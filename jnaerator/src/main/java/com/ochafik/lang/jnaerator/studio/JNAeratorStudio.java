@@ -440,7 +440,9 @@ public class JNAeratorStudio extends JPanel {
 	private void doShowExample(boolean generate) {
 
 		try {
-			sourceArea.setText(ReadText.readText(getClass().getClassLoader().getResourceAsStream("com/ochafik/lang/jnaerator/examples/example.h")));
+			sourceArea.setText(ReadText.readText(getClass().getClassLoader().getResourceAsStream(
+                "com/ochafik/lang/jnaerator/examples/example.h"
+            )));
 			sourceArea.scrollTo(0, 0);
 			if (generate)
 				generate();

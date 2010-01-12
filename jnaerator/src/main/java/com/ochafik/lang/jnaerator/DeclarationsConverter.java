@@ -841,7 +841,6 @@ public class DeclarationsConverter {
         
         Function nativeMethod = new Function(Type.JavaMethod, ident(functionName), null);
         nativeMethod.addModifiers(Modifier.Public, Modifier.Native);
-        nativeMethod.addAnnotation(new Annotation(Deprecated.class));
 
         TypeConversion.NL4JTypeConversion retType = result.typeConverter.toNL4JType(function.getValueType(), null);
         typedMethod.setValueType(retType.getTypedTypeRef());
@@ -857,22 +856,25 @@ public class DeclarationsConverter {
             nativeMethod.addArg(argType.annotateRawType(new Arg(argName, argType.getRawType())));
         }
 
+        String natFullSig = nativeMethod.computeSignature(true), typFullSig = typedMethod.computeSignature(true);
         String natSig = nativeMethod.computeSignature(false), typSig = typedMethod.computeSignature(false);
+
+        if (!natFullSig.equals(typFullSig)) {
+            if (natSig.equals(typSig)) {
+                nativeMethod.setName(ident(functionName + "_native"));
+                natSig = nativeMethod.computeSignature(false);
+            }
+        }
+
         if (!signatures.methodsSignatures.add(natSig))
             return;
 
-        if (!natSig.equals(typSig)) {
+        if (!natFullSig.equals(typFullSig)) {
+            
             if (!signatures.methodsSignatures.add(typSig))
                 return;
 
-            /**
-                TempPointers temp = new TempPointers(pointerTo(arg1), errOut);
-                try {
-                    return someFunction_native(temp.get(0), temp.get(1));
-                } finally {
-                    temp.release();
-                }
-             */
+            nativeMethod.addAnnotation(new Annotation(Deprecated.class));
             String tempPeerVarName = "tempPeers";
             List<Expression> tempPeerExprs = new ArrayList<Expression>();
             List<Expression> argExprs = new ArrayList<Expression>();
