@@ -503,7 +503,7 @@ public abstract class Statement extends Element {
             b.append("\n" + indent + "}");
             b.append(implode(catches, " ", indent));
             if (getFinallyStatement() != null) {
-                b.append(" finally {\n" + indent);
+                b.append(" finally {\n" + nindent);
                 b.append(getFinallyStatement().toString(nindent));
                 b.append("\n" + indent + "}");
             }

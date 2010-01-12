@@ -147,22 +147,22 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
 		return javaPrims.containsKey(s);
 	}
 	public enum JavaPrim {
-		Void(null, ESize.Zero),
-		Char(Character.TYPE, ESize.CharSize), 
-		Long(java.lang.Long.TYPE, ESize.Eight), 
-		Int(Integer.TYPE, ESize.Four), 
-		Short(java.lang.Short.TYPE, ESize.Two), 
-		Byte(java.lang.Byte.TYPE, ESize.One), 
-		Boolean(java.lang.Boolean.TYPE, ESize.One), 
-		Float(java.lang.Float.TYPE, ESize.Four), 
-		Double(java.lang.Double.TYPE, ESize.Eight), 
-		NativeLong(com.sun.jna.NativeLong.class, ESize.StaticSizeField),
-		NativeSize(NativeSize.class, ESize.StaticSizeField),
-		NSInteger(org.rococoa.cocoa.foundation.NSInteger.class, ESize.StaticSizeField),
-		NSUInteger(org.rococoa.cocoa.foundation.NSUInteger.class, ESize.StaticSizeField), 
-		CGFloat(org.rococoa.cocoa.CGFloat.class, ESize.StaticSizeField);
+		Void(null, null, ESize.Zero),
+		Char(Character.TYPE, Character.class, ESize.CharSize),
+		Long(java.lang.Long.TYPE, java.lang.Long.class, ESize.Eight),
+		Int(Integer.TYPE, Integer.class, ESize.Four),
+		Short(java.lang.Short.TYPE, java.lang.Short.class, ESize.Two),
+		Byte(java.lang.Byte.TYPE, java.lang.Byte.class, ESize.One),
+		Boolean(java.lang.Boolean.TYPE, java.lang.Boolean.class, ESize.One),
+		Float(java.lang.Float.TYPE, java.lang.Float.class, ESize.Four),
+		Double(java.lang.Double.TYPE, java.lang.Double.class, ESize.Eight),
+		NativeLong(com.sun.jna.NativeLong.class, com.sun.jna.NativeLong.class, ESize.StaticSizeField),
+		NativeSize(NativeSize.class, NativeSize.class, ESize.StaticSizeField),
+		NSInteger(org.rococoa.cocoa.foundation.NSInteger.class, org.rococoa.cocoa.foundation.NSInteger.class, ESize.StaticSizeField),
+		NSUInteger(org.rococoa.cocoa.foundation.NSUInteger.class, org.rococoa.cocoa.foundation.NSUInteger.class, ESize.StaticSizeField),
+		CGFloat(org.rococoa.cocoa.CGFloat.class, org.rococoa.cocoa.CGFloat.class, ESize.StaticSizeField);
 		
-		public final Class<?> type;
+		public final Class<?> type, wrapperType;
 		public final String simpleName, name;
 		public final boolean isPrimitive;
 		public enum ESize {
@@ -203,8 +203,9 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
 			}
 			return nameToPrim.get(name);
 		}
-		JavaPrim(Class<?> type, ESize size) {
+		JavaPrim(Class<?> type, Class<?> wrapperType, ESize size) {
 			this.type = type;
+            this.wrapperType = wrapperType;
 			this.size = size;
 			this.name = type == null ? "void" : type.getName();
 			this.isPrimitive = type == null || type.isPrimitive();
@@ -1124,11 +1125,12 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
         public enum Type {
             Enum, Pointer, Primitive, Struct, NativeLong, NativeSize, Void, Callback
         }
-        public NL4JTypeConversion(TypeRef typedTypeRef, Type type) {
-            this.typedTypeRef = typedTypeRef;
+        public NL4JTypeConversion(TypeRef directType, TypeRef indirectType, Type type) {
+            this.directType = directType;
+            this.indirectType = indirectType;
             this.type = type;
         }
-        public final TypeRef typedTypeRef;//, rawTypeRef;
+        private final TypeRef directType, indirectType;
         public final Type type;
 
         public <M extends ModifiableElement> M annotateRawType(M element) throws UnsupportedConversionException {
@@ -1147,12 +1149,23 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
                     element.addAnnotation(new Annotation(PointerSized.class));
                     break;
                 case Struct:
-                    throw new UnsupportedConversionException(typedTypeRef, "Struct by value not supported yet");
+                    throw new UnsupportedConversionException(directType, "Struct by value not supported yet");
                 default:
-                    throw new UnsupportedConversionException(typedTypeRef, "Not supported");
+                    throw new UnsupportedConversionException(directType, "Not supported");
             }
             return element;
         }
+
+        public TypeRef getTypedTypeRef() {
+            return directType.clone();
+        }
+
+        public TypeRef getIndirectTypeRef() {
+            if (type == NL4JTypeConversion.Type.Void)
+                return typeRef(ident("?"));
+            return (indirectType == null ? directType : indirectType).clone();
+        }
+
         public TypeRef getRawType() throws UnsupportedConversionException {
             switch (type) {
                 case Enum:
@@ -1160,22 +1173,39 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
                 case Pointer:
                     return typeRef(Long.TYPE);
                 case Void:
+                    return typeRef("void");
                 case Primitive:
                 case NativeLong:
                 case NativeSize:
-                    return typedTypeRef.clone();
+                    return getTypedTypeRef();
                 case Struct:
-                    throw new UnsupportedConversionException(typedTypeRef, "Struct by value not supported yet");
+                    throw new UnsupportedConversionException(getTypedTypeRef(), "Struct by value not supported yet");
                 default:
-                    throw new UnsupportedConversionException(typedTypeRef, "Not supported");
+                    throw new UnsupportedConversionException(getTypedTypeRef(), "Not supported");
             }
         }
     }
     NL4JTypeConversion toNL4JType(TypeRef valueType, java.util.Stack<String> namesStack) throws UnsupportedConversionException {
         if (valueType instanceof TargettedTypeRef) {
             TargettedTypeRef ttr = (TargettedTypeRef)valueType;
+            NL4JTypeConversion targetConv = toNL4JType(ttr.getTarget(), namesStack);
+            if (targetConv.type != NL4JTypeConversion.Type.Void) {
+                String s = targetConv.getRawType().toString();
+                if (s.equals(Byte.TYPE.getName()) && (result.config.charPtrAsString || Modifier.__const.isContainedBy(valueType.getModifiers())))
+                    return new NL4JTypeConversion(
+                        typeRef(ident(result.config.runtime.pointerClass, expr(typeRef(String.class)))),
+                        null,
+                        NL4JTypeConversion.Type.Pointer
+                    );
+            }
             return new NL4JTypeConversion(
-                typeRef(ident(result.config.runtime.pointerClass, expr(toNL4JType(ttr.getTarget(), namesStack).typedTypeRef))),
+                typeRef(
+                    ident(
+                        result.config.runtime.pointerClass,
+                        expr(targetConv.getIndirectTypeRef())
+                    )
+                ),
+                null,
                 NL4JTypeConversion.Type.Pointer
             );
         }
@@ -1184,13 +1214,13 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
             if (prim != null) {
                 switch (prim) {
                     case NativeLong:
-                        return new NL4JTypeConversion(typeRef(Long.TYPE), NL4JTypeConversion.Type.NativeLong);
+                        return new NL4JTypeConversion(typeRef(Long.TYPE), typeRef(Long.class), NL4JTypeConversion.Type.NativeLong);
                     case NativeSize:
-                        return new NL4JTypeConversion(typeRef(Long.TYPE), NL4JTypeConversion.Type.NativeSize);
+                        return new NL4JTypeConversion(typeRef(Long.TYPE), typeRef(Long.class),  NL4JTypeConversion.Type.NativeSize);
                     case Void:
-                        return new NL4JTypeConversion(typeRef("void"), NL4JTypeConversion.Type.Void);
+                        return new NL4JTypeConversion(null, null, NL4JTypeConversion.Type.Void);
                     default:
-                        return new NL4JTypeConversion(typeRef(prim.type), NL4JTypeConversion.Type.Primitive);
+                        return new NL4JTypeConversion(typeRef(prim.type), typeRef(prim.wrapperType),  NL4JTypeConversion.Type.Primitive);
                 }
             }
 
@@ -1223,14 +1253,14 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
 
                         TypeRef javaRef = typeRef(result.getTaggedTypeIdentifierInJava(ttr));
                         if (tr instanceof Enum) {
-                            return new NL4JTypeConversion(toNL4JEnum(javaRef), NL4JTypeConversion.Type.Enum);
+                            return new NL4JTypeConversion(toNL4JEnum(javaRef), null, NL4JTypeConversion.Type.Enum);
                         } else if (tr instanceof Struct) {
-                            return new NL4JTypeConversion(javaRef, NL4JTypeConversion.Type.Struct);
+                            return new NL4JTypeConversion(javaRef, null,  NL4JTypeConversion.Type.Struct);
                         }
 
                         
                     } else if (tr instanceof FunctionSignature) {
-                        return new NL4JTypeConversion(findCallbackRef((FunctionSignature)tr, null), NL4JTypeConversion.Type.Callback);
+                        return new NL4JTypeConversion(findCallbackRef((FunctionSignature)tr, null), null, NL4JTypeConversion.Type.Callback);
                     } else {
                         String strs = valueType.toString();
                         String trs = tr == null ? null : tr.toString();
@@ -1250,12 +1280,12 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
                 
                 TypeRef structRef = typeRef(findStructRef(name, null));
                 if (structRef != null) {
-                    return new NL4JTypeConversion(structRef.clone(), NL4JTypeConversion.Type.Struct);
+                    return new NL4JTypeConversion(structRef.clone(), null,  NL4JTypeConversion.Type.Struct);
                 }
 
                 TypeRef enumRef = findEnum(name, null);
                 if (enumRef != null) {
-                    return new NL4JTypeConversion(toNL4JEnum(enumRef), NL4JTypeConversion.Type.Enum);
+                    return new NL4JTypeConversion(toNL4JEnum(enumRef), null,  NL4JTypeConversion.Type.Enum);
                 }
 
                 Define define = result.defines.get(nameStr);

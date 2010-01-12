@@ -160,7 +160,7 @@ public class JNAeratorConfig {
         public Identifier ident(Ann ann) {
             return annotationPackage == null ? null : ElementsHelper.ident(annotationPackage, ann.toString());
         }
-        public final Class<?> callbackClass, pointerClass, memoryClass, structClass, unionClass, structIOClass, arrayClass, libraryClass;
+        public final Class callbackClass, pointerClass, memoryClass, structClass, unionClass, structIOClass, arrayClass, libraryClass;
         public final boolean hasFastStructs;
         public final boolean hasJNA;
     }

@@ -842,7 +842,7 @@ public class DeclarationsConverter {
         nativeMethod.addAnnotation(new Annotation(Deprecated.class));
 
         TypeConversion.NL4JTypeConversion retType = result.typeConverter.toNL4JType(function.getValueType(), null);
-        typedMethod.setValueType(retType.typedTypeRef);
+        typedMethod.setValueType(retType.getTypedTypeRef());
         retType.annotateRawType(nativeMethod).setValueType(retType.getRawType());
 
         Map<String, TypeConversion.NL4JTypeConversion> argTypes = new LinkedHashMap<String, TypeConversion.NL4JTypeConversion>();
@@ -851,7 +851,7 @@ public class DeclarationsConverter {
 
             TypeConversion.NL4JTypeConversion argType = result.typeConverter.toNL4JType(arg.getValueType(), null);
             argTypes.put(argName, argType);
-            typedMethod.addArg(new Arg(argName, argType.typedTypeRef));
+            typedMethod.addArg(new Arg(argName, argType.getTypedTypeRef()));
             nativeMethod.addArg(argType.annotateRawType(new Arg(argName, argType.getRawType())));
         }
 
@@ -893,14 +893,14 @@ public class DeclarationsConverter {
                         argExprs.add(new Expression.Cast(typeRef(Integer.TYPE), methodCall(varRef(argName), MemberRefStyle.Dot, "value")));
                         break;
                     default:
-                        throw new UnsupportedConversionException(function, "Cannot convert argument " + argName + " of type " + argType.typedTypeRef);
+                        throw new UnsupportedConversionException(function, "Cannot convert argument " + argName + " of type " + argType.getTypedTypeRef());
                 }
             }
             Expression call = methodCall(nativeMethod.getName().toString(), argExprs.toArray(new Expression[argExprs.size()]));
             Statement callStat;
             switch (retType.type) {
                 case Pointer:
-                    callStat = new Statement.Return(methodCall(expr(typeRef(result.config.runtime.pointerClass)), MemberRefStyle.Dot, "fromAddress", call));
+                    callStat = new Statement.Return(methodCall(expr(typeRef(result.config.runtime.pointerClass)), MemberRefStyle.Dot, "pointerToAddress", call));
                     break;
                 case NativeLong:
                 case NativeSize:
@@ -908,13 +908,13 @@ public class DeclarationsConverter {
                     callStat = new Statement.Return(call);
                     break;
                 case Enum:
-                    callStat = new Statement.Return(methodCall(expr(retType.typedTypeRef.clone()), MemberRefStyle.Dot, "fromValue", call));
+                    callStat = new Statement.Return(methodCall(expr(retType.getTypedTypeRef().clone()), MemberRefStyle.Dot, "fromValue", call));
                     break;
                 case Void:
                     callStat = stat(call);
                     break;
                 default:
-                    throw new UnsupportedConversionException(function, "Cannot convert return argument of type " + retType.typedTypeRef);
+                    throw new UnsupportedConversionException(function, "Cannot convert return argument of type " + retType.getTypedTypeRef());
             }
             if (tempPeerExprs.isEmpty())
                 typedMethod.setBody(block(
