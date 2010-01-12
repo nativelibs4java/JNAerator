@@ -98,7 +98,7 @@ public class JNAeratorConfig {
             com.nativelibs4java.runtime.jna.Array.class,
             com.sun.jna.Library.class,
             com.nativelibs4java.runtime.ann.jna.Bits.class,
-            "jnaerator-runtime.jar.files") {
+            "jnaerator-runtime.jar.files,nl4j-runtime-structs-jna.jar.files") {
 
             @Override
             public String toString() {

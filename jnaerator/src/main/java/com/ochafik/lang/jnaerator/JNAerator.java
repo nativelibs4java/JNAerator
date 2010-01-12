@@ -913,7 +913,9 @@ public class JNAerator {
         if (listingFile == null)
             return;
 
-		List<String> files = ReadText.readLines(classLoader.getResourceAsStream(listingFile ));
+		List<String> files = new ArrayList<String>();
+        for (String s : listingFile.split(","))
+            files.addAll(ReadText.readLines(classLoader.getResourceAsStream(s.trim())));
 		
 		try {
 			if (files == null)
