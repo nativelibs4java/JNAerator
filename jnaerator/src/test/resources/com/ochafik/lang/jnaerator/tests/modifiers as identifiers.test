@@ -1,0 +1,14 @@
+typedef struct _simplestruct {
+  int myfield;
+} simplestruct;
+
+
+typedef struct _outerstruct2 {
+  simplestruct *byref;
+} outerstruct2;
+
+--
+import test.*;
+import static test.TestLibrary.*;
+
+outerstruct2 s = new outerstruct2(new simplestruct(1).byReference());

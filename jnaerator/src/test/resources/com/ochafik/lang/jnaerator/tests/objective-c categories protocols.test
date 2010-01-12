@@ -1,0 +1,26 @@
+@protocol Printing
+-(void) print;
+@end
+
+@interface Base: NSObject <Printing> 
+{}
++baseWithName();
+
+@end
+
+@interface Base (Categ)
+-(Base*) merge: (Base*) f;
+-test:(id<Printing>)arg;
+@end
+
+--
+import test.*;
+import test.protocols.*;
+
+Base base = Base.baseWithName();
+base = base.as_Base_Categ().merge(base);
+base.print();
+base.as_Base_Categ().test((Printing)null);
+//base.test((org.rococoa.NSObject)null);
+//base.asCateg().test((org.rococoa.ObjCObject)null);
+

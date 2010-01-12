@@ -1,0 +1,15 @@
+struct A {
+    int i;
+};
+struct B {
+   A a;
+   A *pa;
+};
+--
+import test.*;
+import static test.TestLibrary.*;
+
+B b = new B();
+b.a = new A.ByValue();
+b.pa = new A.ByReference();
+int i = b.pa.i = 10;

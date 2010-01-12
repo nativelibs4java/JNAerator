@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project name="global-jar" basedir=".">
+
+    <target name="global-jar" depends="global-compile">
+		<delete dir="${global.dir.build.jar}" />
+		<mkdir dir="${global.dir.build.jar}" />
+		<mkdir dir="${global.dir.build.tar}/lib" />
+		<mkdir dir="${global.dir.src.resources}" />
+
+        <copy todir="${global.dir.build.jar}">
+			<fileset dir="${global.dir.build.java}">
+				<include name="**/*.dat" />
+			</fileset>
+			<fileset dir="${global.dir.build.classes}">
+				<include name="**" />
+			</fileset>
+			<!--
+			<fileset dir="${global.dir.src.resources}">
+				<include name="log4j.properties" />
+			</fileset>
+			-->
+		</copy>
+
+		<jar
+				destfile="${global.file.jar}"
+				manifest="etc/MANIFEST"
+				index="true"
+				compress="${system.jar.compress}">
+			<fileset dir="${global.dir.build.jar}" />
+			<manifest>
+				<attribute name="Built-By" value="${user.name}" />
+			</manifest>
+		</jar>
+    </target>
+
+</project>

@@ -1,0 +1,12 @@
+mvn deploy:deploy-file  \
+	-f scripts/deploy.pom \
+	-Durl=scp://shell.sourceforge.net/home/groups/j/jn/jnaerator/htdocs/maven \
+	-DrepositoryId=jnaerator-repo \
+	-Dfile=../libraries/ecj-3.5.jar \
+	-DgroupId=org.eclipse.jdt \
+	-DartifactId=core \
+	"-Dversion=3.5" \
+	-Dpackaging=jar \
+	-DgeneratePom=true \
+	-DgeneratePom.description="Java Development Tools Core" \
+	-DuniqueVersion=true

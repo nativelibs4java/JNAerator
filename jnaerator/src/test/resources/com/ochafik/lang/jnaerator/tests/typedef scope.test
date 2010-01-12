@@ -1,0 +1,21 @@
+typedef void (*lfptr)();
+struct S {
+	int a;
+	lfptr p;
+	U u;
+	typedef void (*fp2)();
+	fp2 p2;
+};
+struct U {
+	int u;
+};
+f(S, void (*fptr)(), T*, lfptr p2);
+
+
+--
+import test.*;
+
+S s = new S();
+(s.p = (test.TestLibrary.lfptr)null).invoke();
+(s.p2 = (test.S.fp2)null).invoke();
+TestLibrary.INSTANCE.f((S.ByValue)null, (TestLibrary.fptr)null, (TestLibrary.T)null, (test.TestLibrary.lfptr)null);

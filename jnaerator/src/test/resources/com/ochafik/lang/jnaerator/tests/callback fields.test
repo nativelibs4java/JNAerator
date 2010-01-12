@@ -1,0 +1,16 @@
+struct S {
+	long (__cdecl *const fptr)();
+	void (*functions[8])(void*);
+	long (*foo[10])(union { long l; int i; });
+};
+--
+import test.*;
+import static test.TestLibrary.*;
+
+S s = new S();
+s.functions[0].invoke((Pointer)null);
+s.fptr.invoke();
+S.foo_callback_arg1_union u = new S.foo_callback_arg1_union();
+u.l = (NativeLong)null;
+u.i = 12;
+s.foo[0].invoke(u.byValue());

@@ -1,0 +1,35 @@
+
+union U {
+	int a; // first
+	float b; // second
+	const char* str;
+};
+
+// test struct
+struct S {
+// first value
+	int a;
+	float b; // second one
+	double d;
+};
+
+struct S2 : S {
+	long long ll;
+	long l;
+};
+
+--
+
+import test.*;
+import static test.TestLibrary.*;
+
+U c 			 = new U(0).clone();
+U.ByValue bv 	 = new U(0f).byValue();
+U.ByReference br = new U((Pointer)null).byReference();
+
+S sc 			  = new S(0, 0f, 0.0).clone();
+S.ByValue sbv 	  = new S(0, 0f, 0.0).byValue();
+S.ByReference sbr = new S(0, 0f, 0.0).byReference();
+
+S2 s2 = new S2();
+s2 = new S2(0, 0f, 0.0, 0L, (NativeLong)null);

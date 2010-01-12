@@ -1,0 +1,13 @@
+// any
+|+(BOOL)respondsToSelector:(SEL)
+|+(Class)class
+
+// AppKit
+NSControl|+(Class)cellClass
+NSControl|+(void)setCellClass:(Class)
+
+// QuartzCore
+CATransaction|+(id)valueForKey:(NSString*)
+CATransaction|+(void)setValue:(id) forKey:(NSString*)
+
+

@@ -1,0 +1,33 @@
+Current development version (0.9.3-SNAPSHOT)
+
+- Fixed parsing of some common C expressions (better tolerates inline functions)
+- Fixed parsing of OpenCL source codes (used by JavaCL Generator project on NativeLibs4Java/JavaCL project)
+- Introduced experimental lightweight structures support.
+
+Version 0.9.2 (r886, 20081030):
+
+- Fixed issue #31 : parse unnamed "char *const *" function arguments
+- Fixed issue #35 : byref, byval, in, out and bycopy can now be used in most contexts (general case of issue #22 is still not fixed, though)
+- Fixed regression on structs with callbacks
+- Added "oneway" Objective C modifier
+- Allow java-only modifiers, declspec and gcc attributes as identifiers (native, transient, dllimport...)
+- Fixed issue #38 : Function pointer pointers were completely broken
+- Fixed regression since maven move : missed objectivec static forwards exclusion list
+- Deprecated Structure.toArray(), renamed to Structure.castToArray().
+- Added static Structure.newArray(Class<? extends Structure>, int length)
+- JNAerating a typed static newArray(int length) for each structure
+- Added "C type" comment to struct fields with non-primitive types
+- Deprecated StringPointer
+- Added basic output customization capabilities with -choicesOut & -choice switches : syntax is one line of the C function declaration, then n lines of corresponding Java declarations, each function block being separated by an empty line. 
+- Fixed issue #39 : Failure to parse define with expression containing a cast
+- Fixed long constants being generated as NativeLong (now long)
+- Fixed regression with function pre-comments
+- Fixed generation of references to constants defined in other libraries
+- size_t is now mapped to NativeSize. Classes NativeSizeByReference & GlobalNativeSize have also been added, along with a backwards compatibility switch -sizeAsLong (and a switch -gccLong to treat 'long' as 'size_t')
+- Fixed primitive type promotion of constants (NativeLong -> long)
+- Added -ifRegexMatch switch 
+- Define __STDC__ in auto configuration
+- Fixed issue #44: Hypens in header names translate to hyphens in class names
+- Byref & globals mapping of NSInteger now uses NativeSizeByReference and GlobalNativeSize, instead of NativeLong derivates
+
+

@@ -1,0 +1,64 @@
+// Taken directly from JNA's front page : https://jna.dev.java.net/
+
+typedef struct _simplestruct {
+  int myfield;
+} simplestruct;
+
+typedef struct _outerstruct {
+  simplestruct nested; // use Structure
+} outerstruct;
+
+typedef struct _outerstruct2 {
+  simplestruct *byref; // use Structure.ByReference
+} outerstruct2;
+
+typedef struct _outerstruct3 {
+  simplestruct array[4]; // use Structure[]
+} outerstruct3;
+
+typedef struct _outerstruct4 {
+  simplestruct* ptr_array[4]; // use Structure.ByReference[]
+} outerstruct4;
+
+// Field is a pointer to an array of struct
+typedef struct _outerstruct5 {
+  simplestruct* ptr_to_array; // use Structure.ByReference, and use Structure.toArray() to allocate array
+} outerstruct5;
+
+// struct pointers as return value or argument
+// use Structure
+outerstruct *myfunc(); 
+
+// struct pointers as return value or argument
+// use Structure
+void myfunc(outerstruct* data);
+
+// struct (by value) as return value or argument
+// use Structure.ByValue
+simplestruct myfuncV();
+
+// struct (by value) as return value or argument
+// use Structure.ByValue
+void myfuncV(simplestruct);
+
+--
+
+import test.*;
+import org.rococoa.cocoa.*;
+import static test.TestLibrary.*;
+
+outerstruct o1 = new outerstruct(new simplestruct(10));
+simplestruct s1 = o1.nested;
+
+outerstruct2 o2 = new outerstruct2(new simplestruct(10).byReference());
+simplestruct.ByReference s2 = o2.byref;
+
+outerstruct3 o3 = new outerstruct3(new simplestruct[0]);
+simplestruct[] s3 = o3.array;
+
+outerstruct4 o4 = new outerstruct4(new simplestruct.ByReference[0]);
+simplestruct.ByReference[] s4 = o4.ptr_array;
+
+simplestruct.ByValue fv = INSTANCE.myfuncV();
+
+

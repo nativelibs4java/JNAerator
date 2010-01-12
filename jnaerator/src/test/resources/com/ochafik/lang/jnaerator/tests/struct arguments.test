@@ -1,0 +1,20 @@
+typedef struct _S {
+	int a;
+} S;
+
+void fv(S);
+void fv_(_S);
+
+void fp(S*);
+void fp_(_S*);
+
+--
+
+import test.*;
+import static test.TestLibrary.*;
+
+INSTANCE.fv(new S.ByValue());
+INSTANCE.fv_(new S.ByValue());
+
+INSTANCE.fp(new S());
+INSTANCE.fp_(new S());

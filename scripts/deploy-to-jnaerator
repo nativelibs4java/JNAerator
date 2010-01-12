@@ -1,0 +1,4 @@
+mvn deploy  \
+	-Durl=scp://shell.sourceforge.net/home/groups/j/jn/jnaerator/htdocs/maven \
+	-DrepositoryId=jnaerator-repo \
+	-DuniqueVersion=true 

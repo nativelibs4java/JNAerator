@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project name="global-inject" basedir=".">
+
+    <target name="global-inject">
+		<inject>
+			<fileset dir="${global.dir.build.classes}">
+				<include name="**/*.class" />
+			</fileset>
+			<criteria>
+                <!-- <includeClass class="org.jboss.util.stream.*"/> -->
+				<!-- <excludeClass class="java.lang.reflect.*"/> -->
+				<!-- <excludeMethod method="get*"/> -->
+				<!-- <excludeMethod method="set*"/> -->
+			</criteria>
+		</inject>
+
+	</target>
+
+</project>

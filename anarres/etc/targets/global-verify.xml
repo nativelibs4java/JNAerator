@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project name="global-verify" basedir=".">
+
+	<target name="global-verify" depends="global-taskdefs">
+			<!-- "master-jar,slave-jar,client-jar" -->
+		<mkdir dir="${global.dir.build.reports}" />
+
+		<verifydesign
+			design="${global.dir.etc}/design.xml"
+			jar="${master.file.jar}" />
+
+		<verifydesign
+			design="${global.dir.etc}/design.xml"
+			jar="${slave.file.jar}" />
+
+		<verifydesign
+			design="${global.dir.etc}/design.xml"
+			jar="${client.file.jar}" />
+
+	</target>
+
+</project>

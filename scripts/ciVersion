@@ -1,0 +1,1 @@
+svn ci -m "`cat  bin/VERSION.jnaerator`"  bin/VERSION.jnaerator

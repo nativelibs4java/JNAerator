@@ -1,0 +1,55 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+ <modelVersion>4.0.0</modelVersion>
+  <groupId>org.anarres</groupId>
+  <artifactId>anarres-cpp-jnaerator</artifactId>
+  <name>Anarres JCPP (with JNAerator modifications)</name>
+  <url>http://www.anarres.org/projects/jcpp/</url>
+  <version>1.2.5-JNAerator.2</version>
+  <packaging>jar</packaging>
+  <description>
+  </description>
+  
+	<developers>
+		<developer>
+			<id>anarres.author</id>
+			<name>Anarres Author</name>
+			<email>contact@anarres.org</email>
+		</developer>
+	</developers>
+  
+  <licenses>
+    <license>
+      <name>Apache 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.html</url>
+      <distribution>repo</distribution>
+      <comments>Anarres JCPP was patched with some modifications for use in JNAerator.. 
+	  Diffs are trivial to make with Original Anarres SVN repository : https://svn.anarres.org/svn/repos/code/java/cpp/trunk/</comments>
+	</license>
+  </licenses>
+  
+  <parent>
+	  <groupId>com.jnaerator</groupId>
+	  <artifactId>jnaerator-parent</artifactId>
+	  <version>0.9.3-SNAPSHOT</version>
+	  <relativePath>../parent</relativePath>
+  </parent>
+  
+  <build>
+		<plugins>
+		  <plugin>
+			<groupId>org.apache.maven.plugins</groupId>
+			<artifactId>maven-compiler-plugin</artifactId>
+			<version>2.0.2</version>
+			<configuration>
+			  <source>1.5</source>
+			  <target>1.5</target>
+			</configuration>
+		  </plugin>
+		  
+		</plugins>
+	</build>
+</project>
+
+

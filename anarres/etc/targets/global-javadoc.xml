@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project name="global-javadoc" basedir=".">
+
+	<target name="global-javadoc" depends="global-vpp" unless="build.no.javadoc">
+		<javadoc
+				sourcepath="${global.dir.build.java}:${global.dir.src.docs}/javadoc"
+				destdir="${global.dir.build.javadoc}"
+				classpathref="compile-classpath"
+				source="${system.javac.source}"
+				access="${system.javadoc.access}"
+				use="true"
+				splitindex="false"
+				failonerror="true"
+				windowtitle="Anarres C Preprocessor version ${global.version}"
+				>
+
+			<package name="org.anarres.cpp" />
+			<packageset dir="${global.dir.build.java}" />
+
+			<link
+					href="http://java.sun.com/j2se/1.5.0/docs/api/"
+					offline="${system.javadoc.offline}" />
+			<link
+					href="http://java.sun.com/j2ee/1.4/docs/api/"
+					offline="${system.javadoc.offline}" />
+			<link
+					href="http://java.sun.com/products/servlet/2.3/javadoc/"
+					offline="${system.javadoc.offline}" />
+			<link
+					href="http://ws.apache.org/axis/java/apiDocs/"
+					offline="${system.javadoc.offline}" />
+			<!--
+			<link
+					href="http://www.jdom.org/docs/apidocs/"
+					offline="${system.javadoc.offline}" />
+			-->
+			<link
+					href="http://www.junit.org/junit/javadoc/3.8.1/"
+					offline="${system.javadoc.offline}" />
+			<link
+					href="http://jakarta.apache.org/commons/configuration/apidocs/"
+					offline="${system.javadoc.offline}" />
+			<link
+					href="http://www.jajakarta.org/ant/ant-1.6.1/docs/ja/manual/api/"
+					offline="${system.javadoc.offline}" />
+<!-- href="http://www.cs.bris.ac.uk/Teaching/Resources/General/ant/docs/manual/api/" -->
+			<tag dir="${global.dir.etc}/javadoc" />
+
+			<bottom><![CDATA[Copyright &#169; 2007 <a href="http://www.anarres.org/">Shevek, Anarres</a>. All Rights Reserved.]]></bottom>
+		</javadoc>
+
+	</target>
+
+</project>

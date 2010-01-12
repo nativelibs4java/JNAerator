@@ -1,0 +1,179 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+ <modelVersion>4.0.0</modelVersion>
+  <groupId>com.jnaerator</groupId>
+  <artifactId>jnaerator</artifactId>
+  <name>JNAerator CLI &amp; Studio Tools</name>
+  <url>http://code.google.com/p/jnaerator/</url>
+  <version>${jnaerator.version}</version>
+  <packaging>jar</packaging>
+  
+  <parent>
+	  <groupId>com.jnaerator</groupId>
+	  <artifactId>jnaerator-parent</artifactId>
+	  <version>0.9.3-SNAPSHOT</version>
+	  <relativePath>../parent</relativePath>
+  </parent>
+  
+  <description>
+JNAerator (pronounce "generator") simply parses C &amp; Objective-C headers and generates the corresponding JNA and Rococoa Java interfaces (it also has a very limited support for C++).
+
+This lets Java programmers access native libraries transparently, with full IDE support and little to no hand-tweaking.
+
+Users who are looking for ready-to-use libraries should check the NativeLibs4Java project instead.
+  </description>
+  
+  <mailingLists>
+    <mailingList>
+      <name>jna-users</name>
+      <post>users@jna.dev.java.net</post>
+      <archive>https://jna.dev.java.net/servlets/SummarizeList?listName=users</archive>
+    </mailingList>
+  </mailingLists>
+  
+  <licenses>
+    <license>
+      <name>LGPL 2.1</name>
+      <url>http://www.gnu.org/copyleft/lesser.html</url>
+      <distribution>repo</distribution>
+      <comments>Covers JNA, Rococoa and everything under packages com.ochafik.*</comments>
+	</license>
+    <license>
+      <name>Apache 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.html</url>
+      <distribution>repo</distribution>
+      <comments>Anarres JCPP</comments>
+	</license>
+  </licenses>
+  
+  <dependencies>
+    
+  	<dependency>
+	  <groupId>com.ochafik</groupId>
+	  <artifactId>ochafik-swing</artifactId>
+	  <version>${jnaerator.version}</version>
+	  <scope>compile</scope>
+	</dependency>
+	
+  	<dependency>
+	  <groupId>com.jnaerator</groupId>
+	  <artifactId>jnaerator-rococoa-runtime</artifactId>
+	  <version>${jnaerator.version}</version>
+	  <scope>compile</scope>
+	</dependency>
+	
+  	<dependency>
+	  <groupId>com.nativelibs4java</groupId>
+	  <artifactId>nl4j-runtime</artifactId>
+      <version>${nl4j-runtime.version}</version>
+      <scope>compile</scope>
+    </dependency>
+	
+  	<dependency>
+	  <groupId>com.jnaerator</groupId>
+	  <artifactId>jnaerator-parser</artifactId>
+	  <version>${jnaerator.version}</version>
+	  <scope>compile</scope>
+	</dependency>
+
+	
+	<dependency>
+		<groupId>org.anarres.cpp</groupId>
+		<artifactId>anarres-cpp-jnaerator</artifactId>
+		<version>1.2.5-JNAerator.3</version>
+		<scope>compile</scope>
+	</dependency>
+	
+	<dependency>
+		<groupId>org.eclipse.jdt</groupId>
+		<artifactId>core</artifactId>
+		<version>3.5</version>
+		<scope>compile</scope>
+	</dependency>
+	
+	
+  </dependencies>
+  <build>
+		<plugins>
+		  
+		  <plugin>
+			<groupId>org.apache.maven.plugins</groupId>
+			<artifactId>maven-compiler-plugin</artifactId>
+			<version>2.0.2</version>
+			<configuration>
+			  <source>1.6</source>
+			  <target>1.6</target>
+			</configuration>
+		  </plugin>
+		  
+		  <plugin>
+			  <groupId>org.apache.maven.plugins</groupId>
+			  <artifactId>maven-jar-plugin</artifactId>
+			  <configuration>
+			<archive>
+			  <manifest>
+				<mainClass>com.ochafik.lang.jnaerator.JNAerator</mainClass>
+			  </manifest>
+			</archive>
+			  </configuration>
+		  </plugin>
+		  
+		  <plugin>
+			<groupId>org.codehaus.mojo</groupId>
+			<artifactId>cobertura-maven-plugin</artifactId>
+			<configuration>
+			  <instrumentation>
+				<!--<ignores>
+				  <ignore>antlr.*</ignore>
+				</ignores>-->
+				<excludes>
+				  <exclude>antlr/**/*.class</exclude>
+				  <exclude>org/**/*.class</exclude>
+				  <exclude>net/**/*.class</exclude>
+				  <exclude>com/sun/**/*.class</exclude>
+				</excludes>
+			  </instrumentation>
+			</configuration>
+			<executions>
+			  <execution>
+				<goals>
+				  <goal>clean</goal>
+				</goals>
+			  </execution>
+			</executions>
+		  </plugin>
+		  
+		  <plugin>
+		  <groupId>org.apache.maven.plugins</groupId>
+			<artifactId>maven-shade-plugin</artifactId>
+			<version>1.2.1</version>
+			<executions>
+			 
+			  <execution>
+				<phase>package</phase>
+				<goals>
+				  <goal>shade</goal>
+				</goals>
+				<configuration>
+					<shadedArtifactAttached>true</shadedArtifactAttached>
+					<!--finalName>${project.artifactId}-standalone-${project.version}</finalName-->
+					<artifactSet>
+						<excludes>
+						  <exclude>org.scala-lang:scala-library</exclude>
+						  <exclude>org.slf4j:slf4j-jdk14</exclude>
+						  <exclude>junit:junit</exclude>
+						</excludes>
+					  </artifactSet>
+					  
+				</configuration>
+			  </execution>
+			  
+			</executions>
+		</plugin>
+
+		</plugins>
+	</build>
+</project>
+
+

@@ -1,0 +1,20 @@
+void ComplexArgFunction(
+        struct { 
+                union { 
+                        enum { A, B } e; 
+                        float f; 
+                } u; 
+                long v; 
+                void (*fptr)(); 
+        }* pArg
+);
+--
+import test.*;
+import static test.TestLibrary.*;
+
+ComplexArgFunction_pArg_struct a = null;
+a.v = (NativeLong)null;
+a.fptr.invoke();
+a.u = new ComplexArgFunction_pArg_struct.u_union.ByValue();
+a.u.e = ComplexArgFunction_pArg_struct.u_union.e_enum.A;
+INSTANCE.ComplexArgFunction(a);

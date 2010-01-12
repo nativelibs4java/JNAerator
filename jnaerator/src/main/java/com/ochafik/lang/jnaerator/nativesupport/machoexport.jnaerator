@@ -1,0 +1,8 @@
+-DPWSTR=wchar_t*
+-library FatMachO
+	"$(DIR)/machoexport.h"
+	
+-package com.ochafik.lang.jnaerator.nativesupport.machoexport
+-noComp
+-o "$(DIR)/../../../../.."
+

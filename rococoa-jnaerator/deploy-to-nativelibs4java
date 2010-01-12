@@ -1,0 +1,10 @@
+mvn deploy:deploy-file  \
+	-Dfile=target/rococoa-core-0.5.jar \
+	-Durl=scp://shell.sourceforge.net/home/groups/j/jn/jnaerator/htdocs/maven \
+	-DrepositoryId=jnaerator-repo \
+	-DgroupId=org.rococoa \
+	-DartifactId=rococoa-core \
+	-Dpackaging=jar \
+	-DuniqueVersion=true \
+	"-Dversion=0.5" \
+	-f pom.xml

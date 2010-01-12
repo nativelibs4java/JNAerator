@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project name="global" default="all" basedir=".">
+
+	<dirname property="global.dir.etc" file="${ant.file}"/>
+	<dirname property="global.dir.root" file="${global.dir.etc}"/>
+	<property file="${global.dir.etc}/custom.properties" />
+	<property file="${global.dir.etc}/build.properties" />
+	<property file="${global.dir.etc}/log4j.properties" />
+
+	<path id="compile-classpath">
+		<fileset dir="${global.dir.lib}">
+			<include name="runtime/**/*.jar"/>
+		</fileset>
+		<fileset dir="/usr/share/ant/lib">
+			<include name="*.jar" />
+		</fileset>
+	</path>
+
+	<path id="runtime-classpath">
+		<pathelement path="${global.dir.build.classes}" />
+		<path refid="compile-classpath" />
+	</path>
+
+    <path id="antcontrib-classpath">
+        <fileset dir="${global.dir.lib}/ant">
+            <include name="*.jar"/>
+        </fileset>
+    </path> 
+
+    <path id="checkstyle-classpath">
+        <fileset dir="${global.dir.lib}/checkstyle">
+            <include name="**/*.jar"/>
+        </fileset>
+    </path>
+
+    <path id="vpp-classpath">
+        <fileset dir="${global.dir.lib}/vpp">
+            <include name="**/*.jar" />
+        </fileset>
+    </path>
+
+    <path id="findbugs-classpath">
+        <fileset dir="${global.dir.lib}/findbugs">
+            <include name="**/*.jar" />
+        </fileset>
+    </path>
+
+    <path id="jrat-classpath">
+        <fileset dir="${global.dir.lib}/jrat">
+            <include name="*.jar"/>
+        </fileset>
+    </path> 
+
+    <path id="cobertura-classpath">
+        <fileset dir="${global.dir.lib}/log4j">
+            <include name="log4j-*.jar"/>
+        </fileset>
+        <fileset dir="${global.dir.lib}/cobertura">
+            <include name="**/*.jar" />
+        </fileset>
+    </path> 
+
+    <path id="svn-classpath">
+        <fileset dir="${global.dir.lib}/svn">
+            <include name="**/*.jar" />
+        </fileset>
+    </path>
+
+    <!-- classpath for compiling junit tasks -->
+	<path id="junit-compile-classpath">
+	    <fileset dir="${global.dir.lib}/junit">
+		    <include name="**/*.jar" />
+		</fileset>
+		<path refid="runtime-classpath" />
+	</path>
+
+    <!-- classpath for running junit tasks -->
+	<path id="junit-run-classpath">
+	    <pathelement path="${global.dir.build.tests}"/>
+	    <pathelement path="${global.dir.build.cobertura}"/>
+		<pathelement path="${global.dir.src.resources}" />
+		<pathelement path="${global.dir.src.tests}" />
+		<path refid="junit-compile-classpath"/>
+		<path refid="cobertura-classpath"/>
+		<path refid="jrat-classpath"/>
+	</path>
+
+
+
+
+
+
+	<import file="${global.dir.etc}/targets/global-checkstyle.xml" />
+	<import file="${global.dir.etc}/targets/global-clean.xml" />
+	<import file="${global.dir.etc}/targets/global-cobertura.xml" />
+	<import file="${global.dir.etc}/targets/global-compile.xml" />
+	<import file="${global.dir.etc}/targets/global-findbugs.xml" />
+	<import file="${global.dir.etc}/targets/global-inject.xml" />
+	<import file="${global.dir.etc}/targets/global-jar.xml" />
+	<import file="${global.dir.etc}/targets/global-javadoc.xml" />
+	<import file="${global.dir.etc}/targets/global-junit.xml" />
+	<import file="${global.dir.etc}/targets/global-tar.xml" />
+	<import file="${global.dir.etc}/targets/global-taskdefs.xml" />
+	<import file="${global.dir.etc}/targets/global-verify.xml" />
+	<import file="${global.dir.etc}/targets/global-vpp.xml" />
+
+</project>

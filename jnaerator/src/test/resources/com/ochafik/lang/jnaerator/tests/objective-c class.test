@@ -1,0 +1,14 @@
+@interface NSMutableArray: NSObject 
+{}
+
+-(int) count;
+-(BOOL) empty;
++arrayWithCapacity: (int) c;
+
+@end
+--
+import test.*;
+
+NSMutableArray a = NSMutableArray.arrayWithCapacity(10);
+int c = a.count();
+boolean e = a.empty();

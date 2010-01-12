@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project name="global-taskdefs">
+
+	<target name="global-taskdefs" unless="global.taskdefs.done">
+
+		<taskdef
+			resource="net/sf/antcontrib/antlib.xml"
+			classpathref="antcontrib-classpath"
+			loaderref="ant" />
+
+	    <taskdef
+			resource="net/sf/antcontrib/antcontrib.properties"
+			classpathref="antcontrib-classpath"
+			loaderref="ant" />
+
+		<taskdef
+		    resource="checkstyletask.properties"
+			classpathref="checkstyle-classpath"
+			loaderref="checkstyle"
+			/>
+
+		<taskdef
+			resource="foundrylogic/vpp/taskdef.properties"
+			classpathref="vpp-classpath"
+			loaderref="vpp" />
+
+		<!--
+		   velocity-tools-generic-1.4.jar
+		   jtidy-r8-21122004.jar
+		-->
+
+        <taskdef name="injectcopy"
+			classname="org.shiftone.jrat.inject.ant.InjectCopyTask"
+			classpathref="jrat-classpath"
+			loaderref="jrat" />
+
+        <taskdef name="inject"
+			classname="org.shiftone.jrat.inject.ant.InjectTask"
+			classpathref="jrat-classpath"
+			loaderref="jrat" />
+
+		<taskdef
+			classpathref="cobertura-classpath"
+			resource="tasks.properties"
+			loaderref="cobratura"
+			/>
+
+		<taskdef name="findbugs"
+			classname="edu.umd.cs.findbugs.anttask.FindBugsTask"
+			classpathref="findbugs-classpath"
+			loaderref="findbugs" />
+
+		<taskdef
+			name="svn"
+			classname="org.tigris.subversion.svnant.SvnTask"
+			classpathref="svn-classpath"
+			loaderref="svn"
+			/>
+
+		<property name="global.taskdefs.done" value="true" />
+
+    </target>
+
+</project>

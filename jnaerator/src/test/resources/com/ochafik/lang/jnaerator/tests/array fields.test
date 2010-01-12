@@ -1,0 +1,24 @@
+struct S {
+	int iarr[4]; 
+	char* csarr[3][4]; 
+	char s[8];
+	long* (*foo2[12][8])();
+};
+
+
+typedef unsigned char Str15[16];
+struct Months {
+	Str15	names[12];
+};
+--
+import test.*;
+import static test.TestLibrary.*;
+
+S s = new S();
+s.iarr[2] = 10;
+s.csarr[10] = (Pointer)null;
+s.s[10] = (byte)0;
+NativeLongByReference lp = s.foo2[10].invoke();
+
+Months m = null;
+m.names = (byte[])null;

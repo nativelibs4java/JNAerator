@@ -1,0 +1,17 @@
+mvn "-Dstorepass=$KEYSTORE_PASS" deploy:deploy-file  \
+	-Dfile=build/tar/lib/anarres-cpp.jar \
+	-Durl=scp://shell.sourceforge.net/home/groups/j/jn/jnaerator/htdocs/maven \
+	-DrepositoryId=jnaerator-repo \
+	-DgroupId=org.anarres.cpp \
+	-DartifactId=anarres-cpp-jnaerator \
+	-Dpackaging=jar \
+	-DgeneratePom.description="JNAerator's version of Anarres JCPP" \
+	-DuniqueVersion=true \
+	"-Dversion=1.2.5-JNAerator.3" \
+	-f pom.xml
+	
+#	-f scripts/deploy.pom \
+#	-Durl=scp://shell.sourceforge.net/home/groups/j/jn/jnaerator/htdocs/maven \
+#	-DgeneratePom=true \
+#	-Dfile=../../../jnaerator/trunk/libraries/anarres/build/tar/lib/anarres-cpp.jar \
+

@@ -1,0 +1,35 @@
+typedef enum _E1
+{
+    E1A, E1B
+} F, E1;
+
+f1_(_E1);
+f1(E1);
+
+typedef enum _E2
+{
+    E2A, E2B
+} G;
+
+typedef struct _S1
+{
+    int a;
+} S, S1;
+
+
+typedef struct _S2
+{
+    int a;
+} K;
+
+--
+import test.*;
+import static test.TestLibrary.*;
+
+int i;
+i = E1.E1A;
+i = G.E2A;
+
+Structure s;
+s = (S1)null;
+s = (K)null;

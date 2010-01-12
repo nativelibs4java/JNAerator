@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project name="global-junit" basedir=".">
+
+	<target name="global-junit" depends="global-taskdefs">
+		<runtarget target="global-junit-compile" />
+		<runtarget target="global-cobertura-instrument" />
+
+		<mkdir dir="${global.dir.build.reports}/junit-output" />
+		<!-- This only sets the properties if they aren't set
+		   - already. -->
+		<property name="test.package" value="" />
+		<property name="test.case" value="" />
+		<property name="test.all" value="" />
+		<property name="test.root" value="${global.dir.build.tests}"/>
+		<property name="jrat.configuration" value="${global.dir.src.resources}/jrat.xml" />
+
+		<runtarget target="global-junit-cleanup" />
+
+		<junit
+				printsummary="yes"
+				showoutput="yes"
+				haltonfailure="no"
+				fork="yes"
+				forkmode="once"
+				>
+			<jvmarg value="-Xbootclasspath/p:${global.dir.build}/hacks/lib/boot.jar"/>
+		    <classpath refid="junit-run-classpath"/>
+			<formatter type="plain" />
+			<formatter type="xml" />
+			<sysproperty key="net.sourceforge.cobertura.datafile"
+					file="${global.dir.build.cobertura}/cobertura.ser" />
+			<sysproperty key="test.package" value="${test.package}" />
+			<sysproperty key="test.case" value="${test.case}" />
+			<sysproperty key="test.root" value="${test.root}" />
+			<sysproperty key="test.all" value="${test.all}" />
+			<sysproperty key="global.dir.build.classes"
+							value="${global.dir.build.classes}" />
+			<sysproperty key="jrat.configuration" value="${jrat.configuration}" />
+
+			<assertions>
+				<enable/>
+			</assertions>
+
+			<batchtest fork="yes" todir="${global.dir.build.reports}/junit-output">
+				<fileset dir="${global.dir.build.tests}">
+					<include name="AutoTestSuite.class" />
+				</fileset>
+			</batchtest>
+		</junit>
+
+		<delete dir="${global.dir.root}/webroot" />
+		<delete dir="${global.dir.src.resources}/webapp/WEB-INF" />
+
+
+		<runtarget target="global-junit-report" />
+		<runtarget target="global-cobertura-report" />
+	</target>
+
+	<target name="global-junit-cleanup">
+		<delete dir="${global.dir.root}/webroot" />
+	</target>
+
+	<target name="global-junit-compile">
+		<delete dir="${global.dir.build.tests}" />
+		<mkdir dir="${global.dir.src.tests}" />
+		<mkdir dir="${global.dir.build.tests}" />
+
+        <javac
+				srcdir="${global.dir.src.tests}"
+				destdir="${global.dir.build.tests}"
+				optimize="false"
+				debug="true"
+				source="${system.javac.source}"
+				target="${system.javac.target}"
+				deprecation="${system.javac.deprecation}"
+				classpathref="junit-compile-classpath"
+				>
+			<!--
+			<exclude name="**/master/**" />
+			<exclude name="**/slave/**" />
+			<exclude name="**/old/**" />
+			-->
+		</javac>
+	</target>
+
+	<target name="global-junit-report" depends="global-taskdefs">
+		<junitreport
+				todir="${global.dir.build.reports}/junit-output">
+			<fileset dir="${global.dir.build.reports}/junit-output">
+				<include name="*.xml" />
+				<exclude name="TESTS-TestSuites.xml" />
+			</fileset>
+			<report format="frames" todir="${global.dir.build.reports}/junit"
+				styledir="${global.dir.etc}/junit/xsl"/>
+		</junitreport>
+	</target>
+
+</project>

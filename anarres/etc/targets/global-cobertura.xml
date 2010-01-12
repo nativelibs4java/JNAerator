@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project name="global-cobertura" basedir=".">
+
+	<target name="global-cobertura-instrument" depends="global-taskdefs"
+					unless="test.no.cobertura">
+		<delete dir="${global.dir.build.cobertura}" />
+		<mkdir dir="${global.dir.build.cobertura}" />
+
+		<cobertura-instrument
+				todir="${global.dir.build.cobertura}"
+				datafile="${global.dir.build.cobertura}/cobertura.ser">
+			<fileset dir="${global.dir.build.classes}">
+				<include name="**/*.class" />
+				<exclude name="**/Main.class" />
+				<exclude name="**/cmd/**" />
+				<exclude name="**/soap/port/*/*PortSoapBindingStub.class" />
+				<exclude name="**/soap/port/*/*PortServiceLocator.class" />
+				<exclude name="**/soap/port/*/*PortService.class" />
+			</fileset>
+		</cobertura-instrument>
+
+	</target>
+
+	<target name="global-cobertura-report" depends="global-taskdefs"
+					unless="test.no.cobertura">
+		<cobertura-report
+				format="html"
+				datafile="${global.dir.build.cobertura}/cobertura.ser"
+				destdir="${global.dir.build.reports}/cobertura"
+				srcdir="${global.dir.build.java}" />
+	</target>
+
+
+</project>

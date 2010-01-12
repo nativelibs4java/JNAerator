@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project name="global-checkstyle" basedir=".">
+
+    <target name="global-checkstyle" depends="global-vpp"
+					unless="test.no.checkstyle">
+
+		<mkdir dir="${global.dir.build.reports}" />
+
+        <!-- XXX: Stupid checkstyle task doesn't expand it's parameters -->
+        <checkstyle config="etc/checkstyle/config.xml"
+							failOnViolation="false">
+			<classpath refid="checkstyle-classpath" />
+			<fileset dir="${global.dir.build.java}" />
+			<formatter type="xml" 
+			    toFile="${global.dir.build.reports}/checkstyle.xml" />
+		    <formatter type="plain"
+			    toFile="${global.dir.build.reports}/checkstyle.txt" />
+        </checkstyle>
+
+    </target>
+
+</project>

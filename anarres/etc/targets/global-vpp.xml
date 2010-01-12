@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project name="global-vpp">
+
+	<target name="global-vpp" depends="global-taskdefs">
+		<mkdir dir="${global.dir.build.java}" />
+
+        <vppcopy todir="${global.dir.build.java}">
+            <fileset dir="${global.dir.src.java}">
+				<include name="**/*.java" />
+            </fileset>
+			<config>
+				<context>
+					<!-- Avoid subversion and RCS tags. -->
+					<property key="Revision" value="\$Revision" />
+					<property key="Id" value="\$Id" />
+					<property key="Author" value="\$Author" />
+					<property key="Date" value="\$Date" />
+					<property key="URL" value="\$URL" />
+					<property key="Rev" value="\$Rev" />
+					<property key="SOA" value="\$SOA" />
+					<property key="TTL" value="\$TTL" />
+					<property key="DATASET" value="$DATASET" />
+					<property key="_" value="\$_" />
+
+					<property key="version" value="${global.version}" />
+				</context>
+			</config>
+        </vppcopy>
+    </target>
+
+</project>

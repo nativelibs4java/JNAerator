@@ -1,0 +1,13 @@
+void CopyBytes(char* dest, const char* source, const wchar_t* wsource, size_t n, const int* intArray);
+int process(void* ptr);
+--
+import test.*;
+import static test.TestLibrary.*;
+import org.rococoa.cocoa.foundation.*;
+import org.rococoa.cocoa.*;
+import com.ochafik.lang.jnaerator.runtime.*;
+
+INSTANCE.CopyBytes((Pointer)null, (Pointer)null, (CharByReference)null, (NativeSize)null, (IntByReference)null);
+INSTANCE.CopyBytes((ByteBuffer)null, (String)null, (WString)null, (NativeSize)null, (int[])null);
+
+INSTANCE.process((Pointer)null);

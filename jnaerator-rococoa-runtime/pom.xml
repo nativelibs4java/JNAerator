@@ -1,0 +1,96 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+ <modelVersion>4.0.0</modelVersion>
+  <groupId>com.jnaerator</groupId>
+  <artifactId>jnaerator-rococoa-runtime</artifactId>
+  <name>JNAerator Rococoa Runtime</name>
+  <url>http://code.google.com/p/jnaerator/</url>
+  <version>${jnaerator.version}</version>
+  <packaging>jar</packaging>
+  
+  <dependencies>
+  
+	<dependency>
+      <groupId>com.jnaerator</groupId>
+      <artifactId>jnaerator-runtime</artifactId>
+      <version>${jnaerator.version}</version>
+      <scope>compile</scope>
+    </dependency>
+	
+	<dependency>
+	  <groupId>org.rococoa</groupId>
+	  <artifactId>rococoa-core</artifactId>
+	  <version>${rococoa.version}</version>
+	  <scope>compile</scope>
+	</dependency>
+	
+  </dependencies>
+  
+  <parent>
+	  <groupId>com.jnaerator</groupId>
+	  <artifactId>jnaerator-parent</artifactId>
+	  <version>0.9.3-SNAPSHOT</version>
+	  <relativePath>../parent</relativePath>
+  </parent>
+  
+  <build>
+		<plugins>
+		
+		
+		  <plugin>
+			<groupId>org.apache.maven.plugins</groupId>
+			<artifactId>maven-compiler-plugin</artifactId>
+			<version>2.0.2</version>
+			<configuration>
+			  <source>1.5</source>
+			  <target>1.5</target>
+			</configuration>
+		  </plugin>
+		  
+		<plugin>
+			<groupId>org.apache.maven.plugins</groupId>
+			<artifactId>maven-shade-plugin</artifactId>
+			<version>1.2.2</version>
+			<executions>
+			  <execution>
+				<phase>package</phase>
+				<goals>
+				  <goal>shade</goal>
+				</goals>
+				<configuration>
+					<shadedArtifactAttached>true</shadedArtifactAttached>
+					<!--shadedArtifactId>${project.artifactId}-standalone</shadedArtifactId-->
+					<!--finalName>${project.artifactId}-standalone-${project.version}</finalName-->
+					<artifactSet>
+						<excludes>
+						  <exclude>org.scala-lang:scala-library</exclude>
+						  <exclude>org.slf4j:slf4j-jdk14</exclude>
+						  <exclude>com.sun.jna:jna</exclude>
+						  <exclude>junit:junit</exclude>
+						</excludes>
+					  </artifactSet>
+					  
+					  <filters>
+					  	<filter>
+			
+							<artifact>com.sun.jna:jna</artifact>
+			
+							<excludes>
+			
+								<exclude>META-INF/**</exclude>
+								
+								</excludes>
+								
+						</filter>
+					</filters>
+				</configuration>
+			  </execution>
+			</executions>
+		</plugin>
+		  
+		</plugins>
+	</build>
+</project>
+
+

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="sources"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="libraries/antlr-runtime-3.1.jar"/>
+	<classpathentry kind="lib" path="libraries/junit-4.4-src.jar"/>
+	<classpathentry kind="lib" path="libraries/junit-4.4.jar"/>
+	<classpathentry kind="lib" path="libraries/rococoa.jar"/>
+	<classpathentry kind="lib" path="libraries/trove.jar"/>
+	<classpathentry kind="lib" path="libraries/anarres/build/tar/lib/anarres-cpp.jar"/>
+	<classpathentry kind="lib" path="libraries/anarres/build/tar/lib/gnu.getopt.jar"/>
+	<classpathentry kind="lib" path="C:/Prog/jnaerator/trunk/libraries/jna.jar"/>
+	<classpathentry kind="output" path="output"/>
+</classpath>

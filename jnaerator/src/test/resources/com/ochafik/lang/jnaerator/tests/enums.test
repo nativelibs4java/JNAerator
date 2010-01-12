@@ -1,0 +1,18 @@
+enum {
+   /*
+    * These bits are reserved by Apple and will result in a invalid
+    * value error if attemped to set. Obsolete constants:
+    */
+   kATSLineAppleReserved         = (UInt32)0xFCE00000
+};
+
+enum E {
+	Item1,
+	Item2 = Item1 + 10
+};
+--
+import test.*;
+import static test.TestLibrary.*;
+
+int i = kATSLineAppleReserved;
+i = E.Item2;

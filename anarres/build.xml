@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project name="jcpp" default="all" basedir=".">
+	<dirname property="global.dir.root" file="${ant.file}"/>
+	<property name="global.dir.etc" value="${global.dir.root}/etc"/>
+	<import file="${global.dir.etc}/global.xml" />
+
+	<target name="clean" depends="global-clean" />
+	<target name="compile" depends="global-compile" />
+	<target name="all" depends="global-tar" />
+
+
+	<target name="junit" depends="global-junit" />
+	<target name="test" depends="global-junit" />
+	<!-- global-findbugs" -->
+
+	<target name="findbugs" depends="global-findbugs,global-findbugs-gui" />
+
+</project>

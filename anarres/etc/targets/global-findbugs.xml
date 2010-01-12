@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project name="global-findbugs" basedir=".">
+
+	<!-- Used to depend on compile. -->
+	<target name="global-findbugs" depends="global-taskdefs">
+		<delete dir="${global.dir.build.reports}/findbugs-output" />
+		<mkdir dir="${global.dir.build.reports}/findbugs-output" />
+		<findbugs
+				home="${global.dir.lib}/findbugs"
+				output="xml"
+				outputFile="${global.dir.build.reports}/findbugs-output/findbugs.xml" >
+			<sourcePath path="${global.dir.build.java}" />
+			<class location="${global.dir.build.classes}" />
+			<auxClasspath refid="compile-classpath" />
+		</findbugs>
+
+	</target>
+
+	<target name="global-findbugs-report" depends="global-taskdefs">
+		<xslt
+				basedir="${global.dir.build.reports}/findbugs-output"
+				destdir="${global.dir.build.reports}/findbugs"
+				extension=".html"
+				style="${global.dir.lib}/findbugs/xsl/plain.xsl">
+		</xslt>
+	</target>
+
+	<target name="global-findbugs-gui" depends="global-taskdefs">
+		<java
+				fork="true"
+				spawn="true"
+				classname="edu.umd.cs.findbugs.gui.FindBugsFrame">
+			<classpath>
+				<fileset dir="${global.dir.lib}/findbugs/lib" />
+			</classpath>
+			<sysproperty
+				key="findbugs.home"
+				value="${global.dir.lib}/findbugs" />
+			<jvmarg value="-Xmx768m" />
+			<arg value="-loadbugs" />
+			<arg value="${global.dir.build.reports}/findbugs-output/findbugs.xml" />
+		</java>
+	</target>
+
+
+</project>

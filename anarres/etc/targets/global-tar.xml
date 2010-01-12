@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project name="global-tar" basedir=".">
+
+    <target name="global-tar-dir" depends="global-jar">
+		<mkdir dir="${global.dir.build.dist}" />
+		<mkdir dir="${global.dir.build.tar}/lib" />
+		<mkdir dir="${global.dir.build.tar}/bin" />
+		<mkdir dir="${global.dir.build.javadoc}" />
+
+		<copy todir="${global.dir.build.tar}/lib">
+			<!--
+			<fileset dir="${global.dir.lib}/log4j">
+				<include name="**/*.jar" />
+			</fileset>
+			-->
+			<fileset dir="${global.dir.lib}/runtime">
+				<include name="**/*.jar" />
+			</fileset>
+			<mapper type="flatten" />
+		</copy>
+
+		<copy todir="${global.dir.build.tar}">
+			<fileset dir="${global.dir.src.scripts}">
+				<include name="jcpp" />
+			</fileset>
+			<fileset dir="${global.dir.root}">
+				<include name="LICENSE" />
+			</fileset>
+		</copy>
+
+		<chmod perm="a+x">
+		    <fileset dir="${global.dir.build.tar}/bin">
+			    <include name="**/*.pl"/>
+			</fileset>
+		    <fileset dir="${global.dir.build.tar}">
+			    <include name="*.sh"/>
+			</fileset>
+		    <fileset dir="${global.dir.build.tar}">
+			    <include name="jcpp"/>
+			</fileset>
+		</chmod>
+
+		<!-- <runtarget target="global-inject" /> -->
+	</target>
+
+    <target name="global-tar" depends="global-tar-dir,global-javadoc">
+
+		<copy todir="${global.dir.build.tar}/docs/api">
+			<fileset dir="${global.dir.build.javadoc}" />
+		</copy>
+
+		<tar
+				destfile="${global.file.bintar}"
+				compression="gzip"
+				longfile="gnu">
+			<tarfileset
+					dir="${global.dir.build.tar}"
+					prefix="${global.name}-bin-${global.version}"
+					username="root" group="root"
+					uid="0" gid="0"
+					>
+				<include name="**" />
+			</tarfileset>
+		</tar>
+
+		<tar
+				destfile="${global.file.srctar}"
+				compression="gzip"
+				longfile="gnu">
+			<tarfileset
+					dir="${global.dir.root}"
+					prefix="${global.name}-src-${global.version}"
+					username="root" group="root"
+					uid="0" gid="0"
+					>
+				<include name="**" />
+				<exclude name="build/**" />
+				<exclude name="**/.*.swp" />
+				<exclude name="src/scripts/release.sh" />
+			</tarfileset>
+		</tar>
+
+	</target>
+
+</project>

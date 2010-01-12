@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jnlp spec="1.0+"
+  codebase="http://jnaerator.sourceforge.net/"
+  href="webstart/JNAeratorStudio.jnlp"
+>
+<information>
+  <title>JNAerator Studio</title>
+  <vendor>Olivier Chafik</vendor>
+  <homepage href="http://jnaerator.googlecode.com/" />
+  <description>JNAerator : Java gets to love native libraries !</description>
+  <description kind='tooltip'>JNAerator Studio : wrap C and Objective-C libraries in Java.</description>
+  <icon href="webstart/appIcon128.gif"/>
+  <update check="timeout" policy="prompt-update"/>
+  <association mime-type="application-x/jnaerator-config" extensions="jnaerator" icon="webstart/fileIcon128.gif"/>
+  <offline-allowed/>
+  <shortcut online="true">
+	  <desktop/>
+	  <menu submenu="JNAerator"/>
+  </shortcut>
+</information>
+<security>
+  <all-permissions/>
+</security>
+<resources>
+  <j2se version="1.6+" />
+  <jar href="maven/com/jnaerator/jnaerator/0.9.1/jnaerator-0.9.1.jar" main="true"/>
+  <!--<jar href="libraries/ecj-3.5M6.jar"/>-->
+</resources>
+<application-desc main-class="com.ochafik.lang.jnaerator.studio.JNAeratorStudio"/>
+</jnlp>

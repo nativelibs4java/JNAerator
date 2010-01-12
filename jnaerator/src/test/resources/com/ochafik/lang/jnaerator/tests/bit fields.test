@@ -1,0 +1,21 @@
+struct BF {
+    int i:1;
+	int j:2;
+	int k:5;
+	int i8:8, i16:16, i32:32;
+	long long l32:32, l64:64;
+	float f;
+};
+--
+import test.*;
+import static test.TestLibrary.*;
+
+BF b = new BF();
+b.i = b.j = b.k = 1;
+b.f = 1f;
+byte i8 = b.i8;
+short i16 = b.i16;
+int i32 = b.i32;
+int l32 = b.l32;
+b.l64 = (long)0;
+

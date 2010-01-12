@@ -1,0 +1,16 @@
+struct OpaqueStruct;
+
+const OpaqueStruct* GetInterestingMessage(UnknownPtr*);
+
+--
+
+import test.*;
+import static test.TestLibrary.*;
+
+PointerType pt = null;
+pt = new OpaqueStruct();
+pt = new UnknownPtr();
+pt = new OpaqueStruct((Pointer)null);
+pt = new UnknownPtr((Pointer)null);
+
+OpaqueStruct s = INSTANCE.GetInterestingMessage(null);

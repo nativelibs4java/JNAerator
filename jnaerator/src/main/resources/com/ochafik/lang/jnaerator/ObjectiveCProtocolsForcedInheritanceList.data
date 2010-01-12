@@ -1,0 +1,5 @@
+// AppKit
+NSOpenSavePanelDelegate:NSWindowDelegate
+NSOutlineViewDelegate:NSTableViewDelegate
+NSOutlineViewDataSource:NSTableViewDataSource
+NSComboBoxDelegate:NSTextFieldDelegate

@@ -1,0 +1,36 @@
+enum _E1
+{
+    E1A, E1B
+};
+typedef uint32_t NothingToDoWithE;
+
+enum _E2
+{
+    E2A, E2B
+};
+typedef uint32_t E2
+
+typedef uint32_t E3
+enum
+{
+    E3A, E3B
+};
+
+
+enum
+{
+    E4A, E4B
+};
+
+typedef uint32_t E4; // too far away !
+
+
+--
+import test.*;
+import static test.TestLibrary.*;
+
+int i;
+i = _E1.E1A;
+i = E2.E2A;
+i = E3.E3A;
+i = E4A;

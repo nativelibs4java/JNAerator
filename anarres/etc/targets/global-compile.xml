@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project name="global-compile" basedir=".">
+
+    <target name="global-compile" depends="global-vpp">
+		<mkdir dir="${global.dir.build.classes}" />
+		<mkdir dir="${global.dir.build.depcache}" />
+		<mkdir dir="${global.dir.build.java}" />
+
+		<depend
+				srcdir="${global.dir.build.java}"
+				destdir="${global.dir.build.classes}"
+				cache="${global.dir.build.depcache}"
+				closure="yes">
+		</depend>
+
+        <javac
+				srcdir="${global.dir.build.java}"
+				destdir="${global.dir.build.classes}"
+				optimize="${system.javac.optimize}"
+				debug="${system.javac.debug}"
+				source="${system.javac.source}"
+				target="${system.javac.target}"
+				deprecation="${system.javac.deprecation}"
+				>
+            <classpath refid="compile-classpath" />
+			<!--
+			<compilerarg compiler="modern" value="-Xlint:unchecked" />
+			-->
+			<compilerarg compiler="modern" value="-Xlint:deprecation" />
+			<compilerarg compiler="modern" value="-Xlint:finally" />
+        </javac>
+    </target>
+
+</project>

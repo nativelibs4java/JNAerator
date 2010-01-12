@@ -1,0 +1,6 @@
+extern bool operator/=(int&, float);
+--
+import test.*;
+import static test.TestLibrary.*;
+
+INSTANCE.operatorDivideEqual((IntByReference)null, 0f);

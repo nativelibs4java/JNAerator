@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project name="global-clean" basedir=".">
+	<target name="global-clean">
+		<delete dir="${global.dir.root}/build" />
+		<delete dir="${global.dir.root}/webroot" />
+	</target>
+</project>

@@ -1,0 +1,21 @@
+struct S {
+	S byVal;
+	S* byRef;
+};
+
+struct S2 {
+	struct I {
+		int i;
+	} v[10];
+};
+
+--
+import test.*;
+import static test.TestLibrary.*;
+
+S s = new S();
+Structure.ByValue v = (S.ByValue)s.byVal;
+Structure.ByReference r = (S.ByReference)s.byRef;
+
+S2 s2 = new S2();
+s2.v[1] = new S2.I(2).byValue();
