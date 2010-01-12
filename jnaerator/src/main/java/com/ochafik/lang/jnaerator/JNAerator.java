@@ -933,9 +933,14 @@ public class JNAerator {
 		
 		boolean needsObjCRuntime = result.hasObjectiveC();
 		for (String file : files) {
+            if (file.startsWith("Archive: "))
+                continue;
+
+            if (file.startsWith("META-INF/"))
+                continue;
+
 			if (!needsObjCRuntime) {
-				if (!file.startsWith("com/ochafik") &&
-						!file.startsWith("com/sun/jna"))
+				if (file.contains("rococoa"))
 					continue;
 			}
 			
@@ -1080,7 +1085,7 @@ public class JNAerator {
 			);
 			interf.addModifiers(Modifier.Public);
 			interf.setTag(simpleLibraryClassName);
-            interf.addParent(ident(config.runtime.libraryClass));
+            interf.addParent(ident(config.runtime.libraryClass, expr(typeRef(simpleLibraryClassName))));
 
             String libFileOrDirArgName = "libraryFileOrDirectory";
             Function constr = new Function(Function.Type.JavaMethod, fullLibraryClassName.resolveLastSimpleIdentifier().clone(), null, new Arg(libFileOrDirArgName, typeRef(File.class)));
@@ -1090,6 +1095,7 @@ public class JNAerator {
 
             constr = new Function(Function.Type.JavaMethod, fullLibraryClassName.resolveLastSimpleIdentifier().clone(), null);
             constr.addModifiers(Modifier.Public);
+            constr.addThrown(typeRef(FileNotFoundException.class));
             constr.setBody(block(stat(methodCall("super", classLiteral(typeRef(fullLibraryClassName.clone()))))));
             interf.addDeclaration(constr);
 

@@ -685,8 +685,12 @@ public class DeclarationsConverter {
 			if (function.getAsmName() != null)
 				names.add(function.getAsmName());
 
-			if (!isCallback && !names.isEmpty())
-				natFunc.addAnnotation(new Annotation(result.config.runtime.ident(JNAeratorConfig.Runtime.Ann.Mangling), "({\"" + StringUtils.implode(names, "\", \"") + "\"})"));
+			if (!isCallback && !names.isEmpty()) {
+                Identifier mgc = result.config.runtime.ident(JNAeratorConfig.Runtime.Ann.Mangling);
+                if (mgc != null) {
+                    natFunc.addAnnotation(new Annotation(mgc, "({\"" + StringUtils.implode(names, "\", \"") + "\"})"));
+                }
+            }
 
 			boolean needsThis = false, needsThisAnnotation = false;
 			if (Modifier.__fastcall.isContainedBy(function.getModifiers())) {
@@ -845,7 +849,7 @@ public class DeclarationsConverter {
         for (Arg arg : function.getArgs()) {
             String argName = arg.getName();
 
-            TypeConversion.NL4JTypeConversion argType = result.typeConverter.toNL4JType(function.getValueType(), null);
+            TypeConversion.NL4JTypeConversion argType = result.typeConverter.toNL4JType(arg.getValueType(), null);
             argTypes.put(argName, argType);
             typedMethod.addArg(new Arg(argName, argType.typedTypeRef));
             nativeMethod.addArg(argType.annotateRawType(new Arg(argName, argType.getRawType())));
