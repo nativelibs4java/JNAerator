@@ -1157,7 +1157,7 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
         }
 
         public TypeRef getTypedTypeRef() {
-            return directType.clone();
+            return directType == null ? typeRef("void") : directType.clone();
         }
 
         public TypeRef getIndirectTypeRef() {
@@ -1190,13 +1190,16 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
             TargettedTypeRef ttr = (TargettedTypeRef)valueType;
             NL4JTypeConversion targetConv = toNL4JType(ttr.getTarget(), namesStack);
             if (targetConv.type != NL4JTypeConversion.Type.Void) {
-                String s = targetConv.getRawType().toString();
-                if (s.equals(Byte.TYPE.getName()) && (result.config.charPtrAsString || Modifier.__const.isContainedBy(valueType.getModifiers())))
-                    return new NL4JTypeConversion(
-                        typeRef(ident(result.config.runtime.pointerClass, expr(typeRef(String.class)))),
-                        null,
-                        NL4JTypeConversion.Type.Pointer
-                    );
+                try {
+                    String s = targetConv.getRawType().toString();
+                    if (s.equals(Byte.TYPE.getName()) && (result.config.charPtrAsString || Modifier.__const.isContainedBy(valueType.getModifiers())))
+                        return new NL4JTypeConversion(
+                            typeRef(ident(result.config.runtime.pointerClass, expr(typeRef(String.class)))),
+                            null,
+                            NL4JTypeConversion.Type.Pointer
+                        );
+                } catch (UnsupportedConversionException ex) {
+                }
             }
             return new NL4JTypeConversion(
                 typeRef(
@@ -1228,12 +1231,13 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
             if (name == null)
                 return null;
 
+            if (namesStack == null)
+                namesStack = new Stack<String>();
+
             String nameStr = name.toString();
             if (nameStr == null || namesStack.contains(nameStr))
                 return null;
 
-            if (namesStack == null)
-                namesStack = new Stack<String>();
             namesStack.push(nameStr);
             try {
 

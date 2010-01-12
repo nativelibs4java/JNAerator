@@ -591,7 +591,9 @@ public class DeclarationsConverter {
                     throwBadRuntime();
             }
         } catch (UnsupportedConversionException ex) {
-            out.addDeclaration(skipDeclaration(function));
+            Declaration d = skipDeclaration(function);
+            d.addToCommentBefore(ex.toString());
+            out.addDeclaration(d);
         }
 	}
 
