@@ -95,7 +95,7 @@ public class JNAeratorConfig {
             com.nativelibs4java.runtime.jna.Struct.class,
             com.nativelibs4java.runtime.jna.Struct.class,
             com.nativelibs4java.runtime.jna.StructIO.class,
-            com.nativelibs4java.runtime.jna.Array.class,
+            null,//com.nativelibs4java.runtime.jna.Array.class,
             com.sun.jna.Library.class,
             com.nativelibs4java.runtime.ann.jna.Bits.class,
             "jnaerator-runtime.jar.files,nl4j-runtime-structs-jna.jar.files") {
@@ -113,7 +113,7 @@ public class JNAeratorConfig {
             com.nativelibs4java.runtime.Struct.class,
             com.nativelibs4java.runtime.Struct.class,
             com.nativelibs4java.runtime.StructIO.class,
-            com.nativelibs4java.runtime.Array.class,
+            com.nativelibs4java.runtime.Pointer.class,// "array" class
             com.nativelibs4java.runtime.NativeLib.class,
             com.nativelibs4java.runtime.ann.Bits.class,
             "nl4j-runtime.jar.files") {
