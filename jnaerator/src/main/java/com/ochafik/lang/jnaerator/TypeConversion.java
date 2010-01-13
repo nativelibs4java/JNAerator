@@ -553,7 +553,7 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
 		JavaPrim javaPrim;
 		public JavaPrimitive() {}
 		public JavaPrimitive(JavaPrim javaPrim) {
-			super(javaPrim.toString());
+			super(toPrimString(javaPrim));
 			this.javaPrim = javaPrim;
 		}
 		public JavaPrim getJavaPrim() {
@@ -561,10 +561,6 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
 		}
 		public void setJavaPrim(JavaPrim javaPrim) {
 			this.javaPrim = javaPrim;
-		}
-		@Override
-		public String toString(CharSequence indent) {
-			return toPrimString(javaPrim);
 		}
 	}
 	

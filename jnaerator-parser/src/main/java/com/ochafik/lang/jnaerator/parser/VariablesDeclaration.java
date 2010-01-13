@@ -42,20 +42,5 @@ public class VariablesDeclaration extends StoredDeclarations {
 	public void accept(Visitor visitor) {
 		visitor.visitVariablesDeclaration(this);
 	}
-	@Override
-	public String toString(CharSequence indent) {
-		String pre = "";
-		if (!getAnnotations().isEmpty())
-			pre += StringUtils.implode(getAnnotations(), "\n" + indent) + "\n" + indent;
-		
-		
-		return formatComments(indent, false, true, true) +
-			pre + 
-			getModifiersStringPrefix() + getValueTypeAndStorageSuffix(indent) +
-			//(bits < 0 ? "" : ":" + bits) + 
-			";"
-			+ (commentAfter == null ? "" : " " + commentAfter.trim())
-		;
-	}
 	
 }

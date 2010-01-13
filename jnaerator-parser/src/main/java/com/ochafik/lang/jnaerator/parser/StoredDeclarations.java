@@ -42,41 +42,15 @@ public abstract class StoredDeclarations extends Declaration {
 			visitor.visitTypeDef(this);
 		}
 		
-		@Override
-		public String toString(CharSequence indent) {
-			String p = formatComments(indent, false, true, true) + getModifiersStringPrefix();
-			return p + "typedef " + getValueTypeAndStorageSuffix(indent) + ";"
-				+ (commentAfter == null ? "" : " " + commentAfter.trim());
-			
-		}
 	}
-	
-	protected String getValueTypeAndStorageSuffix(CharSequence indent) {
-		if (getValueType() instanceof FunctionSignature) {
-			FunctionSignature sig = (FunctionSignature) getValueType();
-			if (sig.getFunction() != null) {
-				Identifier name = sig.getFunction().getName();
-				if (name != null && declarators.size() == 1) {
-					String stoName = declarators.get(0).resolveName();
-					if (name.equals(stoName) || stoName == null)
-						return sig.toString();// + ";";
-				}
-			}
-		}
-		String stoStr = implode(declarators, ", ", indent).trim();
-		return 
-			(getValueType() == null ? "" : getValueType().toString(indent)) + 
-			(stoStr.length() == 0 ? "" : " " + stoStr) 	//+ 
-		//";" + (commentAfter == null ? "" : " " + commentAfter.trim())
-		;
-	}
+    /*
 	@Override
 	public String toString(CharSequence indent) {
 		return formatComments(indent, false, true, true) +
 			getModifiersStringPrefix() + getValueTypeAndStorageSuffix(indent) + ";"
 			+ (commentAfter == null ? "" : " " + commentAfter.trim())
 			;
-	}
+	}*/
 	
 	public List<Declarator> getDeclarators() {
 		return unmodifiableList(declarators);

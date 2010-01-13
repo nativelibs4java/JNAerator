@@ -98,5 +98,4 @@ public abstract class ModifiableElement extends Element {
 		if (modifiers != null)
 			this.modifiers.addAll(modifiers);
 	}
-	
 }

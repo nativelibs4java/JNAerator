@@ -50,9 +50,5 @@ public class ExternDeclarations extends Declaration {
 			return true;
 		return super.replaceChild(child, by);
 	}
-	@Override
-	public String toString(CharSequence indent) {
-		return "extern \"" + getLanguage() + "\" {" + implode(getDeclarations(), "\n\t" + indent, indent + "\t") + "\n" + indent + "}";
-	}
 
 }

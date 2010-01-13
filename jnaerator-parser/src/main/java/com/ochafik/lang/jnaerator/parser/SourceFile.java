@@ -43,10 +43,6 @@ public class SourceFile extends Element implements DeclarationsHolder {
 	}
 	
 	@Override
-	public String toString(CharSequence indent) {
-		return implode(declarations, "\n" + indent, indent);
-	}
-	@Override
 	public Element getNextChild(Element child) {
 		return getNextSibling(declarations, child);
 	}

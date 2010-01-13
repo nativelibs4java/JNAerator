@@ -122,11 +122,6 @@ public abstract class TypeRef extends ModifiableElement implements Declarator.Mu
 		}
 		
 		@Override
-		public String toString(CharSequence indent) {
-			return formatComments(indent, true, false, false) + getModifiersStringPrefix() + name;
-		}
-		
-		@Override
 		public boolean replaceChild(Element child, Element by) {
 			if (child == getName())
 				setName((Identifier)by);
@@ -141,9 +136,6 @@ public abstract class TypeRef extends ModifiableElement implements Declarator.Mu
 		
 	}
 
-	public String variableDeclarationToString(String varName, boolean isVarArg, CharSequence indent) {
-		return toString(indent) + (isVarArg ? "... " : " ") + varName;
-	}
 	public boolean acceptsModifier(Modifier modifier) {
 		return modifier.isAnyOf(ModifierKind.NumericTypeQualifier, ModifierKind.TypeQualifier);
 	}
@@ -158,10 +150,6 @@ public abstract class TypeRef extends ModifiableElement implements Declarator.Mu
 			modifiers.add(i, modifier);
 	}*/
 	
-	public String getModifiersStringPrefix() {
-		return StringUtils.implode(modifiers, " ") + (modifiers.isEmpty() ? "" : " ");
-	}
-
 	public static class FunctionSignature extends TypeRef {
 		public enum Type {
 			CFunction, ObjCBlock
@@ -198,32 +186,6 @@ public abstract class TypeRef extends ModifiableElement implements Declarator.Mu
 			this.function = changeValue(this, this.function, function);
 		}
 		
-		@Override
-		public String toString(CharSequence indent) {
-			if (function == null)
-				return null;
-			
-			assert function.getBody() == null;
-			String s = 
-				(function.getValueType() == null ? "" : function.getValueType() + " ") +
-				"(" +
-					function.getModifiersStringPrefix() +
-					(Type.ObjCBlock.equals(getType()) ? "^" : "*") +
-					(function.getName() == null ? "" : function.getName()) +
-				")(" +
-				StringUtils.implode(function.getArgs(), ", ") +
-				")" + (getModifiers().isEmpty() ? "" : " ") + StringUtils.implode(getModifiers(), " ");
-			
-			return getModifiersStringPrefix() + s;
-		}
-
-		@Override
-		public String variableDeclarationToString(String varName, boolean isVarArg, CharSequence indent) {
-			if (isVarArg || getFunction() == null | getFunction().getName() == null)
-				return super.variableDeclarationToString(varName, isVarArg, indent);
-			else
-				return toString(indent);
-		}
 		@Override
 		public void accept(Visitor visitor) {
 			visitor.visitFunctionSignature(this);
@@ -278,129 +240,12 @@ public abstract class TypeRef extends ModifiableElement implements Declarator.Mu
 			return (Primitive)super.addModifiers(mds);
 		}
 
-		/*public String getName() {
-			return name;
-		}
-		public void setName(String name) {
-			this.name = name;
-		}*/
-		@Override
-		public String toString(CharSequence indent) {
-			if (name != null)
-				return getModifiersStringPrefix() + name;
-			else
-				return getModifiersStringPrefix().trim();
-		}
-
 		@Override
 		public void accept(Visitor visitor) {
 			visitor.visitPrimitive(this);
 		}
 	}
 	
-	/*public static class StructTypeRef extends TypeRef {
-		protected Struct struct;
-		
-		public StructTypeRef(Struct struct) {
-			this();
-			setStruct(struct);
-		}
-		public StructTypeRef() {
-		}
-		public Struct getStruct() {
-			return struct;
-		}
-		public void setStruct(Struct struct) {
-			this.struct = changeValue(this, this.struct, struct);
-		}
-		@Override
-		public boolean replaceChild(Element child, Element by) {
-			if (child == getStruct()) {
-				setStruct((Struct) by);
-				return true;
-			}
-			return super.replaceChild(child, by);
-		}
-		@Override
-		public String toString(CharSequence indent) {
-			return getStruct() == null ? null : getStruct().toCoreString("");
-		}
-		@Override
-		public void accept(Visitor visitor) {
-			visitor.visitStructTypeRef(this);
-		}
-	}*/
-	/*public static class EnumTypeRef extends TypeRef {
-		protected Enum enumeration;
-		
-		
-		public EnumTypeRef(Enum enumeration) {
-			this();
-			setEnumeration(enumeration);
-		}
-		public EnumTypeRef() {}
-		
-		public void setEnumeration(Enum enumeration) {
-			this.enumeration = changeValue(this, this.enumeration, enumeration);
-		}
-		public Enum getEnumeration() {
-			return enumeration;
-		}
-		@Override
-		public boolean replaceChild(Element child, Element by) {
-			if (child == getEnumeration()) {
-				setEnumeration((Enum) by);
-				return true;
-			}
-			return super.replaceChild(child, by);
-		}
-		@Override
-		public String toString(CharSequence indent) {
-			return getEnumeration() == null ? null : getEnumeration().toCoreString("");
-		}
-		@Override
-		public void accept(Visitor visitor) {
-			visitor.visitEnumTypeRef(this);
-		}
-	}*/
-	/*
-	public static class SubTypeRef extends TargettedTypeRef {
-		public enum Style { 
-			Dot { public String toString() { return "."; } }, 
-			Colons { public String toString() { return "::"; } } 
-		}
-		public SubTypeRef() {}
-		public SubTypeRef(TypeRef target, Style style, String subName) {
-			setTarget(target);
-			setStyle(style);
-			setSubName(subName);
-		}
-
-		Style style;
-		String subName;
-		
-		public void setStyle(Style style) {
-			this.style = style;
-		}
-		public Style getStyle() {
-			return style;
-		}
-		public String getSubName() {
-			return subName;
-		}
-		public void setSubName(String subName) {
-			this.subName = subName;
-		}
-		
-		@Override
-		public String toString(CharSequence indent) {
-			return getTarget().toString(indent) + getStyle() + getSubName();
-		}
-		@Override
-		public void accept(Visitor visitor) {
-			visitor.visitSubTypeRef(this);
-		}
-	}*/
 	public static class Pointer extends TargettedTypeRef {
 		Declarator.PointerStyle pointerStyle;
 		
@@ -416,12 +261,6 @@ public abstract class TypeRef extends ModifiableElement implements Declarator.Mu
 		}
 		public Declarator.PointerStyle getPointerStyle() {
 			return pointerStyle;
-		}
-		@Override
-		public String toString(CharSequence indent) {
-			String s = getModifiersStringPrefix();
-			//return getTarget() + (s.length() == 0 ? "" : " " + s.trim()) + VariableStorage.toString(getPointerStyle());
-			return s + getTarget() + getPointerStyle();
 		}
 		@Override
 		public void accept(Visitor visitor) {
@@ -518,18 +357,7 @@ public abstract class TypeRef extends ModifiableElement implements Declarator.Mu
 		public void setDimensions(List<Expression> dimensions) {
 			changeValue(this, this.dimensions, dimensions);
 		}
-		public String bracketsToString() {
-			return "[" + StringUtils.implode(dimensions, "][") + "]";
-		}
-		@Override
-		public String toString(CharSequence indent) {
-			return getModifiersStringPrefix() + getTarget() + bracketsToString();
-		}
-	
-		@Override
-		public String variableDeclarationToString(String varName, boolean isVarArg, CharSequence indent) {
-			return (getTarget() == null ? "" : getTarget().toString(indent)) + (isVarArg ? "... " : " ") + varName + bracketsToString();
-		}
+		
 		@Override
 		public void accept(Visitor visitor) {
 			visitor.visitArray(this);

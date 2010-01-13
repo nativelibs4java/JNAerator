@@ -184,54 +184,6 @@ public class Struct extends TypeRef.TaggedTypeRef implements DeclarationsHolder 
 		return nextMemberVisibility;
 	}
 
-    public String bodyToString(CharSequence indent) {
-        String lnind = "\n" + indent + "\t";
-		return isForwardDeclaration() ? "" :
-			(declarations.isEmpty() ?
-				"" :
-				lnind + implode(declarations, lnind, indent + "\t") + "\n" + indent
-			)
-		;
-    }
-	public String toString(CharSequence indent) {
-		String body = isForwardDeclaration() ? "" : " {" + bodyToString(indent) + "}";
-		
-		String pre = formatComments(indent, false, true, true) + 
-			getModifiersStringPrefix();
-			//commentBefore + "\n" + indent;//(indent, mergeCommentsBeforeAndAfter);
-		
-		String nameStr = (getTag() == null ? "" : " " + getTag().toString(indent));
-//		String javaPublicity = getModifiers().contains(Modifier.Public) ? "public " :
-//			getModifiers().contains(Modifier.Protected) ? "protected " :
-//			"";
-//		if (getModifiers().contains(Modifier.Static))
-//			javaPublicity += "static ";
-//		if (getModifiers().contains(Modifier.Final))
-//			javaPublicity += "final ";
-		
-		String javaExtension = getParents().isEmpty() ? "" : " extends " + StringUtils.implode(getParents(), ", ");
-		String javaImplements = getProtocols().isEmpty() ? "" : " implements " + StringUtils.implode(getProtocols(), ", ");
-		
-		if (getType() != null)
-		switch (getType()) {
-			case CPPClass:
-				return pre + "class" + nameStr + body;
-			case CUnion:
-				return pre + "union" + nameStr + body;
-			case JavaClass:
-				return pre + "class" + nameStr + javaExtension + javaImplements + body;
-			case JavaInterface:
-				return pre + "interface" + nameStr + javaExtension + javaImplements + body;
-			case ObjCClass:
-				return pre + (isForwardDeclaration() ? "@class" : "@interface") + nameStr + (getCategoryName() == null ? "" : " (" + getCategoryName() + ")") + body;
-			case ObjCProtocol:
-				return pre + "@protocol" + nameStr + body; // TODO check this ???
-			case CStruct:
-			default:
-				return pre + "struct" + nameStr + body;
-		}
-		return null;
-	}
 	public void accept(Visitor visitor) {
 		visitor.visitStruct(this);
 	}

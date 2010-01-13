@@ -87,14 +87,6 @@ public abstract class Identifier extends Element implements Comparable<Object> {
 			return replaceChild(templateArguments, Expression.class, this, child, by);
 		}
 		@Override
-		public String toString(CharSequence indent) {
-			if (templateArguments.isEmpty())
-				return name == null ? "" : name;
-			
-			String args = implode(templateArguments, ", ", indent);
-			return name + "<" + args + (args.endsWith(">") ? " " : "") + ">";
-		}
-		@Override
 		public boolean isPlain() {
 			return templateArguments.isEmpty();
 		}
@@ -160,10 +152,6 @@ public abstract class Identifier extends Element implements Comparable<Object> {
 		@Override
 		public boolean replaceChild(Element child, Element by) {
 			return replaceChild(identifiers, SimpleIdentifier.class, this, child, by);
-		}
-		@Override
-		public String toString(CharSequence indent) {
-			return implode(identifiers, String.valueOf(separator), indent);
 		}
 		public void addIdentifiers(List<SimpleIdentifier> is) {
 			for (SimpleIdentifier i : is)

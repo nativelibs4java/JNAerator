@@ -45,10 +45,22 @@ public class Enum extends TaggedTypeRef {
 		String name;
 		List<Expression> arguments = new ArrayList<Expression>();
         Struct body;
+        Type type;
 
         public EnumItem() {
 			super();
 		}
+
+        public Type getType() {
+            if (type == null && (getParentElement() instanceof Enum))
+                return ((Enum)getParentElement()).getType();
+            return type;
+        }
+
+        public void setType(Type type) {
+            this.type = type;
+        }
+
 		public EnumItem(String name, Expression... arguments) {
 			setName(name);
 			setArguments(Arrays.asList(arguments));
@@ -77,19 +89,6 @@ public class Enum extends TaggedTypeRef {
 			changeValue(this, this.arguments, arguments);
 		}
 
-        @Override
-		public String toString(CharSequence indent) {
-            return toString(indent, Enum.Type.C);
-        }
-        
-		public String toString(CharSequence indent, Enum.Type type) {
-			return
-				formatComments(indent, false, true, true) +
-				getName() + 
-				(getArguments().isEmpty() ? "" : type == Type.C ? " = " + getArguments().get(0) : "(" + StringUtils.implode(arguments) + ")") +
-                (getBody() == null ? "" : " {\n\t" + indent + getBody().bodyToString(indent + "\t") + "\n" + indent + "}") +
-                (getCommentAfter() == null ? "" : " " + getCommentAfter());
-		}
 		@Override
 		public void accept(Visitor visitor) {
 			visitor.visitEnumItem(this);
@@ -136,7 +135,7 @@ public class Enum extends TaggedTypeRef {
 			return;
 		
 		item.setParentElement(this);
-		items.add(item);
+        items.add(item);
 	}
 
 	public void accept(Visitor visitor) {
@@ -211,24 +210,4 @@ public class Enum extends TaggedTypeRef {
         }
         return super.replaceChild(child, by);
 	}
-	
-	@Override
-	public String toString(CharSequence indent) {
-		String nindent = indent + "\t";
-		String indentt = "\n" + nindent;
-        StringBuilder sb = new StringBuilder(getModifiersStringPrefix());
-        sb.append("enum ");
-        sb.append(getTag() != null ? getTag().toString(indentt) + " " : "");
-        if (!interfaces.isEmpty())
-            sb.append("implements " + StringUtils.implode(interfaces, ", ") + " ");
-        List<String> ts = new ArrayList<String>();
-        for (EnumItem item : items)
-            ts.add(item.toString(nindent, type));
-        sb.append("{" + indentt + StringUtils.implode(ts, ",\n" + nindent) + "\n");
-        if (getBody() != null)
-            sb.append(indent + getBody().bodyToString(indent) + "\n");
-        sb.append(indent + "}");
-		return sb.toString();
-	}
-
 }

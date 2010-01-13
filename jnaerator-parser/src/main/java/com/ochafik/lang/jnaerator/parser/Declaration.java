@@ -57,10 +57,6 @@ public abstract class Declaration extends ModifiableElement {
 		return super.replaceChild(child, by);
 	}
 		
-	public String getModifiersStringPrefix() {
-		List<Modifier> mods = getModifiers();
-		return StringUtils.implode(mods, " ") + (mods.isEmpty() ? "" : " ");
-	}
 	public void setVisibility(MemberVisibility visibility) {
 		this.visibility = visibility;
 	}

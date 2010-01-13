@@ -45,9 +45,4 @@ public class FriendDeclaration extends Declaration {
 	public void accept(Visitor visitor) {
 		visitor.visitFriendDeclaration(this);
 	}
-	@Override
-	public String toString(CharSequence indent) {
-		return "friend "  + (getFriend() == null ? "null" : getFriend().toString(indent));
-	}
-
 }

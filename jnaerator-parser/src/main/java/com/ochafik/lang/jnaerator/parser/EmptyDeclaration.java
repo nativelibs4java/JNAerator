@@ -28,10 +28,4 @@ public class EmptyDeclaration extends Declaration {
 	public void accept(Visitor visitor) {
 		visitor.visitEmptyDeclaration(this);
 	}
-	
-	@Override
-	public String toString(CharSequence indent) {
-		return formatComments(indent, true, true, false);
-	}
-
 }

@@ -201,68 +201,6 @@ public class Function extends Declaration implements Declarator.MutableByDeclara
 		return (Function) super.addModifiers(mds);
 	}
 	
-	@Override
-	public String toString(CharSequence indent) {
-		String s = "";
-		TypeRef valueType = getValueType();
-		Identifier name = getName();
-		List<Modifier> modifiers = getModifiers();
-		
-		if (type == null)
-			return "<no function type>";
-		
-		String pre = formatComments(indent, false, true, true);
-		String post = (asmName == null ? "" : "__asm(\"" + asmName + "\") ") +
-			(initializers.isEmpty() ? "" : " : " + implode(initializers, ", ", indent)) +
-			(commentAfter == null ? "" : " " + commentAfter);//" /*" + commentAfter + " */";
-		
-		if (!getAnnotations().isEmpty())
-			pre += StringUtils.implode(getAnnotations(), "\n" + indent) + "\n" + indent;
-		
-		String preMods;
-		switch (type) {
-		case StaticInit:
-			preMods = StringUtils.implode(modifiers, " ") + (modifiers.isEmpty() ? "" : " ");
-			return pre + preMods + (body == null ? ";" : body.toString(indent)) + post;
-		case CFunction:
-		case CppMethod:
-		case JavaMethod:
-			preMods = StringUtils.implode(modifiers, " ") + (modifiers.isEmpty() ? "" : " ");
-			s = preMods + 
-				(valueType == null ? "" : valueType + " ") +
-				name + "(" +
-				StringUtils.implode(args, ", ") +
-				")";
-
-            if (!thrown.isEmpty())
-                s += " throws " + implode(thrown, ", ", indent);
-
-			return pre + s + (body == null ? ";" : " " + body.toString(indent)) + post;
-		case ObjCMethod:
-			s = modifiers.contains(Modifier.Static) ? "+" : "-";
-			StringBuilder argsStr = new StringBuilder();
-			for (Arg arg : args) {
-				if (arg.isVarArg()) {
-					if (argsStr.length() > 0)
-						argsStr.append(", ");
-					argsStr.append("...");
-				} else {
-					if (argsStr.length() > 0)
-					{
-						argsStr.append(' ');
-						argsStr.append(arg.getSelector());
-					}
-					argsStr.append(":(");
-					argsStr.append(arg.createMutatedType());
-					argsStr.append(')');
-					argsStr.append(arg.getName());
-				}
-			}
-			return pre + s + " " + (valueType == null ? "" : "(" + valueType + ")") + name + argsStr + ";" + post;
-		default:
-			throw new NoSuchElementException(type.toString());
-		}
-	}
 
 	public void accept(Visitor visitor) {
 		visitor.visitFunction(this);

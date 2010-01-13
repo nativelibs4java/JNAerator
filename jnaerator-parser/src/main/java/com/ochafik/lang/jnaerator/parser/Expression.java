@@ -48,10 +48,6 @@ public abstract class Expression extends Element {
 			changeValue(this, this.sequence, sequence);
 		}
 		@Override
-		protected String toInnerString(CharSequence indent) {
-			return implode(getSequence(), ", ", indent);
-		}
-		@Override
 		public void accept(Visitor visitor) {
 			visitor.visitExpressionSequence(this);
 		}
@@ -80,11 +76,6 @@ public abstract class Expression extends Element {
 		}
 		public OpaqueExpression(String opaqueString) {
 			setOpaqueString(opaqueString);
-		}
-		
-		@Override
-		protected String toInnerString(CharSequence indent) {
-			return getOpaqueString();
 		}
 
 		@Override
@@ -173,10 +164,6 @@ public abstract class Expression extends Element {
 			}
 			return false;
 		}
-		@Override
-		public String toInnerString(CharSequence indent) {
-			return getType() == null ? "" : getType().toString();
-		}
 	}
 
 	public static class EmptyArraySize extends Expression {
@@ -199,10 +186,6 @@ public abstract class Expression extends Element {
 		@Override
 		public boolean replaceChild(Element child, Element by) {
 			return false;
-		}
-		@Override
-		public String toInnerString(CharSequence indent) {
-			return "";
 		}
 	}
 	
@@ -230,12 +213,6 @@ public abstract class Expression extends Element {
 		public Identifier getName() {
 			return name;
 		}
-		@Override
-		public String toInnerString(CharSequence indent) {
-			String pref = getTargetPrefix();
-			return (pref == null ? "" : pref) + getName();
-		}
-		
 		public void setTarget(Expression target) {
 			this.target = changeValue(this, this.target, target);
 		}
@@ -259,32 +236,7 @@ public abstract class Expression extends Element {
 			return false;
 		}
 		
-		protected String getTargetPrefix() {
-			if (getTarget() == null || getMemberRefStyle() == null)
-				return null;
-			
-			StringBuilder b = new StringBuilder();
-			String sep;
-			switch (getMemberRefStyle()) {
-			case Arrow:
-				sep = "->";
-				break;
-			case Dot:
-				sep = ".";
-				break;
-			case Colons:
-				sep = "::";
-				break;
-			default:
-				assert false;
-				sep = null;
-			}
-			if (sep != null) {
-				b.append(getTarget());
-				b.append(sep);
-			}
-			return b.toString();
-		}
+		
 		@Override
 		public void accept(Visitor visitor) {
 			visitor.visitMemberRef(this);
@@ -347,11 +299,6 @@ public abstract class Expression extends Element {
 			return replaceChild(dimensions, Expression.class, this, child, by);
 		}
 
-		@Override
-		public String toInnerString(CharSequence indent) {
-			return "new " + getType() + "[" + implode(getDimensions(), "][", indent) + "]";
-		}
-
 	}
 
 	public static class New extends Expression {
@@ -380,10 +327,6 @@ public abstract class Expression extends Element {
 		}
 		public FunctionCall getConstruction() {
 			return construction;
-		}
-		@Override
-		public String toInnerString(CharSequence indent) {
-			return "new " + (type == null ? "" : type) + (construction == null ? "()" : construction.toString(indent));
 		}
 		@Override
 		public void accept(Visitor visitor) {
@@ -530,45 +473,6 @@ public abstract class Expression extends Element {
 			
 			return super.replaceChild(child, by);
 		}
-		
-		@Override
-		public String toInnerString(CharSequence indent) {
-			StringBuilder b = new StringBuilder();
-			if (getMemberRefStyle() == MemberRefStyle.SquareBrackets) {
-				/// Objective-C method call
-				b.append('[');
-				b.append(getTarget());
-				if (getFunction() != null) {
-					b.append(' ');
-					b.append(getFunction().toString(indent));
-				}
-				List<Pair<String, Expression>> args = getArguments();
-				for (int i = 0, len = args.size(); i < len; i++) {
-					Pair<String, Expression> arg = args.get(i);
-					if (i > 0) {
-						b.append(' ');
-						b.append(arg.getFirst());
-					}
-					b.append(':');
-					b.append(arg.getSecond());
-				}
-				b.append(']');
-			} else {
-				String pref = getTargetPrefix();
-				if (pref != null)
-					b.append(pref);
-				if (getFunction() != null)
-					b.append(getFunction().toString(indent));
-				b.append("(" + StringUtils.implode(ListenableCollections.adapt(arguments, new Adapter<Pair<String, Expression>, Expression>() {
-	
-					public Expression adapt(Pair<String, Expression> value) {
-						return value.getValue();
-					} 
-					
-				}), ", ") + ")");
-			}
-			return b.toString();
-		}
 	}
 	public static class ArrayAccess extends Expression {
 		Expression target, index;
@@ -588,17 +492,6 @@ public abstract class Expression extends Element {
 		}
 		public Expression getIndex() {
 			return index;
-		}
-		@Override
-		protected String toInnerString(CharSequence indent) {
-			StringBuilder b = new StringBuilder();
-			if (getTarget() != null)
-				b.append(getTarget().toString(indent));
-			b.append("[");
-			if (getIndex() != null)
-				b.append(getIndex().toString(indent));
-			b.append("]");
-			return b.toString();
 		}
 		@Override
 		public void accept(Visitor visitor) {
@@ -668,11 +561,6 @@ public abstract class Expression extends Element {
 			}
 			return false;
 		}
-
-		@Override
-		public String toInnerString(CharSequence indent) {
-			return getName() == null ? "" : getName().toString(indent);
-		}
 	}
 
 	public enum BinaryOperator {
@@ -730,12 +618,12 @@ public abstract class Expression extends Element {
 		}
 	};
 	
-	private static final Map<String, AssignmentOperator> assignOps = new HashMap<String, AssignmentOperator>();
-	private static final Map<String, BinaryOperator> binOps = new HashMap<String, BinaryOperator>();
-	private static final Map<String, UnaryOperator> unOps = new HashMap<String, UnaryOperator>();
-	private static final Map<AssignmentOperator, String> assignOpsRev = new HashMap<AssignmentOperator, String>();
-	private static final Map<BinaryOperator, String> binOpsRev = new HashMap<BinaryOperator, String>();
-	private static final Map<UnaryOperator, String> unOpsRev = new HashMap<UnaryOperator, String>();
+	static final Map<String, AssignmentOperator> assignOps = new HashMap<String, AssignmentOperator>();
+	static final Map<String, BinaryOperator> binOps = new HashMap<String, BinaryOperator>();
+	static final Map<String, UnaryOperator> unOps = new HashMap<String, UnaryOperator>();
+	static final Map<AssignmentOperator, String> assignOpsRev = new HashMap<AssignmentOperator, String>();
+	static final Map<BinaryOperator, String> binOpsRev = new HashMap<BinaryOperator, String>();
+	static final Map<UnaryOperator, String> unOpsRev = new HashMap<UnaryOperator, String>();
 	//public static final Expression EMPTY_EXPRESSION = new Constant(null, null, "");
 	static {
 		for (AssignmentOperator op : AssignmentOperator.values())
@@ -793,12 +681,6 @@ public abstract class Expression extends Element {
 		public boolean replaceChild(Element child, Element by) {
 			return false;
 		}
-
-		@Override
-		public String toInnerString(CharSequence indent) {
-			return "null";
-		}
-		
 	}
 	public static class ConditionalExpression extends Expression {
 		Expression test, thenValue, elseValue;
@@ -827,10 +709,6 @@ public abstract class Expression extends Element {
 			this.elseValue = changeValue(this, this.elseValue, elseValue);
 		}
 
-		@Override
-		protected String toInnerString(CharSequence indent) {
-			return getTest() + " ? " + getThenValue() + " : " + getElseValue();
-		}
 
 		@Override
 		public void accept(Visitor visitor) {
@@ -914,11 +792,6 @@ public abstract class Expression extends Element {
 			}
 			return false;
 		}
-		
-		@Override
-		public String toInnerString(CharSequence indent) {
-			return "(" + type + ")" + target;
-		}
 	}
 	public static class AssignmentOp extends Expression {
 		Expression target, value;
@@ -988,13 +861,6 @@ public abstract class Expression extends Element {
 			return false;
 		}
 
-
-		@Override
-		public String toInnerString(CharSequence indent) {
-			String opStr = assignOpsRev.get(getOperator());
-			return  
-				getTarget() + " " + opStr + " " + getValue();
-		}
 
 	}
 	
@@ -1067,12 +933,6 @@ public abstract class Expression extends Element {
 			return false;
 		}
 
-		@Override
-		public String toInnerString(CharSequence indent) {
-			String opStr = binOpsRev.get(getOperator());
-			return  
-				getFirstOperand() + " " + opStr + " " + getSecondOperand();
-		}
 	}
 
 	public static class UnaryOp extends Expression {
@@ -1124,12 +984,6 @@ public abstract class Expression extends Element {
 				return true;
 			}
 			return false;
-		}
-		
-		@Override
-		public String toInnerString(CharSequence indent) {
-			return  
-				unOpsRev.get(getOperator()) + getOperand();
 		}
 
 	}
@@ -1247,70 +1101,6 @@ public abstract class Expression extends Element {
 				((char)(0xff & (intVal >> 8)))+
 				((char)(0xff & (intVal)))
 				;
-		}
-		@Override
-		public String toInnerString(CharSequence indent) {
-			StringBuffer b = new StringBuffer();
-			
-			if (intForm == IntForm.Hex)
-				return "0x" + Long.toHexString(value instanceof Long ? ((Long)value).longValue() : ((Integer)value).longValue()).toUpperCase();
-			else if (intForm == IntForm.Octal)
-				return Long.toOctalString(value instanceof Long ? ((Long)value).longValue() : ((Integer)value).longValue()).toUpperCase();
-			
-			if (getType() == null)
-				b.append("");
-			else {
-				switch (getType()) {
-				case Null:
-					b.append("null");
-					break;
-				case Byte:
-				case Double:
-				case Int:
-				case Short:
-				case UInt:
-					b.append(value);
-					break;
-				case Float:
-					b.append(value);
-					b.append('F');
-					break;
-				case ULong:
-				case Long:
-					b.append(value);
-					b.append('L');
-					break;
-				case String:
-					b.append('"');
-					b.append(StringUtils.javaEscape((String)value));
-					b.append('"');
-					break;
-				case Char:
-					b.append('\'');
-					b.append(StringUtils.javaEscape(((Character)value).toString()));
-					b.append('\'');
-					break;
-				case IntegerString:
-					b.append('\'');
-					int intVal = ((Integer)value).intValue();
-					b.append(intStr(intVal));
-					b.append('\'');
-					break;
-				case LongString:
-					b.append('\'');
-					long longVal = ((Long)value).intValue();
-					b.append(intStr((int)(longVal & 0xffffffffL)));
-					b.append(intStr((int)((longVal >>> 32) & 0xffffffffL)));
-					b.append('\'');
-					break;
-				case Bool:
-					b.append(((Boolean)value).toString());
-					break;
-				default:
-					throw new UnsupportedOperationException("toInnerString not implemented for constqnt type " + getType());	
-				}
-			}
-			return b.toString();
 		}
 		
 		public void accept(Visitor visitor) {
@@ -1564,13 +1354,4 @@ public abstract class Expression extends Element {
 
 		
 	}
-	
-	@Override
-	public final String toString(CharSequence indent) {
-		return 
-			(getParenthesis() ? "(" : "") + 
-			toInnerString(indent) + 
-			(getParenthesis() ? ")" : "");
-	}
-	protected abstract String toInnerString(CharSequence indent);
 }

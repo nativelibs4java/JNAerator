@@ -61,15 +61,4 @@ public class TaggedTypeRefDeclaration extends Declaration {
 		visitor.visitTaggedTypeRefDeclaration(this);
 	}
 
-	@Override
-	public String toString(CharSequence indent) {
-		if (getTaggedTypeRef() == null)
-			return null;
-		
-		TaggedTypeRef tr = getTaggedTypeRef();
-		return formatComments(indent, false, true, true) + 
-			tr.toString(indent) + (tr.isForwardDeclaration() ? ";" : "") +
-			(getCommentAfter() == null ? "" : getCommentAfter());
-	}
-
 }

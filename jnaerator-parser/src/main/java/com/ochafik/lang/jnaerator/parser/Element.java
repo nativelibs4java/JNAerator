@@ -122,8 +122,8 @@ public abstract class Element {
 		}
 		return file;
 	}
-	
-	public static String cleanComment(String s) {
+
+    public static String cleanComment(String s) {
 		s = s.trim();
 		if (s.startsWith("//"))
 			s = s.replaceAll("^//+", "");
@@ -136,6 +136,7 @@ public abstract class Element {
 		s = s.replaceAll("<br/?>$", "");
 		return s.trim();
 	}
+
 	public void addToCommentBefore(List<String> s) {
 		String b = getCommentBefore();
 		List<String> ss = new ArrayList<String>();
@@ -156,72 +157,12 @@ public abstract class Element {
 			setCommentAfter(null);
 		}
 	}
-	public static final <T extends Element> String implode(Iterable<T> elements, Object separator, CharSequence indent) {
-		String sepStr = separator.toString();
-		StringBuilder out = new StringBuilder();
-		boolean first = true;
-		for (T s : elements) {
-			if (s == null)
-				continue;
-			
-			if (first) 
-				first = false;
-			else 
-				out.append(sepStr);
-			out.append(s.toString(indent));
-		}
-		return out.toString();
-	}
 	public void addToCommentBefore(String... s) {
 		addToCommentBefore(Arrays.asList(s));
-	}
-	public String formatComments(CharSequence indent, boolean mergeCommentsAfter, boolean allowLineComments, boolean skipLineAfter, String... otherComments) {
-		return formatComments(indent, commentBefore, commentAfter, mergeCommentsAfter, allowLineComments, skipLineAfter, otherComments);
 	}
 //	public String formatComments(CharSequence indent, boolean mergeCommentsAfter, String... otherComments) {
 //		return formatComments(indent, commentBefore, commentAfter, mergeCommentsAfter, otherComments);
 //	}
-	public static String formatComments(CharSequence indent, String commentBefore, String commentAfter, boolean mergeCommentsAfter, boolean allowLineComments, boolean skipLineAfter, String... otherComments) {
-		List<String> nakedComments = new ArrayList<String>();
-		List<String> src = new ArrayList<String>();
-		if (commentBefore != null)
-			src.add(commentBefore);
-		if (mergeCommentsAfter && commentAfter != null)
-			src.add(commentAfter);
-		src.addAll(Arrays.asList(otherComments));
-		
-		if (src.isEmpty())
-			return "";
-		
-		for (String c : src) {
-			if (c == null)
-				continue;
-			
-			c = cleanComment(c).trim();
-			//c = c.replaceAll("\n\\s*+(\\*\\s?)?", "<br/>\n" + indent + " * ");
-			nakedComments.add(c);
-		}
-		
-		//return "/**\n" + indent + " * " + StringUtils.implode(nakedComments, "\n").replaceAll("\n", "<br/>\n" + indent + " * ") + "\n" + indent + " */";
-		String uniqueLine = null;
-		if (nakedComments.size() == 1 && !nakedComments.get(0).contains("\n"))
-			uniqueLine = nakedComments.get(0);
-			
-		String suffix = skipLineAfter ? "\n" + indent : "";
-		if (uniqueLine != null && allowLineComments)
-			return "/// " + uniqueLine.replace("\\u", "\\\\u") + suffix;
-			
-		
-		String content = beginEachCommentLineWithStar ?
-			" * " + StringUtils.implode(nakedComments, "\n").replaceAll("\n", "<br>\n" + indent + " * ") + "\n" + indent : 
-			"\t" + StringUtils.implode(nakedComments, "\n").replaceAll("\n", "<br>" + LINE_SEPARATOR + indent + "\t");
-		
-		return "/**" + LINE_SEPARATOR + indent + content.replace("\\u", "\\\\u") + " */" + suffix;
-	}
-	private static boolean //allowSingleLineDoc = true, 
-		beginEachCommentLineWithStar = true;
-	
-
 	public void setCommentBefore(String text) {
 		commentBefore = text;
 	}
@@ -416,13 +357,19 @@ public abstract class Element {
 
 	@SuppressWarnings("unchecked")
 	public static <T extends Element> boolean replaceChild(List<T> list, Class<T> type, Element parent, Element child, Element by) {
-		int i = list.indexOf(child);
+		int i = -1;
+        for (int k = 0, n = list.size(); k < n; k++)
+            if (list.get(k) == child) {
+                i = k;
+                break;
+            }
+        
 		if (i >= 0) {
 			T old;
 			if (by == null)
 				old = list.remove(i);
 			else
-				old = list.set(i, type == null ? (T)by : type.cast(by));
+                old = list.set(i, type == null ? (T)by : type.cast(by));
 
 			if (old != by) {
 				if (old != null)
@@ -564,34 +511,9 @@ public abstract class Element {
 	
 //	static int depth;
 	@Override
-	public final String toString() {
-//		synchronized(Element.class) {
-//			if (depth > 50)
-//				depth = depth;
-//			depth++;
-//		}
-//		try {
-			return toString("");
-//		} finally {
-//			synchronized(Element.class) {
-//				depth--;
-//			}
-//		}
+	public String toString() {
+		return new Printer(null).append(this).toString();
 	}
-	/*
-	@Override
-	public int hashCode() {
-		return toString().hashCode();
-	}
-	@Override
-	public boolean equals(Object obj) {
-		if (obj == null)
-			return false;
-		String str = toString(), oStr = obj.toString();
-		return str == null ? oStr == null : str.equals(oStr);
-	}*/
-	
-	public abstract String toString(CharSequence indent);
 	
 	public abstract void accept(Visitor visitor);
 

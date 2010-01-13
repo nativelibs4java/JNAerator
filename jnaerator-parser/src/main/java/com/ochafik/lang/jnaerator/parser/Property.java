@@ -27,12 +27,4 @@ public class Property extends Declaration {
 		}
 		return super.replaceChild(child, by);
 	}
-	
-	@Override
-	public String toString(CharSequence indent) {
-		String modStr = getModifiers().isEmpty() ? "" :
-			"(" + StringUtils.implode(getModifiers(), " ") + ")";
-		return "@property" + modStr  + " " + getDeclaration().toString(indent);
-	}
-
 }

@@ -111,7 +111,7 @@ void operator()(signed&);
 --
 void operator+=(long long*, const signed&);
 --
-void A<T*>::~A();
+void A<T* >::~A();
 --
 const void *x;
 --
@@ -156,12 +156,12 @@ unsigned short x, *px, **ppx, **&rppx = a, *pa[4];
 class pair;
 class map;
 class string;
-pair<int, map<long*, string> > x;
+pair<int, map<long*, string > > x;
 --
 class pair;
 class map;
 class string;
-pair<int, map<long*, string>*> x;
+pair<int, map<long*, string >* > x;
 --
 enum {
 	a = 1,

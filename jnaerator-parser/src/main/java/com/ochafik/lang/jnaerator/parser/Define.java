@@ -63,8 +63,4 @@ public class Define extends Declaration {
 		return super.getNextSibling();
 	}
 	
-	@Override
-	public String toString(CharSequence indent) {
-		return indent + "#define " + getName() + (getValue() == null ? "" : " " + getValue());
-	}
 }

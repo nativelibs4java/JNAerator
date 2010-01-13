@@ -56,11 +56,6 @@ public class FunctionPointerDeclaration extends Declaration {
 	public void setValueType(TypeRef valueType) {
 		super.setValueType((FunctionSignature)valueType);
 	}
-	@Override
-	public String toString(CharSequence indent) {
-		String asst = getDefaultValue() != null ? " = " + getDefaultValue() : "";
-		return getModifiersStringPrefix() + getValueType().toString() + asst + ";";
-	}
 	public void accept(Visitor visitor) {
 		visitor.visitFunctionPointerDeclaration(this);
 	}

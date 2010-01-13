@@ -61,11 +61,6 @@ public abstract class Statement extends Element {
 			return false;
 		}
 
-		@Override
-		public String toString(CharSequence indent) {
-			return "throw " + getExpression().toString(indent) + ";";
-		}
-
 	}
 	public static class DeclarationStatement extends Statement {
 		Declaration declaration;
@@ -98,10 +93,6 @@ public abstract class Statement extends Element {
 				return true;
 			}
 			return false;
-		}
-		@Override
-		public String toString(CharSequence indent) {
-			return getDeclaration() == null ? "" : getDeclaration().toString(indent);
 		}
 	}
 	public static class Return extends Statement {
@@ -140,11 +131,6 @@ public abstract class Statement extends Element {
 				return true;
 			}
 			return false;
-		}
-
-		@Override
-		public String toString(CharSequence indent) {
-			return "return " + (getValue() == null ? "<null>" : getValue().toString(indent)) + ";";
 		}
 
 	}
@@ -204,43 +190,6 @@ public abstract class Statement extends Element {
 			}
 			return false;
 		}
-		@Override
-		public String toString(CharSequence indent) {
-			StringBuffer b = new StringBuffer("if (");
-			if (getCondition() == null)
-				b.append("<null>");
-			else
-				b.append(getCondition().toString(indent));
-			String indent2 = indent + "\t";
-			b.append(") ");
-			if (getThenBranch() == null)
-				b.append("<null>");
-			else {
-				if (getThenBranch() instanceof Block) {
-					b.append(getThenBranch().toString(indent));
-					if (getElseBranch() != null)
-						b.append(" ");
-				} else {
-					b.append("\n");
-					b.append(indent2);
-					b.append(getThenBranch().toString(indent2));
-					if (getElseBranch() != null)
-						b.append("\n" + indent);
-				}
-			}
-			
-			if (getElseBranch() != null) {
-				b.append("else ");
-				if (getElseBranch() instanceof Block) {
-					b.append(getElseBranch().toString(indent));
-				} else {
-					b.append("\n");
-					b.append(indent2);
-					b.append(getElseBranch().toString(indent2));
-				}
-			}
-			return b.toString();
-		}
 	}
 	public static class ExpressionStatement extends Statement {
 
@@ -281,12 +230,6 @@ public abstract class Statement extends Element {
 			}
 			return false;
 		}
-
-		@Override
-		public String toString(CharSequence indent) {
-			return expression == null ? null : expression.toString(indent) + ";";
-		}
-		
 	}
 	
 	public static class Block extends Statement {
@@ -346,32 +289,6 @@ public abstract class Statement extends Element {
 		public boolean replaceChild(Element child, Element by) {
 			return replaceChild(statements, Statement.class, this, child, by);
 		}
-
-		@Override
-		public String toString(CharSequence indent) {
-			String nindent = indent + "\t";
-//			if (statements.size() == 1 && !(getParentElement() instanceof Function))
-//				return "\t" + statements.get(0).toString(nindent);
-			
-			StringBuilder b = new StringBuilder();
-			b.append('{');
-			if (!statements.isEmpty()) {
-				if (isCompact()) {
-					b.append(' ');
-					b.append(implode(statements, ", ", indent));
-					b.append(' ');
-				} else {
-					String lnindent = "\n" + nindent;
-					b.append(lnindent);
-					b.append(implode(statements, lnindent, nindent));
-					b.append('\n');
-					b.append(indent);
-				}
-			}
-			b.append('}');
-			return b.toString();
-		}
-
 	}
 
     public static class Catch extends Statement {
@@ -421,11 +338,6 @@ public abstract class Statement extends Element {
         @Override
         public Element getPreviousChild(Element child) {
             return null;
-        }
-
-        @Override
-        public String toString(CharSequence indent) {
-            return "catch (" + getDeclaration().toString(indent) + ") {\n\t" + indent + (getBody() == null ? "" : getBody().toString("\t" + indent)) + "\n" + indent + "}";
         }
 
         @Override
@@ -491,23 +403,6 @@ public abstract class Statement extends Element {
         @Override
         public Element getPreviousChild(Element child) {
             return getPreviousSibling(catches, child);
-        }
-
-        @Override
-        public String toString(CharSequence indent) {
-            StringBuilder b = new StringBuilder();
-            String nindent = "\t" + indent;
-            b.append("try {\n" + nindent);
-            if (getTryStatement() != null)
-                b.append(getTryStatement().toString(nindent));
-            b.append("\n" + indent + "}");
-            b.append(implode(catches, " ", indent));
-            if (getFinallyStatement() != null) {
-                b.append(" finally {\n" + nindent);
-                b.append(getFinallyStatement().toString(nindent));
-                b.append("\n" + indent + "}");
-            }
-            return b.toString();
         }
 
         @Override

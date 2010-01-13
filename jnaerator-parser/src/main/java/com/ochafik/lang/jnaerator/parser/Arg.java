@@ -111,26 +111,6 @@ public class Arg extends Declaration {
 		}
 		return super.replaceChild(child, by);
 	}
-	
-	@Override
-	public String toString(CharSequence indent) {
-		//if (isVarArg())
-		//	return "...";
-		///else
-		String ann = "";
-		if (!getAnnotations().isEmpty())
-			ann = StringUtils.implode(getAnnotations(), "\n" + indent) + "\n" + indent;
-		
-		if (getValueType() == null)
-			return null;
-		else if (getValueType() != null) {
-			if (getName() != null)
-				return ann + getValueType().variableDeclarationToString(getName(), isVarArg(), indent);
-			else
-				return ann + getValueType().toString() + (isVarArg() ? "..." : "");
-		} else
-			return "...";
-	}
 
 	public void accept(Visitor visitor) {
 		visitor.visitArg(this);

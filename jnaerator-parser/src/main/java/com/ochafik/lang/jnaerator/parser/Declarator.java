@@ -106,10 +106,6 @@ public abstract class Declarator extends ModifiableElement {
 			return type;
 		}
 		@Override
-		public String toCoreString(CharSequence arg0) {
-			return getName();
-		}
-		@Override
 		public void accept(Visitor visitor) {
 			visitor.visitDirectDeclarator(this);
 		}
@@ -192,19 +188,6 @@ public abstract class Declarator extends ModifiableElement {
 		public void setPointerStyle(Declarator.PointerStyle pointerStyle) {
 			this.pointerStyle = pointerStyle;
 		}
-		
-		@Override
-		public String toCoreString(CharSequence indent) {
-			StringBuilder b = new StringBuilder();
-			b.append(getPointerStyle());
-			if (getTarget() != null)
-				b.append(getTarget().toString(indent));
-//			if (getBits() >= 0)
-//				b.append(":" + getBits());
-			//if (getDefaultValue() != null)
-			//	b.append(" = " + getDefaultValue());
-			return b.toString();
-		}
 	}
 	public static class FunctionDeclarator extends TargettedDeclarator {
 		final List<Arg> args = new ArrayList<Arg>();
@@ -283,16 +266,6 @@ public abstract class Declarator extends ModifiableElement {
 			return super.getNextChild(child);
 		}
 		
-		@Override
-		public String toCoreString(CharSequence indent) {
-			StringBuilder b = new StringBuilder();
-			if (getTarget() != null)
-				b.append(getTarget().toString(indent));
-			b.append('(');
-			b.append(implode(getArgs(), ", ", indent));
-			b.append(')');
-			return b.toString();
-		}
 	}
 	public static class ArrayDeclarator extends TargettedDeclarator {
 		protected final List<Expression> dimensions = new ArrayList<Expression>();
@@ -362,19 +335,6 @@ public abstract class Declarator extends ModifiableElement {
 				return true;
 			return super.replaceChild(child, by);
 		}
-		@Override
-		public String toCoreString(CharSequence indent) {
-			StringBuilder b = new StringBuilder();
-			if (getTarget() != null)
-				b.append(getTarget().toString(indent));
-			//if (!getDimensions().isEmpty())
-				b.append("[" + StringUtils.implode(getDimensions(), "][") + "]");
-//				if (getBits() >= 0)
-//					b.append(":" + getBits());
-//				if (getDefaultValue() != null)
-//				b.append(" = " + getDefaultValue());
-			return b.toString();
-		}
 	}
 	
 	public void setDefaultValue(Expression defaultValue) {
@@ -404,26 +364,4 @@ public abstract class Declarator extends ModifiableElement {
 	public abstract String resolveName();
 	public abstract void propagateName(String name);
 	
-	public String toString(CharSequence indent) {
-		StringBuilder b = new StringBuilder();
-		if (isParenthesized())
-			b.append('(');
-		
-		if (!getModifiers().isEmpty()) {
-			b.append(StringUtils.implode(getModifiers(), " "));
-			b.append(" ");
-		}
-		b.append(toCoreString(indent));
-		if (isParenthesized())
-			b.append(')');
-		if (getBits() >= 0)
-			b.append(":" + getBits());
-		if (getDefaultValue() != null) {
-			b.append(" = ");
-			b.append(getDefaultValue().toString(indent));
-		}
-		return b.toString();
-	}
-
-	protected abstract String toCoreString(CharSequence indent);
 }

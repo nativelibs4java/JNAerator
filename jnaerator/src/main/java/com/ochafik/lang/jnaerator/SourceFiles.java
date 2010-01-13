@@ -25,6 +25,7 @@ import com.ochafik.lang.jnaerator.parser.Define;
 import com.ochafik.lang.jnaerator.parser.Element;
 import com.ochafik.lang.jnaerator.parser.SourceFile;
 import com.ochafik.lang.jnaerator.parser.Visitor;
+import com.ochafik.util.string.StringUtils;
 
 public class SourceFiles extends Element {
 	public List<Define> defines = new ArrayList<Define>();
@@ -51,9 +52,10 @@ public class SourceFiles extends Element {
 	public void add(SourceFile sourceFile) {
 		sourceFiles.add(sourceFile);
 	}
+
 	@Override
-	public String toString(CharSequence indent) {
-		return implode(sourceFiles, "\n" + indent, indent);
+	public String toString() {
+		return StringUtils.implode(sourceFiles, "\n");
 	}
 
 	@Override

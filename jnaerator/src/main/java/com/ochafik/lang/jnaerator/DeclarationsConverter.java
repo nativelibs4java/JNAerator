@@ -350,7 +350,7 @@ public class DeclarationsConverter {
 		List<String> mess = new ArrayList<String>();
 		if (preMessages != null)
 			mess.addAll(Arrays.asList(preMessages));
-		mess.addAll(Arrays.asList("SKIPPED:", e.formatComments("", true, true, false), getFileCommentContent(e), e.toString().replace("*/", "* /")));
+		mess.addAll(Arrays.asList("SKIPPED:", new Printer(null).formatComments(e, true, true, false).toString(), getFileCommentContent(e), e.toString().replace("*/", "* /")));
 		return new EmptyDeclaration(mess.toArray(new String[0]));
 	}
 	
