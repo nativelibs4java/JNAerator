@@ -93,8 +93,8 @@ public class DeclarationsConverter {
 		callbackStruct.addModifiers(Modifier.Public);
 		callbackStruct.setParents(Arrays.asList(
 			FunctionSignature.Type.ObjCBlock.equals(functionSignature.getType()) ?
-				result.config.runtime.ident(JNAeratorConfig.Runtime.Ann.ObjCBlock) :
-				ident(result.config.runtime.callbackClass)
+				result.config.runtime.typeRef(JNAeratorConfig.Runtime.Ann.ObjCBlock) :
+				(SimpleTypeRef)typeRef(result.config.runtime.callbackClass)
 		));
 		callbackStruct.setTag(ident(chosenName));
 		if (!result.config.noComments)
@@ -688,7 +688,7 @@ public class DeclarationsConverter {
 				names.add(function.getAsmName());
 
 			if (!isCallback && !names.isEmpty()) {
-                Identifier mgc = result.config.runtime.ident(JNAeratorConfig.Runtime.Ann.Mangling);
+                TypeRef mgc = result.config.runtime.typeRef(JNAeratorConfig.Runtime.Ann.Mangling);
                 if (mgc != null) {
                     natFunc.addAnnotation(new Annotation(mgc, "({\"" + StringUtils.implode(names, "\", \"") + "\"})"));
                 }
@@ -696,11 +696,11 @@ public class DeclarationsConverter {
 
 			boolean needsThis = false, needsThisAnnotation = false;
 			if (Modifier.__fastcall.isContainedBy(function.getModifiers())) {
-				natFunc.addAnnotation(new Annotation(result.config.runtime.ident(JNAeratorConfig.Runtime.Ann.FastCall)));
+				natFunc.addAnnotation(new Annotation(result.config.runtime.typeRef(JNAeratorConfig.Runtime.Ann.FastCall)));
 				needsThis = true;
 			}
 			if (Modifier.__thiscall.isContainedBy(function.getModifiers())) {
-				natFunc.addAnnotation(new Annotation(result.config.runtime.ident(JNAeratorConfig.Runtime.Ann.ThisCall)));
+				natFunc.addAnnotation(new Annotation(result.config.runtime.typeRef(JNAeratorConfig.Runtime.Ann.ThisCall)));
 				needsThis = true;
 			}
 			if (function.getType() == Type.CppMethod && !function.getModifiers().contains(Modifier.Static)) {
@@ -1067,8 +1067,8 @@ public class DeclarationsConverter {
 		Identifier baseClass = null;
 		if (!onlyFields) {
 			if (!struct.getParents().isEmpty()) {
-				for (Identifier parentName : struct.getParents()) {
-					Struct parent = result.structsByName.get(parentName);
+				for (SimpleTypeRef parentName : struct.getParents()) {
+					Struct parent = result.structsByName.get(parentName.getName());
 					if (parent == null) {
 						// TODO report error
 						continue;
@@ -1209,8 +1209,8 @@ public class DeclarationsConverter {
 		Identifier baseClass = null;
 		if (!onlyFields) {
 			if (!struct.getParents().isEmpty()) {
-				for (Identifier parentName : struct.getParents()) {
-					Struct parent = result.structsByName.get(parentName);
+				for (SimpleTypeRef parentName : struct.getParents()) {
+					Struct parent = result.structsByName.get(parentName.getName());
 					if (parent == null) {
 						// TODO report error
 						continue;
@@ -1304,7 +1304,7 @@ public class DeclarationsConverter {
 							continue;
 						Function method = (Function) md;
 						method.addModifiers(Modifier.Public, isStatic ? Modifier.Static : null, Modifier.Native);
-                        method.addAnnotation(new Annotation(result.config.runtime.ident(JNAeratorConfig.Runtime.Ann.Virtual), expr(iVirtual)));
+                        method.addAnnotation(new Annotation(result.config.runtime.typeRef(JNAeratorConfig.Runtime.Ann.Virtual), expr(iVirtual)));
 						structJavaClass.addDeclaration(method);
 					}
 				}
@@ -1327,8 +1327,7 @@ public class DeclarationsConverter {
 			structJavaClass = result.notifyBeforeWritingClass(fullClassName, structJavaClass, signatures, library);
 			if (structJavaClass != null) {
 				PrintWriter pout = result.classOutputter.getClassSourceWriter(fullClassName.toString());
-				result.printJavaHeader(javaPackage, pout);
-				pout.println(structJavaClass);
+				result.printJavaClass(javaPackage, structJavaClass, pout);
 				pout.close();
 			}
 		} else
@@ -1341,8 +1340,8 @@ public class DeclarationsConverter {
 		Boolean bVirtual = structsVirtuality.get(name);
 		if (bVirtual == null) {
 			boolean hasVirtualParent = false, hasVirtualMembers = false;
-			for (Identifier parentName : struct.getParents()) {
-				Struct parentStruct = result.structsByName.get(parentName);
+			for (SimpleTypeRef parentName : struct.getParents()) {
+				Struct parentStruct = result.structsByName.get(parentName.getName());
 				if (parentStruct == null) {
 					if (result.config.verbose)
 						System.out.println("Failed to resolve parent '" + parentName + "' for struct '" + name + "'");
@@ -1503,11 +1502,11 @@ public class DeclarationsConverter {
 		convDecl.addModifiers(Modifier.Public);
 
 		if (conv.arrayLength != null)
-            convDecl.addAnnotation(new Annotation(result.config.runtime.ident(JNAeratorConfig.Runtime.Ann.Length), conv.arrayLength));
+            convDecl.addAnnotation(new Annotation(result.config.runtime.typeRef(JNAeratorConfig.Runtime.Ann.Length), conv.arrayLength));
         if (conv.bits != null)
-            convDecl.addAnnotation(new Annotation(result.config.runtime.ident(JNAeratorConfig.Runtime.Ann.Bits), conv.bits));
+            convDecl.addAnnotation(new Annotation(result.config.runtime.typeRef(JNAeratorConfig.Runtime.Ann.Bits), conv.bits));
         if (conv.byValue)
-            convDecl.addAnnotation(new Annotation(result.config.runtime.ident(JNAeratorConfig.Runtime.Ann.ByValue)));
+            convDecl.addAnnotation(new Annotation(result.config.runtime.typeRef(JNAeratorConfig.Runtime.Ann.ByValue)));
 
         for (Element e : toImportDetailsFrom)
             convDecl.importDetails(e, false);
@@ -1521,8 +1520,8 @@ public class DeclarationsConverter {
         convDecl.moveAllCommentsBefore();
 
         convDecl.setName(ident(name));
-        convDecl.addAnnotation(new Annotation(result.config.runtime.ident(JNAeratorConfig.Runtime.Ann.Field), expr(iChild[0])));
-        Function getter = convDecl;
+        convDecl.addAnnotation(new Annotation(result.config.runtime.typeRef(JNAeratorConfig.Runtime.Ann.Field), expr(iChild[0])));
+        Function getter = convDecl.clone();
 
         if (conv.structIOFieldGetterNameRadix == null)
             getter.addModifiers(Modifier.Native);
@@ -1537,7 +1536,7 @@ public class DeclarationsConverter {
         out.add(getter);
 
         if (!conv.readOnly) {
-            Function setter = getter.clone();
+            Function setter = convDecl.clone();
             TypeRef javaType = setter.getValueType();
             setter.setValueType(typeRef(holderName.clone()));//Void.TYPE));
             setter.addArg(new Arg(name, javaType));
@@ -1578,7 +1577,7 @@ public class DeclarationsConverter {
                 Declarator d = v.getDeclarators().get(0);
                 if (d.getBits() > 0)
 					for (Declaration vd : vds)
-                        vd.addAnnotation(new Annotation(result.config.runtime.ident(JNAeratorConfig.Runtime.Ann.Bits), expr(d.getBits())));
+                        vd.addAnnotation(new Annotation(result.config.runtime.typeRef(JNAeratorConfig.Runtime.Ann.Bits), expr(d.getBits())));
 				/*if (vd != null && vd.size() > 0) {
 					Declarator d = v.getDeclarators().get(0);
 					if (d.getBits() > 0) {
@@ -1631,7 +1630,7 @@ public class DeclarationsConverter {
 					Declarator d = v.getDeclarators().get(0);
 					if (d.getBits() > 0) {
 						int bits = d.getBits();
-						vd.addAnnotation(new Annotation(result.config.runtime.ident(JNAeratorConfig.Runtime.Ann.Bits), expr(bits)));
+						vd.addAnnotation(new Annotation(result.config.runtime.typeRef(JNAeratorConfig.Runtime.Ann.Bits), expr(bits)));
 						String st = vd.getValueType().toString(), mst = st;
 						if (st.equals("int") || st.equals("long") || st.equals("short") || st.equals("long")) {
 							if (bits <= 8)
@@ -1665,12 +1664,13 @@ public class DeclarationsConverter {
 		cl.setType(type);
 		cl.setTag(name);
 		if (parentName != null)
-			cl.setParents(parentName);
+			cl.setParents(typeRef(parentName));
 		if (type == Struct.Type.JavaInterface)
 			for (Identifier inter : interfaces)
-				cl.addParent(inter);
+				cl.addParent(typeRef(inter));
 		else
-			cl.setProtocols(Arrays.asList(interfaces));
+            for (Identifier inter : interfaces)
+                cl.addProtocol(typeRef(inter));
 		
 		if (!result.config.noComments)
 			if (toCloneCommentsFrom != null ) {
@@ -1689,8 +1689,8 @@ public class DeclarationsConverter {
 			)
 		;
 		if (!nativeStruct.getParents().isEmpty()) {
-			for (Identifier parentName : nativeStruct.getParents()) {
-				Struct parent = result.structsByName.get(parentName);
+			for (SimpleTypeRef parentName : nativeStruct.getParents()) {
+				Struct parent = result.structsByName.get(parentName.getName());
 				if (parent == null) {
 					// TODO report error
 					continue;

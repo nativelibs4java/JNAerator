@@ -65,6 +65,8 @@ public abstract class Identifier extends Element implements Comparable<Object> {
 			return name;
 		}
 		public void setName(String name) {
+            if (name != null && (name.contains(".") || name.contains("::")))
+                throw new IllegalArgumentException("Not a simple identifier : '" + name + "'");
 			this.name = name;
 		}
 		public void setTemplateArguments(List<Expression> templateArguments) {
@@ -109,6 +111,12 @@ public abstract class Identifier extends Element implements Comparable<Object> {
 		public List<SimpleIdentifier> getIdentifiers() {
 			return unmodifiableList(identifiers);
 		}
+
+        @Override
+        public QualifiedIdentifier clone() {
+            return (QualifiedIdentifier)super.clone();
+        }
+
 		public void add(Identifier identifier) {
 			if (identifier instanceof SimpleIdentifier)
 				addIdentifier((SimpleIdentifier)identifier);

@@ -12,8 +12,6 @@ com/nativelibs4java/runtime/ann/jna/Length.class
 com/nativelibs4java/runtime/ann/jna/PointerSized.class
 com/nativelibs4java/runtime/ann/jna/Virtual.class
 com/nativelibs4java/runtime/ann/jna/Wide.class
-com/nativelibs4java/runtime/jna/Array$1.class
-com/nativelibs4java/runtime/jna/Array.class
 com/nativelibs4java/runtime/jna/BitFields$1.class
 com/nativelibs4java/runtime/jna/BitFields$2.class
 com/nativelibs4java/runtime/jna/BitFields$3.class

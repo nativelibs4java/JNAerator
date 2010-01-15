@@ -168,7 +168,7 @@ public class BridgeSupportParser {
 				continue;
 			
 			if (!"NSObject".equals(String.valueOf(cs.getTag().toString())))
-				cs.setParents(ident("NSObject"));
+				cs.setParents(typeRef(ident("NSObject")));
 			
 //			cs.accept(result);
 		}

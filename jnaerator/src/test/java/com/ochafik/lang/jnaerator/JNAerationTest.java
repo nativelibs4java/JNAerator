@@ -130,6 +130,9 @@ public class JNAerationTest {
 			
 			@Override
 			public void setFinished(Throwable ex) {
+                if (ex != null) {
+                    ex.printStackTrace(System.out);
+                }
 				Collection<Entry<String, String>> cc = test.extraJavaSourceFilesContents.entrySet();//new CompoundCollection<Map.Entry<String, String>>(test.extraJavaSourceFilesContents.entrySet(), Arrays.asList(new Pair<String, String>("?.java", test.cSource)));
 				System.out.println("Finished with an error ! " + ex);
 				if (ex instanceof CompilerUtils.CompilationError) {

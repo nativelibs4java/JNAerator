@@ -61,6 +61,7 @@ import com.ochafik.lang.jnaerator.parser.Statement.Block;
 import com.ochafik.lang.jnaerator.parser.StoredDeclarations.TypeDef;
 import com.ochafik.lang.jnaerator.parser.Struct.Type;
 import com.ochafik.lang.jnaerator.parser.TypeRef.FunctionSignature;
+import com.ochafik.lang.jnaerator.parser.TypeRef.SimpleTypeRef;
 import com.ochafik.lang.jnaerator.parser.TypeRef.TaggedTypeRef;
 import java.util.*;
 import org.rococoa.ObjCClass;
@@ -198,15 +199,13 @@ public class ObjectiveCGenerator {
 	}
 	public void outputObjectiveCClass(Struct in) throws IOException {
 		Identifier fullClassName = getFullClassName(in);
-		PrintWriter out = result.classOutputter.getClassSourceWriter(fullClassName.toString());
-		result.printJavaHeader(getPackageName(in), out);
-		
 		Signatures signatures = new Signatures();
 
 		Struct s = generateObjectiveCClass(in, signatures);
 		result.notifyBeforeWritingClass(fullClassName, s, signatures, result.getLibrary(in));
 		
-		out.println(s);
+		PrintWriter out = result.classOutputter.getClassSourceWriter(fullClassName.toString());
+		result.printJavaClass(getPackageName(in), s, out);
 		out.close();
 	}
 	static Identifier 
@@ -232,11 +231,11 @@ public class ObjectiveCGenerator {
 		classStruct.setType(Struct.Type.JavaClass);
 		classStruct.addModifiers(Modifier.Public, Modifier.Static, Modifier.Abstract);
 		
-		List<Identifier> 
-			interfacesForInstance = new ArrayList<Identifier>();
+		List<SimpleTypeRef>
+			interfacesForInstance = new ArrayList<SimpleTypeRef>();
 
-		List<Identifier>
-			parentsForInstance = new ArrayList<Identifier>(in.getParents());
+		List<SimpleTypeRef>
+			parentsForInstance = new ArrayList<SimpleTypeRef>(in.getParents());
 
 		//for (Identifier p : parentsForInstance)
 		//	parentsForClass
@@ -264,7 +263,8 @@ public class ObjectiveCGenerator {
 				outputObjectiveCClass(catIn);
 			}	
 
-		for (Identifier p : parentsForInstance) {
+		for (SimpleTypeRef sp : parentsForInstance) {
+            Identifier p = sp.getName();
 			String ps = p.toString();
 			boolean basic = ps.toString().equals(ObjCObject.class.getName()) || ps.equals(NSObject.class.getName());
 			Identifier id = basic ? p : result.typeConverter.findObjCClassIdent(p);
@@ -302,12 +302,12 @@ public class ObjectiveCGenerator {
 				//classStruct.addProtocol(ident(ObjCClass.class));
 		}
 
-		for (Identifier p : in.getProtocols()) {
-			Identifier id = getFullClassName(getStruct(p, Type.ObjCProtocol));
+		for (SimpleTypeRef p : in.getProtocols()) {
+			Identifier id = getFullClassName(getStruct(p.getName(), Type.ObjCProtocol));
 			if (id != null)
-				interfacesForInstance.add(id);
+				interfacesForInstance.add(typeRef(id));
 		}
-		for (Identifier id : interfacesForInstance) {
+		for (SimpleTypeRef id : interfacesForInstance) {
 			if (isProtocol || isCategory)
 				instanceStruct.addParent(id);
 			else

@@ -22,15 +22,15 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import static com.ochafik.lang.jnaerator.parser.ElementsHelper.*;
 
 import com.ochafik.lang.jnaerator.parser.Identifier.SimpleIdentifier;
-import com.ochafik.util.string.StringUtils;
 
 public class Struct extends TypeRef.TaggedTypeRef implements DeclarationsHolder {//extends StoredDeclarations  {
 	Type type;
 	MemberVisibility nextMemberVisibility = MemberVisibility.Public;
-	final List<Identifier> parents = new ArrayList<Identifier>();
-	final List<Identifier> protocols = new ArrayList<Identifier>();
+	final List<SimpleTypeRef> parents = new ArrayList<SimpleTypeRef>();
+	final List<SimpleTypeRef> protocols = new ArrayList<SimpleTypeRef>();
 	String categoryName;
 	final List<Declaration> declarations = new ArrayList<Declaration>();
 	
@@ -79,10 +79,10 @@ public class Struct extends TypeRef.TaggedTypeRef implements DeclarationsHolder 
 		if (super.replaceChild(child, by))
 			return true;
 		
-		if (replaceChild(protocols, Identifier.class, this, child, by))
+		if (replaceChild(protocols, SimpleTypeRef.class, this, child, by))
 			return true;
 
-		if (replaceChild(parents, Identifier.class, this, child, by))
+		if (replaceChild(parents, SimpleTypeRef.class, this, child, by))
 			return true;
 
 		return replaceChild(declarations, Declaration.class, this, child, by);
@@ -104,33 +104,39 @@ public class Struct extends TypeRef.TaggedTypeRef implements DeclarationsHolder 
 		return categoryName;
 	}
 	
-	public List<Identifier> getParents() {
+	public List<SimpleTypeRef> getParents() {
 		return unmodifiableList(parents);
 	}
-	public void addParent(Identifier parent) {
+    public void addParent(Identifier parent) {
+        addParent(typeRef(parent));
+    }
+	public void addParent(SimpleTypeRef parent) {
 		if (parent == null)
 			return;
 		parent.setParentElement(this);
 		parents.add(parent);
 	}
-	public void setParents(List<Identifier> parents) {
+	public void setParents(List<SimpleTypeRef> parents) {
 		changeValue(this, this.parents, parents);
 	}
-	public List<Identifier> getProtocols() {
+	public List<SimpleTypeRef> getProtocols() {
 		return unmodifiableList(protocols);
 	}
-	public void addProtocol(Identifier protocol) {
+	public void addProtocol(Identifier parent) {
+        addProtocol(typeRef(parent));
+    }
+	public void addProtocol(SimpleTypeRef protocol) {
 		if (protocol == null)
 			return;
 		protocol.setParentElement(this);
 		protocols.add(protocol);
 	}
-	public void addProtocols(Identifier... protocols) {
-		List<Identifier> l = new ArrayList<Identifier>(getProtocols());
+	public void addProtocols(SimpleTypeRef... protocols) {
+		List<SimpleTypeRef> l = new ArrayList<SimpleTypeRef>(getProtocols());
 		l.addAll(Arrays.asList(protocols));
 		setProtocols(l);
 	}
-	public void setProtocols(List<Identifier> protocols) {
+	public void setProtocols(List<SimpleTypeRef> protocols) {
 		changeValue(this, this.protocols, protocols);
 	}
 	public Struct setType(Type type) {
@@ -188,7 +194,7 @@ public class Struct extends TypeRef.TaggedTypeRef implements DeclarationsHolder 
 		visitor.visitStruct(this);
 	}
 
-	public void setParents(Identifier... ns) {
+	public void setParents(SimpleTypeRef... ns) {
 		setParents(Arrays.asList(ns));
 	}
 }

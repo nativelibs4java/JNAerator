@@ -1,7 +1,5 @@
 Archive:  /Users/ochafik/nativelibs4java/Runtime/JDyncall/target/nl4j-runtime-0.1-SNAPSHOT-shaded.jar
 META-INF/MANIFEST.MF
-META-INF/OCHAFIK2.DSA
-META-INF/OCHAFIK2.SF
 META-INF/maven/com.nativelibs4java/
 META-INF/maven/com.nativelibs4java/nl4j-runtime/
 META-INF/maven/com.nativelibs4java/nl4j-runtime/pom.properties
@@ -11,8 +9,6 @@ META-INF/maven/com.ochafik/ochafik-util/
 META-INF/maven/com.ochafik/ochafik-util/pom.properties
 META-INF/maven/com.ochafik/ochafik-util/pom.xml
 com/nativelibs4java/runtime/AddressableFactory.class
-com/nativelibs4java/runtime/Array$1.class
-com/nativelibs4java/runtime/Array.class
 com/nativelibs4java/runtime/BitFields$1.class
 com/nativelibs4java/runtime/BitFields$2.class
 com/nativelibs4java/runtime/BitFields$3.class

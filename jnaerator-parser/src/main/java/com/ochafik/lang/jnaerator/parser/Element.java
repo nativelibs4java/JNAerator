@@ -357,7 +357,7 @@ public abstract class Element {
 
 	@SuppressWarnings("unchecked")
 	public static <T extends Element> boolean replaceChild(List<T> list, Class<T> type, Element parent, Element child, Element by) {
-		int i = indexOf(child, list);
+		int i = indexOfInstance(child, list);
         
 		if (i >= 0) {
 			T old;
@@ -379,7 +379,7 @@ public abstract class Element {
 		return false;
 	}
 
-    static int indexOf(Element e, List<? extends Element> list) {
+    static int indexOfInstance(Element e, List<? extends Element> list) {
         int i = -1;
         for (int k = 0, n = list.size(); k < n; k++)
             if (list.get(k) == e) {
@@ -389,7 +389,7 @@ public abstract class Element {
         return i;
     }
 	public static <T extends Element> Element getNextSibling(List<T> list, Element child) {
-		int i = indexOf(child, list);
+		int i = indexOfInstance(child, list);
 		if (i >= 0) {
 			return i < list.size() - 1 ? list.get(i + 1) : null;
 		}
@@ -397,7 +397,7 @@ public abstract class Element {
 	}
 
 	public static <T extends Element> Element getPreviousSibling(List<T> list, Element child) {
-		int i = indexOf(child, list);
+		int i = indexOfInstance(child, list);
 		if (i >= 0) {
 			return i > 0 ? list.get(i - 1) : null;
 		}
@@ -475,7 +475,7 @@ public abstract class Element {
 				List<Element> list = (List<Element>)info.getter.invoke(this);
 				if (list instanceof SemiUnmodifiableList)
 					list = ((SemiUnmodifiableList<Element>)list).getList();
-				int i = indexOf(existingChild, list);
+				int i = indexOfInstance(existingChild, list);
 				if (i < 0)
 					continue;
 				

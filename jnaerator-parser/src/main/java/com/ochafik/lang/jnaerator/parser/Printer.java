@@ -53,9 +53,18 @@ import com.ochafik.util.listenable.Adapter;
 import com.ochafik.util.listenable.ListenableCollections;
 import com.ochafik.util.listenable.Pair;
 import com.ochafik.util.string.StringUtils;
+
+import static com.ochafik.lang.jnaerator.parser.ElementsHelper.*;
+
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.Stack;
 
 /**
@@ -66,7 +75,7 @@ public class Printer implements Visitor {
 
     StringBuilder out = new StringBuilder();
     Stack<String> indentStack = new Stack<String>();
-    String indent = "";
+    volatile String indent = "";
     protected static boolean beginEachCommentLineWithStar = true;
 
     protected void indent(String indent) {
@@ -74,11 +83,12 @@ public class Printer implements Visitor {
     }
 
     protected void indent() {
-        indent(indent == null ? "\t" : indent + "\t");
+        indent(indent + "\t");
     }
 
     protected void deindent() {
-        indent = indentStack.pop();
+        indentStack.pop();
+        indent = indentStack.isEmpty() ? "" : indentStack.lastElement();
     }
 
     public Printer() {}
@@ -212,13 +222,12 @@ public class Printer implements Visitor {
 			implode(modifiers, " ");
             space(!modifiers.isEmpty());
 			append(valueType);
-            space(valueType != null);
+            space();
             append(name, "(").implode(e.getArgs(), ", ").append(")");
 
             if (!e.getThrown().isEmpty())
                 append(" throws ").implode(e.getThrown(), ", ");
 
-            indent();
             if (e.getBody() == null)
                 append(";");
             else
@@ -310,6 +319,7 @@ public class Printer implements Visitor {
         if (!e.isForwardDeclaration()) {
             space(e.getTag() != null).append("{\n");
             indent();
+            append(indent);
             implode(e.getDeclarations(), "\n" + indent);
             deindent();
             append("\n", indent, "}");
@@ -566,11 +576,12 @@ public class Printer implements Visitor {
     }
 
     public void visitAnnotation(Annotation e) {
-        append(indent, "@", e.getAnnotationClass());
+        append("@", e.getAnnotationClass());
         if (e.getArgument() != null)
             append(e.getArgument());
         else if (!e.getArguments().isEmpty())
             append("(").implode(e.getArguments(), ", ").append(")");
+        space();
     }
 
     public void visitEmptyDeclaration(EmptyDeclaration e) {
@@ -604,7 +615,7 @@ public class Printer implements Visitor {
     }
 
     public void visitBlock(Block e) {
-        append('{');
+        append("{");
         if (!e.getStatements().isEmpty()) {
             if (e.isCompact()) {
                 append(' ');
@@ -612,10 +623,10 @@ public class Printer implements Visitor {
                 append(' ');
             } else {
                 indent();
-                append(indent);
+                append("\n", indent);
                 implode(e.getStatements(), "\n" + indent);
                 deindent();
-                append('\n', indent);
+                append("\n", indent);
             }
         }
         append('}');
@@ -766,9 +777,9 @@ public class Printer implements Visitor {
     public void visitCatch(Catch e) {
         append("catch (", e.getDeclaration(), ") {\n\t", indent);
         if (e.getBody() != null) {
-            indent();
+            //indent();
             append(e.getBody());
-            deindent();
+            //deindent();
         }
         append("\n", indent, "}");
     }
@@ -902,5 +913,108 @@ public class Printer implements Visitor {
 		}
 		append(e.getValueType()).space(!e.getDeclarators().isEmpty()).implode(e.getDeclarators(), ", ");
 	}
+
+    public static void printJava(Identifier packageName, Identifier className, Element rootElement, PrintWriter out) {
+        final Map<String, Set<Identifier>> identifiersBySimpleName = new HashMap<String, Set<Identifier>>();
+        final String outputPackage = packageName.toString();
+        final String outputClassPrefix = className + ".";
+
+        rootElement.accept(new Scanner() {
+
+            @Override
+            public void visitIdentifier(Identifier e) {
+                super.visitIdentifier(e);
+                
+                if (e.getParentElement() instanceof QualifiedIdentifier)
+                    return;
+
+                Element parent = e.getParentElement();
+                if (!(parent instanceof TypeRef))
+                    return;
+
+                e = e.clone();
+                SimpleIdentifier si = e.resolveLastSimpleIdentifier();
+                si.setTemplateArguments(Collections.EMPTY_LIST);
+                
+                String name = si.getName();
+                Set<Identifier> ids = identifiersBySimpleName.get(name);
+                if (ids == null)
+                    identifiersBySimpleName.put(name, ids = new HashSet<Identifier>());
+
+                ids.add(e);
+            }
+        });
+
+        final Map<Identifier, String> resolvedIds = new HashMap<Identifier, String>();
+        final Set<String> importedClassesStrings = new HashSet<String>(50);
+        importedClassesStrings.add(className.toString());
+        
+        List<String> importStatements = new ArrayList<String>();
+        for (Map.Entry<String, Set<Identifier>> kv : identifiersBySimpleName.entrySet()) {
+            if (kv.getValue().size() == 1) {
+                Identifier id = kv.getValue().iterator().next();
+                String ids = id.toString();
+                if (ids.indexOf(".") < 0)
+                    continue;
+
+                SimpleIdentifier si = id.resolveLastSimpleIdentifier();
+                String name = si.getName();
+                resolvedIds.put(id, name);
+                Identifier pack = id.resolveAllButLastIdentifier();
+                if (pack == null)
+                    continue;
+
+                String ps = pack.toString();
+                if (ps.equals("java.lang") || ps.equals(outputPackage) || ids.startsWith(outputClassPrefix))
+                    continue;
+
+                importedClassesStrings.add(ids);
+                importStatements.add("import " + ids + ";");
+            }
+        }
+
+        for (String imp : importStatements)
+            out.println(imp);
+
+        out.println(new Printer() {
+
+            @Override
+            public void visitQualifiedIdentifier(QualifiedIdentifier e) {
+
+
+                if (e.getParentElement() instanceof TypeRef) {
+                    QualifiedIdentifier c = e.clone();
+                    SimpleIdentifier si = c.resolveLastSimpleIdentifier();
+                    List<Expression> targs = new ArrayList<Expression>(si.getTemplateArguments());
+                    si.setTemplateArguments(Collections.EMPTY_LIST);
+
+                    List<SimpleIdentifier> sis = new ArrayList<SimpleIdentifier>(c.resolveSimpleIdentifiers());
+                    //for (String importedClassStr : importedClassesStrings) {
+                        Printer pt = new Printer();
+                        for (int i = 0, n = sis.size(); i < n; i++) {
+                            if (i != 0)
+                                pt.append(".");
+                            pt.append(sis.get(i));
+
+                            String str = pt.toString();//, s;
+                            if (importedClassesStrings.contains(str)) {
+                            //if ((s = resolvedIds.get(str)) != null) {
+                                for (int j = i; j-- != 0;)
+                                    sis.remove(j);
+
+                                c.setIdentifiers(sis);
+                                c.resolveLastSimpleIdentifier().setTemplateArguments(targs);//clones(e.resolveLastSimpleIdentifier().getTemplateArguments()));
+                                append(c);
+                                return;
+                            }
+                        }
+                    //}
+                }
+
+                super.visitQualifiedIdentifier(e);
+            }
+
+        }.append(rootElement));
+    }
 
 }

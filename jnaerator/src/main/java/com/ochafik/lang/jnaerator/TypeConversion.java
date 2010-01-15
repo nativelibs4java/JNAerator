@@ -553,7 +553,8 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
 		JavaPrim javaPrim;
 		public JavaPrimitive() {}
 		public JavaPrimitive(JavaPrim javaPrim) {
-			super(toPrimString(javaPrim));
+            super();
+            setName(ident(javaPrim == JavaPrim.Void ? Void.TYPE : javaPrim.type));
 			this.javaPrim = javaPrim;
 		}
 		public JavaPrim getJavaPrim() {
@@ -824,6 +825,7 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
 	static TypeRef primRef(JavaPrim p) {
         if (p == null)
             return null;
+
 		return new JavaPrimitive(p);
 //		return new SimpleTypeRef(toString(p));
 	}
@@ -974,7 +976,7 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
 
             if (valueConvRef == null) {
                 // TODO limit to OpenCL
-                Pair<Integer, Class<?>> p = arraysAndArityByType.get(valueName.toString());
+                Pair<Integer, Class<?>> p = valueName == null ? null : arraysAndArityByType.get(valueName.toString());
                 if (p != null) {
                     conv.typeRef = typeRef(p.getSecond());
                     conv.structIOFieldGetterNameRadix = structIOFieldGetterNameRadixByType.get(valueName.toString());
@@ -993,6 +995,18 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
             }
             
             if (valueConvRef != null) {
+                if (valueConvRef instanceof JavaPrimitive) {
+                    switch (((JavaPrimitive)valueConvRef).javaPrim) {
+                        case NativeLong:
+                            conv.cLong = true;
+                            conv.typeRef = typeRef(long.class);
+                            return conv;
+                        case NativeSize:
+                            conv.nativeSize = true;
+                            conv.typeRef = typeRef(long.class);
+                            return conv;
+                    }
+                }
                 conv.typeRef = valueConvRef;
                 return conv;
             }

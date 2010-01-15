@@ -11,6 +11,8 @@ import com.ochafik.lang.jnaerator.parser.Expression.Constant;
 import com.ochafik.lang.jnaerator.parser.Expression.MemberRefStyle;
 import com.ochafik.lang.jnaerator.parser.TypeRef.SimpleTypeRef;
 import com.ochafik.lang.jnaerator.parser.TypeRef.TaggedTypeRef;
+import java.util.ArrayList;
+import java.util.List;
 public class ElementsHelper {
 	public static Expression memberRef(Expression x, MemberRefStyle style, String name) {
 		return new Expression.MemberRef(x, style, new SimpleIdentifier(name));
@@ -58,24 +60,41 @@ public class ElementsHelper {
 	public static Expression varRef(Identifier name) {
 		return memberRef(expr(typeRef(name.resolveAllButLastIdentifier())), MemberRefStyle.Dot, name.resolveLastSimpleIdentifier());
 	}
-	public static Identifier ident(String[] others) {
-		if (others.length > 0)
-			return ident(others[0], Arrays.copyOfRange(others, 1, others.length));
-		return null;
+	public static Identifier ident(String... others) {
+        if (others == null)
+            return null;
+        
+        List<SimpleIdentifier> list = new ArrayList<SimpleIdentifier>();
+        for (String o : others)
+            if (o != null && (o = o.trim()).length() > 0)
+                list.addAll(getClassSimpleIdentifiers(o));
+
+        if (list.isEmpty())
+            return null;
+        if (list.size() == 1)
+            return list.get(0);
+        
+        QualifiedIdentifier id = new QualifiedIdentifier(QualificationSeparator.Dot);
+        id.setIdentifiers(list);
+        return id;
 	}
-	public static Identifier ident(String name, String... others) {
-		if (name == null || name.trim().length() == 0) {
-			if (others.length > 0)
-				return ident(others[0], Arrays.copyOfRange(others, 1, others.length));
-			return null;
-		}
-		return new SimpleIdentifier(name).derive(Identifier.QualificationSeparator.Dot, others);
-	}
+    public static List<SimpleIdentifier> getClassSimpleIdentifiers(String className) {
+        List<SimpleIdentifier> elts = new ArrayList<SimpleIdentifier>();
+        for (String s : className.split("[.$]"))
+            if (s.length() > 0)
+                elts.add(new SimpleIdentifier(s));
+
+        return elts;
+    }
 	public static Identifier ident(Class<?> cl, Expression... args) {
-		if (cl.getPackage() == null)
-			return new SimpleIdentifier(cl.getName(), args);
-		else
-			return ident(ident(cl.getPackage().getName()), new SimpleIdentifier(cl.getSimpleName(), args));
+        if (cl == null)
+            return null;
+        if (cl == Void.TYPE || cl == Void.class)
+            return ident("void");
+        QualifiedIdentifier id = new QualifiedIdentifier(QualificationSeparator.Dot);
+        id.setIdentifiers(getClassSimpleIdentifiers(cl.getName()));
+        id.resolveLastSimpleIdentifier().setTemplateArguments(Arrays.asList(args));
+        return id;
 	}
 	public static Identifier ident(Identifier ident, String name) {
 		return ident(ident, ident(name));
@@ -124,6 +143,13 @@ public class ElementsHelper {
 	public static Expression expr(Expression a, AssignmentOperator op, Expression b) {
 		return new AssignmentOp(a, op, b);
 	}
+
+    public static <T extends Element> List<T> clones(List<T> list) {
+        List<T> clone = new ArrayList<T>(list.size());
+        for (T e : list)
+            clone.add((T)e.clone());
+        return clone;
+    }
 	public static FunctionCall methodCall(Expression x, MemberRefStyle style, String name, Expression... exprs) {
 		return new FunctionCall(memberRef(x, style, name), exprs);
 	}
@@ -135,13 +161,14 @@ public class ElementsHelper {
 			return new TypeRef.ArrayRef(typeRef(cl.getComponentType()));
         if (cl.isPrimitive() || cl == Void.class)
             return new TypeRef.Primitive(cl.getSimpleName());
-		return new SimpleTypeRef(cl.getName().replace('$', '.'));
+        
+        return typeRef(ident(cl));
 	}
 
 	public static SimpleTypeRef typeRef(String name) {
-		return new SimpleTypeRef(name);
+        return typeRef(ident(name));
 	}
-	public static TypeRef typeRef(Identifier name) {
+	public static SimpleTypeRef typeRef(Identifier name) {
 		return name == null ? null : new SimpleTypeRef(name);
 	}
     public static Statement stat(Declaration d) {

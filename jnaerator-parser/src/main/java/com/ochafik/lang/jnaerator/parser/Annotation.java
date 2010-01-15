@@ -25,7 +25,7 @@ import static com.ochafik.lang.jnaerator.parser.ElementsHelper.*;
 
 public class Annotation extends Element {
 
-    Identifier annotationClass;
+    TypeRef annotationClass;
 	//Class<? extends java.lang.annotation.Annotation> annotationClass;
 	final List<Expression> arguments = new ArrayList<Expression>();
 	String argument;
@@ -35,13 +35,13 @@ public class Annotation extends Element {
 	}
 	
 	public Annotation(Class<? extends java.lang.annotation.Annotation> annotationClass, Expression... arguments) {
-		this(ident(annotationClass), arguments);
+		this(typeRef(annotationClass), arguments);
 	}
-	public Annotation(Identifier annotationClass, Expression... arguments) {
+	public Annotation(TypeRef annotationClass, Expression... arguments) {
 		setAnnotationClass(annotationClass);
 		setArguments(Arrays.asList(arguments));
 	}
-	public Annotation(Identifier annotationClass, String argument) {
+	public Annotation(TypeRef annotationClass, String argument) {
 		setAnnotationClass(annotationClass);
 		setArgument(argument);
 	}
@@ -59,10 +59,10 @@ public class Annotation extends Element {
 		return unmodifiableList(arguments);
 	}
 	
-	public Identifier getAnnotationClass() {
+	public TypeRef getAnnotationClass() {
 		return annotationClass;
 	}
-	public void setAnnotationClass(Identifier annotationClass) {
+	public void setAnnotationClass(TypeRef annotationClass) {
 		this.annotationClass = changeValue(this, this.annotationClass, annotationClass);
 	}
 	
@@ -84,7 +84,7 @@ public class Annotation extends Element {
 	@Override
 	public boolean replaceChild(Element child, Element by) {
         if (child == getAnnotationClass()) {
-            setAnnotationClass((Identifier)by);
+            setAnnotationClass((TypeRef)by);
             return true;
         }
 		return replaceChild(arguments, Expression.class, this, child, by);

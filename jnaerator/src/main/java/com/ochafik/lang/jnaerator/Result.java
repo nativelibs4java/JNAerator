@@ -53,6 +53,7 @@ import com.ochafik.lang.jnaerator.parser.VariablesDeclaration;
 import com.ochafik.lang.jnaerator.parser.Declarator.DirectDeclarator;
 import com.ochafik.lang.jnaerator.parser.Enum.EnumItem;
 import com.ochafik.lang.jnaerator.parser.Expression.MemberRefStyle;
+import com.ochafik.lang.jnaerator.parser.Printer;
 import com.ochafik.lang.jnaerator.parser.StoredDeclarations.TypeDef;
 import com.ochafik.lang.jnaerator.parser.Struct.Type;
 import com.ochafik.lang.jnaerator.parser.TypeRef.FunctionSignature;
@@ -563,28 +564,12 @@ public class Result extends Scanner {
 	}
 	public List<ClassWritingNotifiable> classWritingNotifiables = new ArrayList<ClassWritingNotifiable>();
 	
-	public void printJavaHeader(Identifier javaPackage, PrintWriter out) {
+	public void printJavaClass(Identifier javaPackage, Struct javaClass, PrintWriter out) {
 
 		if (javaPackage != null)
 			out.println("package " + javaPackage + ";");
-		
-//		for (Identifier pn : javaPackages) {
-//			if (pn.equals(""))
-//				continue;
-//			
-//			if (pn.equals(javaPackage))
-//				continue;
-//			out.println("import " + pn + ".*;");
-//		}
-//		for (String otherLibrary : libraries) {
-//			if (otherLibrary == null)
-//				continue;
-//			if (otherLibrary.equals(javaPackage))
-//				continue;
-//			Identifier otherJavaPackage = javaPackageByLibrary.get(otherLibrary);
-//			Identifier otherLibraryClassName = getLibraryClassSimpleName(otherLibrary);
-//			out.println("import static " + ident(otherJavaPackage, otherLibraryClassName) + ".*;");
-//		}
+
+        Printer.printJava(javaPackage, ident(javaPackage.clone(), javaClass.getTag().clone()), javaClass, out);
 //		out.println("@SuppressWarnings(\"unused\")");
 	}
 	public boolean hasObjectiveC() {

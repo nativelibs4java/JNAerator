@@ -37,12 +37,15 @@ import com.ochafik.lang.jnaerator.parser.Element;
 import com.ochafik.lang.jnaerator.parser.ElementsHelper;
 import com.ochafik.lang.jnaerator.parser.Function;
 import com.ochafik.lang.jnaerator.parser.Identifier;
+import com.ochafik.lang.jnaerator.parser.TypeRef;
+import com.ochafik.lang.jnaerator.parser.TypeRef.SimpleTypeRef;
 import com.ochafik.util.CompoundCollection;
 import com.ochafik.util.listenable.Adapter;
 import com.ochafik.util.listenable.Filter;
 import com.ochafik.util.listenable.Pair;
 import java.lang.annotation.Annotation;
 import java.text.MessageFormat;
+import java.util.Arrays;
 import java.util.HashSet;
 
 import static com.ochafik.lang.jnaerator.parser.ElementsHelper.*;
@@ -157,8 +160,11 @@ public class JNAeratorConfig {
         }
         public final String runtimeFilesListFileName;
         private String annotationPackage;
-        public Identifier ident(Ann ann) {
-            return annotationPackage == null ? null : ElementsHelper.ident(annotationPackage, ann.toString());
+        public SimpleTypeRef typeRef(Ann ann) {
+            List<String> elts = new ArrayList<String>();
+            elts.addAll(Arrays.asList(annotationPackage.split("\\.")));
+            elts.add(ann.toString());
+            return annotationPackage == null ? null : ElementsHelper.typeRef(ident(elts.toArray(new String[elts.size()])));
         }
         public final Class callbackClass, pointerClass, memoryClass, structClass, unionClass, structIOClass, arrayClass, libraryClass;
         public final boolean hasFastStructs;
