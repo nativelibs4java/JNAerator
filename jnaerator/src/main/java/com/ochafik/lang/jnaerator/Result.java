@@ -61,6 +61,7 @@ import com.ochafik.lang.jnaerator.parser.TypeRef.TaggedTypeRef;
 import com.ochafik.util.SystemUtils;
 import com.ochafik.util.listenable.Pair;
 import com.ochafik.util.string.StringUtils;
+import java.util.LinkedHashMap;
 
 import static com.ochafik.lang.jnaerator.parser.ElementsHelper.*;
 
@@ -128,7 +129,7 @@ public class Result extends Scanner {
 	public Map<String, List<Enum>> enumsByLibrary = new HashMap<String, List<Enum>>();
 	public Map<Identifier, Enum> enumsByName = new HashMap<Identifier, Enum>();
 	public Map<String, EnumItem> enumItems = new HashMap<String, EnumItem>();
-	public Map<String, Define> defines = new HashMap<String, Define>();
+	public Map<String, Define> defines = new LinkedHashMap<String, Define>();
 	public Map<String, List<Define>> definesByLibrary = new HashMap<String, List<Define>>();
 	public Map<String, Set<String>> fakePointersByLibrary = new HashMap<String, Set<String>>();
 	
@@ -147,7 +148,7 @@ public class Result extends Scanner {
 	static <T, U, V> Map<U, V> getMap(Map<T, Map<U, V>> m, T key) {
 		Map<U, V> map = m.get(key);
 		if (map == null)
-			m.put(key, map = new HashMap<U, V>());
+			m.put(key, map = new LinkedHashMap<U, V>());
 		return map;
 	}
 	
@@ -569,7 +570,10 @@ public class Result extends Scanner {
 		if (javaPackage != null)
 			out.println("package " + javaPackage + ";");
 
-        Printer.printJava(javaPackage, ident(javaPackage.clone(), javaClass.getTag().clone()), javaClass, out);
+        if (config.noAutoImports)
+            out.println(javaClass);
+        else
+            Printer.printJava(javaPackage, ident(javaPackage.clone(), javaClass.getTag().clone()), javaClass, out);
 //		out.println("@SuppressWarnings(\"unused\")");
 	}
 	public boolean hasObjectiveC() {

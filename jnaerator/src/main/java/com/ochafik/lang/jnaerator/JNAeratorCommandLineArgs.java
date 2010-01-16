@@ -133,7 +133,8 @@ public class JNAeratorCommandLineArgs {
 		Runtime(            "-runtime",             "Choose target runtime library between " + StringUtils.implode(JNAeratorConfig.Runtime.values(), ", ") + " (default: " + JNAeratorConfig.Runtime.DEFAULT + ").", new ArgDef(Type.Enum, "enum", JNAeratorConfig.Runtime.class)),
         IfRegexMatch(		"-ifRegexMatch",		"Conditional evaluation of an argument if a java system property matches a regular expression", new ArgDef(Type.String, "javaProperty"), new ArgDef(Type.String, "regex"), new ArgDef(Type.String, "thenArg"), new ArgDef(Type.String, "elseArg")),
 		DefineMacro(		"-D([^=]*)(?:=(.*))?", 	"Define a macro symbol", new ArgDef(Type.String, "name"), new ArgDef(Type.String, "value")),
-		RootPackage(		"-root(?:Package)?", 	"Define the root package for all output classes", new ArgDef(Type.String, "package")),
+		NoAutoImports(      "-noAutoImport",        "Don't add import statements automatically to output java source files"),
+        RootPackage(		"-root(?:Package)?", 	"Define the root package for all output classes", new ArgDef(Type.String, "package")),
 		CurrentLibrary(		"-library", 			"Define the name of the output library. This is a state parameter, it will affect all files listed after it, until another -library switch is provided. It does not affect sources included from a project file (Visual Studio...).\n" + 
 													"C functions exported in library \"test\" will end up in class \"TestLibrary\", for instance. \n" +
 													"The name of the library is the one fed to JNA to find the shared library, so library \"test\" must be in \"test.dll\" on Windows, \"libtest.dylib\" on Mac OS X and  \"libtest.so\" on other Unices.\n" +

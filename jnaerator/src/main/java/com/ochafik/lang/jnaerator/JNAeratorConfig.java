@@ -329,6 +329,7 @@ public class JNAeratorConfig {
     public Set<String> undefines = new HashSet<String>();
 	public boolean gccLong = false, sizeAsLong = false;
 	public boolean compile = true;
+    public boolean noAutoImports = false;
 	public boolean bundleSources = true;
 	public boolean noCPlusPlus;
 	
