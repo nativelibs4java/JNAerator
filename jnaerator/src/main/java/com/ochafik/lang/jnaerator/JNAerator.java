@@ -95,6 +95,7 @@ import com.sun.jna.Native;
 import com.sun.jna.NativeLibrary;
 import com.sun.jna.Pointer;
 import com.sun.jna.PointerType;
+import com.sun.jna.win32.StdCallLibrary;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.FileOutputStream;
@@ -1144,14 +1145,6 @@ public class JNAerator {
 			
 			interf.addModifiers(Modifier.Public);
 			interf.setTag(simpleLibraryClassName);
-			Identifier libSuperInter = ident(config.runtime.libraryClass);
-			if (result.config.useJNADirectCalls) {
-				interf.addProtocol(libSuperInter);
-				interf.setType(Type.JavaClass);
-			} else {
-				interf.addParent(libSuperInter);
-				interf.setType(Type.JavaInterface);
-			}
 			
 			Expression libNameExpr = opaqueExpr(result.getLibraryFileExpression(library));
 			TypeRef libTypeRef = typeRef(fullLibraryClassName);
@@ -1216,6 +1209,26 @@ public class JNAerator {
 				} else
 					interf.addDeclaration(instanceDecl);
 			}
+
+            boolean stdcall = false;
+            List<Function> functions = result.functionsByLibrary.get(library);
+            if (functions != null)
+                for (Function function : functions)
+                    if (Modifier.__stdcall.isContainedBy(function.getModifiers())) {
+                        stdcall = true;
+                        break;
+                    }
+
+            Identifier libSuperInter = ident(stdcall ? StdCallLibrary.class : config.runtime.libraryClass);
+
+            if (result.config.useJNADirectCalls) {
+				interf.addProtocol(libSuperInter);
+				interf.setType(Type.JavaClass);
+			} else {
+				interf.addParent(libSuperInter);
+				interf.setType(Type.JavaInterface);
+			}
+
 			fillLibraryMapping(result, sourceFiles, interf, library, javaPackage, fullLibraryClassName, nativeLibFieldExpr);
 		}
 		if (hubOut != null) {
@@ -1251,16 +1264,27 @@ public class JNAerator {
 
             Struct ptClass = result.declarationsConverter.publicStaticClass(fakePointer, ident(PointerType.class), Struct.Type.JavaClass, null);
             ptClass.addToCommentBefore("Pointer to unknown (opaque) type");
-            ptClass.addDeclaration(new Function(Function.Type.JavaMethod, fakePointer, null,
-                new Arg("pointer", typeRef(Pointer.class))
-            ).addModifiers(Modifier.Public).setBody(
-                block(stat(methodCall("super", varRef("pointer")))))
-            );
-            ptClass.addDeclaration(new Function(Function.Type.JavaMethod, fakePointer, null)
-            .addModifiers(Modifier.Public)
-            .setBody(
-                block(stat(methodCall("super")))
-            ));
+
+            if (result.config.runtime.hasJNA) {
+                String pointerVarName = "address";
+                ptClass.addDeclaration(new Function(Function.Type.JavaMethod, fakePointer, null,
+                    new Arg(pointerVarName, typeRef(Pointer.class))
+                ).addModifiers(Modifier.Public).setBody(
+                    block(stat(methodCall("super", varRef(pointerVarName)))))
+                );
+                ptClass.addDeclaration(new Function(Function.Type.JavaMethod, fakePointer, null)
+                .addModifiers(Modifier.Public)
+                .setBody(
+                    block(stat(methodCall("super")))
+                ));
+            } else {
+                String addressVarName = "address";
+                ptClass.addDeclaration(new Function(Function.Type.JavaMethod, fakePointer, null,
+                    new Arg(addressVarName, typeRef(long.class))
+                ).addModifiers(Modifier.Public).setBody(
+                    block(stat(methodCall("super", varRef(addressVarName)))))
+                );
+            }
             interf.addDeclaration(decl(ptClass));
         }
 

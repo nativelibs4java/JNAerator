@@ -883,11 +883,46 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
     }
 
     public NL4JConversion convertTypeToNL4J(TypeRef valueType, TypeConversionMode conversionMode, Identifier libraryClassName) throws UnsupportedConversionException {
-        switch (conversionMode) {
-            case FieldType:
-                return convertFieldTypeToNL4J(valueType, libraryClassName);
-            default:
-                return convertArgTypeToNL4J(valueType, libraryClassName);
+        try {
+            switch (conversionMode) {
+                case FieldType:
+                    return convertFieldTypeToNL4J(valueType, libraryClassName);
+                default:
+                    return convertArgTypeToNL4J(valueType, libraryClassName);
+            }
+        } catch (UnsupportedConversionException ex) {
+            if (!(valueType instanceof TypeRef.Pointer))
+                throw ex;
+
+            TypeRef.Pointer ptr = (TypeRef.Pointer)valueType;
+            TypeRef target = ptr.getTarget();
+            if (target instanceof TypeRef.SimpleTypeRef &&
+                result.config.features.contains(JNAeratorConfig.GenFeatures.TypedPointersForForwardDeclarations) &&
+                allowFakePointers
+            ) {
+                NL4JConversion conv = new NL4JConversion();
+                if (isResolved((SimpleTypeRef)target))
+                    conv.typeRef = target;
+                else {
+                    Identifier name = null;
+                    if (target instanceof SimpleTypeRef)
+                        name = ((SimpleTypeRef) target).getName();
+                    else if (target instanceof Struct) {
+                        Struct struct = (Struct)target;
+                        if (struct == null) {
+                            valueType =  resolveTypeDef(target, libraryClassName, true);
+                            struct = null;
+                        } else {
+                            name = result.declarationsConverter.getActualTaggedTypeName(struct);
+                        }
+                    }
+                    conv.typeRef = typeRef(result.getFakePointer(libraryClassName, name));
+                }
+
+                conv.isPtr = true;
+                return conv;
+            }
+            throw ex;
         }
     }
     public NL4JConversion convertFieldTypeToNL4J(TypeRef valueType, Identifier libraryClassName) throws UnsupportedConversionException {

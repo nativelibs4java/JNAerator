@@ -81,7 +81,7 @@ public enum Modifier {
 	Static(of(StorageClassSpecifier)), 
 	Virtual(of(StorageClassSpecifier)), 
 	Extern(of(StorageClassSpecifier)),
-	Pascal(of(StorageClassSpecifier)),
+	Pascal(__pascal, of(StorageClassSpecifier)),
 	//TypeDef(of(StorageClassSpecifier)), // TODO propagate this to everywhere : need to remove TypeDef class
 	
 	__const(of(TypeQualifier)), 
@@ -145,7 +145,7 @@ public enum Modifier {
 	
 	Alias(of(Attribute)),
 	Always_inline(of(Attribute)),
-	Cdecl(of(Attribute)),
+	Cdecl(__cdecl, of(Attribute)),
 	//Const(of(Attribute)),
 	Constructor(of(Attribute)),
 	Destructor(of(Attribute)),
@@ -155,7 +155,7 @@ public enum Modifier {
 	Eightbit_data(of(Attribute)),
 	Exception(of(Attribute)),
 	Far(of(Attribute)),
-	Fastcall(of(Attribute)),
+	Fastcall(__fastcall, of(Attribute)),
 	Format(of(Attribute)),
 	Format_arg(of(Attribute)),
 	Function_vector(of(Attribute)),
@@ -180,7 +180,7 @@ public enum Modifier {
 	Section(of(Attribute)),
 	Signal(of(Attribute)),
 	Sp_switch(of(Attribute)),
-	Stdcall(of(Attribute)),
+	Stdcall(__stdcall, of(Attribute)),
 	Tiny_data(of(Attribute)),
 	Trap_exit(of(Attribute)),
 	Unused(of(Attribute)),
@@ -222,6 +222,10 @@ public enum Modifier {
 		this.alias = alias;
 	}
 	Modifier(EnumSet<ModifierKind> kinds) {
+		this.kinds = kinds;
+	}
+    Modifier(Modifier alias, EnumSet<ModifierKind> kinds) {
+		this.alias = alias;
 		this.kinds = kinds;
 	}
 

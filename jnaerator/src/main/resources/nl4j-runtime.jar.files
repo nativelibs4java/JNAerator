@@ -59,8 +59,6 @@ com/nativelibs4java/runtime/Struct.class
 com/nativelibs4java/runtime/StructIO$1.class
 com/nativelibs4java/runtime/StructIO$FieldIO.class
 com/nativelibs4java/runtime/StructIO.class
-com/nativelibs4java/runtime/StructIOWithNIO.class
-com/nativelibs4java/runtime/StructWithNIO.class
 com/nativelibs4java/runtime/TempPointers.class
 com/nativelibs4java/runtime/UnmappableTypeException.class
 com/nativelibs4java/runtime/ValuedEnum$EnumWrapper.class
