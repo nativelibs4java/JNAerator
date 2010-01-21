@@ -1,8 +1,8 @@
-Current development version (0.9.3-SNAPSHOT)
+Current development version (0.9.4-SNAPSHOT)
 
 ...
 
-Version 0.9.3
+Version 0.9.3 (r760@nl4j, 20100121)
 
 - Fixed parsing of some common C expressions (better tolerates inline functions)
 - Fixed parsing of OpenCL source codes (used by JavaCL Generator project on NativeLibs4Java/JavaCL project)
