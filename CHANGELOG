@@ -1,5 +1,9 @@
 Current development version (0.9.3-SNAPSHOT)
 
+...
+
+Version 0.9.3
+
 - Fixed parsing of some common C expressions (better tolerates inline functions)
 - Fixed parsing of OpenCL source codes (used by JavaCL Generator project on NativeLibs4Java/JavaCL project)
 - Introduced experimental lightweight structures support (use new "-runtime JNAeratorNL4JStructs" switch)

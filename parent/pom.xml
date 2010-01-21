@@ -3,16 +3,16 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.jnaerator</groupId>
     <artifactId>jnaerator-parent</artifactId>
-    <version>0.9.3-SNAPSHOT</version>
+    <version>0.9.3</version>
     <packaging>pom</packaging>
     <inceptionYear>2009</inceptionYear>
     <name>JNAerator Abstract Parent Project</name>
 	
 	<properties>
 		<rococoa.version>0.5</rococoa.version>
-		<jnaerator.version>0.9.3-SNAPSHOT</jnaerator.version>
+		<jnaerator.version>0.9.3</jnaerator.version>
 		<jarsigner.skip>true</jarsigner.skip>
-		<nl4j-runtime.version>0.1-SNAPSHOT</nl4j-runtime.version>
+		<nl4j-runtime.version>0.1</nl4j-runtime.version>
 		<jna.version>3.2.4</jna.version>
 	</properties>
 

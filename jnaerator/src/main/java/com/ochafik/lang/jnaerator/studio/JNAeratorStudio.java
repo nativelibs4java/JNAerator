@@ -93,6 +93,7 @@ import com.ochafik.util.SystemUtils;
 import com.ochafik.util.listenable.ListenableCollections;
 import com.ochafik.util.listenable.ListenableComboModel;
 import com.ochafik.util.listenable.ListenableList;
+import java.util.List;
 
 /*
 include com/ochafik/lang/jnaerator/examples/*.h
@@ -112,11 +113,8 @@ public class JNAeratorStudio extends JPanel {
 		structsAsTopLevelClassesCb = new JCheckBox("Structs as Top-Level classes", true),
 		charPtrAsString = new JCheckBox("char*/wchar_t* as (W)String", false),
 		noCommentNoManglingCb = new JCheckBox("No comment & no mangling", false);
-	
-    JComboBox runtimeCombo = new JComboBox(JNAeratorConfig.Runtime.values()) {{
-        setToolTipText("Target runtime library");
-        setSelectedItem(JNAeratorConfig.Runtime.JNAerator);
-    }};
+
+    JComboBox runtimeCombo;
 
 	JTextArea errorsArea = new JTextArea();
 	JSplitPane sp;
@@ -310,6 +308,17 @@ public class JNAeratorStudio extends JPanel {
 	private JButton generateButton;
 	public JNAeratorStudio() {
 		super(new BorderLayout());
+
+        List<JNAeratorConfig.Runtime> runtimeValues = new ArrayList<JNAeratorConfig.Runtime>();
+        for (JNAeratorConfig.Runtime runtime : JNAeratorConfig.Runtime.values())
+        if (runtime != JNAeratorConfig.Runtime.NL4J)
+            runtimeValues.add(runtime);
+
+        runtimeCombo = new JComboBox(runtimeValues.toArray()) {{
+            setToolTipText("Target runtime library");
+            setSelectedItem(JNAeratorConfig.Runtime.JNAerator);
+        }};
+
 		resultsListCombo.setModel(new ListenableComboModel<ResultContent>(results));
 		
 		//animator.setAcceleration(.2f); 
