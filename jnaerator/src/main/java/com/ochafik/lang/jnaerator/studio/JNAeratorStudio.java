@@ -311,7 +311,7 @@ public class JNAeratorStudio extends JPanel {
 
         List<JNAeratorConfig.Runtime> runtimeValues = new ArrayList<JNAeratorConfig.Runtime>();
         for (JNAeratorConfig.Runtime runtime : JNAeratorConfig.Runtime.values())
-        if (runtime != JNAeratorConfig.Runtime.NL4J)
+        //if (runtime != JNAeratorConfig.Runtime.NL4J)
             runtimeValues.add(runtime);
 
         runtimeCombo = new JComboBox(runtimeValues.toArray()) {{
