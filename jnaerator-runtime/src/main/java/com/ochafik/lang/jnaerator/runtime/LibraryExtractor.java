@@ -36,6 +36,8 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * @see http://landonf.bikemonkey.org/static/soylatte/
@@ -84,7 +86,7 @@ public class LibraryExtractor {
 			//ClassLoader cl = LibraryExtractor.class.getClassLoader();
 			String prefix = "(?i)" + (Platform.isWindows() || Platform.isWindowsCE() ? "" : "lib") + libraryName + "[^A-Za-z_].*";
 			String libsuffix = "(?i).*\\.(so|dll|dylib|jnilib)";
-			String othersuffix = "(?i).*\\.(pdb)";
+			//String othersuffix = "(?i).*\\.(pdb)";
 			
 			URL sourceURL = null;
 			List<URL> otherURLs = new ArrayList<URL>();
@@ -92,8 +94,20 @@ public class LibraryExtractor {
 
 			String arch = getCurrentOSAndArchString();
 			//System.out.println("libURL = " + libURL);
-			List<URL> list = URLUtils.listFiles(URLUtils.getResource(cl, "libraries/" + arch), null);
-			if (list.isEmpty()) {
+			List<URL> list = URLUtils.listFiles(URLUtils.getResource(cl, "libraries/" + arch), null),
+                    noArchList = URLUtils.listFiles(URLUtils.getResource(cl, "libraries/noarch"), null);
+
+            Set<String> names = new HashSet<String>();
+            for (URL url : list) {
+                String name = getFileName(url);
+                names.add(name);
+            }
+            for (URL url : noArchList) {
+                String name = getFileName(url);
+                if (names.add(name))
+                    list.add(url);
+            }
+			/*if (list.isEmpty()) {
 				for (URL u : URLUtils.listFiles(URLUtils.getResource(cl, "libraries"), null)) {
 					String f = u.getFile();
 					int i = f.lastIndexOf('/');
@@ -105,17 +119,17 @@ public class LibraryExtractor {
 					}
 				}
 				
-			}
+			}*/
 			for (File f : new File(".").listFiles())
 				if (f.isFile())
 					list.add(f.toURI().toURL());
 			
 			for (URL url : list) {
-				String fileName = new File(url.toString()).getName();
-				boolean pref = fileName.matches(prefix), suff = fileName.matches(libsuffix); 
+				String name = getFileName(url);
+				boolean pref = name.matches(prefix), suff = name.matches(libsuffix);
 				if (pref && suff)
 					sourceURL = url;
-				else if (suff || fileName.matches(othersuffix))
+				else //if (suff || fileName.matches(othersuffix))
 					otherURLs.add(url);
 			}
 			List<File> files = new ArrayList<File>();
@@ -249,5 +263,9 @@ public class LibraryExtractor {
         Object original = com.sun.jna.Native.loadLibrary(path, libraryClass, MangledFunctionMapper.DEFAULT_OPTIONS);
         return shouldTraceCalls(name) ?
             LibraryExtractor.getTracingLibrary(original, libraryClass) : original;
+    }
+
+    private static String getFileName(URL url) {
+        return new File(url.getFile()).getName();
     }
 }

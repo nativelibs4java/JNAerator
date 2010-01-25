@@ -160,7 +160,8 @@ public class JNAeratorCommandLineArgs {
 		NoJAR(				"(?i)-noJar",			"Do not create an output JAR"),
 //		EnableCPlusPlus(	"-cppInstanceMethods",	"Enable experimental C++ instance methods wrapping"),
 		NoLibBundle(		"(?i)-noLibBundle",		"Do not bundle libraries in output JAR"),
-		MaxConstructedFields(		
+		LibFile(            "-libFile",             "Bundle the provided file with the JNAerated JAR so that it is extracted with the library when it is first used.", new ArgDef(Type.ExistingFile, "resourceFile")),
+        MaxConstructedFields(
 							"-maxConstrFields",		"Maximum number of fields allowed for structure fields constructors. If a struct has more fields, it will only get a default constructor.", new ArgDef(Type.Int, "fieldCount")),
 		CPlusPlusGen(		"-genCPlusPlus",		"[Experimental, Not working at all] Generate C++ classes.");
 		

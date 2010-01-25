@@ -353,6 +353,9 @@ public class JNAerator {
                     case Runtime:
                         config.runtime = a.getEnumParam(0, JNAeratorConfig.Runtime.class);
                         break;
+                    case LibFile:
+                        config.addLibraryFile(a.getFileParam(0), arch);
+                        break;
 					case File:
 						return parsedFile(a);
 					case FrameworksPath:
@@ -462,7 +465,9 @@ public class JNAerator {
 					case IncludeArgs:
 						return parsedArgsInclude(a);
 					case Arch:
-						arch = a.getStringParam(0);
+						arch = a.getStringParam(0).trim();
+                        if (arch.length() == 0)
+                            arch = null;
 						break;
 					
 					}
