@@ -25,10 +25,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.ochafik.lang.jnaerator.parser.Identifier.SimpleIdentifier;
-import com.ochafik.util.listenable.Adapter;
-import com.ochafik.util.listenable.ListenableCollections;
 import com.ochafik.util.listenable.Pair;
-import com.ochafik.util.string.StringUtils;
 
 public abstract class Expression extends Element {
 	private static final long MAX_UINT_VALUE = 2L * Integer.MAX_VALUE;

@@ -18,14 +18,13 @@
 */
 package com.ochafik.lang.jnaerator.runtime;
 
-import com.sun.jna.Memory;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Field;
 import java.nio.Buffer;
 
+import com.sun.jna.Memory;
 import com.sun.jna.Native;
 import com.sun.jna.Pointer;
-import java.lang.reflect.Array;
 
 public abstract class Structure<S extends Structure<S, V, R>, V extends S, R extends S> 
 	extends com.sun.jna.Structure
@@ -38,7 +37,7 @@ public abstract class Structure<S extends Structure<S, V, R>, V extends S, R ext
 	public interface ByValue extends com.sun.jna.Structure.ByValue, StructureTypeDependent {}
 	
 	transient WeakReference<StructureType> dependency;
-	@Override
+	//@Override
 	public void setDependency(StructureType type) {
 		this.dependency = type == null ? null : new WeakReference<StructureType>(type);
 	}
@@ -159,11 +158,11 @@ public abstract class Structure<S extends Structure<S, V, R>, V extends S, R ext
 	public S[] castToArray() {
 		return castToArray(1);
 	}
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "deprecation" })
 	public R[] castToReferenceArray(int size) {
 		return (R[])byReference().toArray(size);
 	}
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "deprecation" })
 	public V[] castToValueArray(int size) {
 		return (V[])byValue().toArray(size);
 	}
@@ -186,7 +185,7 @@ public abstract class Structure<S extends Structure<S, V, R>, V extends S, R ext
 	}
 	/** Simply does a memcmp between the two memory blocks of the two structures
      */
-	@Override
+	//@Override
 	public int compareTo(Structure<S, V, R> o) {
         if (o == this)
             return 0;
@@ -225,6 +224,7 @@ public abstract class Structure<S extends Structure<S, V, R>, V extends S, R ext
 	public S use(Pointer m) {
 		return use(m, 0);
 	}
+	@SuppressWarnings("unchecked")
 	public S use(Pointer m, long byteOffset) {
 		useMemory(m, (int)byteOffset);
 		return (S)this;
@@ -232,6 +232,7 @@ public abstract class Structure<S extends Structure<S, V, R>, V extends S, R ext
 	public S use(Buffer m) {
 		return use(m, 0);
 	}
+	@SuppressWarnings("unchecked")
 	public S use(Buffer b, long byteOffset) {
 		useMemory(Native.getDirectBufferPointer(b), (int)byteOffset);
 		return (S)this;

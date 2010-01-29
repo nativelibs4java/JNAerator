@@ -21,8 +21,6 @@ package com.ochafik.lang.jnaerator.runtime.globals;
 import com.ochafik.lang.jnaerator.runtime.NativeSize;
 import com.ochafik.lang.jnaerator.runtime.NativeSizeByReference;
 import com.sun.jna.NativeLibrary;
-import com.sun.jna.NativeLong;
-import com.sun.jna.ptr.NativeLongByReference;
 
 public class GlobalNativeSize extends GlobalPrimitive<NativeSizeByReference> {
 	public GlobalNativeSize(NativeLibrary library, String... symbols) {

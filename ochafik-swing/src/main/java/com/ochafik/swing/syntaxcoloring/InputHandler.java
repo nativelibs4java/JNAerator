@@ -35,6 +35,7 @@ import javax.swing.text.BadLocationException;
  * @version $Id: InputHandler.java,v 1.14 1999/12/13 03:40:30 sp Exp $
  * @see org.gjt.sp.jedit.textarea.DefaultInputHandler
  */
+@SuppressWarnings("unchecked")
 public abstract class InputHandler extends KeyAdapter
 {
 	/**

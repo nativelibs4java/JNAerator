@@ -22,6 +22,7 @@ import javax.swing.undo.UndoableEdit;
  * @author Slava Pestov
  * @version $Id: SyntaxDocument.java,v 1.14 1999/12/13 03:40:30 sp Exp $
  */
+@SuppressWarnings("serial")
 public class SyntaxDocument extends PlainDocument
 {
 	/**

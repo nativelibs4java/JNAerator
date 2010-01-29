@@ -18,8 +18,6 @@
 */
 package com.ochafik.lang.jnaerator.parser;
 
-import static com.ochafik.util.string.StringUtils.*;
-
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;

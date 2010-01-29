@@ -274,7 +274,7 @@ public class BitFields {
 	WSTRING_HANDLER = new StringHandler(true)
 	;
 	
-	private static final Map primHandlers = new IdentityHashMap(10);
+	private static final Map<Class<?>, PrimHandler> primHandlers = new IdentityHashMap<Class<?>, PrimHandler>(10);
 	static {
 		primHandlers.put(Integer.TYPE, INT_HANDLER);
 		primHandlers.put(Integer.class, INT_HANDLER);
@@ -324,7 +324,7 @@ public class BitFields {
 		}
 	}
 	
-	private static PrimHandler getPrimHandler(Class type, int bitOffset, int bits) {
+	private static PrimHandler getPrimHandler(Class<?> type, int bitOffset, int bits) {
 		PrimHandler handler = (PrimHandler)primHandlers.get(type);
 //		if (handler == null && Pointer.class.isAssignableFrom(type))
 //			handler = (PrimHandler)primHandlers.get(Pointer.class);
@@ -382,7 +382,7 @@ public class BitFields {
 	}
 	public static final Object UNHANDLED_TYPE = new Object() {};
 	
-	public static boolean setPrimitiveValue(Pointer pointer, long offset, int bitOffset, int bits, Object value, Class type) {
+	public static boolean setPrimitiveValue(Pointer pointer, long offset, int bitOffset, int bits, Object value, Class<?> type) {
 		PrimHandler handler = getPrimHandler(type, bitOffset, bits);
 		if (handler == null)
 			return false;
@@ -428,7 +428,7 @@ public class BitFields {
 		}
 		return true;
 	}
-	public static Object getPrimitiveValue(Pointer pointer, long offset, int bitOffset, int bits, Class type) {
+	public static Object getPrimitiveValue(Pointer pointer, long offset, int bitOffset, int bits, Class<?> type) {
 		PrimHandler handler = getPrimHandler(type, bitOffset, bits);
 		if (handler == null)
 			return UNHANDLED_TYPE;

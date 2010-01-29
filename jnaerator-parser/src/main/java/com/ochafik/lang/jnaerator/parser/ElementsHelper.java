@@ -144,7 +144,8 @@ public class ElementsHelper {
 		return new AssignmentOp(a, op, b);
 	}
 
-    public static <T extends Element> List<T> clones(List<T> list) {
+    @SuppressWarnings("unchecked")
+	public static <T extends Element> List<T> clones(List<T> list) {
         List<T> clone = new ArrayList<T>(list.size());
         for (T e : list)
             clone.add((T)e.clone());

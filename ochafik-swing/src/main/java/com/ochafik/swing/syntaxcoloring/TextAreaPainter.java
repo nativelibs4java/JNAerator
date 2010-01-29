@@ -32,6 +32,7 @@ import javax.swing.text.Utilities;
  * @author Slava Pestov
  * @version $Id: TextAreaPainter.java,v 1.24 1999/12/13 03:40:30 sp Exp $
  */
+@SuppressWarnings({"serial"})
 public class TextAreaPainter extends JComponent implements TabExpander
 {
 	/**
@@ -364,6 +365,7 @@ public class TextAreaPainter extends JComponent implements TabExpander
 	 * cached font metrics and to recalculate which lines are visible.
 	 * @param font The font
 	 */
+	@SuppressWarnings("deprecation")
 	public void setFont(Font font)
 	{
 		super.setFont(font);

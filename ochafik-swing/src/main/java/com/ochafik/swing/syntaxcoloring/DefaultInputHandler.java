@@ -23,6 +23,7 @@ import javax.swing.KeyStroke;
  * @author Slava Pestov
  * @version $Id: DefaultInputHandler.java,v 1.18 1999/12/13 03:40:30 sp Exp $
  */
+@SuppressWarnings({"unused", "unchecked"})
 public class DefaultInputHandler extends InputHandler
 {
 	/**

@@ -2,7 +2,6 @@ package com.ochafik.lang.jnaerator.runtime;
 
 import com.sun.jna.IntegerType;
 import com.sun.jna.Native;
-import com.sun.jna.Platform;
 
 /**
  * 'size_t' C type (32 bits on 32 bits platforms, 64 bits on 64 bits platforms).
@@ -11,7 +10,11 @@ import com.sun.jna.Platform;
  * @author ochafik
  */
 public class NativeSize extends IntegerType {
-    /** Size of a size_t integer, in bytes. */
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 2398288011955445078L;
+	/** Size of a size_t integer, in bytes. */
     public static int SIZE = Native.SIZE_T_SIZE;//Platform.is64Bit() ? 8 : 4;
 
     /** Create a zero-valued Size. */

@@ -17,9 +17,7 @@ import java.nio.Buffer;
 import java.util.AbstractCollection;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -62,6 +60,7 @@ import java.util.WeakHashMap;
  * @author  Todd Fast, todd.fast@sun.com
  * @author twall@users.sf.net
  */
+@SuppressWarnings({"unchecked", "unused", "serial"})
 public abstract class Structure {
     
     /** Tagging interface to indicate the value of an instance of the

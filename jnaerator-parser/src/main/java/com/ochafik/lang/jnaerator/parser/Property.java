@@ -1,7 +1,5 @@
 package com.ochafik.lang.jnaerator.parser;
 
-import com.ochafik.util.string.StringUtils;
-
 public class Property extends Declaration {
 	Declaration declaration;
 	public Property() {}

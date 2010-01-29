@@ -22,8 +22,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import com.ochafik.lang.jnaerator.parser.TypeRef.FunctionSignature;
-
 public abstract class StoredDeclarations extends Declaration {
 	final List<Declarator> declarators = new ArrayList<Declarator>();
 

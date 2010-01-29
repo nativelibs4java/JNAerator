@@ -10,16 +10,13 @@
  */
 package com.sun.jna;
 
-import com.sun.jna.ptr.ByReference;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Array;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * An abstraction for a native pointer data type.  A Pointer instance 
@@ -379,11 +376,11 @@ public class Pointer {
     // Java type read methods
     //////////////////////////////////////////////////////////////////////////
 	
-	Object getValue(long offset, Class type, Object currentValue) {
+	Object getValue(long offset, Class<?> type, Object currentValue) {
 		return getValue(offset, 0, 0, type, currentValue);
 	}
 	
-    Object getValue(long offset, int bitOffset, int bits, Class type, Object currentValue) {
+    Object getValue(long offset, int bitOffset, int bits, Class<?> type, Object currentValue) {
 
         Object result = BitFields.getPrimitiveValue(this, offset, bitOffset, bits, type);
     	if (result != BitFields.UNHANDLED_TYPE)
@@ -467,7 +464,7 @@ public class Pointer {
         return result;
     }
 
-    private void getArrayValue(long offset, Object o, Class cls) {
+    private void getArrayValue(long offset, Object o, Class<?> cls) {
         int length = 0;
         length = Array.getLength(o);
         Object result = o;
@@ -766,7 +763,7 @@ v     * @param wide whether to convert from a wide or standard C string
      * determined by a NULL-valued terminating element.
      */
     public Pointer[] getPointerArray(long base) {
-        List array = new ArrayList();
+        List<Pointer> array = new ArrayList<Pointer>();
         int offset = 0;
         Pointer p = getPointer(base);
         while (p != null) {
@@ -814,7 +811,7 @@ v     * @param wide whether to convert from a wide or standard C string
      */
     public String[] getStringArray(long base, int length, boolean wide) {
     
-        List strings = new ArrayList();
+        List<String> strings = new ArrayList<String>();
         int offset = 0;
         Pointer p = getPointer(base);
         if (length != -1) {
@@ -839,11 +836,11 @@ v     * @param wide whether to convert from a wide or standard C string
     // Java type write methods
     //////////////////////////////////////////////////////////////////////////
 
-	void setValue(long offset, Object value, Class type) {
+	void setValue(long offset, Object value, Class<?> type) {
 		setValue(offset, 0, 0, value, type);
 	}
 
-	void setValue(long offset, int bitOffset, int bits, Object value, Class type) {
+	void setValue(long offset, int bitOffset, int bits, Object value, Class<?> type) {
 
 		if (BitFields.setPrimitiveValue(this, offset, bitOffset, bits, value, type))
 			return;
@@ -873,7 +870,7 @@ v     * @param wide whether to convert from a wide or standard C string
         }
         else if (NativeMapped.class.isAssignableFrom(type)) {
             NativeMappedConverter tc = NativeMappedConverter.getInstance(type);
-            Class nativeType = tc.nativeType();
+            Class<?> nativeType = tc.nativeType();
             setValue(offset, bitOffset, bits, tc.toNative(value, new ToNativeContext()), nativeType);
         }
         else if (type.isArray()) {
@@ -884,7 +881,7 @@ v     * @param wide whether to convert from a wide or standard C string
         }
     }
 
-    private void setArrayValue(long offset, Object value, Class cls) {
+    private void setArrayValue(long offset, Object value, Class<?> cls) {
         if (cls == byte.class) {
             byte[] buf = (byte[])value;
             write(offset, buf, 0, buf.length);
@@ -940,7 +937,7 @@ v     * @param wide whether to convert from a wide or standard C string
         else if (NativeMapped.class.isAssignableFrom(cls)) {
             NativeMapped[] buf = (NativeMapped[])value;
             NativeMappedConverter tc = NativeMappedConverter.getInstance(cls);
-            Class nativeType = tc.nativeType();
+            Class<?> nativeType = tc.nativeType();
             int size = Native.getNativeSize(value.getClass(), value) / buf.length;
             for (int i=0;i < buf.length;i++) {
                 Object element = tc.toNative(buf[i], new ToNativeContext());

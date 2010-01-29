@@ -36,6 +36,7 @@ import com.ochafik.util.string.StringUtils;
 
 public class CompilerUtils {
 	public static class CompilationError extends IOException {
+		private static final long serialVersionUID = 4002559714569792833L;
 		public final String compilerClass;
 		//public final String bootclasspath;
 		public final List<Diagnostic<? extends JavaFileObject>> diagnostics;

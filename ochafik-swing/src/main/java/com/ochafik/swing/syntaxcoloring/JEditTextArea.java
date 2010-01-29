@@ -15,7 +15,6 @@ import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Insets;
 import java.awt.LayoutManager;
-import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.StringSelection;
@@ -91,6 +90,7 @@ import javax.swing.undo.UndoableEdit;
  * @author Slava Pestov
  * @version $Id: JEditTextArea.java,v 1.36 1999/12/13 03:40:30 sp Exp $
  */
+@SuppressWarnings("serial")
 public class JEditTextArea extends JComponent
 {
 	/**
@@ -305,7 +305,6 @@ public class JEditTextArea extends JComponent
 	{
 		if(firstLine == this.firstLine)
 			return;
-		int oldFirstLine = this.firstLine;
 		this.firstLine = firstLine;
 		if(firstLine != vertical.getValue())
 			updateScrollBars();
@@ -330,7 +329,6 @@ public class JEditTextArea extends JComponent
 			return;
 		int height = painter.getHeight();
 		int lineHeight = painter.getFontMetrics().getHeight();
-		int oldVisibleLines = visibleLines;
 		visibleLines = height / lineHeight;
 		updateScrollBars();
 	}
@@ -368,8 +366,6 @@ public class JEditTextArea extends JComponent
 	public boolean setOrigin(int firstLine, int horizontalOffset)
 	{
 		boolean changed = false;
-		int oldFirstLine = this.firstLine;
-
 		if(horizontalOffset != this.horizontalOffset)
 		{
 			this.horizontalOffset = horizontalOffset;
@@ -542,7 +538,8 @@ public class JEditTextArea extends JComponent
 					= tokenMarker.markTokens(lineSegment,line);
 			}
 
-			Toolkit toolkit = painter.getToolkit();
+//			Toolkit toolkit = 
+				painter.getToolkit();
 			Font defaultFont = painter.getFont();
 			SyntaxStyle[] styles = painter.getStyles();
 
@@ -641,7 +638,8 @@ public class JEditTextArea extends JComponent
 			}
 
 			int offset = 0;
-			Toolkit toolkit = painter.getToolkit();
+//			Toolkit toolkit = 
+				painter.getToolkit();
 			Font defaultFont = painter.getFont();
 			SyntaxStyle[] styles = painter.getStyles();
 
@@ -1813,7 +1811,7 @@ public class JEditTextArea extends JComponent
 				centerHeight);
 
 			// Lay out all status components, in order
-			Enumeration status = leftOfScrollBar.elements();
+			Enumeration<?> status = leftOfScrollBar.elements();
 			while(status.hasMoreElements())
 			{
 				Component comp = (Component)status.nextElement();
@@ -1836,7 +1834,7 @@ public class JEditTextArea extends JComponent
 		private Component center;
 		private Component right;
 		private Component bottom;
-		private Vector leftOfScrollBar = new Vector();
+		private Vector<Object> leftOfScrollBar = new Vector<Object>();
 	}
 
 	static class CaretBlinker implements ActionListener

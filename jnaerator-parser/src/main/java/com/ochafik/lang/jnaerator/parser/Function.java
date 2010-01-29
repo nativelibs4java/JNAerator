@@ -18,18 +18,15 @@
 */
 package com.ochafik.lang.jnaerator.parser;
 
-import static com.ochafik.lang.jnaerator.parser.ElementsHelper.*;
+import static com.ochafik.lang.jnaerator.parser.ElementsHelper.ident;
+import static com.ochafik.lang.jnaerator.parser.ElementsHelper.typeRef;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.NoSuchElementException;
-
-//import org.rococoa.ReturnType;
 
 import com.ochafik.lang.jnaerator.parser.Expression.FunctionCall;
-import com.ochafik.util.string.StringUtils;
 
 public class Function extends Declaration implements Declarator.MutableByDeclarator {
 	//private Struct owner;
@@ -43,8 +40,8 @@ public class Function extends Declaration implements Declarator.MutableByDeclara
 	Identifier name;
 	
 	public Function setName(Identifier name) {
-		if (name != null && name.toString().equals("NSStringFromSelector"))
-			name = name;
+//		if (name != null && name.toString().equals("NSStringFromSelector"))
+//			name = name;
 		
 		this.name = changeValue(this, this.name, name);
 		return this;

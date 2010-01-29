@@ -19,7 +19,6 @@
 package com.ochafik.lang.jnaerator.parser;
 
 import com.ochafik.lang.jnaerator.parser.Declarator.MutableByDeclarator;
-import com.ochafik.util.string.StringUtils;
 
 public class Arg extends Declaration {
 	String selector;

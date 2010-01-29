@@ -25,7 +25,6 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import com.ochafik.lang.jnaerator.parser.Function.Type;
-import com.ochafik.util.string.StringUtils;
 
 /**
  * @see http://msdn.microsoft.com/en-us/library/4x7sfztk(VS.80).aspx

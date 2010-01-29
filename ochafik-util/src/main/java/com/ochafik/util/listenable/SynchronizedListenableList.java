@@ -43,8 +43,8 @@ class SynchronizedListenableList<T> extends SynchronizedListenableCollection<T> 
 	}
 
 	public ListIterator<T> listIterator() {
-		if (true)
-			throw new UnsupportedOperationException();
+//		if (true)
+//			throw new UnsupportedOperationException();
 		
 		synchronized (mutex) {
 			return list.listIterator();
@@ -52,8 +52,8 @@ class SynchronizedListenableList<T> extends SynchronizedListenableCollection<T> 
 	}
 
 	public ListIterator<T> listIterator(int index) {
-		if (true)
-			throw new UnsupportedOperationException();
+//		if (true)
+//			throw new UnsupportedOperationException();
 		
 		synchronized (mutex) {
 			return list.listIterator(index);
@@ -73,8 +73,8 @@ class SynchronizedListenableList<T> extends SynchronizedListenableCollection<T> 
 	}
 
 	public List<T> subList(int fromIndex, int toIndex) {
-		if (true)
-			throw new UnsupportedOperationException();
+//		if (true)
+//			throw new UnsupportedOperationException();
 		
 		synchronized (mutex) {
 			return list.subList(fromIndex, toIndex);

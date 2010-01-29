@@ -21,8 +21,6 @@ package com.ochafik.lang.jnaerator.parser;
 import java.util.Arrays;
 import java.util.List;
 
-import com.ochafik.util.string.StringUtils;
-
 public class VariablesDeclaration extends StoredDeclarations {
 
 	public VariablesDeclaration() {}

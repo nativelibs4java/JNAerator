@@ -14,6 +14,7 @@ package com.ochafik.swing.syntaxcoloring;
  * @author Slava Pestov
  * @version $Id: XMLTokenMarker.java,v 1.2 1999/12/13 03:40:30 sp Exp $
  */
+@SuppressWarnings({})
 public class XMLTokenMarker extends HTMLTokenMarker
 {
 	public XMLTokenMarker()

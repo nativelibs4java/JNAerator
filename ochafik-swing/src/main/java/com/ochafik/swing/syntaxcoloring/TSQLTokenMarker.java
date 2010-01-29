@@ -6,6 +6,7 @@ package com.ochafik.swing.syntaxcoloring;
  * @author mike dillon
  * @version $Id: TSQLTokenMarker.java,v 1.9 1999/12/13 03:40:30 sp Exp $
  */
+@SuppressWarnings({})
 public class TSQLTokenMarker extends SQLTokenMarker
 {
 	// public members

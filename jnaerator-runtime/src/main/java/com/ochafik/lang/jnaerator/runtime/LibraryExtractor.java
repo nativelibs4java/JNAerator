@@ -47,7 +47,6 @@ import java.util.Set;
 public class LibraryExtractor {
 	static {
 		if (Platform.isWindows()) {
-			File ff;
 			String path = System.getProperty("java.library.path");
 			String winPath = "c:\\Windows\\" + (Platform.is64Bit() ? "SysWOW64" : "System32");
 			if (path == null)
@@ -219,12 +218,12 @@ public class LibraryExtractor {
     public static boolean shouldTraceCalls(String libraryName) {
         return  "true".equals(System.getProperty("jna.traceCalls")) || "true".equals(System.getProperty(libraryName.toLowerCase() + ".traceCalls"));
     }
-    public static final Object getTracingLibrary(final Object original, Class libraryClass) {
+    public static final Object getTracingLibrary(final Object original, Class<?> libraryClass) {
         try {
             final String pref = "[" + libraryClass.getSimpleName() + "]";
             InvocationHandler handler = new InvocationHandler() {
 
-                @Override
+                //@Override
                 public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
                     StringBuilder b = new StringBuilder(pref);
                     b.append(method.getDeclaringClass().getName() + "." + method.getName() + "(");
@@ -253,13 +252,13 @@ public class LibraryExtractor {
                 }
 
             };
-            Class proxyClass = Proxy.getProxyClass(libraryClass.getClassLoader(), libraryClass);
+            Class<?> proxyClass = Proxy.getProxyClass(libraryClass.getClassLoader(), libraryClass);
             return proxyClass.getConstructor(InvocationHandler.class).newInstance(handler);
         } catch (Exception ex) {
             throw new RuntimeException("Failed to create trace library");
         }
     }
-    public static final Object getLibrary(String name, String path, final Class libraryClass) {
+    public static final Object getLibrary(String name, String path, final Class<?> libraryClass) {
         Object original = com.sun.jna.Native.loadLibrary(path, libraryClass, MangledFunctionMapper.DEFAULT_OPTIONS);
         return shouldTraceCalls(name) ?
             LibraryExtractor.getTracingLibrary(original, libraryClass) : original;

@@ -5,7 +5,18 @@
 
 package com.ochafik.lang.jnaerator.parser;
 
-import static com.ochafik.util.string.StringUtils.*;
+import static com.ochafik.util.string.StringUtils.LINE_SEPARATOR;
+
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.Stack;
 
 import com.ochafik.lang.jnaerator.parser.Declarator.ArrayDeclarator;
 import com.ochafik.lang.jnaerator.parser.Declarator.DirectDeclarator;
@@ -19,7 +30,6 @@ import com.ochafik.lang.jnaerator.parser.Expression.BinaryOp;
 import com.ochafik.lang.jnaerator.parser.Expression.Cast;
 import com.ochafik.lang.jnaerator.parser.Expression.ConditionalExpression;
 import com.ochafik.lang.jnaerator.parser.Expression.Constant;
-import com.ochafik.lang.jnaerator.parser.Expression.Constant.IntForm;
 import com.ochafik.lang.jnaerator.parser.Expression.EmptyArraySize;
 import com.ochafik.lang.jnaerator.parser.Expression.ExpressionSequence;
 import com.ochafik.lang.jnaerator.parser.Expression.FunctionCall;
@@ -32,6 +42,7 @@ import com.ochafik.lang.jnaerator.parser.Expression.OpaqueExpression;
 import com.ochafik.lang.jnaerator.parser.Expression.TypeRefExpression;
 import com.ochafik.lang.jnaerator.parser.Expression.UnaryOp;
 import com.ochafik.lang.jnaerator.parser.Expression.VariableRef;
+import com.ochafik.lang.jnaerator.parser.Expression.Constant.IntForm;
 import com.ochafik.lang.jnaerator.parser.Identifier.QualifiedIdentifier;
 import com.ochafik.lang.jnaerator.parser.Identifier.SimpleIdentifier;
 import com.ochafik.lang.jnaerator.parser.Statement.Block;
@@ -53,19 +64,6 @@ import com.ochafik.util.listenable.Adapter;
 import com.ochafik.util.listenable.ListenableCollections;
 import com.ochafik.util.listenable.Pair;
 import com.ochafik.util.string.StringUtils;
-
-import static com.ochafik.lang.jnaerator.parser.ElementsHelper.*;
-
-import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.Stack;
 
 /**
  *
@@ -195,8 +193,7 @@ public class Printer implements Visitor {
     }
 
     public void visitFunction(Function e) {
-        String s = "";
-		TypeRef valueType = e.getValueType();
+        TypeRef valueType = e.getValueType();
 		Identifier name = e.getName();
 		List<Modifier> modifiers = e.getModifiers();
 
@@ -209,7 +206,6 @@ public class Printer implements Visitor {
 		if (!e.getAnnotations().isEmpty())
 			implode(e.getAnnotations(), "\n" + indent).append("\n", indent);
 
-		String preMods;
 		switch (e.getType()) {
 		case StaticInit:
 			implode(modifiers, " ");
@@ -921,7 +917,8 @@ public class Printer implements Visitor {
 
         rootElement.accept(new Scanner() {
 
-            @Override
+            @SuppressWarnings("unchecked")
+			@Override
             public void visitIdentifier(Identifier e) {
                 super.visitIdentifier(e);
                 
@@ -978,7 +975,8 @@ public class Printer implements Visitor {
 
         out.println(new Printer() {
 
-            @Override
+            @SuppressWarnings("unchecked")
+			@Override
             public void visitQualifiedIdentifier(QualifiedIdentifier e) {
 
 

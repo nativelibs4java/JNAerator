@@ -7,6 +7,7 @@ import javax.swing.JScrollPane;
 import com.ochafik.io.ReadText;
 
 public class Test {
+	@SuppressWarnings("deprecation")
 	public static void main(String args[]) {
 		JFrame f=new JFrame("Test");
 		String text=args.length==0 ? "" : ReadText.readText(new File(args[0]));

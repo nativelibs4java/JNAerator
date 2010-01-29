@@ -35,7 +35,7 @@ public abstract class Union<S extends Union<S, V, R>, V extends S, R extends S>
 	public interface ByValue extends com.sun.jna.Union.ByValue, StructureTypeDependent {}
 
 	transient WeakReference<StructureType> dependency;
-	@Override
+	//@Override
 	public void setDependency(StructureType type) {
 		this.dependency = type == null ? null : new WeakReference<StructureType>(type);
 	}
@@ -131,6 +131,7 @@ public abstract class Union<S extends Union<S, V, R>, V extends S, R extends S>
 	public S use(Pointer m) {
 		return use(m, 0);
 	}
+	@SuppressWarnings("unchecked")
 	public S use(Pointer m, long byteOffset) {
 		useMemory(m, (int)byteOffset);
 		return (S)this;
@@ -138,6 +139,7 @@ public abstract class Union<S extends Union<S, V, R>, V extends S, R extends S>
 	public S use(Buffer m) {
 		return use(m, 0);
 	}
+	@SuppressWarnings("unchecked")
 	public S use(Buffer b, long byteOffset) {
 		useMemory(Native.getDirectBufferPointer(b), (int)byteOffset);
 		return (S)this;

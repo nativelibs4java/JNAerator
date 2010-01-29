@@ -92,11 +92,5 @@ public interface DbgHelpLibrary extends com.sun.jna.Library {
 	 * <i>native declaration : C:\Prog\jnaerator\sources\com\ochafik\lang\jnaerator\nativesupport\dllexport.h:166</i>
 	 */
 	@com.ochafik.lang.jnaerator.runtime.Mangling({"_Z20UnDecorateSymbolName5PCSTR4PSTR5DWORD5DWORD", "?UnDecorateSymbolName@@YGX5PCSTR4PSTR5DWORD5DWORD@Z"})
-	int UnDecorateSymbolName(java.lang.String name, com.ochafik.lang.jnaerator.runtime.StringPointer.ByValue outputString, int maxStringLength, int flags);
-	/**
-	 * Original signature : <code>UnDecorateSymbolName(PCSTR, PSTR, DWORD, DWORD)</code><br>
-	 * <i>native declaration : C:\Prog\jnaerator\sources\com\ochafik\lang\jnaerator\nativesupport\dllexport.h:166</i>
-	 */
-	@com.ochafik.lang.jnaerator.runtime.Mangling({"_Z20UnDecorateSymbolName5PCSTR4PSTR5DWORD5DWORD", "?UnDecorateSymbolName@@YGX5PCSTR4PSTR5DWORD5DWORD@Z"})
 	int UnDecorateSymbolName(java.lang.String name, java.nio.ByteBuffer outputString, int maxStringLength, int flags);
 }

@@ -30,7 +30,6 @@ import com.sun.jna.FunctionMapper;
 import com.sun.jna.Library;
 import com.sun.jna.NativeLibrary;
 import com.sun.jna.win32.StdCallFunctionMapper;
-import com.sun.jna.win32.W32APIFunctionMapper;
 
 public class MangledFunctionMapper implements FunctionMapper {
 	public static final Map<Object, Object> DEFAULT_OPTIONS;
