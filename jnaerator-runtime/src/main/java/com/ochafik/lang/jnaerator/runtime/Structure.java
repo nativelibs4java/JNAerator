@@ -76,6 +76,7 @@ public abstract class Structure<S extends Structure<S, V, R>, V extends S, R ext
 	public V byValue() { return setupClone(newByValue(), this); }
 	public S clone() { return setupClone(newInstance(), this); }
 
+	@SuppressWarnings("unchecked")
 	public static <S extends Structure>
 			S[] newArray(Class<S> structClass, int arrayLength) {
 		try {

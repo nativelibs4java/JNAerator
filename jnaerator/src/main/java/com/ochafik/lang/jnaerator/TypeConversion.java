@@ -18,45 +18,72 @@
 */
 package com.ochafik.lang.jnaerator;
 
-import com.nativelibs4java.runtime.ValuedEnum;
-import com.nativelibs4java.runtime.ann.CLong;
-import com.nativelibs4java.runtime.ann.PointerSized;
-import java.nio.*;
+import static com.ochafik.lang.SyntaxUtils.as;
+import static com.ochafik.lang.jnaerator.parser.ElementsHelper.classLiteral;
+import static com.ochafik.lang.jnaerator.parser.ElementsHelper.expr;
+import static com.ochafik.lang.jnaerator.parser.ElementsHelper.ident;
+import static com.ochafik.lang.jnaerator.parser.ElementsHelper.memberRef;
+import static com.ochafik.lang.jnaerator.parser.ElementsHelper.methodCall;
+import static com.ochafik.lang.jnaerator.parser.ElementsHelper.staticField;
+import static com.ochafik.lang.jnaerator.parser.ElementsHelper.typeRef;
+import static com.ochafik.lang.jnaerator.parser.ElementsHelper.varRef;
+
+import java.nio.Buffer;
+import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
+import java.nio.DoubleBuffer;
+import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
+import java.nio.LongBuffer;
+import java.nio.ShortBuffer;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Stack;
 import java.util.TreeMap;
+import java.util.regex.Pattern;
 
+import org.rococoa.ObjCClass;
+import org.rococoa.ObjCObject;
 import org.rococoa.cocoa.foundation.NSObject;
-import com.ochafik.lang.SyntaxUtils;
-import static com.ochafik.lang.SyntaxUtils.*;
 
+import com.nativelibs4java.runtime.ValuedEnum;
+import com.nativelibs4java.runtime.ann.CLong;
+import com.nativelibs4java.runtime.ann.PointerSized;
+import com.ochafik.lang.SyntaxUtils;
 import com.ochafik.lang.jnaerator.JNAeratorConfig.GenFeatures;
 import com.ochafik.lang.jnaerator.parser.Annotation;
 import com.ochafik.lang.jnaerator.parser.Arg;
 import com.ochafik.lang.jnaerator.parser.Declaration;
+import com.ochafik.lang.jnaerator.parser.Declarator;
 import com.ochafik.lang.jnaerator.parser.Define;
 import com.ochafik.lang.jnaerator.parser.Element;
 import com.ochafik.lang.jnaerator.parser.Enum;
 import com.ochafik.lang.jnaerator.parser.Expression;
 import com.ochafik.lang.jnaerator.parser.Function;
 import com.ochafik.lang.jnaerator.parser.Identifier;
+import com.ochafik.lang.jnaerator.parser.ModifiableElement;
 import com.ochafik.lang.jnaerator.parser.Modifier;
+import com.ochafik.lang.jnaerator.parser.ObjCppParser;
 import com.ochafik.lang.jnaerator.parser.Scanner;
 import com.ochafik.lang.jnaerator.parser.Struct;
 import com.ochafik.lang.jnaerator.parser.TypeRef;
-import com.ochafik.lang.jnaerator.parser.Declarator;
 import com.ochafik.lang.jnaerator.parser.VariablesDeclaration;
+import com.ochafik.lang.jnaerator.parser.Declarator.ArrayDeclarator;
 import com.ochafik.lang.jnaerator.parser.Enum.EnumItem;
 import com.ochafik.lang.jnaerator.parser.Expression.AssignmentOp;
 import com.ochafik.lang.jnaerator.parser.Expression.AssignmentOperator;
 import com.ochafik.lang.jnaerator.parser.Expression.BinaryOp;
+import com.ochafik.lang.jnaerator.parser.Expression.BinaryOperator;
 import com.ochafik.lang.jnaerator.parser.Expression.Cast;
 import com.ochafik.lang.jnaerator.parser.Expression.Constant;
+import com.ochafik.lang.jnaerator.parser.Expression.EmptyArraySize;
 import com.ochafik.lang.jnaerator.parser.Expression.FunctionCall;
 import com.ochafik.lang.jnaerator.parser.Expression.MemberRef;
 import com.ochafik.lang.jnaerator.parser.Expression.MemberRefStyle;
@@ -74,17 +101,21 @@ import com.ochafik.lang.jnaerator.parser.TypeRef.Primitive;
 import com.ochafik.lang.jnaerator.parser.TypeRef.SimpleTypeRef;
 import com.ochafik.lang.jnaerator.parser.TypeRef.TaggedTypeRef;
 import com.ochafik.lang.jnaerator.parser.TypeRef.TargettedTypeRef;
-import com.ochafik.lang.jnaerator.parser.Declarator.ArrayDeclarator;
-import com.ochafik.lang.jnaerator.parser.Expression.BinaryOperator;
-import com.ochafik.lang.jnaerator.parser.Expression.EmptyArraySize;
-import com.ochafik.lang.jnaerator.parser.ModifiableElement;
 import com.ochafik.lang.jnaerator.runtime.CGFloatByReference;
 import com.ochafik.lang.jnaerator.runtime.CharByReference;
 import com.ochafik.lang.jnaerator.runtime.NativeSize;
 import com.ochafik.lang.jnaerator.runtime.NativeSizeByReference;
-import com.ochafik.lang.jnaerator.runtime.StringPointer;
-import com.ochafik.lang.jnaerator.runtime.WStringPointer;
-import com.ochafik.lang.jnaerator.runtime.globals.*;
+import com.ochafik.lang.jnaerator.runtime.globals.Global;
+import com.ochafik.lang.jnaerator.runtime.globals.GlobalByte;
+import com.ochafik.lang.jnaerator.runtime.globals.GlobalCGFloat;
+import com.ochafik.lang.jnaerator.runtime.globals.GlobalChar;
+import com.ochafik.lang.jnaerator.runtime.globals.GlobalDouble;
+import com.ochafik.lang.jnaerator.runtime.globals.GlobalFloat;
+import com.ochafik.lang.jnaerator.runtime.globals.GlobalInt;
+import com.ochafik.lang.jnaerator.runtime.globals.GlobalLong;
+import com.ochafik.lang.jnaerator.runtime.globals.GlobalNativeLong;
+import com.ochafik.lang.jnaerator.runtime.globals.GlobalNativeSize;
+import com.ochafik.lang.jnaerator.runtime.globals.GlobalShort;
 import com.ochafik.util.listenable.Pair;
 import com.ochafik.util.string.StringUtils;
 import com.sun.jna.Native;
@@ -98,16 +129,6 @@ import com.sun.jna.ptr.LongByReference;
 import com.sun.jna.ptr.NativeLongByReference;
 import com.sun.jna.ptr.PointerByReference;
 import com.sun.jna.ptr.ShortByReference;
-
-import com.ochafik.lang.jnaerator.parser.ObjCppParser;
-import java.nio.charset.Charset;
-import java.util.Collections;
-import java.util.Stack;
-import java.util.regex.Pattern;
-
-import org.rococoa.ObjCClass;
-import org.rococoa.ObjCObject;
-import static com.ochafik.lang.jnaerator.parser.ElementsHelper.*;
 
 public class TypeConversion implements ObjCppParser.ObjCParserHelper {
 	Result result;
@@ -932,7 +953,7 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
         
         NL4JConversion conv = new NL4JConversion();
 
-        boolean wide = false, ptr = false;
+        boolean wide = false;
         if (isString(valueTypeStr, false) || (wide = isString(valueTypeStr, true))) {
             conv.wideString = wide;
             conv.typeRef = typeRef(String.class);
@@ -1146,7 +1167,8 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
         throw new UnsupportedConversionException(original, "Unsupported type");
     }
 
-    Pair<TypeRef, List<Annotation>> toRawNL4JType(TypeRef nl4jType) throws UnsupportedConversionException {
+    @SuppressWarnings("unchecked")
+	Pair<TypeRef, List<Annotation>> toRawNL4JType(TypeRef nl4jType) throws UnsupportedConversionException {
         if (!(nl4jType instanceof SimpleTypeRef))
             throw new UnsupportedConversionException(nl4jType, "Not a known type : " + nl4jType);
 
@@ -1723,7 +1745,6 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
 		if (name instanceof SimpleIdentifier) {
 			SimpleIdentifier sname = (SimpleIdentifier)name;
 			String n = sname.getName();
-			TypeRef objCClass = null;
 			if (n.equals("id") &&
 					sname.getTemplateArguments().size() == 1/* &&
 					conversionMode != TypeConversionMode.NativeParameter &&
@@ -1894,9 +1915,9 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
 					}
 				} else {
 					String sname = name.toString();
-					if (name.equals("True") || name.equals("true"))
+					if (sname.equals("True") || sname.equals("true"))
 						res = typed(expr(Constant.Type.Bool, true), primRef(JavaPrim.Boolean));
-					else if (name.equals("False") || name.equals("false"))
+					else if (sname.equals("False") || sname.equals("false"))
 						res = typed(expr(Constant.Type.Bool, false), primRef(JavaPrim.Boolean));
 					else {
 						EnumItem enumItem = result.enumItems.get(name);

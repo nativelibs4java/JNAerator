@@ -41,9 +41,7 @@ import com.ochafik.io.ReadText;
 import com.ochafik.io.WriteText;
 import com.ochafik.lang.jnaerator.parser.Define;
 import com.ochafik.lang.jnaerator.parser.Expression;
-import com.ochafik.util.listenable.Pair;
 import com.ochafik.util.string.StringUtils;
-import java.util.Collection;
 import java.util.HashMap;
 
 public class PreprocessorUtils {

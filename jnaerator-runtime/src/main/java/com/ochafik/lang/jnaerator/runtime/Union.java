@@ -95,6 +95,7 @@ public abstract class Union<S extends Union<S, V, R>, V extends S, R extends S>
 	}
 
 
+	@SuppressWarnings("unchecked")
 	public static <S extends Union>
 			S[] newArray(Class<S> structClass, int arrayLength) {
 		try {

@@ -19,9 +19,7 @@
 package com.ochafik.lang.jnaerator;
 
 import java.io.PrintWriter;
-import java.io.Writer;
 import java.util.ArrayList;
-import java.util.EventListener;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
