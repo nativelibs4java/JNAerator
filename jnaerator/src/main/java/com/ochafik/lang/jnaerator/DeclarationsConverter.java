@@ -39,7 +39,6 @@ import com.ochafik.lang.jnaerator.JNAeratorConfig.GenFeatures;
 import com.ochafik.lang.jnaerator.cplusplus.CPlusPlusMangler;
 import com.ochafik.lang.jnaerator.parser.*;
 import com.ochafik.lang.jnaerator.parser.Enum;
-import com.ochafik.lang.jnaerator.parser.Function;
 import com.ochafik.lang.jnaerator.parser.Scanner;
 import com.ochafik.lang.jnaerator.parser.Statement.Block;
 import com.ochafik.lang.jnaerator.parser.StoredDeclarations.*;
@@ -539,6 +538,7 @@ public class DeclarationsConverter {
 
 	Map<String, Pair<Function, List<Function>>> functionAlternativesByNativeSignature = new LinkedHashMap<String, Pair<Function, List<Function>>>();
 
+	@SuppressWarnings("unchecked")
 	static <E extends Element> E cleanClone(E e) {
 		E c = (E)e.clone();
 		c.setCommentBefore(null);
