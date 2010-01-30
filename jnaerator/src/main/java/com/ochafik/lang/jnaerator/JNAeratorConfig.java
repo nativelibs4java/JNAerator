@@ -126,7 +126,21 @@ public class JNAeratorConfig {
                 return "Experimental dyncall-based runtime";
             }
 
-        };
+        },
+        IPhone(
+            false,
+            false,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+        );
 
         public static final Runtime DEFAULT = JNAerator;
         public enum Ann {
