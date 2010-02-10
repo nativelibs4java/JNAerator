@@ -53,9 +53,9 @@ import org.rococoa.ObjCClass;
 import org.rococoa.ObjCObject;
 import org.rococoa.cocoa.foundation.NSObject;
 
-import com.nativelibs4java.runtime.ValuedEnum;
-import com.nativelibs4java.runtime.ann.CLong;
-import com.nativelibs4java.runtime.ann.PointerSized;
+import com.bridj.ValuedEnum;
+import com.bridj.ann.CLong;
+import com.bridj.ann.PointerSized;
 import com.ochafik.lang.SyntaxUtils;
 import com.ochafik.lang.jnaerator.JNAeratorConfig.GenFeatures;
 import com.ochafik.lang.jnaerator.parser.Annotation;

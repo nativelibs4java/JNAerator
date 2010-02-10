@@ -18,12 +18,12 @@
 */
 package com.ochafik.lang.jnaerator;
 
-import com.nativelibs4java.runtime.FlagSet;
-import com.nativelibs4java.runtime.TempPointers;
-import com.nativelibs4java.runtime.ValuedEnum;
+import com.bridj.FlagSet;
+import com.bridj.TempPointers;
+import com.bridj.ValuedEnum;
 import static com.ochafik.lang.SyntaxUtils.as;
-//import com.nativelibs4java.runtime.structs.StructIO;
-//import com.nativelibs4java.runtime.structs.Array;
+//import com.bridj.structs.StructIO;
+//import com.bridj.structs.Array;
 
 import java.io.File;
 import java.io.IOException;

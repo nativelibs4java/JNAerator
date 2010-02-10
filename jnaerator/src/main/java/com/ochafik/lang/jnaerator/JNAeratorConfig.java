@@ -110,15 +110,15 @@ public class JNAeratorConfig {
 
         },
         NL4J(true, false,
-            com.nativelibs4java.runtime.Callback.class,
-            com.nativelibs4java.runtime.Pointer.class,
-            com.nativelibs4java.runtime.Memory.class,
-            com.nativelibs4java.runtime.Struct.class,
-            com.nativelibs4java.runtime.Struct.class,
-            com.nativelibs4java.runtime.StructIO.class,
-            com.nativelibs4java.runtime.Pointer.class,// "array" class
-            com.nativelibs4java.runtime.NativeLib.class,
-            com.nativelibs4java.runtime.ann.Bits.class,
+            com.bridj.Callback.class,
+            com.bridj.Pointer.class,
+            com.bridj.Memory.class,
+            com.bridj.Struct.class,
+            com.bridj.Struct.class,
+            com.bridj.StructIO.class,
+            com.bridj.Pointer.class,// "array" class
+            com.bridj.NativeLib.class,
+            com.bridj.ann.Bits.class,
             "nl4j-runtime.jar.files") {
 
             @Override
