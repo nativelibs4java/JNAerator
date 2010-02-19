@@ -112,12 +112,12 @@ public class JNAeratorConfig {
         NL4J(true, false,
             com.bridj.Callback.class,
             com.bridj.Pointer.class,
-            com.bridj.Memory.class,
+            null, //com.bridj.Memory.class,
             com.bridj.Struct.class,
             com.bridj.Struct.class,
-            com.bridj.StructIO.class,
+            null, //com.bridj.StructIO.class,
             com.bridj.Pointer.class,// "array" class
-            com.bridj.NativeLib.class,
+            null, //com.bridj.NativeLib.class,
             com.bridj.ann.Bits.class,
             "nl4j-runtime.jar.files") {
 
