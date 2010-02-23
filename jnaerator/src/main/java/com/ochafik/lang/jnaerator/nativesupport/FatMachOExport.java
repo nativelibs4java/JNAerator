@@ -62,7 +62,7 @@ public class FatMachOExport {
 			switch (lc.cmd) {
 			case LC_SYMTAB:
 				symtab_command sc = deserializeBigEndianStruct(new symtab_command(), raf, currentCommandOffset);
-				byte[] tbytes = GetFileBytes(raf, sc.symoff + machOffset, 100);
+				//byte[] tbytes = GetFileBytes(raf, sc.symoff + machOffset, 100);
 				
 				int symtabsize = new nlist().size(), scsize = sc.size();
 				for (int iSymTab = 0; iSymTab < sc.nsyms; iSymTab++) {
