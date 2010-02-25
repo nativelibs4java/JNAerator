@@ -18,9 +18,10 @@
 */
 package com.ochafik.lang.jnaerator;
 
-import com.bridj.FlagSet;
 import com.bridj.TempPointers;
 import com.bridj.ValuedEnum;
+import com.bridj.c.FlagSet;
+
 import static com.ochafik.lang.SyntaxUtils.as;
 //import com.bridj.structs.StructIO;
 //import com.bridj.structs.Array;
