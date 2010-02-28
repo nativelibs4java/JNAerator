@@ -113,8 +113,8 @@ public class JNAeratorConfig {
             com.bridj.Callback.class,
             com.bridj.Pointer.class,
             null, //com.bridj.Memory.class,
-            com.bridj.Struct.class,
-            com.bridj.Struct.class,
+            null,//com.bridj.Struct.class,
+            null,//com.bridj.Struct.class,
             null, //com.bridj.StructIO.class,
             com.bridj.Pointer.class,// "array" class
             null, //com.bridj.NativeLib.class,
