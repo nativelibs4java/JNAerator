@@ -55,7 +55,7 @@ import org.rococoa.cocoa.foundation.NSObject;
 
 import com.bridj.ValuedEnum;
 import com.bridj.ann.CLong;
-import com.bridj.ann.PointerSized;
+import com.bridj.ann.Ptr;
 import com.ochafik.lang.SyntaxUtils;
 import com.ochafik.lang.jnaerator.JNAeratorConfig.GenFeatures;
 import com.ochafik.lang.jnaerator.parser.Annotation;
@@ -1179,7 +1179,7 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
         SimpleTypeRef str = (SimpleTypeRef)nl4jType;
         Identifier strn = str.getName();
         if (strn.equals(result.config.runtime.pointerClass.getName())) {
-            ret.setSecond(Arrays.asList(new Annotation(PointerSized.class)));
+            ret.setSecond(Arrays.asList(new Annotation(Ptr.class)));
             ret.setFirst(typeRef(JavaPrim.Long.type));
         } else if (strn.equals(ValuedEnum.class.getName())) {
             ret.setFirst(typeRef(JavaPrim.Int.type));
@@ -1210,10 +1210,10 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
                     element.addAnnotation(new Annotation(CLong.class));
                     break;
                 case NativeSize:
-                    element.addAnnotation(new Annotation(PointerSized.class));
+                    element.addAnnotation(new Annotation(Ptr.class));
                     break;
                 case Pointer:
-                    element.addAnnotation(new Annotation(PointerSized.class));
+                    element.addAnnotation(new Annotation(Ptr.class));
                     break;
                 case Struct:
                     throw new UnsupportedConversionException(directType, "Struct by value not supported yet");
