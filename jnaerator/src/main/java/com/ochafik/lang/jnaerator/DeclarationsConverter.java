@@ -411,7 +411,7 @@ public class DeclarationsConverter {
                     }
                 }
                 break;
-            case NL4J:
+            case BridJ:
                 if (!signatures.classSignatures.add(enumName))
                         return;
 
@@ -585,7 +585,7 @@ public class DeclarationsConverter {
                 case JNAeratorNL4JStructs:
                     convertJNAFunction(function, signatures, isCallback, out, libraryClassName, sig, functionName, library);
                     break;
-                case NL4J:
+                case BridJ:
                     convertNL4JFunction(function, signatures, isCallback, out, libraryClassName, sig, functionName, library);
                     break;
                 default:

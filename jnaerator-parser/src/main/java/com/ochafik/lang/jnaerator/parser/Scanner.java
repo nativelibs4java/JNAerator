@@ -491,4 +491,10 @@ public class Scanner implements Visitor {
         visit(ca.getBody());
     }
 
+	public void visitTemplate(Template template) {
+		visitDeclaration(template);
+		visit(template.getArgs());
+		visit(template.getDeclaration());
+	}
+
 }

@@ -109,7 +109,7 @@ public class JNAeratorConfig {
             }
 
         },
-        NL4J(true, false,
+        BridJ(true, false,
             com.bridj.Callback.class,
             com.bridj.Pointer.class,
             null, //com.bridj.Memory.class,

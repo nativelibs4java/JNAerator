@@ -431,7 +431,9 @@ scope ModContext;
 		(
 			(
 				{ next("__pragma") }?=> pragmaContent |
-				templateDef | //TODO
+				templateDef {
+					$declarations.add($templateDef.template);
+				} |
 				functionDeclaration {
 					$declarations.add($functionDeclaration.function);
 				} |
@@ -742,7 +744,7 @@ scope ModContext;
 		'}'
 	;
 
-structCore returns [Struct struct]					
+structCore returns [Struct struct]
 scope Symbols; 
 @init {
 	$Symbols::typeIdentifiers = new HashSet<String>();
@@ -988,20 +990,47 @@ arrayTypeMutator returns [TypeMutator mutator]
 		']' 
 	;
 
-templateDef
+templateDef returns [Template template]
 scope Symbols; 
 scope IsTypeDef;
 @init {
 	$IsTypeDef::isTypeDef = true;
 	$Symbols::typeIdentifiers = new HashSet<String>();
+	$template = new Template();
 }
-	:	'template' '<' (templateArgDecl (',' templateArgDecl)* )? '>'
-		declaration
+	:	'template' '<' (
+			t1=templateArgDecl {
+				$template.addArg($t1.arg);
+			}
+			(
+				',' tx=templateArgDecl {
+					$template.addArg($tx.arg);
+				}
+			)* 
+		)? '>'
+		declaration {
+			if (!$declaration.declarations.isEmpty()) {
+				Declaration decl = $declaration.declarations.get(0);
+				$template.setDeclaration(decl);
+				if (decl instanceof TaggedTypeRefDeclaration) {
+					TaggedTypeRefDeclaration ttrd = (TaggedTypeRefDeclaration)decl;
+					TaggedTypeRef ttr = (TaggedTypeRef)ttrd.getTaggedTypeRef();
+					if (ttr instanceof Struct)
+						defineTypeIdentifierInParentScope(((Struct)ttr).getTag());
+				}	
+			}
+		}
 		//(structCore ';' | functionDeclaration)
 	;
 	
-templateArgDecl
-	:	argDef //mutableTypeRef ('=' constant)?
+templateArgDecl returns [Arg arg]
+	:	t=('class' | 'typename') n=IDENTIFIER {
+			$arg = new Arg($n.text, new SimpleTypeRef($t.text));
+			$Symbols::typeIdentifiers.add($t.text);
+		} |
+		argDef ('=' expression)? {
+			$arg = $argDef.arg;
+		} //mutableTypeRef ('=' constant)?
 	;	
 	
 functionSignatureSuffix returns [FunctionSignature signature]
@@ -1228,7 +1257,7 @@ argList returns [List<Arg> args, boolean isObjC]
 		op='(' 
 		(
 			a1=argDef {
-				if (!$a1.text.equals("void"))
+				if (!$a1.text.equals("void")) 
 					$args.add($a1.arg);
 			}
 			(

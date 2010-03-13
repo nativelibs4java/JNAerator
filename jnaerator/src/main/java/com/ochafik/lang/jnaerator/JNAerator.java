@@ -1065,7 +1065,7 @@ public class JNAerator {
             case JNAeratorNL4JStructs:
                 generateJNALibraryFiles(sourceFiles, result);
                 break;
-            case NL4J:
+            case BridJ:
                 generateNL4JLibraryFiles(sourceFiles, result);
                 break;
             default:

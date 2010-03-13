@@ -168,5 +168,7 @@ public interface Visitor {
     public void visitTry(Try aThis);
 
     public void visitCatch(Catch aThis);
+
+	void visitTemplate(Template template);
 	
 }

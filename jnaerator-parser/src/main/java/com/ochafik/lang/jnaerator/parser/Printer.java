@@ -1015,4 +1015,9 @@ public class Printer implements Visitor {
         }.append(rootElement));
     }
 
+	public void visitTemplate(Template template) {
+		append("template <").implode(template.getArgs(), ", ").append(">\n");
+		append(template.getDeclaration());        
+	}
+
 }
