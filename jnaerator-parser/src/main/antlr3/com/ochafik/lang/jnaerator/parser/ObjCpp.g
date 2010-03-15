@@ -814,6 +814,7 @@ anyOp returns [java.lang.Enum<?> op]
 	;
 
 //structInsides returns [List<Declaration> declarations, Struct.MemberVisibility
+
 functionDeclaration returns [Function function]
 scope Symbols;
 @init {
@@ -823,17 +824,26 @@ scope Symbols;
 			$function = mark(new Function(), -1);
 			$function.setType(Function.Type.CFunction);
 		}
-		preMods1=modifiers { $function.addModifiers($preMods1.modifiers); }
-		returnTypeRef=mutableTypeRef? { 
-			$function.setValueType($returnTypeRef.type); 
-		}
-		preMods2=modifiers { $function.addModifiers($preMods2.modifiers); }
-		name=qualifiedCppFunctionName {
-			$function.setName($name.identifier); 
-			mark($function, getLine($start));
-			//$function.setElementFile($functionName.file);
-			//$function.setElementLine($functionName.line);
-		}
+		(
+			// C++ cast operator
+			{ next("operator") }?=> IDENTIFIER {
+				$function.setName(ident("operator")); 
+				mark($function, getLine($start));
+			} 
+			castPreMods=modifiers { $function.addModifiers($castPreMods.modifiers); }
+			castTypeRef=mutableTypeRef { 
+				$function.setValueType($castTypeRef.type); 
+			} |
+			preMods1=modifiers { $function.addModifiers($preMods1.modifiers); }
+			returnTypeRef=mutableTypeRef? { 
+				$function.setValueType($returnTypeRef.type); 
+			}
+			preMods2=modifiers { $function.addModifiers($preMods2.modifiers); }
+			name=qualifiedCppFunctionName {
+				$function.setName($name.identifier); 
+				mark($function, getLine($start));
+			}
+		)	
 		argList {
 			$function.setArgs($argList.args);
 		}
@@ -1352,6 +1362,16 @@ binaryOp returns [Expression.BinaryOperator op]
 		}
 	;
 
+postfixOp returns [Expression.UnaryOperator op]
+	:
+		'++' { 
+			$op = UnaryOperator.PostIncr; 
+		} |
+		'--' { 
+			$op = UnaryOperator.PostDecr; 
+		}
+	; 
+	
 typeRefOrExpression returns [Expression expr]
 	:	tr=mutableTypeRef {
 			$expr = new Expression.TypeRefExpression($tr.type);
@@ -1388,8 +1408,25 @@ qualifiedCppFunctionName returns [Identifier identifier]
 		)*
 	;
 	
+operator returns [Expression.Operator op]
+	:
+		unaryOp { $op = $unaryOp.op; } | 
+		postfixOp { $op = $postfixOp.op; } | 
+		binaryOp { $op = $binaryOp.op; } | 
+		assignmentOp { $op = $assignmentOp.op; } |
+		'=' { $op = BinaryOperator.Assign; } |
+		'->' '*' { $op = BinaryOperator.ArrowStar; } |
+		'[' ']' { $op = BinaryOperator.SquareBrackets; } |
+		'(' ')' { $op = UnaryOperator.Parenthesis; } |
+		',' { $op = BinaryOperator.Comma; } |
+		'->' { $op = BinaryOperator.Arrow; }
+	;
+	
 simpleCppFunctionName returns [SimpleIdentifier identifier]
 	:
+		{ next("operator") }? IDENTIFIER operator {
+			$identifier = new SimpleIdentifier("operator" + $operator.op.toString());
+		} |
 		pre='~'? //n=IDENTIFIER anyOp? { 
 		i=simpleIdentifier {
 			if ($pre.text != null)
@@ -1592,11 +1629,8 @@ postfixExpr returns [Expression expr]
 			'->' ai=simpleIdentifier { 
 				$expr = new MemberRef($expr, MemberRefStyle.Arrow, $ai.identifier); 
 			} |
-			'++' { 
-				$expr = new UnaryOp($expr, UnaryOperator.PostIncr); 
-			} |
-			'--' { 
-				$expr = new UnaryOp($expr, UnaryOperator.PostDecr); 
+			postfixOp { 
+				$expr = new UnaryOp($expr, $postfixOp.op); 
 			}
 		)*
 	;
@@ -1771,14 +1805,14 @@ javaMethodDeclaration returns [Function function]
 IDENTIFIER
 	:	
 		(
-			(
+			//(
 				Letter 
 				(
 					Letter |
 					'0'..'9'
 				)*
-			) |
-			(
+			//) |
+			/*(
 				'operator'
 				(
 					'+' '+'? '='? |
@@ -1795,7 +1829,7 @@ IDENTIFIER
 					'!' '='? |
 					'~' '='?
 				)
-			)
+			)*/
 		)
 	;
 

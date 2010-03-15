@@ -560,7 +560,12 @@ public abstract class Expression extends Element {
 		}
 	}
 
-	public enum BinaryOperator {
+	public enum BinaryOperator  implements Operator {
+		Assign("="),
+		Arrow("->"),
+		ArrowStar("->*"),
+		SquareBrackets("[]"),
+		Comma(","),
 		Plus("+"), Minus("-"), Divide("/"), Multiply("*"), Modulo("%"), LeftShift("<<"), RightShift(">>"), SignedRightShift(">>>"), XOR("^"), 
 		LessEqual("<="), GreaterEqual(">="), Less("<"), Greater(">"), IsEqual("=="), IsDifferent("!="), BitOr("|"), Or("||"), BitAnd("&"), And("&&");
 		
@@ -573,7 +578,10 @@ public abstract class Expression extends Element {
 			return s;
 		}
 	};
-	public enum AssignmentOperator {
+	public interface Operator {
+		
+	}
+	public enum AssignmentOperator implements Operator {
 		Equal("="),
 		MultiplyEqual("*="),
 		DivideEqual("/="),
@@ -597,8 +605,9 @@ public abstract class Expression extends Element {
 			return s;
 		}
 	}
-	public enum UnaryOperator {
+	public enum UnaryOperator  implements Operator {
 		Not("!"), 
+		Parenthesis("()"),
 		Complement("~"),
 		PreIncr("++"), 
 		PreDecr("--"),

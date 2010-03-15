@@ -123,7 +123,7 @@ public class JNAeratorConfig {
 
             @Override
             public String toString() {
-                return "Experimental dyncall-based runtime";
+                return "BridJ (experimental dyncall-based runtime)";
             }
 
         },

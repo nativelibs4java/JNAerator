@@ -215,11 +215,20 @@ public class Printer implements Visitor {
 		case CFunction:
 		case CppMethod:
 		case JavaMethod:
-			implode(modifiers, " ");
-            space(!modifiers.isEmpty());
-			append(valueType);
-            space();
-            append(name, "(").implode(e.getArgs(), ", ").append(")");
+			if (name != null && name.equals("operator") && e.getType() == Function.Type.CppMethod) {
+            	append(name);
+            	space();
+            	implode(modifiers, " ");
+                space(!modifiers.isEmpty());
+                append(valueType);
+            } else {
+            	implode(modifiers, " ");
+                space(!modifiers.isEmpty());
+            	append(valueType);
+	            space();
+	            append(name);
+            }
+            append("(").implode(e.getArgs(), ", ").append(")");
 
             if (!e.getThrown().isEmpty())
                 append(" throws ").implode(e.getThrown(), ", ");
