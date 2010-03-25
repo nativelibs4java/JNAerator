@@ -21,6 +21,7 @@ package com.ochafik.lang.jnaerator.parser;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.ochafik.lang.jnaerator.parser.TypeRef.SimpleTypeRef;
 import com.ochafik.lang.jnaerator.parser.TypeRef.TaggedTypeRef;
 import java.util.Arrays;
 import java.util.Collections;
@@ -192,6 +193,13 @@ public class Enum extends TaggedTypeRef {
     public void setInterfaces(List<Identifier> interfaces) {
         changeValue(this, this.interfaces, interfaces);
     }
+    public void addInterface(Identifier interf) {
+		if (interf == null)
+			return;
+		interf.setParentElement(this);
+		interfaces.add(interf);
+	}
+	
 
 	@Override
 	public boolean replaceChild(Element child, Element by) {

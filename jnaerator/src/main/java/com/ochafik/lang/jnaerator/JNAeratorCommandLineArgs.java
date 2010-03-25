@@ -163,6 +163,7 @@ public class JNAeratorCommandLineArgs {
 		LibFile(            "-libFile",             "Bundle the provided file with the JNAerated JAR so that it is extracted with the library when it is first used.", new ArgDef(Type.ExistingFile, "resourceFile")),
         MaxConstructedFields(
 							"-maxConstrFields",		"Maximum number of fields allowed for structure fields constructors. If a struct has more fields, it will only get a default constructor.", new ArgDef(Type.Int, "fieldCount")),
+		GenPrivateMembers(	"-genPrivateMembers", 	"Generate wrappers for private fields and methods (will be protected and deprecated)."),
 		CPlusPlusGen(		"-genCPlusPlus",		"[Experimental, Not working at all] Generate C++ classes.");
 		
 		OptionDef(String clSwitch, String description, ArgDef... args) {

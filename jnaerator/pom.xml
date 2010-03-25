@@ -49,50 +49,62 @@ Users who are looking for ready-to-use libraries should check the NativeLibs4Jav
   
   <dependencies>
     
-  	<dependency>
-	  <groupId>com.ochafik</groupId>
-	  <artifactId>ochafik-swing</artifactId>
-	  <version>${jnaerator.version}</version>
-	  <scope>compile</scope>
-	</dependency>
 	
-  	<dependency>
-	  <groupId>com.jnaerator</groupId>
-	  <artifactId>jnaerator-rococoa-runtime</artifactId>
-	  <version>${jnaerator.version}</version>
-	  <scope>compile</scope>
-	</dependency>
 	
-  	<dependency>
-	  <groupId>com.nativelibs4java</groupId>
-	  <artifactId>bridj</artifactId>
-      <version>${nl4j-runtime.version}</version>
-      <scope>compile</scope>
-    </dependency>
 	
-  	<dependency>
-	  <groupId>com.jnaerator</groupId>
-	  <artifactId>jnaerator-parser</artifactId>
-	  <version>${jnaerator.version}</version>
-	  <scope>compile</scope>
-	</dependency>
 
 	
-	<dependency>
-		<groupId>org.anarres.cpp</groupId>
-		<artifactId>anarres-cpp-jnaerator</artifactId>
-		<version>1.2.5-JNAerator.3</version>
-		<scope>compile</scope>
-	</dependency>
-	
-	<dependency>
-		<groupId>org.eclipse.jdt</groupId>
-		<artifactId>core</artifactId>
-		<version>3.5</version>
-		<scope>compile</scope>
-	</dependency>
 	
 	
+	
+  	<dependency>
+  		<groupId>com.ochafik</groupId>
+  		<artifactId>ochafik-swing</artifactId>
+  		<version>${jnaerator.version}</version>
+  		<type>jar</type>
+  		<scope>compile</scope>
+  		<optional>false</optional>
+  	</dependency>
+  	<dependency>
+  		<groupId>com.jnaerator</groupId>
+  		<artifactId>jnaerator-rococoa-runtime</artifactId>
+  		<version>${jnaerator.version}</version>
+  		<type>jar</type>
+  		<scope>compile</scope>
+  		<optional>false</optional>
+  	</dependency>
+  	<dependency>
+  		<groupId>com.nativelibs4java</groupId>
+  		<artifactId>bridj</artifactId>
+  		<version>${nl4j-runtime.version}</version>
+  		<type>jar</type>
+  		<scope>compile</scope>
+  		<optional>false</optional>
+  	</dependency>
+  	<dependency>
+  		<groupId>com.jnaerator</groupId>
+  		<artifactId>jnaerator-parser</artifactId>
+  		<version>${jnaerator.version}</version>
+  		<type>jar</type>
+  		<scope>compile</scope>
+  		<optional>false</optional>
+  	</dependency>
+  	<dependency>
+  		<groupId>org.anarres.cpp</groupId>
+  		<artifactId>anarres-cpp-jnaerator</artifactId>
+  		<version>1.2.5-JNAerator.3</version>
+  		<type>jar</type>
+  		<scope>compile</scope>
+  		<optional>false</optional>
+  	</dependency>
+  	<dependency>
+  		<groupId>org.eclipse.jdt</groupId>
+  		<artifactId>core</artifactId>
+  		<version>3.5</version>
+  		<type>jar</type>
+  		<scope>compile</scope>
+  		<optional>false</optional>
+  	</dependency>
   </dependencies>
   <build>
 		<plugins>

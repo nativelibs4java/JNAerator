@@ -241,7 +241,10 @@ public class JNAeratorConfigUtils {
 	/**
 	 * TODO move this to a .h resource file
 	 */
-	public static void autoConfigure(final JNAeratorConfig config) {
+	public static void autoConfigure(final JNAeratorConfig config) 
+	{
+		if (config.runtime == JNAeratorConfig.Runtime.BridJ)
+			config.genCPlusPlus = true;
 		config.cPlusPlusManglers.add(new GCC4Mangler());
 		config.cPlusPlusManglers.add(new VC9Mangler());
 		

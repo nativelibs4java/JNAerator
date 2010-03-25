@@ -91,24 +91,6 @@ public class JNAeratorConfig {
             }
 
         },
-        JNAeratorNL4JStructs(true, true,
-            com.sun.jna.Callback.class,
-            com.sun.jna.Pointer.class,
-            com.sun.jna.Memory.class,
-            com.nativelibs4java.runtime.jna.Struct.class,
-            com.nativelibs4java.runtime.jna.Struct.class,
-            com.nativelibs4java.runtime.jna.StructIO.class,
-            null,//com.nativelibs4java.runtime.jna.Array.class,
-            com.sun.jna.Library.class,
-            com.nativelibs4java.runtime.ann.jna.Bits.class,
-            "jnaerator-runtime.jar.files,nl4j-runtime-structs-jna.jar.files") {
-
-            @Override
-            public String toString() {
-                return "JNAerator + experimental structs";
-            }
-
-        },
         BridJ(true, false,
             com.bridj.Callback.class,
             com.bridj.Pointer.class,
@@ -119,28 +101,28 @@ public class JNAeratorConfig {
             com.bridj.Pointer.class,// "array" class
             null, //com.bridj.NativeLib.class,
             com.bridj.ann.Bits.class,
-            "nl4j-runtime.jar.files") {
+            "bridj.jar.files") {
 
             @Override
             public String toString() {
                 return "BridJ (experimental dyncall-based runtime)";
             }
 
-        },
-        IPhone(
-            false,
-            false,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null
-        );
+        };//,
+//        IPhone(
+//            false,
+//            false,
+//            null,
+//            null,
+//            null,
+//            null,
+//            null,
+//            null,
+//            null,
+//            null,
+//            null,
+//            null
+//        );
 
         public static final Runtime DEFAULT = JNAerator;
         public enum Ann {
@@ -367,6 +349,7 @@ public class JNAeratorConfig {
 	public boolean noMangling;
 	public boolean noPrimitiveArrays;
 	public File scalaOut;
+	public boolean skipPrivateMembers = true;
 	public Collection<File> getFiles() {
 		/*return new AdaptedCollection<String, File>(libraryByFile.keySet(), new Adapter<String, File>() {
 			@Override

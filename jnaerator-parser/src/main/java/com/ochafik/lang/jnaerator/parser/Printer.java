@@ -186,7 +186,12 @@ public class Printer implements Visitor {
         List<EnumItem> items = e.getItems();
         for (int i = 0, len = items.size(); i < len; i++) {
             EnumItem item = items.get(i);
-            append(indent, item, i < len - 1 ? "," : null, "\n");
+            append(indent, item, i < len - 1 ? "," : ";", "\n");
+        }
+        if (e.getBody() != null) {
+        	append(indent);
+            implode(e.getBody().getDeclarations(), "\n" + indent);
+            append("\n");
         }
         deindent();
         append(indent, "}");
@@ -225,7 +230,7 @@ public class Printer implements Visitor {
             	implode(modifiers, " ");
                 space(!modifiers.isEmpty());
             	append(valueType);
-	            space();
+	            space(valueType != null);
 	            append(name);
             }
             append("(").implode(e.getArgs(), ", ").append(")");
@@ -287,6 +292,9 @@ public class Printer implements Visitor {
     public void visitStruct(Struct e) {
 
 		formatComments(e, false, true, true);
+		if (!e.getAnnotations().isEmpty())
+            implode(e.getAnnotations(), "\n" + indent).append("\n", indent);
+
         modifiersStringPrefix(e);
 
 		if (e.getType() != null)

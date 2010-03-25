@@ -316,7 +316,7 @@ public class JNAeratorStudio extends JPanel {
 
         runtimeCombo = new JComboBox(runtimeValues.toArray()) {{
             setToolTipText("Target runtime library");
-            setSelectedItem(JNAeratorConfig.Runtime.JNAerator);
+            setSelectedItem(JNAeratorConfig.Runtime.BridJ);
         }};
 
 		resultsListCombo.setModel(new ListenableComboModel<ResultContent>(results));
@@ -498,7 +498,10 @@ public class JNAeratorStudio extends JPanel {
 				config.libraryForElementsInNullFile = libraryName.getText();
 //				config.addFile(getFile(), "");
 				config.preprocessorConfig.includeStrings.add(sourceArea.getText());
-				config.genCPlusPlus = config.genCPlusPlus || sourceArea.getText().contains("//@" + JNAeratorCommandLineArgs.OptionDef.CPlusPlusGen.clSwitch);
+				if (config.runtime == Runtime.BridJ)
+					config.genCPlusPlus = true;
+				else
+					config.genCPlusPlus = config.genCPlusPlus || sourceArea.getText().contains("//@" + JNAeratorCommandLineArgs.OptionDef.CPlusPlusGen.clSwitch);
 				config.cacheDir = getDir("cache");
 				
 				final PrintStream out = System.out;

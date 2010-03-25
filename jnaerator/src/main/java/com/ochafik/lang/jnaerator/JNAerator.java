@@ -50,6 +50,9 @@ import org.antlr.runtime.RecognitionException;
 import org.rococoa.cocoa.foundation.NSClass;
 import org.rococoa.Rococoa;
 
+import com.bridj.BridJ;
+import com.bridj.TypedPointer;
+import com.bridj.cpp.CPPRuntime;
 import com.ochafik.io.FileListUtils;
 import com.ochafik.io.ReadText;
 import com.ochafik.lang.compiler.CompilerUtils;
@@ -58,6 +61,7 @@ import com.ochafik.lang.compiler.MemoryJavaFile;
 import com.ochafik.lang.compiler.URLFileObject;
 import com.ochafik.lang.jnaerator.JNAeratorCommandLineArgs.OptionDef;
 import com.ochafik.lang.jnaerator.nativesupport.DllExport;
+import com.ochafik.lang.jnaerator.parser.Annotation;
 import com.ochafik.lang.jnaerator.parser.Arg;
 import com.ochafik.lang.jnaerator.parser.Declaration;
 import com.ochafik.lang.jnaerator.parser.Declarator;
@@ -316,6 +320,9 @@ public class JNAerator {
 						break;
 					case SkipIncludedFrameworks:
 						config.skipIncludedFrameworks = true;
+						break;
+					case GenPrivateMembers:
+						config.skipPrivateMembers = false;
 						break;
 					case CPlusPlusGen:
 						config.genCPlusPlus = true;
@@ -1062,7 +1069,7 @@ public class JNAerator {
         switch (result.config.runtime) {
             case JNA:
             case JNAerator:
-            case JNAeratorNL4JStructs:
+//            case JNAeratorNL4JStructs:
                 generateJNALibraryFiles(sourceFiles, result);
                 break;
             case BridJ:
@@ -1095,6 +1102,13 @@ public class JNAerator {
 			interf.addModifiers(Modifier.Public);
 			interf.setTag(simpleLibraryClassName);
             interf.addParent(ident(config.runtime.libraryClass, expr(typeRef(simpleLibraryClassName))));
+            interf.addDeclaration(new Function(Function.Type.StaticInit, null, null).setBody(block(
+				stat(methodCall(
+					expr(typeRef(BridJ.class)),
+					MemberRefStyle.Dot,
+					"register"
+				))
+			)).addModifiers(Modifier.Static));
 
             String libFileOrDirArgName = "libraryFileOrDirectory";
             Function constr = new Function(Function.Type.JavaMethod, fullLibraryClassName.resolveLastSimpleIdentifier().clone(), null, new Arg(libFileOrDirArgName, typeRef(File.class)));
@@ -1267,10 +1281,10 @@ public class JNAerator {
             if (!signatures.classSignatures.add(fakePointer))
                 continue;
 
-            Struct ptClass = result.declarationsConverter.publicStaticClass(fakePointer, ident(PointerType.class), Struct.Type.JavaClass, null);
-            ptClass.addToCommentBefore("Pointer to unknown (opaque) type");
-
             if (result.config.runtime.hasJNA) {
+            	Struct ptClass = result.declarationsConverter.publicStaticClass(fakePointer, ident(PointerType.class), Struct.Type.JavaClass, null);
+                ptClass.addToCommentBefore("Pointer to unknown (opaque) type");
+
                 String pointerVarName = "address";
                 ptClass.addDeclaration(new Function(Function.Type.JavaMethod, fakePointer, null,
                     new Arg(pointerVarName, typeRef(Pointer.class))
@@ -1282,17 +1296,24 @@ public class JNAerator {
                 .setBody(
                     block(stat(methodCall("super")))
                 ));
+                interf.addDeclaration(decl(ptClass));
             } else {
+            	Struct ptClass = result.declarationsConverter.publicStaticClass(fakePointer, ident(TypedPointer.class), Struct.Type.JavaClass, null);
+                ptClass.addToCommentBefore("Pointer to unknown (opaque) type");
+
                 String addressVarName = "address";
                 ptClass.addDeclaration(new Function(Function.Type.JavaMethod, fakePointer, null,
                     new Arg(addressVarName, typeRef(long.class))
                 ).addModifiers(Modifier.Public).setBody(
                     block(stat(methodCall("super", varRef(addressVarName)))))
                 );
+                interf.addDeclaration(decl(ptClass));
             }
-            interf.addDeclaration(decl(ptClass));
         }
 
+        interf.addAnnotation(new Annotation(com.bridj.ann.Library.class, expr(library)));
+        interf.addAnnotation(new Annotation(com.bridj.ann.Runtime.class, expr(typeRef(CPPRuntime.class))));
+		
         interf = result.notifyBeforeWritingClass(fullLibraryClassName, interf, signatures, library);
         if (interf != null) {
             final PrintWriter out = result.classOutputter.getClassSourceWriter(fullLibraryClassName.toString());

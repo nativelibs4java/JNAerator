@@ -11,20 +11,24 @@
   
   <dependencies>
   
-	<dependency>
-      <groupId>com.jnaerator</groupId>
-      <artifactId>jnaerator-runtime</artifactId>
-      <version>${jnaerator.version}</version>
-      <scope>compile</scope>
-    </dependency>
 	
-	<dependency>
-	  <groupId>org.rococoa</groupId>
-	  <artifactId>rococoa-core</artifactId>
-	  <version>${rococoa.version}</version>
-	  <scope>compile</scope>
-	</dependency>
 	
+  	<dependency>
+  		<groupId>com.jnaerator</groupId>
+  		<artifactId>jnaerator-runtime</artifactId>
+  		<version>${jnaerator.version}</version>
+  		<type>jar</type>
+  		<scope>compile</scope>
+  		<optional>false</optional>
+  	</dependency>
+  	<dependency>
+  		<groupId>org.rococoa</groupId>
+  		<artifactId>rococoa-core</artifactId>
+  		<version>${rococoa.version}</version>
+  		<type>jar</type>
+  		<scope>compile</scope>
+  		<optional>false</optional>
+  	</dependency>
   </dependencies>
   
   <parent>

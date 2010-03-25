@@ -19,8 +19,12 @@
 package com.ochafik.lang.jnaerator;
 
 import com.bridj.FlagSet;
+import com.bridj.IntValuedEnum;
+import com.bridj.StructObject;
 import com.bridj.TempPointers;
 import com.bridj.ValuedEnum;
+import com.bridj.ann.Library;
+import com.bridj.cpp.CPPObject;
 
 import static com.ochafik.lang.SyntaxUtils.as;
 //import com.bridj.structs.StructIO;
@@ -43,6 +47,7 @@ import com.ochafik.lang.jnaerator.parser.Enum;
 import com.ochafik.lang.jnaerator.parser.Scanner;
 import com.ochafik.lang.jnaerator.parser.Statement.Block;
 import com.ochafik.lang.jnaerator.parser.StoredDeclarations.*;
+import com.ochafik.lang.jnaerator.parser.Struct.MemberVisibility;
 import com.ochafik.lang.jnaerator.parser.TypeRef.*;
 import com.ochafik.lang.jnaerator.parser.Expression.*;
 import com.ochafik.lang.jnaerator.parser.Function.Type;
@@ -364,7 +369,7 @@ public class DeclarationsConverter {
         switch (result.config.runtime) {
             case JNA:
             case JNAerator:
-            case JNAeratorNL4JStructs:
+//            case JNAeratorNL4JStructs:
                 boolean hasEnumClass = false;
                 if (enumName != null && enumName.resolveLastSimpleIdentifier().getName() != null) {
                     if (!signatures.classSignatures.add(enumName))
@@ -380,95 +385,118 @@ public class DeclarationsConverter {
                     out = struct;
                     signatures = new Signatures();
                 }
-
-                for (EnumItemResult er : results) {
-                    try {
-                        if (er.errorElement != null) {
-                            out.addDeclaration(er.errorElement);
-                            continue;
-                        }
-                        Declaration ct = outputConstant(
-                            er.originalItem.getName(),
-                            result.typeConverter.convertExpressionToJava(er.value, libraryClassName, true),
-                            signatures,
-                            er.originalItem,
-                            "enum item",
-                            libraryClassName,
-                            hasEnumClass,
-                            true,
-                            true,
-                            true
-                        );
-                        if (!result.config.noComments)
-                            if (ct != null && hasEnumClass) {
-                                String c = ct.getCommentBefore();
-                                ct.setCommentBefore(er.originalItem.getCommentBefore());
-                                ct.addToCommentBefore(c);
-                            }
-                        out.addDeclaration(ct);
-                    } catch (Exception ex) {
-                        out.addDeclaration(skipDeclaration(er.originalItem, ex.toString()));
-                    }
-                }
+                
+                outputEnumItemsAsConstants(results, out, signatures, libraryClassName, hasEnumClass);
                 break;
             case BridJ:
-                if (!signatures.classSignatures.add(enumName))
+            	hasEnumClass = false;
+                if (enumName != null && enumName.resolveLastSimpleIdentifier().getName() != null) {
+                    if (!signatures.classSignatures.add(enumName))
                         return;
 
-                Enum en = new Enum();
-                en.setType(Enum.Type.Java);
-                en.setTag(enumName.clone());
-                en.addModifiers(Modifier.Public);
-                out.addDeclaration(new TaggedTypeRefDeclaration(en));
-                Struct body = new Struct();
-                en.setBody(body);
-                for (EnumItemResult er : results) {
-                    if (er.errorElement != null) {
-                        out.addDeclaration(er.errorElement);
-                        continue;
-                    }
-                    en.addItem(new Enum.EnumItem(er.originalItem.getName(), er.value));
+                    signatures = new Signatures();
+                
+                    Enum en = new Enum();
+	                en.setType(Enum.Type.Java);
+	            	en.setTag(enumName.clone());
+	                en.addModifiers(Modifier.Public);
+	                out.addDeclaration(new TaggedTypeRefDeclaration(en));
+	                Struct body = new Struct();
+	                en.setBody(body);
+	                for (EnumItemResult er : results) {
+	                    if (er.errorElement != null) {
+	                        out.addDeclaration(er.errorElement);
+	                        continue;
+	                    }
+	                    Enum.EnumItem item = new Enum.EnumItem(er.originalItem.getName(), er.value);
+	                    en.addItem(item);
+	                    if (!result.config.noComments)
+	                        if (item != null && hasEnumClass) {
+	                            String c = item.getCommentBefore();
+	                            item.setCommentBefore(er.originalItem.getCommentBefore());
+	                            item.addToCommentBefore(c);
+	                        }
+	                }
+	                en.addInterface(ident(IntValuedEnum.class, expr(typeRef(enumName.clone()))));
+	                String valueArgName = "value";
+	                body.addDeclaration(new Function(Type.JavaMethod, enumName.clone(), null, new Arg(valueArgName, typeRef(Long.TYPE))).setBody(block(
+	                    stat(expr(memberRef(varRef("this"), MemberRefStyle.Dot, valueArgName), AssignmentOperator.Equal, varRef(valueArgName)))
+	                )));
+	                body.addDeclaration(new VariablesDeclaration(typeRef(Long.TYPE), new DirectDeclarator(valueArgName)).addModifiers(Modifier.Public, Modifier.Final));
+	                body.addDeclaration(new Function(Type.JavaMethod, ident(valueArgName), typeRef(Long.TYPE)).setBody(block(
+	                    new Statement.Return(memberRef(varRef("this"), MemberRefStyle.Dot, valueArgName))
+	                )).addAnnotation(new Annotation(Override.class)).addModifiers(Modifier.Public));
+	
+	                /*
+	                body.addDeclaration(new Function(Type.JavaMethod, ident("iterator"), typeRef(ident(Iterator.class, expr(typeRef(enumName.clone()))))).setBody(block(
+	                    new Statement.Return(
+	                        methodCall(
+	                            methodCall(
+	                                expr(typeRef(Collections.class)),
+	                                MemberRefStyle.Dot,
+	                                "singleton",
+	                                varRef("this")
+	                            ),
+	                            MemberRefStyle.Dot,
+	                            "iterator"
+	                        )
+	                    )
+	                )).addAnnotation(new Annotation(Override.class)).addModifiers(Modifier.Public));
+	
+	                body.addDeclaration(new Function(Type.JavaMethod, ident("fromValue"), typeRef(ident(ValuedEnum.class, expr(typeRef(enumName.clone())))), new Arg(valueArgName, typeRef(Long.TYPE))).setBody(block(
+	                    new Statement.Return(
+	                        methodCall(
+	                            expr(typeRef(FlagSet.class)),
+	                            MemberRefStyle.Dot,
+	                            "fromValue",
+	                            varRef(valueArgName),
+	                            methodCall(
+	                                "values"
+	                            )
+	                        )
+	                    )
+	                )).addAnnotation(new Annotation(Override.class)).addModifiers(Modifier.Public, Modifier.Static));
+	                */
+                } else {
+                	outputEnumItemsAsConstants(results, out, signatures, libraryClassName, hasEnumClass);
                 }
-                en.setInterfaces(Arrays.asList(ident(ValuedEnum.class, expr(typeRef(enumName.clone())))));
-                String valueArgName = "value";
-                body.addDeclaration(new Function(Type.JavaMethod, enumName.clone(), null, new Arg(valueArgName, typeRef(Long.TYPE))).setBody(block(
-                    stat(expr(memberRef(varRef("this"), MemberRefStyle.Dot, valueArgName), AssignmentOperator.Equal, varRef(valueArgName)))
-                )));
-                body.addDeclaration(new VariablesDeclaration(typeRef(Long.TYPE), new DirectDeclarator(valueArgName)));
-                body.addDeclaration(new Function(Type.JavaMethod, ident(valueArgName), typeRef(Long.TYPE)).setBody(block(
-                    new Statement.Return(memberRef(varRef("this"), MemberRefStyle.Dot, valueArgName))
-                )).addAnnotation(new Annotation(Override.class)).addModifiers(Modifier.Public));
-
-                body.addDeclaration(new Function(Type.JavaMethod, ident("iterator"), typeRef(ident(Iterator.class, expr(typeRef(enumName.clone()))))).setBody(block(
-                    new Statement.Return(
-                        methodCall(
-                            methodCall(
-                                expr(typeRef(Collections.class)),
-                                MemberRefStyle.Dot,
-                                "singleton",
-                                varRef("this")
-                            ),
-                            MemberRefStyle.Dot,
-                            "iterator"
-                        )
-                    )
-                )).addAnnotation(new Annotation(Override.class)).addModifiers(Modifier.Public));
-
-                body.addDeclaration(new Function(Type.JavaMethod, ident("fromValue"), typeRef(ident(ValuedEnum.class, expr(typeRef(enumName.clone())))), new Arg(valueArgName, typeRef(Long.TYPE))).setBody(block(
-                    new Statement.Return(
-                        methodCall(
-                            expr(typeRef(FlagSet.class)),
-                            MemberRefStyle.Dot,
-                            "fromValue",
-                            varRef(valueArgName),
-                            methodCall(
-                                "values"
-                            )
-                        )
-                    )
-                )).addAnnotation(new Annotation(Override.class)).addModifiers(Modifier.Public, Modifier.Static));
-
                 break;
+        }
+	}
+
+	private void outputEnumItemsAsConstants(List<EnumItemResult> results,
+			DeclarationsHolder out, Signatures signatures, Identifier libraryClassName,
+			boolean hasEnumClass) {
+		
+
+    	for (EnumItemResult er : results) {
+            try {
+                if (er.errorElement != null) {
+                    out.addDeclaration(er.errorElement);
+                    continue;
+                }
+                Declaration ct = outputConstant(
+                    er.originalItem.getName(),
+                    result.typeConverter.convertExpressionToJava(er.value, libraryClassName, true),
+                    signatures,
+                    er.originalItem,
+                    "enum item",
+                    libraryClassName,
+                    hasEnumClass,
+                    true,
+                    true,
+                    true
+                );
+                if (!result.config.noComments)
+                    if (ct != null && hasEnumClass) {
+                        String c = ct.getCommentBefore();
+                        ct.setCommentBefore(er.originalItem.getCommentBefore());
+                        ct.addToCommentBefore(c);
+                    }
+                out.addDeclaration(ct);
+            } catch (Exception ex) {
+                out.addDeclaration(skipDeclaration(er.originalItem, ex.toString()));
+            }
         }
 	}
 
@@ -582,7 +610,7 @@ public class DeclarationsConverter {
             switch (result.config.runtime) {
                 case JNA:
                 case JNAerator:
-                case JNAeratorNL4JStructs:
+//                case JNAeratorNL4JStructs:
                     convertJNAFunction(function, signatures, isCallback, out, libraryClassName, sig, functionName, library);
                     break;
                 case BridJ:
@@ -837,15 +865,25 @@ public class DeclarationsConverter {
     }
 
     private void convertNL4JFunction(Function function, Signatures signatures, boolean isCallback, DeclarationsHolder out, Identifier libraryClassName, String sig, Identifier functionName, String library) throws UnsupportedConversionException {
-        Function typedMethod = new Function(Type.JavaMethod, ident(functionName), null);
-        typedMethod.addModifiers(Modifier.Public);
+    	List<Modifier> modifiers = function.getModifiers();
+    	MemberVisibility visibility = function.getVisibility();
+    	boolean isPublic = visibility == MemberVisibility.Public || Modifier.Public.isContainedBy(modifiers);
+    	boolean isPrivate = visibility == MemberVisibility.Private || Modifier.Private.isContainedBy(modifiers);
+    	boolean isProtected = visibility == MemberVisibility.Protected || Modifier.Protected.isContainedBy(modifiers);
+    	if (result.config.skipPrivateMembers && (isPrivate || !isPublic && !isProtected))
+        	return;
+        boolean isStatic = Modifier.Static.isContainedBy(modifiers);
+		
+//        Function typedMethod = new Function(Type.JavaMethod, ident(functionName), null);
+//        typedMethod.addModifiers(Modifier.Public, isStatic ? Modifier.Static : null);
         
         Function nativeMethod = new Function(Type.JavaMethod, ident(functionName), null);
-        nativeMethod.addModifiers(Modifier.Public, Modifier.Native);
+        nativeMethod.addModifiers(isProtected ? Modifier.Protected : Modifier.Public, Modifier.Native, isStatic ? Modifier.Static : null);
 
         TypeConversion.NL4JTypeConversion retType = result.typeConverter.toNL4JType(function.getValueType(), null);
-        typedMethod.setValueType(retType.getTypedTypeRef());
-        retType.annotateRawType(nativeMethod).setValueType(retType.getRawType());
+//        typedMethod.setValueType(retType.getTypedTypeRef());
+//        retType.annotateRawType(nativeMethod).setValueType(retType.getRawType());
+        nativeMethod.setValueType(retType.getTypedTypeRef());
 
         Map<String, TypeConversion.NL4JTypeConversion> argTypes = new LinkedHashMap<String, TypeConversion.NL4JTypeConversion>();
         for (Arg arg : function.getArgs()) {
@@ -853,95 +891,97 @@ public class DeclarationsConverter {
 
             TypeConversion.NL4JTypeConversion argType = result.typeConverter.toNL4JType(arg.getValueType(), null);
             argTypes.put(argName, argType);
-            typedMethod.addArg(new Arg(argName, argType.getTypedTypeRef()));
-            nativeMethod.addArg(argType.annotateRawType(new Arg(argName, argType.getRawType())));
+//            typedMethod.addArg(new Arg(argName, argType.getTypedTypeRef()));
+            nativeMethod.addArg(new Arg(argName, argType.getTypedTypeRef()));
+//            nativeMethod.addArg(argType.annotateRawType(new Arg(argName, argType.getRawType())));
         }
-
-        String natFullSig = nativeMethod.computeSignature(true), typFullSig = typedMethod.computeSignature(true);
-        String natSig = nativeMethod.computeSignature(false), typSig = typedMethod.computeSignature(false);
-
-        if (!natFullSig.equals(typFullSig)) {
-            if (natSig.equals(typSig)) {
-                nativeMethod.setName(ident(functionName + "_native"));
-                natSig = nativeMethod.computeSignature(false);
-            }
-        }
+//
+        String //natFullSig = nativeMethod.computeSignature(true), 
+        	natSig = nativeMethod.computeSignature(false);
+//        String , typFullSig = typedMethod.computeSignature(true), typSig = typedMethod.computeSignature(false);
+//
+//        if (!natFullSig.equals(typFullSig)) {
+//            if (natSig.equals(typSig)) {
+//                nativeMethod.setName(ident(functionName + "_native"));
+//                natSig = nativeMethod.computeSignature(false);
+//            }
+//        }
 
         if (!signatures.methodsSignatures.add(natSig))
             return;
 
-        if (!natFullSig.equals(typFullSig)) {
-            
-            if (!signatures.methodsSignatures.add(typSig))
-                return;
-
-            nativeMethod.addAnnotation(new Annotation(Deprecated.class));
-            String tempPeerVarName = "tempPeers";
-            List<Expression> tempPeerExprs = new ArrayList<Expression>();
-            List<Expression> argExprs = new ArrayList<Expression>();
-
-            for (Map.Entry<String, TypeConversion.NL4JTypeConversion> e : argTypes.entrySet()) {
-                TypeConversion.NL4JTypeConversion argType = e.getValue();
-                String argName = e.getKey();
-
-                switch (argType.type) {
-                    case Pointer:
-                        argExprs.add(methodCall(varRef(tempPeerVarName), MemberRefStyle.Dot, "get", expr(tempPeerExprs.size())));
-                        tempPeerExprs.add(varRef(argName));
-                        break;
-                    case NativeLong:
-                    case NativeSize:
-                    case Primitive:
-                        argExprs.add(varRef(argName));
-                        break;
-                    case Enum:
-                        argExprs.add(new Expression.Cast(typeRef(Integer.TYPE), methodCall(varRef(argName), MemberRefStyle.Dot, "value")));
-                        break;
-                    default:
-                        throw new UnsupportedConversionException(function, "Cannot convert argument " + argName + " of type " + argType.getTypedTypeRef());
-                }
-            }
-            Expression call = methodCall(nativeMethod.getName().toString(), argExprs.toArray(new Expression[argExprs.size()]));
-            Statement callStat;
-            switch (retType.type) {
-                case Pointer:
-                    callStat = new Statement.Return(methodCall(expr(typeRef(result.config.runtime.pointerClass)), MemberRefStyle.Dot, "pointerToAddress", call));
-                    break;
-                case NativeLong:
-                case NativeSize:
-                case Primitive:
-                    callStat = new Statement.Return(call);
-                    break;
-                case Enum:
-                    callStat = new Statement.Return(methodCall(expr(retType.getTypedTypeRef().clone()), MemberRefStyle.Dot, "fromValue", call));
-                    break;
-                case Void:
-                    callStat = stat(call);
-                    break;
-                default:
-                    throw new UnsupportedConversionException(function, "Cannot convert return argument of type " + retType.getTypedTypeRef());
-            }
-            if (tempPeerExprs.isEmpty())
-                typedMethod.setBody(block(
-                    callStat
-                ));
-            else
-                typedMethod.setBody(block(
-                    stat(
-                        typeRef(TempPointers.class),
-                        tempPeerVarName,
-                        new Expression.New(
-                            typeRef(TempPointers.class),
-                            tempPeerExprs.toArray(new Expression[tempPeerExprs.size()])
-                        )
-                    ),
-                    new Statement.Try(
-                        callStat,
-                        stat(methodCall(varRef(tempPeerVarName), MemberRefStyle.Dot, "release"))
-                    )
-                ));
-            out.addDeclaration(typedMethod);
-        }
+//        if (!natFullSig.equals(typFullSig)) {
+//            
+//            if (!signatures.methodsSignatures.add(typSig))
+//                return;
+//
+//            nativeMethod.addAnnotation(new Annotation(Deprecated.class));
+//            String tempPeerVarName = "tempPeers";
+//            List<Expression> tempPeerExprs = new ArrayList<Expression>();
+//            List<Expression> argExprs = new ArrayList<Expression>();
+//
+//            for (Map.Entry<String, TypeConversion.NL4JTypeConversion> e : argTypes.entrySet()) {
+//                TypeConversion.NL4JTypeConversion argType = e.getValue();
+//                String argName = e.getKey();
+//
+//                switch (argType.type) {
+//                    case Pointer:
+//                        argExprs.add(methodCall(varRef(tempPeerVarName), MemberRefStyle.Dot, "get", expr(tempPeerExprs.size())));
+//                        tempPeerExprs.add(varRef(argName));
+//                        break;
+//                    case NativeLong:
+//                    case NativeSize:
+//                    case Primitive:
+//                        argExprs.add(varRef(argName));
+//                        break;
+//                    case Enum:
+//                        argExprs.add(new Expression.Cast(typeRef(Integer.TYPE), methodCall(varRef(argName), MemberRefStyle.Dot, "value")));
+//                        break;
+//                    default:
+//                        throw new UnsupportedConversionException(function, "Cannot convert argument " + argName + " of type " + argType.getTypedTypeRef());
+//                }
+//            }
+//            Expression call = methodCall(nativeMethod.getName().toString(), argExprs.toArray(new Expression[argExprs.size()]));
+//            Statement callStat;
+//            switch (retType.type) {
+//                case Pointer:
+//                    callStat = new Statement.Return(methodCall(expr(typeRef(result.config.runtime.pointerClass)), MemberRefStyle.Dot, "pointerToAddress", call));
+//                    break;
+//                case NativeLong:
+//                case NativeSize:
+//                case Primitive:
+//                    callStat = new Statement.Return(call);
+//                    break;
+//                case Enum:
+//                    callStat = new Statement.Return(methodCall(expr(retType.getTypedTypeRef().clone()), MemberRefStyle.Dot, "fromValue", call));
+//                    break;
+//                case Void:
+//                    callStat = stat(call);
+//                    break;
+//                default:
+//                    throw new UnsupportedConversionException(function, "Cannot convert return argument of type " + retType.getTypedTypeRef());
+//            }
+//            if (tempPeerExprs.isEmpty())
+//                typedMethod.setBody(block(
+//                    callStat
+//                ));
+//            else
+//                typedMethod.setBody(block(
+//                    stat(
+//                        typeRef(TempPointers.class),
+//                        tempPeerVarName,
+//                        new Expression.New(
+//                            typeRef(TempPointers.class),
+//                            tempPeerExprs.toArray(new Expression[tempPeerExprs.size()])
+//                        )
+//                    ),
+//                    new Statement.Try(
+//                        callStat,
+//                        stat(methodCall(varRef(tempPeerVarName), MemberRefStyle.Dot, "release"))
+//                    )
+//                ));
+//            out.addDeclaration(typedMethod);
+//        }
         out.addDeclaration(nativeMethod);
     }
 
@@ -1044,8 +1084,8 @@ public class DeclarationsConverter {
 		return structName == null ? null : structName.clone();
 	}
 	public Struct convertStruct(Struct struct, Signatures signatures, Identifier callerLibraryClass, boolean onlyFields) throws IOException {
-        if (result.config.runtime.hasFastStructs)
-            return convertStructToNL4J(struct, signatures, callerLibraryClass, onlyFields);
+        if (result.config.runtime == JNAeratorConfig.Runtime.BridJ)
+            return convertStructToBridJ(struct, signatures, callerLibraryClass, onlyFields);
         else
             return convertStructToJNA(struct, signatures, callerLibraryClass, onlyFields);
     }
@@ -1101,15 +1141,15 @@ public class DeclarationsConverter {
 		//cl.addDeclaration(new EmptyDeclaration())
 		Signatures childSignatures = new Signatures();
 		
-		if (isVirtual(struct) && !onlyFields) {
-			String vptrName = DEFAULT_VPTR_NAME;
-			VariablesDeclaration vptr = new VariablesDeclaration(typeRef(VirtualTablePointer.class), new Declarator.DirectDeclarator(vptrName));
-            //VariablesDeclaration vptr = new VariablesDeclaration(typeRef(result.config.runtime.pointerClass), new Declarator.DirectDeclarator(vptrName));
-			vptr.addModifiers(Modifier.Public);
-			structJavaClass.addDeclaration(vptr);
-			childSignatures.variablesSignatures.add(vptrName);
-			// TODO add vptr grabber to constructor !
-		}
+//		if (isVirtual(struct) && !onlyFields) {
+//			String vptrName = DEFAULT_VPTR_NAME;
+//			VariablesDeclaration vptr = new VariablesDeclaration(typeRef(VirtualTablePointer.class), new Declarator.DirectDeclarator(vptrName));
+//            //VariablesDeclaration vptr = new VariablesDeclaration(typeRef(result.config.runtime.pointerClass), new Declarator.DirectDeclarator(vptrName));
+//			vptr.addModifiers(Modifier.Public);
+//			structJavaClass.addDeclaration(vptr);
+//			childSignatures.variablesSignatures.add(vptrName);
+//			// TODO add vptr grabber to constructor !
+//		}
 		
 		//List<Declaration> children = new ArrayList<Declaration>();
 		for (Declaration d : struct.getDeclarations()) {
@@ -1191,7 +1231,7 @@ public class DeclarationsConverter {
 		return structJavaClass;
 	}
 
-    public Struct convertStructToNL4J(Struct struct, Signatures signatures, Identifier callerLibraryClass, boolean onlyFields) throws IOException {
+    public Struct convertStructToBridJ(Struct struct, Signatures signatures, Identifier callerLibraryClass, boolean onlyFields) throws IOException {
 		Identifier structName = getActualTaggedTypeName(struct);
 		if (structName == null)
 			return null;
@@ -1208,23 +1248,40 @@ public class DeclarationsConverter {
 		boolean isUnion = struct.getType() == Struct.Type.CUnion;
 		boolean inheritsFromStruct = false;
 		Identifier baseClass = null;
-		if (!onlyFields) {
-			if (!struct.getParents().isEmpty()) {
-				for (SimpleTypeRef parentName : struct.getParents()) {
-					Struct parent = result.structsByName.get(parentName.getName());
-					if (parent == null) {
-						// TODO report error
-						continue;
-					}
-					baseClass = result.getTaggedTypeIdentifierInJava(parent);
-					if (baseClass != null) {
-						inheritsFromStruct = true;
-						break; // TODO handle multiple and virtual inheritage
-					}
+		if (!struct.getParents().isEmpty()) {
+			for (SimpleTypeRef parentName : struct.getParents()) {
+				Struct parent = result.structsByName.get(parentName.getName());
+				if (parent == null) {
+					// TODO report error
+					continue;
+				}
+				baseClass = result.getTaggedTypeIdentifierInJava(parent);
+				if (baseClass != null) {
+					inheritsFromStruct = true;
+					break; // TODO handle multiple and virtual inheritage
 				}
 			}
-			if (baseClass == null) {
-				baseClass = ident(result.config.runtime.structClass, expr(typeRef(structName)));
+		}
+		boolean hasMemberFunctions = false;
+		for (Declaration d : struct.getDeclarations()) {
+			if (d instanceof Function) {
+				hasMemberFunctions = true;
+				break;
+			}
+		}
+		if (baseClass == null) {
+			switch (struct.getType()) {
+			case CStruct:
+			case CUnion:
+				if (!hasMemberFunctions) {
+					baseClass = ident(StructObject.class);
+					break;
+				}
+			case CPPClass:
+				baseClass = ident(CPPObject.class);
+				break;
+			default:
+				throw new UnsupportedOperationException();
 			}
 		}
 		Struct structJavaClass = publicStaticClass(structName, baseClass, Struct.Type.JavaClass, struct);
@@ -1244,29 +1301,10 @@ public class DeclarationsConverter {
 		}*/
 
         //    private static StructIO<MyStruct> io = StructIO.getInstance(MyStruct.class);
-        VariablesDeclaration ioDecl = new VariablesDeclaration(
-            typeRef(
-                ident(
-                    result.config.runtime.structIOClass,
-                    expr(typeRef(structName))
-                )
-            ),
-            new DirectDeclarator(
-                ioStaticVarName,
-                methodCall(
-                    expr(
-                        typeRef(result.config.runtime.structIOClass)
-                    ),
-                    MemberRefStyle.Dot,
-                    "getInstance",
-                    classLiteral(typeRef(structName))
-                )
-            )
-        );
-        ioDecl.addModifiers(Modifier.Private, Modifier.Static, Modifier.Final);
-        structJavaClass.addDeclaration(ioDecl);
-
-        structJavaClass.addDeclaration(new Function(Type.JavaMethod, ident(structName), null).setBody(block(stat(methodCall("super", varRef(ioStaticVarName))))).addModifiers(Modifier.Public));
+        
+		structJavaClass.addDeclaration(new Function(Type.JavaMethod, ident(structName), null).setBody(block(stat(methodCall("super")))).addModifiers(Modifier.Public));
+		String ptrName = "pointer";
+		structJavaClass.addDeclaration(new Function(Type.JavaMethod, ident(structName), null, new Arg(ptrName, typeRef(result.config.runtime.pointerClass))).setBody(block(stat(methodCall("super", varRef(ptrName))))).addModifiers(Modifier.Public));
 
         int iVirtual = 0;
 		//List<Declaration> children = new ArrayList<Declaration>();
@@ -1292,9 +1330,11 @@ public class DeclarationsConverter {
 					} else if (tr instanceof FunctionSignature) {
 						convertCallback((FunctionSignature)tr, childSignatures, structJavaClass, callerLibraryClass);
 					}
-				} else if (result.config.genCPlusPlus && d instanceof Function) {
+				} else if ((result.config.runtime == JNAeratorConfig.Runtime.BridJ || result.config.genCPlusPlus) && d instanceof Function) {
 					Function f = (Function) d;
-					boolean isStatic = Modifier.Static.isContainedBy(f.getModifiers());
+					List<Modifier> modifiers = f.getModifiers();
+//					boolean isStatic = Modifier.Static.isContainedBy(modifiers);
+					boolean isVirtual = Modifier.Virtual.isContainedBy(modifiers);
                     String library = result.getLibrary(struct);
 					if (library == null)
 						continue;
@@ -1304,13 +1344,15 @@ public class DeclarationsConverter {
 						if (!(md instanceof Function))
 							continue;
 						Function method = (Function) md;
-						method.addModifiers(Modifier.Public, isStatic ? Modifier.Static : null, Modifier.Native);
-                        method.addAnnotation(new Annotation(result.config.runtime.typeRef(JNAeratorConfig.Runtime.Ann.Virtual), expr(iVirtual)));
+						//method.addModifiers(Modifier.Public, isStatic ? Modifier.Static : null, Modifier.Native);
+						if (isVirtual)
+							method.addAnnotation(new Annotation(result.config.runtime.typeRef(JNAeratorConfig.Runtime.Ann.Virtual), expr(iVirtual)));
 						structJavaClass.addDeclaration(method);
 					}
+					if (isVirtual)
+						iVirtual++;
 				}
 			}
-            iVirtual++;
 		}
 		return structJavaClass;
 	}
@@ -1324,6 +1366,7 @@ public class DeclarationsConverter {
 			Identifier javaPackage = result.getLibraryPackage(library);
 			Identifier fullClassName = ident(javaPackage, structJavaClass.getTag().clone());
 			
+			structJavaClass.addAnnotation(new Annotation(Library.class, expr(library)));
 			structJavaClass.removeModifiers(Modifier.Static);
 			structJavaClass = result.notifyBeforeWritingClass(fullClassName, structJavaClass, signatures, library);
 			if (structJavaClass != null) {
@@ -1484,7 +1527,7 @@ public class DeclarationsConverter {
 		}
 	}
     protected String ioVarName = "io", ioStaticVarName = "IO";
-	public List<Declaration> convertVariablesDeclarationToNL4J(String name, TypeRef mutatedType, int[] iChild, Identifier holderName, Identifier callerLibraryName, Element... toImportDetailsFrom) throws UnsupportedConversionException {
+	public List<Declaration> convertVariablesDeclarationToBridJ(String name, TypeRef mutatedType, int[] iChild, Identifier holderName, Identifier callerLibraryName, Element... toImportDetailsFrom) throws UnsupportedConversionException {
 		name = result.typeConverter.getValidJavaArgumentName(ident(name)).toString();
 		//convertVariablesDeclaration(name, mutatedType, out, iChild, callerLibraryName);
 
@@ -1522,16 +1565,10 @@ public class DeclarationsConverter {
 
         convDecl.setName(ident(name));
         convDecl.addAnnotation(new Annotation(result.config.runtime.typeRef(JNAeratorConfig.Runtime.Ann.Field), expr(iChild[0])));
-        Function getter = convDecl.clone();
-
-        if (conv.structIOFieldGetterNameRadix == null)
-            getter.addModifiers(Modifier.Native);
-        else
-            getter.setBody(block(
-                new Statement.Return(methodCall(varRef(ioVarName), MemberRefStyle.Dot, "get" + conv.structIOFieldGetterNameRadix + "Field", expr(iChild[0]), varRef("this")))
-            ));
-
         convDecl.setValueType(conv.typeRef);
+
+        Function getter = convDecl.clone();
+        getter.addModifiers(Modifier.Native);
 
         List<Declaration> out = new ArrayList<Declaration>();
         out.add(getter);
@@ -1541,26 +1578,18 @@ public class DeclarationsConverter {
             TypeRef javaType = setter.getValueType();
             setter.setValueType(typeRef(holderName.clone()));//Void.TYPE));
             setter.addArg(new Arg(name, javaType));
-            if (conv.structIOFieldGetterNameRadix == null)
-                setter.addModifiers(Modifier.Native);
-            else
-                setter.setBody(block(
-                    stat(methodCall(varRef(ioVarName), MemberRefStyle.Dot, "set" + conv.structIOFieldGetterNameRadix + "Field", expr(iChild[0]), varRef("this"), varRef(name))),
-                    new Statement.Return(varRef("this"))
-                ));
+            setter.addModifiers(Modifier.Native);
             out.add(setter);
         }
-        //nvDecl.addDeclarator(new DirectDeclarator(name, initVal));
-
-        return out;//out.addDeclaration(convDecl);
+        return out;
     }
 	public void convertVariablesDeclaration(VariablesDeclaration v, DeclarationsHolder out, int[] iChild, Identifier holderName, Identifier callerLibraryClass) {
-        if (result.config.runtime.hasFastStructs)
-            convertVariablesDeclarationToNL4J(v, out, iChild, holderName, callerLibraryClass);
+		if (result.config.runtime == JNAeratorConfig.Runtime.BridJ)
+	        convertVariablesDeclarationToBridJ(v, out, iChild, holderName, callerLibraryClass);
         else
             convertVariablesDeclarationToJNA(v, out, iChild, callerLibraryClass);
     }
-	public void convertVariablesDeclarationToNL4J(VariablesDeclaration v, DeclarationsHolder out, int[] iChild, Identifier holderName, Identifier callerLibraryClass) {
+	public void convertVariablesDeclarationToBridJ(VariablesDeclaration v, DeclarationsHolder out, int[] iChild, Identifier holderName, Identifier callerLibraryClass) {
         try { 
 			TypeRef valueType = v.getValueType();
 			for (Declarator vs : v.getDeclarators()) {
@@ -1574,7 +1603,7 @@ public class DeclarationsConverter {
 					mutatedType = (TypeRef)vs.mutateType(valueType);
 					vs = new DirectDeclarator(vs.resolveName());
 				}
-				List<Declaration> vds = convertVariablesDeclarationToNL4J(name, mutatedType, iChild, holderName, callerLibraryClass, v, vs);
+				List<Declaration> vds = convertVariablesDeclarationToBridJ(name, mutatedType, iChild, holderName, callerLibraryClass, v, vs);
                 Declarator d = v.getDeclarators().get(0);
                 if (d.getBits() > 0)
 					for (Declaration vd : vds)
