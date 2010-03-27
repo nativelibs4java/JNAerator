@@ -186,7 +186,7 @@ public class Printer implements Visitor {
         List<EnumItem> items = e.getItems();
         for (int i = 0, len = items.size(); i < len; i++) {
             EnumItem item = items.get(i);
-            append(indent, item, i < len - 1 ? "," : ";", "\n");
+            append(indent, item, i < len - 1 ? "," : (e.getBody() == null ? "" : ";"), "\n");
         }
         if (e.getBody() != null) {
         	append(indent);
@@ -555,7 +555,8 @@ public class Printer implements Visitor {
 
 		TaggedTypeRef tr = e.getTaggedTypeRef();
 		formatComments(e, false, true, true);
-        append(tr, tr.isForwardDeclaration() ? ";" : null, e.getCommentAfter());
+        //append(tr, tr.isForwardDeclaration() ? ";" : null, e.getCommentAfter());
+		append(tr, ";", e.getCommentAfter());
     }
 
     public void visitTaggedTypeRef(TaggedTypeRef e) {
