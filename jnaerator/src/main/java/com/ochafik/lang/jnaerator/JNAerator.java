@@ -772,7 +772,9 @@ public class JNAerator {
 					mfm.addSourceInput(cnAndSrc.getKey(), cnAndSrc.getValue());
 				}
 				feedback.setStatus("Compiling JNAerated files...");
-				CompilerUtils.compile(c, mfm, diagnostics, "1.5", config.cacheDir, config.runtime.libraryClass, JNAerator.class, NSClass.class, Rococoa.class, Mangling.class);
+				CompilerUtils.compile(c, mfm, diagnostics, "1.5", config.cacheDir, config.runtime.libraryClass, 
+						JNAerator.class, NSClass.class, Rococoa.class, Mangling.class,
+						BridJ.class);
 				CompilerUtils.CompilationError.throwErrors(diagnostics.getDiagnostics(), mfm.inputs, c.getClass().getName());
 				
 				if (config.outputJar != null && result.config.bundleRuntime) {
@@ -1311,8 +1313,10 @@ public class JNAerator {
             }
         }
 
-        interf.addAnnotation(new Annotation(com.bridj.ann.Library.class, expr(library)));
-        interf.addAnnotation(new Annotation(com.bridj.ann.Runtime.class, expr(typeRef(CPPRuntime.class))));
+        if (result.config.runtime == JNAeratorConfig.Runtime.BridJ) {
+	        interf.addAnnotation(new Annotation(com.bridj.ann.Library.class, expr(library)));
+	        interf.addAnnotation(new Annotation(com.bridj.ann.Runtime.class, classLiteral(CPPRuntime.class)));
+        }
 		
         interf = result.notifyBeforeWritingClass(fullLibraryClassName, interf, signatures, library);
         if (interf != null) {
