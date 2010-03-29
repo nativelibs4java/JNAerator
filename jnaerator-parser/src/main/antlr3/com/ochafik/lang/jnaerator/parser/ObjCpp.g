@@ -856,6 +856,9 @@ scope Symbols;
 			)*
 		)?
 		(	
+			( 
+				{ next(2, "0") }? '=' DECIMAL_NUMBER // TODO mark in DOM
+			)?
 			';' |
 			statementsBlock {
 				$function.setBody($statementsBlock.stat);
