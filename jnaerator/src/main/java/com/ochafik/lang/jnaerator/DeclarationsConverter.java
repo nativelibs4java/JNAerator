@@ -94,8 +94,13 @@ public class DeclarationsConverter {
 		Element comel = parent != null && parent instanceof TypeDef ? parent : functionSignature;
 		
 		Struct callbackStruct = new Struct();
-		callbackStruct.setType(Struct.Type.JavaInterface);
-		callbackStruct.addModifiers(Modifier.Public);
+		if (result.config.runtime == JNAeratorConfig.Runtime.BridJ) {
+			callbackStruct.setType(Struct.Type.JavaClass);
+			callbackStruct.addModifiers(Modifier.Public, Modifier.Static, Modifier.Abstract);
+		} else {
+			callbackStruct.setType(Struct.Type.JavaInterface);
+			callbackStruct.addModifiers(Modifier.Public);
+		}
 		callbackStruct.setParents(Arrays.asList(
 			FunctionSignature.Type.ObjCBlock.equals(functionSignature.getType()) ?
 				result.config.runtime.typeRef(JNAeratorConfig.Runtime.Ann.ObjCBlock) :

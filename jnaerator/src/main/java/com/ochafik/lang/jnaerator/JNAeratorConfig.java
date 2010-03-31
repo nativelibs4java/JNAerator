@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.bridj.ann.Array;
 import com.ochafik.lang.jnaerator.JNAeratorConfigUtils.FileExtensionFilter;
 import com.ochafik.lang.jnaerator.cplusplus.CPlusPlusMangler;
 import com.ochafik.lang.jnaerator.parser.Element;
@@ -157,9 +158,14 @@ public class JNAeratorConfig {
         public final String runtimeFilesListFileName;
         private String annotationPackage;
         public SimpleTypeRef typeRef(Ann ann) {
+        	String n = ann.toString();
+        	if (this == BridJ) {
+        		if (ann == Ann.Length)
+        			n = Array.class.getSimpleName();
+        	}
             List<String> elts = new ArrayList<String>();
             elts.addAll(Arrays.asList(annotationPackage.split("\\.")));
-            elts.add(ann.toString());
+            elts.add(n);
             return annotationPackage == null ? null : ElementsHelper.typeRef(ident(elts.toArray(new String[elts.size()])));
         }
         public final Class callbackClass, pointerClass, memoryClass, structClass, unionClass, structIOClass, arrayClass, libraryClass;

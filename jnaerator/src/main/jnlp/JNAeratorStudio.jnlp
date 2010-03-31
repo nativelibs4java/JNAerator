@@ -24,7 +24,7 @@
 <resources>
   <j2se version="1.6+" />
   		<jar href="http://jnaerator.sourceforge.net/maven/com/jnaerator/jnaerator/0.9.4-SNAPSHOT/jnaerator-0.9.4-SNAPSHOT-shaded.jar"/>
-		<!--extension name="JNAeratorRuntime" href="http://jnaerator.sourceforge.net/webstart/JNAerator/JNAeratorRuntime.jnlp"/-->
+		<extension name="JNAeratorRuntime" href="http://jnaerator.sourceforge.net/webstart/JNAerator/JNAeratorRuntime.jnlp"/>
 		<!--
 		<jar href="http://somewhere/yourjar.jar" /> 
 		-->

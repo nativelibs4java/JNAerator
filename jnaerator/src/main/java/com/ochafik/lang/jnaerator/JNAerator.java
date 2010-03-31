@@ -1114,17 +1114,17 @@ public class JNAerator {
 				))
 			)).addModifiers(Modifier.Static));
 
-            String libFileOrDirArgName = "libraryFileOrDirectory";
-            Function constr = new Function(Function.Type.JavaMethod, fullLibraryClassName.resolveLastSimpleIdentifier().clone(), null, new Arg(libFileOrDirArgName, typeRef(File.class)));
-            constr.addModifiers(Modifier.Public);
-            constr.setBody(block(stat(methodCall("super", varRef(libFileOrDirArgName)))));
-            interf.addDeclaration(constr);
-
-            constr = new Function(Function.Type.JavaMethod, fullLibraryClassName.resolveLastSimpleIdentifier().clone(), null);
-            constr.addModifiers(Modifier.Public);
-            constr.addThrown(typeRef(FileNotFoundException.class));
-            constr.setBody(block(stat(methodCall("super", classLiteral(typeRef(fullLibraryClassName.clone()))))));
-            interf.addDeclaration(constr);
+//            String libFileOrDirArgName = "libraryFileOrDirectory";
+//            Function constr = new Function(Function.Type.JavaMethod, fullLibraryClassName.resolveLastSimpleIdentifier().clone(), null, new Arg(libFileOrDirArgName, typeRef(File.class)));
+//            constr.addModifiers(Modifier.Public);
+//            constr.setBody(block(stat(methodCall("super", varRef(libFileOrDirArgName)))));
+//            interf.addDeclaration(constr);
+//
+//            constr = new Function(Function.Type.JavaMethod, fullLibraryClassName.resolveLastSimpleIdentifier().clone(), null);
+//            constr.addModifiers(Modifier.Public);
+//            constr.addThrown(typeRef(FileNotFoundException.class));
+//            constr.setBody(block(stat(methodCall("super", classLiteral(typeRef(fullLibraryClassName.clone()))))));
+//            interf.addDeclaration(constr);
 
             fillLibraryMapping(result, sourceFiles, interf, library, javaPackage, fullLibraryClassName, varRef("this"));
         }
