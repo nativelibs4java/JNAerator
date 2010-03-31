@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
+import java.util.TreeSet;
 
 import com.ochafik.lang.jnaerator.parser.Declarator.ArrayDeclarator;
 import com.ochafik.lang.jnaerator.parser.Declarator.DirectDeclarator;
@@ -964,7 +965,7 @@ public class Printer implements Visitor {
         final Set<String> importedClassesStrings = new HashSet<String>(50);
         importedClassesStrings.add(className.toString());
         
-        List<String> importStatements = new ArrayList<String>();
+        Set<String> importStatements = new TreeSet<String>();
         for (Map.Entry<String, Set<Identifier>> kv : identifiersBySimpleName.entrySet()) {
             if (kv.getValue().size() == 1) {
                 Identifier id = kv.getValue().iterator().next();

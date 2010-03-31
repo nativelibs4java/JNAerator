@@ -867,12 +867,14 @@ public class DeclarationsConverter {
     }
 
     private void convertNL4JFunction(Function function, Signatures signatures, boolean isCallback, DeclarationsHolder out, Identifier libraryClassName, String sig, Identifier functionName, String library) throws UnsupportedConversionException {
+		Element parent = function.getParentElement();
     	List<Modifier> modifiers = function.getModifiers();
     	MemberVisibility visibility = function.getVisibility();
     	boolean isPublic = visibility == MemberVisibility.Public || Modifier.Public.isContainedBy(modifiers);
     	boolean isPrivate = visibility == MemberVisibility.Private || Modifier.Private.isContainedBy(modifiers);
     	boolean isProtected = visibility == MemberVisibility.Protected || Modifier.Protected.isContainedBy(modifiers);
-    	if ((function.getParentElement() instanceof Struct) && result.config.skipPrivateMembers && (isPrivate || !isPublic && !isProtected))
+		boolean isInStruct = parent instanceof Struct;
+    	if (isInStruct && result.config.skipPrivateMembers && (isPrivate || !isPublic && !isProtected))
         	return;
         boolean isStatic = Modifier.Static.isContainedBy(modifiers);
 		
@@ -880,7 +882,7 @@ public class DeclarationsConverter {
 //        typedMethod.addModifiers(Modifier.Public, isStatic ? Modifier.Static : null);
         
         Function nativeMethod = new Function(Type.JavaMethod, ident(functionName), null);
-        nativeMethod.addModifiers(isProtected ? Modifier.Protected : Modifier.Public, Modifier.Native, isStatic ? Modifier.Static : null);
+        nativeMethod.addModifiers(isProtected ? Modifier.Protected : Modifier.Public, Modifier.Native, isStatic || !isCallback && !isInStruct ? Modifier.Static : null);
 
         TypeConversion.NL4JTypeConversion retType = result.typeConverter.toNL4JType(function.getValueType(), null, libraryClassName);
 //        typedMethod.setValueType(retType.getTypedTypeRef());
