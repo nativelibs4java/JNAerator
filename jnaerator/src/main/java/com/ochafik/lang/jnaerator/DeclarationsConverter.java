@@ -621,8 +621,10 @@ public class DeclarationsConverter {
             }
         } catch (UnsupportedConversionException ex) {
             Declaration d = skipDeclaration(function);
-            d.addToCommentBefore(ex.toString());
-            out.addDeclaration(d);
+            if (d != null) {
+	            d.addToCommentBefore(ex.toString());
+	            out.addDeclaration(d);
+            }
         }
 	}
 
@@ -880,7 +882,7 @@ public class DeclarationsConverter {
         Function nativeMethod = new Function(Type.JavaMethod, ident(functionName), null);
         nativeMethod.addModifiers(isProtected ? Modifier.Protected : Modifier.Public, Modifier.Native, isStatic ? Modifier.Static : null);
 
-        TypeConversion.NL4JTypeConversion retType = result.typeConverter.toNL4JType(function.getValueType(), null);
+        TypeConversion.NL4JTypeConversion retType = result.typeConverter.toNL4JType(function.getValueType(), null, libraryClassName);
 //        typedMethod.setValueType(retType.getTypedTypeRef());
 //        retType.annotateRawType(nativeMethod).setValueType(retType.getRawType());
         nativeMethod.setValueType(retType.getTypedTypeRef());
@@ -889,10 +891,10 @@ public class DeclarationsConverter {
         for (Arg arg : function.getArgs()) {
             String argName = arg.getName();
 
-            TypeConversion.NL4JTypeConversion argType = result.typeConverter.toNL4JType(arg.getValueType(), null);
+            TypeConversion.NL4JTypeConversion argType = result.typeConverter.toNL4JType(arg.getValueType(), null, libraryClassName);
             argTypes.put(argName, argType);
 //            typedMethod.addArg(new Arg(argName, argType.getTypedTypeRef()));
-            nativeMethod.addArg(new Arg(argName, argType.getTypedTypeRef()));
+            nativeMethod.addArg(argType.annotateTypedType(new Arg(argName, argType.getTypedTypeRef())));
 //            nativeMethod.addArg(argType.annotateRawType(new Arg(argName, argType.getRawType())));
         }
 //

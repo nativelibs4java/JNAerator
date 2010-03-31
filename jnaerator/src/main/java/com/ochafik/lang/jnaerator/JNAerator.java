@@ -234,13 +234,15 @@ public class JNAerator {
 							//"-framework", "Foundation",
 							//"-o", "/Users/ochafik/jnaerator/jnaerator/cocoa",
 							//"-library", "Test",
-							"-framework", "AppKit",
-							"-framework", "CoreGraphics",
+//							"-framework", "AppKit",
+//							"-framework", "CoreGraphics",
 
 							//"/Users/ochafik/Prog/Java/versionedSources/jnaerator/trunk/test/classes.h",
-							"-o", "/Users/ochafik/Prog/Java/versionedSources/jnaerator/trunk/test",
-							"-noComp", "-noJar",
-							"-skipIncludedFrameworks",
+//							"-o", "/Users/ochafik/Prog/Java/versionedSources/jnaerator/trunk/test",
+//							"-noComp", "-noJar",
+//							"-skipIncludedFrameworks",
+							"/Users/ochafik/src/nativelibs4java/OpenCL/OpenCL4Java/src/main/jnaerator/config.jnaerator",
+							"-o", "/Users/ochafik/src/nativelibs4java/OpenCL/OpenCL4Java/temp"
 	//						"-no"
 							//"-studio",
 	//						"/Users/ochafik/src/opencv-1.1.0/config.jnaerator",
@@ -256,7 +258,7 @@ public class JNAerator {
 	//						"-library", "opencl",
 	//						"/Users/ochafik/src/opencl/cl.h",
 	//						"-o", "/Users/ochafik/src/opencl",
-							"-v"
+//							"-v"
 					};
 				} else if (new File(DEFAULT_CONFIG_FILE).exists()){
 					argsArray = new String[] { "@", DEFAULT_CONFIG_FILE };

@@ -1201,6 +1201,7 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
         public final Type type;
 
         public <M extends ModifiableElement> M annotateRawType(M element) throws UnsupportedConversionException {
+        	if (type != null)
             switch (type) {
                 case Enum:
                 case Primitive:
@@ -1223,6 +1224,12 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
             return element;
         }
 
+        public <M extends ModifiableElement> M annotateTypedType(M element) throws UnsupportedConversionException {
+        	if (type != Type.Pointer)
+        		annotateRawType(element);
+            return element;
+        }
+
         public TypeRef getTypedTypeRef() {
             return directType == null ? typeRef("void") : directType.clone();
         }
@@ -1230,10 +1237,14 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
         public TypeRef getIndirectTypeRef() {
             if (type == NL4JTypeConversion.Type.Void)
                 return typeRef(ident("?"));
-            return (indirectType == null ? directType : indirectType).clone();
+            TypeRef t = indirectType == null ? directType : indirectType;
+            return t == null ? null : t.clone();
         }
 
         public TypeRef getRawType() throws UnsupportedConversionException {
+        	if (type == null) {
+        		return directType.clone();
+        	}
             switch (type) {
                 case Enum:
                     return typeRef(Integer.TYPE);
@@ -1252,10 +1263,10 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
             }
         }
     }
-    NL4JTypeConversion toNL4JType(TypeRef valueType, java.util.Stack<String> namesStack) throws UnsupportedConversionException {
+    NL4JTypeConversion toNL4JType(TypeRef valueType, java.util.Stack<String> namesStack, Identifier library) throws UnsupportedConversionException {
         if (valueType instanceof TargettedTypeRef) {
             TargettedTypeRef ttr = (TargettedTypeRef)valueType;
-            NL4JTypeConversion targetConv = toNL4JType(ttr.getTarget(), namesStack);
+            NL4JTypeConversion targetConv = toNL4JType(ttr.getTarget(), namesStack, library);
             if (targetConv.type != NL4JTypeConversion.Type.Void) {
                 try {
                     String s = targetConv.getRawType().toString();
@@ -1339,15 +1350,26 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
                             if (trs.equals("_" + strs) && !strs.startsWith("_") || trs.equals(strs + "_") && !strs.endsWith("_")) {
                                 trs.toString();
                             }
-                            TypeRef clo = tr.clone();
-                            return toNL4JType(clo, namesStack);
+                            try {
+	                            TypeRef clo = tr.clone();
+	                            return toNL4JType(clo, namesStack, library);
+                            } catch (UnsupportedConversionException ex) {
+                            	if (tr instanceof TypeRef.Pointer && allowFakePointers) {
+                            		return new NL4JTypeConversion(
+                        				typeRef(result.getFakePointer(library, name.clone())), 
+                        				null,
+                        				null
+                    				);
+                            	} else 
+                            		throw ex;
+                            }
                         }
                     }
                 }
 
                 TypeRef manualTypeRef = manualTypeDefs.get(nameStr);
                 if (manualTypeRef != null)
-                    return toNL4JType(manualTypeRef, namesStack);
+                    return toNL4JType(manualTypeRef, namesStack, library);
                 
                 TypeRef structRef = typeRef(findStructRef(name, null));
                 if (structRef != null) {
@@ -1369,7 +1391,7 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
                         fieldName = ((MemberRef) expression).getName();
 
                     if (fieldName != null && !fieldName.equals(name))
-                        return toNL4JType(new TypeRef.SimpleTypeRef(fieldName), namesStack);
+                        return toNL4JType(new TypeRef.SimpleTypeRef(fieldName), namesStack, library);
                 }
             } finally {
                 namesStack.pop();
