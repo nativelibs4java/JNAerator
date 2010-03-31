@@ -326,8 +326,8 @@ public class Result extends Scanner {
 				Struct parentStruct = (Struct)parent;
 				switch (parentStruct.getType()) {
 					case CPPClass:
-						if (config.genCPlusPlus)
-							break;
+//						if (config.genCPlusPlus)
+//							break;
 					case JavaClass:
 					case JavaInterface:
 					case ObjCClass:

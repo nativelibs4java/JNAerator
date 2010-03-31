@@ -10,7 +10,7 @@
   <description>JNAerator : Java gets to love native libraries !</description>
   <description kind='tooltip'>JNAerator Studio : wrap C and Objective-C libraries in Java.</description>
   <icon href="appIcon128.gif"/>
-  <update check="timeout" policy="prompt-update"/>
+  <!--update check="timeout" policy="prompt-update"/-->
   <association mime-type="application-x/jnaerator-config" extensions="jnaerator" icon="fileIcon128.gif"/>
   <offline-allowed/>
   <shortcut online="true">
@@ -23,14 +23,11 @@
 </security>
 <resources>
   <j2se version="1.6+" />
-  	<resources>
-  		<jar href="http://jnaerator.sourceforge.net/maven/com/jnaerator/jnaerator-tool/0.9.3-SNAPSHOT/jnaerator-tool-0.9.3-SNAPSHOT.jar"/>
-		<extension name="JNAeratorRuntime" href="http://jnaerator.sourceforge.net/webstart/JNAerator/JNAeratorRuntime.jnlp"/>
+  		<jar href="http://jnaerator.sourceforge.net/maven/com/jnaerator/jnaerator/0.9.4-SNAPSHOT/jnaerator-0.9.4-SNAPSHOT-shaded.jar"/>
+		<!--extension name="JNAeratorRuntime" href="http://jnaerator.sourceforge.net/webstart/JNAerator/JNAeratorRuntime.jnlp"/-->
 		<!--
 		<jar href="http://somewhere/yourjar.jar" /> 
 		-->
-		<j2se version="1.5+"/>
-	</resources>
 </resources>
 <application-desc main-class="com.ochafik.lang.jnaerator.studio.JNAeratorStudio"/>
 </jnlp>

@@ -316,7 +316,7 @@ public class JNAeratorStudio extends JPanel {
 
         runtimeCombo = new JComboBox(runtimeValues.toArray()) {{
             setToolTipText("Target runtime library");
-            setSelectedItem(JNAeratorConfig.Runtime.BridJ);
+            setSelectedItem(JNAeratorConfig.Runtime.JNAerator);
         }};
 
 		resultsListCombo.setModel(new ListenableComboModel<ResultContent>(results));

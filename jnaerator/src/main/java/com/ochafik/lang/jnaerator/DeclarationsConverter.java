@@ -870,7 +870,7 @@ public class DeclarationsConverter {
     	boolean isPublic = visibility == MemberVisibility.Public || Modifier.Public.isContainedBy(modifiers);
     	boolean isPrivate = visibility == MemberVisibility.Private || Modifier.Private.isContainedBy(modifiers);
     	boolean isProtected = visibility == MemberVisibility.Protected || Modifier.Protected.isContainedBy(modifiers);
-    	if (result.config.skipPrivateMembers && (isPrivate || !isPublic && !isProtected))
+    	if ((function.getParentElement() instanceof Struct) && result.config.skipPrivateMembers && (isPrivate || !isPublic && !isProtected))
         	return;
         boolean isStatic = Modifier.Static.isContainedBy(modifiers);
 		

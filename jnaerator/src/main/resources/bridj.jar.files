@@ -116,6 +116,7 @@ com/bridj/ann/Constructor.class
 com/bridj/ann/Convention$Style.class
 com/bridj/ann/Convention.class
 com/bridj/ann/Encoding.class
+com/bridj/ann/EnumValue.class
 com/bridj/ann/Field.class
 com/bridj/ann/Library.class
 com/bridj/ann/Name.class
