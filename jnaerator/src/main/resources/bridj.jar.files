@@ -58,6 +58,16 @@ com/bridj/Dyncall.class
 com/bridj/EllipsisHelper$1.class
 com/bridj/EllipsisHelper.class
 com/bridj/FlagSet.class
+com/bridj/Functional$Func0.class
+com/bridj/Functional$Func1.class
+com/bridj/Functional$Func2.class
+com/bridj/Functional$Func3.class
+com/bridj/Functional$Func4.class
+com/bridj/Functional$Func5.class
+com/bridj/Functional$Func6.class
+com/bridj/Functional$Func7.class
+com/bridj/Functional.class
+com/bridj/HeadersReconstructor.class
 com/bridj/IndirectBufferPointer.class
 com/bridj/IntValuedEnum.class
 com/bridj/JNI.class
