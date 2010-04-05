@@ -1311,6 +1311,11 @@ public class JNAerator {
                 ).addModifiers(Modifier.Public).setBody(
                     block(stat(methodCall("super", varRef(addressVarName)))))
                 );
+                ptClass.addDeclaration(new Function(Function.Type.JavaMethod, fakePointer, null,
+                    new Arg(addressVarName, typeRef(com.bridj.Pointer.class))
+                ).addModifiers(Modifier.Public).setBody(
+                    block(stat(methodCall("super", varRef(addressVarName)))))
+                );
                 interf.addDeclaration(decl(ptClass));
             }
         }
