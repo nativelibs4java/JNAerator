@@ -53,6 +53,7 @@ import org.rococoa.ObjCClass;
 import org.rococoa.ObjCObject;
 import org.rococoa.cocoa.foundation.NSObject;
 
+import com.bridj.SizeT;
 import com.bridj.ValuedEnum;
 import com.bridj.ann.CLong;
 import com.bridj.ann.Ptr;
@@ -1267,15 +1268,24 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
         if (valueType instanceof TargettedTypeRef) {
             TargettedTypeRef ttr = (TargettedTypeRef)valueType;
             NL4JTypeConversion targetConv = toNL4JType(ttr.getTarget(), namesStack, library);
+            
+            TypeRef pointedTypeRef = targetConv.getIndirectTypeRef();
+            
             if (targetConv.type != NL4JTypeConversion.Type.Void) {
                 try {
-                    String s = targetConv.getRawType().toString();
-                    if (s.equals(Byte.TYPE.getName()) && (result.config.charPtrAsString || Modifier.__const.isContainedBy(valueType.getModifiers())))
-                        return new NL4JTypeConversion(
-                            typeRef(ident(result.config.runtime.pointerClass, expr(typeRef(String.class)))),
-                            null,
-                            NL4JTypeConversion.Type.Pointer
-                        );
+                	if (targetConv.type == NL4JTypeConversion.Type.NativeSize)
+                		pointedTypeRef = typeRef(SizeT.class);
+                	else if (targetConv.type == NL4JTypeConversion.Type.NativeLong)
+                		pointedTypeRef = typeRef(CLong.class);
+                	else {
+	                    String s = targetConv.getRawType().toString();
+	                    if (s.equals(Byte.TYPE.getName()) && (result.config.charPtrAsString || Modifier.__const.isContainedBy(valueType.getModifiers())))
+	                        return new NL4JTypeConversion(
+	                            typeRef(ident(result.config.runtime.pointerClass, expr(typeRef(String.class)))),
+	                            null,
+	                            NL4JTypeConversion.Type.Pointer
+	                        );
+                	}
                 } catch (UnsupportedConversionException ex) {
                 }
             }
@@ -1283,7 +1293,7 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
                 typeRef(
                     ident(
                         result.config.runtime.pointerClass,
-                        expr(targetConv.getIndirectTypeRef())
+                        expr(pointedTypeRef)
                     )
                 ),
                 null,
@@ -1342,7 +1352,7 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
 
                         
                     } else if (tr instanceof FunctionSignature) {
-                        return new NL4JTypeConversion(findCallbackRef((FunctionSignature)tr, null), null, NL4JTypeConversion.Type.Callback);
+                        return new NL4JTypeConversion(findCallbackRef((FunctionSignature)tr, null), null, NL4JTypeConversion.Type.Pointer);
                     } else {
                         String strs = valueType.toString();
                         String trs = tr == null ? null : tr.toString();

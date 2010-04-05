@@ -1636,11 +1636,14 @@ public class DeclarationsConverter {
 						if (!st.equals(mst))
 							vd.setValueType(new Primitive(mst));
 					}*/
-                    for (Declaration vd : vds) {
-                        if (!(mutatedType instanceof Primitive) && !result.config.noComments)
-                            vd.addToCommentBefore("C type : " + mutatedType);
-                        out.addDeclaration(vd);
-                    }
+                
+                for (Declaration vd : vds) {
+                	vd.importDetails(mutatedType, true);
+                	vd.moveAllCommentsBefore();
+        			if (!(mutatedType instanceof Primitive) && !result.config.noComments)
+                        vd.addToCommentBefore("C type : " + mutatedType);
+                    out.addDeclaration(vd);
+                }
 				//}
 				iChild[0]++;
 			}
