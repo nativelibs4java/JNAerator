@@ -1352,7 +1352,7 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
 
                         
                     } else if (tr instanceof FunctionSignature) {
-                        return new NL4JTypeConversion(findCallbackRef((FunctionSignature)tr, null), null, NL4JTypeConversion.Type.Pointer);
+                        return new NL4JTypeConversion(typeRef(ident(com.bridj.Pointer.class, expr(findCallbackRef((FunctionSignature)tr, null)))), null, NL4JTypeConversion.Type.Pointer);
                     } else {
                         String strs = valueType.toString();
                         String trs = tr == null ? null : tr.toString();
