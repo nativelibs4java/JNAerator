@@ -20,7 +20,9 @@ package com.ochafik.lang.jnaerator;
 import static com.ochafik.lang.SyntaxUtils.as;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -215,6 +217,8 @@ public class MissingNamesChooser extends Scanner {
 		return false;
 	}
 	
+	Map<String, Integer> nextUnnamedId = new HashMap<String, Integer>();
+	
 	/**
 	 * @return true if changed and revisited on change results (caller can give up)
 	 */
@@ -225,6 +229,8 @@ public class MissingNamesChooser extends Scanner {
 //			taggedTypeRef.accept(this);
 //			return true;
 //		}
+		Element parentElement = taggedTypeRef.getParentElement();
+		
 		//String betterTag = result.declarationsConverter.getActualTaggedTypeName(taggedTypeRef);
 		if (isNull(taggedTypeRef.getTag())) {
 			Identifier betterTag = result.declarationsConverter.getActualTaggedTypeName(taggedTypeRef);
@@ -232,6 +238,45 @@ public class MissingNamesChooser extends Scanner {
 				List<String> ownerNames = JNAeratorUtils.guessOwnerName(taggedTypeRef);//.getParentElement() instanceof StructTypeRef ? struct.getParentElement() : struct);
 				betterTag = ident(chooseName(taggedTypeRef, ownerNames));
 			}
+			
+			// Support (non-standard) unnamed structs and unions : http://www.redhat.com/docs/manuals/enterprise/RHEL-4-Manual/gcc/unnamed-fields.html
+			if (isNull(betterTag) && parentElement instanceof TaggedTypeRefDeclaration && (parentElement.getParentElement() instanceof Struct)) {
+				String type = null;
+				if (taggedTypeRef instanceof Struct) {
+					switch (((Struct)taggedTypeRef).getType()) {
+					case CStruct:
+						type = "Struct";
+						break;
+					case CUnion:
+						type = "Union";
+						break;
+					case CPPClass:
+						type = "Class";
+						break;
+					}
+				}
+				if (type != null) {
+					int unnamedId;
+					Integer i = nextUnnamedId.get(type);
+					if (i == null)
+						unnamedId = 1;
+					else
+						unnamedId = i;
+					
+					nextUnnamedId.put(type, unnamedId + 1);
+					
+					VariablesDeclaration vd = new VariablesDeclaration();
+					vd.setValueType(taggedTypeRef);
+					taggedTypeRef.setTag(ident("Unnamed" + type + unnamedId));
+					vd.addDeclarator(new DirectDeclarator("unnamed" + type + unnamedId));
+					vd.accept(this);
+					
+					parentElement.replaceBy(vd);
+					return true;
+				}
+					
+			}
+			
 			if (!isNull(betterTag)) {
 				taggedTypeRef.setTag(betterTag.clone());
 				taggedTypeRef.accept(this);
