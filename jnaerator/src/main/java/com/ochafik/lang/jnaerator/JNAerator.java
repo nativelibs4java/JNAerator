@@ -296,6 +296,9 @@ public class JNAerator {
 					case MaxConstructedFields:
 						config.maxConstructedFields = a.getIntParam(0);
 						break;
+					case BeanStructs:
+						config.beanStructs = true;
+						break;
 					case NoPrimitiveArrays:
 						config.noPrimitiveArrays = true;
 						break;

@@ -113,6 +113,7 @@ public class JNAeratorCommandLineArgs {
 		Undefine(           "-U(.+)",               "Undefine a preprocessor symbol after the autoconfiguration phase.", new ArgDef(Type.String, "symbolName")),
         GUI(				"-gui",		 			"Show minimalist progression GUI"),
 		NoRuntime(			"-noRuntime",		 	"Don't copy runtime classes to JAR output"),
+		BeanStructs(		"-beanStructs",			"Generate getters and setters for struct fields"),
 		JarOut(				"-jar",					"Jar file where all generated sources and the compiled classes go", new ArgDef(Type.OutputFile, "outFile")),
 		WCharAsShort(		"-wcharAsShort",		"Force treatment of wchar_t as short (char by default)"),
 		//Test(				"-test",				"Launch JNAerator's unit tests (DEBUG option)"),

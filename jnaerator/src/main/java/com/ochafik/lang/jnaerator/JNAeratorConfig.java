@@ -218,6 +218,7 @@ public class JNAeratorConfig {
     public List<Pair<MessageFormat, MessageFormat>> onlineDocumentationURLFormats = new ArrayList<Pair<MessageFormat, MessageFormat>>();
 	public String entryName;
 	public int maxConstructedFields = 10;
+	public boolean beanStructs;
 	
 	public Map<String, String> extraJavaSourceFilesContents = new LinkedHashMap<String, String>();
 	public Set<String> frameworks = new LinkedHashSet<String>();
