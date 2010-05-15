@@ -21,7 +21,6 @@ package com.ochafik.lang.jnaerator;
 import com.bridj.FlagSet;
 import com.bridj.IntValuedEnum;
 import com.bridj.StructObject;
-import com.bridj.TempPointers;
 import com.bridj.ValuedEnum;
 import com.bridj.ann.Library;
 import com.bridj.cpp.CPPObject;
@@ -1690,6 +1689,14 @@ public class DeclarationsConverter {
 					if (!(mutatedType instanceof Primitive) && !result.config.noComments)
 						vd.addToCommentBefore("C type : " + mutatedType);
 					out.addDeclaration(vd);
+				}
+				if (result.config.beanStructs) {
+					out.addDeclaration(new Function(Function.Type.JavaMethod, ident("get" + StringUtils.capitalize(name)), mutatedType).setBody(block(
+						new Statement.Return(varRef(name))
+					)).addModifiers(Modifier.Public));
+					out.addDeclaration(new Function(Function.Type.JavaMethod, ident("set" + StringUtils.capitalize(name)), typeRef(Void.TYPE), new Arg(name, mutatedType)).setBody(block(
+						stat(expr(memberRef(varRef("this"), MemberRefStyle.Dot, ident(name)), AssignmentOperator.Equal, varRef(name)))
+					)).addModifiers(Modifier.Public));
 				}
 				iChild[0]++;
 			}
