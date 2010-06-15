@@ -22,7 +22,6 @@ import com.bridj.FlagSet;
 import com.bridj.IntValuedEnum;
 import com.bridj.StructObject;
 import com.bridj.ValuedEnum;
-import com.bridj.ann.Library;
 import com.bridj.cpp.CPPObject;
 
 import static com.ochafik.lang.SyntaxUtils.as;
@@ -1374,7 +1373,8 @@ public class DeclarationsConverter {
 			Identifier javaPackage = result.getLibraryPackage(library);
 			Identifier fullClassName = ident(javaPackage, structJavaClass.getTag().clone());
 			
-			structJavaClass.addAnnotation(new Annotation(Library.class, expr(library)));
+			if (result.config.runtime == JNAeratorConfig.Runtime.BridJ)
+				structJavaClass.addAnnotation(new Annotation(com.bridj.ann.Library.class, expr(library)));
 			structJavaClass.removeModifiers(Modifier.Static);
 			structJavaClass = result.notifyBeforeWritingClass(fullClassName, structJavaClass, signatures, library);
 			if (structJavaClass != null) {
