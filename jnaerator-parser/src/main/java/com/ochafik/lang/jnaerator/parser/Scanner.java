@@ -451,8 +451,13 @@ public class Scanner implements Visitor {
 	}
 	
 	protected Scanner visit(Element e) {
-		if (e != null)
-			e.accept(this);
+		if (e != null) {
+			try {
+				e.accept(this);
+			} catch (StackOverflowError err) {
+				throw new RuntimeException("Overflow while visiting :\n" + e, err);	
+			}
+		}
 		return this;
 	}
     protected Scanner visit(List<? extends Element> list) {
