@@ -55,6 +55,7 @@ import com.bridj.TypedPointer;
 import com.bridj.cpp.CPPRuntime;
 import com.ochafik.io.FileListUtils;
 import com.ochafik.io.ReadText;
+import com.ochafik.io.WriteText;
 import com.ochafik.lang.compiler.CompilerUtils;
 import com.ochafik.lang.compiler.MemoryFileManager;
 import com.ochafik.lang.compiler.MemoryJavaFile;
@@ -602,6 +603,10 @@ public class JNAerator {
 						config.outputJar = new File(config.outputDir, (entry == null ? "out" : entry) + ".jar");
 					
 					if (config.verbose) {
+						if (config.rawParsedSourcesOutFile == null)
+							config.rawParsedSourcesOutFile = new File("_jnaerator.rawParsed.cpp");
+						if (config.normalizedParsedSourcesOutFile == null)
+							config.normalizedParsedSourcesOutFile = new File("_jnaerator.normalizedParsed.cpp");
 						if (config.macrosOutFile == null)
 							config.macrosOutFile = new File("_jnaerator.macros.cpp");
 						if (config.choicesOutFile == null)
@@ -1400,6 +1405,12 @@ public class JNAerator {
 		if (result.config.choicesInputFile != null)
 			readChoices(result);
 		
+		if (config.rawParsedSourcesOutFile != null) {
+			if (config.verbose)
+				System.out.println("Writing raw parsed sources to '" + config.rawParsedSourcesOutFile + "'");
+			WriteText.writeText(sourceFiles.toString(), config.rawParsedSourcesOutFile);
+		}
+		
 		/// Perform Objective-C-specific pre-transformation (javadoc conversion for enums + find name of enums based on next sibling integer typedefs)
 		sourceFiles.accept(new ObjectiveCToJavaPreScanner());
 
@@ -1442,6 +1453,12 @@ public class JNAerator {
 		sourceFiles.accept(new JavaDocCreator(result));
 		
 		assert checkNoCycles(sourceFiles);
+
+		if (config.normalizedParsedSourcesOutFile != null) {
+			if (config.verbose)
+				System.out.println("Writing normalized parsed sources to '" + config.normalizedParsedSourcesOutFile + "'");
+			WriteText.writeText(sourceFiles.toString(), config.normalizedParsedSourcesOutFile);
+		}
 		
 		//##################################################################
 		//##### BEGINNING HERE, sourceFiles NO LONGER GETS MODIFIED ! ######

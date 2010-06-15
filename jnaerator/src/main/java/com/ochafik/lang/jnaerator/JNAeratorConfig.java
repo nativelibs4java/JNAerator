@@ -357,6 +357,7 @@ public class JNAeratorConfig {
 	public boolean noPrimitiveArrays;
 	public File scalaOut;
 	public boolean skipPrivateMembers = true;
+	public File rawParsedSourcesOutFile, normalizedParsedSourcesOutFile;
 	public Collection<File> getFiles() {
 		/*return new AdaptedCollection<String, File>(libraryByFile.keySet(), new Adapter<String, File>() {
 			@Override

@@ -158,6 +158,10 @@ public class MissingNamesChooser extends Scanner {
 		}
 	}
 	
+	static boolean isUnnamed(TaggedTypeRefDeclaration d) {
+		return d != null && d.getTaggedTypeRef() != null && isNull(d.getTaggedTypeRef().getTag());
+	}
+	
 	@Override
 	public void visitTaggedTypeRef(TaggedTypeRef taggedTypeRef) {
 		super.visitTaggedTypeRef(taggedTypeRef);
@@ -190,6 +194,123 @@ public class MissingNamesChooser extends Scanner {
 				td.accept(this);
 			}
 		}
+//		
+//		super.visitTaggedTypeRef(taggedTypeRef);
+//
+//		Element parent = taggedTypeRef.getParentElement();
+//		boolean unnamed = 
+//			(
+//				parent instanceof TaggedTypeRefDeclaration && isUnnamed((TaggedTypeRefDeclaration)parent) ||
+//				parent instanceof VariablesDeclaration && ((VariablesDeclaration)parent).getDeclarators().isEmpty()
+//			) && 
+//			parent.getParentElement() instanceof Struct
+//		;
+//		// Support (non-standard) unnamed structs and unions : http://www.redhat.com/docs/manuals/enterprise/RHEL-4-Manual/gcc/unnamed-fields.html
+//		if (unnamed) {
+//			String type = null;
+//			if (taggedTypeRef instanceof Struct) {
+//				switch (((Struct)taggedTypeRef).getType()) {
+//				case CStruct:
+//					type = "Struct";
+//					break;
+//				case CUnion:
+//					type = "Union";
+//					break;
+//				case CPPClass:
+//					type = "Class";
+//					break;
+//				}
+//			}
+//			if (type != null) {
+////				taggedTypeRef.setParentElement(null);
+//				
+//				VariablesDeclaration vd = new VariablesDeclaration();
+//				vd.setValueType(taggedTypeRef);
+//				String pref;
+//				if (!isNull(taggedTypeRef.getTag())) {
+//					pref = taggedTypeRef.getTag() + "Field";
+//					pref = pref.substring(0, 1).toLowerCase() + pref.substring(1);
+//				} else {
+//					pref = "unnamed" + type;
+//					int unnamedId = getNextUnnamedId(pref);
+//					if (taggedTypeRef.getTag() == null)
+//						taggedTypeRef.setTag(ident("Unnamed" + type + unnamedId));
+//				}
+//				vd.addDeclarator(new DirectDeclarator(pref + getNextUnnamedId(pref)));
+////				taggedTypeRef.accept(this);
+//				parent.replaceBy(vd);
+////				vd.accept(this);
+////				return;
+//			}
+//		}
+//		chooseNameIfMissing(taggedTypeRef);
+//		
+////		Element parent = taggedTypeRef.getParentElement(); 
+//		
+//		if (!(parent instanceof TaggedTypeRefDeclaration) && !(parent instanceof TypeDef)) 
+//		{
+//			DeclarationsHolder holder = taggedTypeRef.findParentOfType(DeclarationsHolder.class);
+//			if (holder != null && holder != taggedTypeRef.getParentElement() && !(parent instanceof DeclarationsHolder)) {
+//				TaggedTypeRefDeclaration td = new TaggedTypeRefDeclaration();
+//				if (unnamed) {
+//					String type = null;
+//					if (taggedTypeRef instanceof Struct) {
+//						switch (((Struct)taggedTypeRef).getType()) {
+//						case CStruct:
+//							type = "Struct";
+//							break;
+//						case CUnion:
+//							type = "Union";
+//							break;
+//						case CPPClass:
+//							type = "Class";
+//							break;
+//						}
+//					}
+//					if (type == null) {
+//						taggedTypeRef.importDetails(parent, false);
+//						parent.replaceBy(null);
+//					} else {
+////				} else if (unnamed && parent instanceof VariablesDeclaration && ((VariablesDeclaration)parent).getDeclarators().isEmpty()) {
+////					
+////					taggedTypeRef.importDetails(parent, false);
+////					parent.replaceBy(null);
+//				
+//						VariablesDeclaration vd = new VariablesDeclaration();
+//						vd.setValueType(taggedTypeRef);
+//						String pref;
+//						if (!isNull(taggedTypeRef.getTag())) {
+//							pref = taggedTypeRef.getTag() + "Field";
+//							pref = pref.substring(0, 1).toLowerCase() + pref.substring(1);
+//						} else {
+//							pref = "unnamed" + type;
+//							int unnamedId = getNextUnnamedId(pref);
+//							if (taggedTypeRef.getTag() == null)
+//								taggedTypeRef.setTag(ident("Unnamed" + type + unnamedId));
+//						}
+//						vd.addDeclarator(new DirectDeclarator(pref + getNextUnnamedId(pref)));
+////						taggedTypeRef.accept(this);
+//						parent.replaceBy(vd);
+//						vd.accept(this);
+//						return;
+//					}
+//					
+//				} else {
+//					TypeRef tr = new TypeRef.SimpleTypeRef(taggedTypeRef.getTag().clone());
+//					for (Modifier mod : taggedTypeRef.getModifiers()) {
+//						if (mod.isA(ModifierKind.StorageClassSpecifier))
+//							tr.addModifiers(mod);
+//					}
+//					taggedTypeRef.replaceBy(tr);
+//					if (taggedTypeRef instanceof Struct)
+//						tr.setMarkedAsResolved(true);
+//				}
+//				
+//		 		td.setTaggedTypeRef(taggedTypeRef);
+//		 		holder.addDeclaration(td);
+//				td.accept(this);
+//			}
+//		}
 	}
 	
 	/**
@@ -229,63 +350,37 @@ public class MissingNamesChooser extends Scanner {
 //			taggedTypeRef.accept(this);
 //			return true;
 //		}
-		Element parentElement = taggedTypeRef.getParentElement();
-		
 		//String betterTag = result.declarationsConverter.getActualTaggedTypeName(taggedTypeRef);
 		if (isNull(taggedTypeRef.getTag())) {
-			Identifier betterTag = result.declarationsConverter.getActualTaggedTypeName(taggedTypeRef);
-			if (isNull(betterTag)) {
+			Identifier tag = result.declarationsConverter.getActualTaggedTypeName(taggedTypeRef);
+			if (isNull(tag)) {
 				List<String> ownerNames = JNAeratorUtils.guessOwnerName(taggedTypeRef);//.getParentElement() instanceof StructTypeRef ? struct.getParentElement() : struct);
-				betterTag = ident(chooseName(taggedTypeRef, ownerNames));
+				tag = ident(chooseName(taggedTypeRef, ownerNames));
 			}
 			
-			// Support (non-standard) unnamed structs and unions : http://www.redhat.com/docs/manuals/enterprise/RHEL-4-Manual/gcc/unnamed-fields.html
-			if (isNull(betterTag) && parentElement instanceof TaggedTypeRefDeclaration && (parentElement.getParentElement() instanceof Struct)) {
-				String type = null;
-				if (taggedTypeRef instanceof Struct) {
-					switch (((Struct)taggedTypeRef).getType()) {
-					case CStruct:
-						type = "Struct";
-						break;
-					case CUnion:
-						type = "Union";
-						break;
-					case CPPClass:
-						type = "Class";
-						break;
-					}
-				}
-				if (type != null) {
-					int unnamedId;
-					Integer i = nextUnnamedId.get(type);
-					if (i == null)
-						unnamedId = 1;
-					else
-						unnamedId = i;
-					
-					nextUnnamedId.put(type, unnamedId + 1);
-					
-					VariablesDeclaration vd = new VariablesDeclaration();
-					vd.setValueType(taggedTypeRef);
-					taggedTypeRef.setTag(ident("Unnamed" + type + unnamedId));
-					vd.addDeclarator(new DirectDeclarator("unnamed" + type + unnamedId));
-					vd.accept(this);
-					
-					parentElement.replaceBy(vd);
-					return true;
-				}
-					
-			}
-			
-			if (!isNull(betterTag)) {
-				taggedTypeRef.setTag(betterTag.clone());
-				taggedTypeRef.accept(this);
+			if (!isNull(tag)) {
+				taggedTypeRef.setTag(tag.clone());
+//				taggedTypeRef.accept(this);
 				return true;
 			}
 		}
 		return false;
 	}
 	
+	private int getNextUnnamedId(String type) {
+
+		Integer i = nextUnnamedId.get(type);
+		int unnamedId;
+		if (i == null)
+			unnamedId = 1;
+		else
+			unnamedId = i;
+		
+		nextUnnamedId.put(type, unnamedId + 1);
+		return unnamedId;
+	}
+
+	int nextAnonymous = 1;
 	public String chooseName(Element e, List<String> ownerNames) {
 		String s = chooseNameSuffix(e);
 		if (s == null)
@@ -295,7 +390,7 @@ public class MissingNamesChooser extends Scanner {
 		if (ownerNames != null)
 			names.addAll(ownerNames);
 		if (ownerNames.isEmpty())
-			return null;
+			return s + (nextAnonymous++);
 		
 		names.add(s);
 		switch (nameGenerationStyle) {

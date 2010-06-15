@@ -1691,10 +1691,10 @@ public class DeclarationsConverter {
 					out.addDeclaration(vd);
 				}
 				if (result.config.beanStructs) {
-					out.addDeclaration(new Function(Function.Type.JavaMethod, ident("get" + StringUtils.capitalize(name)), mutatedType).setBody(block(
+					out.addDeclaration(new Function(Function.Type.JavaMethod, ident("get" + StringUtils.capitalize(name)), vd.getValueType().clone()).setBody(block(
 						new Statement.Return(varRef(name))
 					)).addModifiers(Modifier.Public));
-					out.addDeclaration(new Function(Function.Type.JavaMethod, ident("set" + StringUtils.capitalize(name)), typeRef(Void.TYPE), new Arg(name, mutatedType)).setBody(block(
+					out.addDeclaration(new Function(Function.Type.JavaMethod, ident("set" + StringUtils.capitalize(name)), typeRef(Void.TYPE), new Arg(name, vd.getValueType().clone())).setBody(block(
 						stat(expr(memberRef(varRef("this"), MemberRefStyle.Dot, ident(name)), AssignmentOperator.Equal, varRef(name)))
 					)).addModifiers(Modifier.Public));
 				}
