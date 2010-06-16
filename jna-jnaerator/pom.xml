@@ -9,6 +9,10 @@
   <version>${jna.version}</version>
   <packaging>jar</packaging>
   
+  <properties>
+  	<shadedArtifactAttached>false</shadedArtifactAttached>
+  </properties>
+  
   <dependencies>
 	
   	<dependency>

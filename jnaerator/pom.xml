@@ -111,6 +111,7 @@ Users who are looking for ready-to-use libraries should check the NativeLibs4Jav
 		  <plugin>
 			  <groupId>org.apache.maven.plugins</groupId>
 			  <artifactId>maven-jar-plugin</artifactId>
+			  <version>2.3.1</version>
 			  <configuration>
 			<archive>
 			  <manifest>
