@@ -49,14 +49,6 @@ Users who are looking for ready-to-use libraries should check the NativeLibs4Jav
   
   <dependencies>
     
-	
-	
-	
-
-	
-	
-	
-	
   	<dependency>
   		<groupId>com.ochafik</groupId>
   		<artifactId>ochafik-swing</artifactId>
@@ -65,6 +57,7 @@ Users who are looking for ready-to-use libraries should check the NativeLibs4Jav
   		<scope>compile</scope>
   		<optional>false</optional>
   	</dependency>
+  	
   	<dependency>
   		<groupId>com.jnaerator</groupId>
   		<artifactId>jnaerator-rococoa-runtime</artifactId>
@@ -73,6 +66,7 @@ Users who are looking for ready-to-use libraries should check the NativeLibs4Jav
   		<scope>compile</scope>
   		<optional>false</optional>
   	</dependency>
+  	
   	<dependency>
   		<groupId>com.nativelibs4java</groupId>
   		<artifactId>bridj</artifactId>
@@ -81,6 +75,7 @@ Users who are looking for ready-to-use libraries should check the NativeLibs4Jav
   		<scope>compile</scope>
   		<optional>false</optional>
   	</dependency>
+  	
   	<dependency>
   		<groupId>com.jnaerator</groupId>
   		<artifactId>jnaerator-parser</artifactId>
@@ -89,6 +84,7 @@ Users who are looking for ready-to-use libraries should check the NativeLibs4Jav
   		<scope>compile</scope>
   		<optional>false</optional>
   	</dependency>
+  	
   	<dependency>
   		<groupId>org.anarres.cpp</groupId>
   		<artifactId>anarres-cpp-jnaerator</artifactId>
@@ -97,6 +93,7 @@ Users who are looking for ready-to-use libraries should check the NativeLibs4Jav
   		<scope>compile</scope>
   		<optional>false</optional>
   	</dependency>
+  	
   	<dependency>
   		<groupId>org.eclipse.jdt</groupId>
   		<artifactId>core</artifactId>
@@ -105,19 +102,11 @@ Users who are looking for ready-to-use libraries should check the NativeLibs4Jav
   		<scope>compile</scope>
   		<optional>false</optional>
   	</dependency>
+  	
   </dependencies>
+  
   <build>
 		<plugins>
-		  
-		  <plugin>
-			<groupId>org.apache.maven.plugins</groupId>
-			<artifactId>maven-compiler-plugin</artifactId>
-			<version>2.0.2</version>
-			<configuration>
-			  <source>1.6</source>
-			  <target>1.6</target>
-			</configuration>
-		  </plugin>
 		  
 		  <plugin>
 			  <groupId>org.apache.maven.plugins</groupId>
@@ -156,34 +145,6 @@ Users who are looking for ready-to-use libraries should check the NativeLibs4Jav
 			</executions>
 		  </plugin>
 		  
-		  <plugin>
-		  <groupId>org.apache.maven.plugins</groupId>
-			<artifactId>maven-shade-plugin</artifactId>
-			<version>1.2.1</version>
-			<executions>
-			 
-			  <execution>
-				<phase>package</phase>
-				<goals>
-				  <goal>shade</goal>
-				</goals>
-				<configuration>
-					<shadedArtifactAttached>true</shadedArtifactAttached>
-					<!--finalName>${project.artifactId}-standalone-${project.version}</finalName-->
-					<artifactSet>
-						<excludes>
-						  <exclude>org.scala-lang:scala-library</exclude>
-						  <exclude>org.slf4j:slf4j-jdk14</exclude>
-						  <exclude>junit:junit</exclude>
-						</excludes>
-					  </artifactSet>
-					  
-				</configuration>
-			  </execution>
-			  
-			</executions>
-		</plugin>
-
 		</plugins>
 	</build>
 </project>
