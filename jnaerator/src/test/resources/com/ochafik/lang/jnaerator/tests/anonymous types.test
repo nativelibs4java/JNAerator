@@ -19,3 +19,14 @@ a.fptr.invoke();
 a.u = new ComplexArgFunction_pArg_struct.u_union.ByValue();
 a.u.e = ComplexArgFunction_pArg_struct.u_union.e_enum.A;
 INSTANCE.ComplexArgFunction(a);
+--
+#runtime(BridJ)
+import test.*;
+import static test.TestLibrary.*;
+
+ComplexArgFunction_pArg_struct a = null;
+a.v((long)0);
+a.fptr().invoke();
+a.u(new ComplexArgFunction_pArg_struct.u_union());
+a.u().e(ComplexArgFunction_pArg_struct.u_union.e_enum.A);
+ComplexArgFunction(Pointer.getPointer(a));
