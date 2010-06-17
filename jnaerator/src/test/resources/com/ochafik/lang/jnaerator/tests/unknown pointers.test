@@ -3,6 +3,7 @@ struct OpaqueStruct;
 const OpaqueStruct* GetInterestingMessage(UnknownPtr*);
 
 --
+#runtime(JNAerator)
 
 import test.*;
 import static test.TestLibrary.*;

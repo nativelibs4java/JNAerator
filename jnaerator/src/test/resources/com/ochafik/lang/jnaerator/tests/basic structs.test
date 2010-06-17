@@ -6,6 +6,7 @@ struct B {
    A *pa;
 };
 --
+#runtime(JNAerator)
 import test.*;
 import static test.TestLibrary.*;
 

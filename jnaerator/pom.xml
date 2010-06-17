@@ -4,7 +4,7 @@
  <modelVersion>4.0.0</modelVersion>
   <groupId>com.jnaerator</groupId>
   <artifactId>jnaerator</artifactId>
-  <name>JNAerator CLI &amp; Studio Tools</name>
+  <name>JNAerator CLI and Studio Tools</name>
   <url>http://code.google.com/p/jnaerator/</url>
   <version>${jnaerator.version}</version>
   <packaging>jar</packaging>
@@ -17,7 +17,7 @@
   </parent>
   
   <description>
-JNAerator (pronounce "generator") simply parses C &amp; Objective-C headers and generates the corresponding JNA and Rococoa Java interfaces (it also has a very limited support for C++).
+JNAerator (pronounce "generator") simply parses C and Objective-C headers and generates the corresponding JNA and Rococoa Java interfaces (it also has a very limited support for C++).
 
 This lets Java programmers access native libraries transparently, with full IDE support and little to no hand-tweaking.
 

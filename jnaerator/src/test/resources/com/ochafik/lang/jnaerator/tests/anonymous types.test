@@ -9,6 +9,7 @@ void ComplexArgFunction(
         }* pArg
 );
 --
+#runtime(JNAerator)
 import test.*;
 import static test.TestLibrary.*;
 

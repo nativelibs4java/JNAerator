@@ -1,6 +1,7 @@
 void CopyBytes(char* dest, const char* source, const wchar_t* wsource, size_t n, const int* intArray);
 int process(void* ptr);
 --
+#runtime(JNAerator)
 import test.*;
 import static test.TestLibrary.*;
 import org.rococoa.cocoa.foundation.*;

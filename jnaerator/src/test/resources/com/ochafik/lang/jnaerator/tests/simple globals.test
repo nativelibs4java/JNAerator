@@ -7,6 +7,7 @@ extern NSInteger nsi;
 extern CGFloat cgf;
 
 --
+#runtime(JNAerator)
 import test.*;
 import org.rococoa.cocoa.*;
 import com.ochafik.lang.jnaerator.runtime.*;

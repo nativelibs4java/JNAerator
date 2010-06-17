@@ -9,6 +9,7 @@ void fp(S*);
 void fp_(_S*);
 
 --
+#runtime(JNAerator)
 
 import test.*;
 import static test.TestLibrary.*;

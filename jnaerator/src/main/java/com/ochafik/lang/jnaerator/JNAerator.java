@@ -1412,7 +1412,7 @@ public class JNAerator {
 		}
 		
 		/// Perform Objective-C-specific pre-transformation (javadoc conversion for enums + find name of enums based on next sibling integer typedefs)
-		sourceFiles.accept(new ObjectiveCToJavaPreScanner());
+		sourceFiles.accept(new ObjectiveCToJavaPreScanner(result));
 
 		/// Explode declarations to have only one direct declarator each
 		sourceFiles.accept(new CToJavaPreScanner());
@@ -1516,9 +1516,9 @@ public class JNAerator {
 		
 		generateLibraryFiles(sourceFiles, result);
 
-		//if (config.verbose)
-		for (String unknownType : result.typeConverter.unknownTypes) 
-			System.out.println("Unknown Type: " + unknownType);
+		if (config.verbose)
+			for (String unknownType : result.typeConverter.unknownTypes) 
+				System.out.println("Unknown Type: " + unknownType);
 
 		if (result.config.choicesOutFile != null) {
 			PrintWriter out = new PrintWriter(result.config.choicesOutFile);

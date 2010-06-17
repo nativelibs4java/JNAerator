@@ -2,6 +2,7 @@
 const int Expression = X + (1 + 2) * 4;
 const int unsignedValue = (UInt32)4294967288L;
 --
+#runtime(JNAerator)
 import test.*;
 import static test.TestLibrary.*;
 

@@ -7,6 +7,7 @@
 
 @end
 --
+#runtime(JNAerator)
 import test.*;
 
 NSMutableArray a = NSMutableArray.arrayWithCapacity(10);

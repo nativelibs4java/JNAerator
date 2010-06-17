@@ -26,6 +26,7 @@ typedef uint32_t E4; // too far away !
 
 
 --
+#runtime(JNAerator)
 import test.*;
 import static test.TestLibrary.*;
 
@@ -34,3 +35,16 @@ i = _E1.E1A;
 i = E2.E2A;
 i = E3.E3A;
 i = E4A;
+--
+#runtime(BridJ)
+import test.*;
+import static test.TestLibrary.*;
+
+_E1 e1 = _E1.E1A;
+E2 e2 = E2.E2A;
+E3 e3 = E3.E3A;
+
+IntValuedEnum<_E1> v1 = e1;
+IntValuedEnum<E2> v2 = e2;
+IntValuedEnum<E3> v3 = e3;
+int i4 = E4A;

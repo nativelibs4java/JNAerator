@@ -4,6 +4,7 @@ struct S {
 	long (*foo[10])(union { long l; int i; });
 };
 --
+#runtime(JNAerator)
 import test.*;
 import static test.TestLibrary.*;
 

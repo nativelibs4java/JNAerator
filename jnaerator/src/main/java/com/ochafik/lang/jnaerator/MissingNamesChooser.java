@@ -351,7 +351,7 @@ public class MissingNamesChooser extends Scanner {
 //			return true;
 //		}
 		//String betterTag = result.declarationsConverter.getActualTaggedTypeName(taggedTypeRef);
-		if (isNull(taggedTypeRef.getTag())) {
+		if (isNull(taggedTypeRef.getTag()) && !(taggedTypeRef.getParentElement() instanceof TaggedTypeRefDeclaration)) {
 			Identifier tag = result.declarationsConverter.getActualTaggedTypeName(taggedTypeRef);
 			if (isNull(tag)) {
 				List<String> ownerNames = JNAeratorUtils.guessOwnerName(taggedTypeRef);//.getParentElement() instanceof StructTypeRef ? struct.getParentElement() : struct);

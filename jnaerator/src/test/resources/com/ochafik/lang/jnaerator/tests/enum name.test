@@ -13,6 +13,7 @@ void f(Choice c);
 void ff(_OtherChoice c);
 
 --
+#runtime(JNAerator)
 import test.*;
 import static test.TestLibrary.*;
 

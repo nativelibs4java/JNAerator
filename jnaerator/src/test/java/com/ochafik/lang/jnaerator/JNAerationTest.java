@@ -32,6 +32,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.Map.Entry;
 import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 
 import junit.framework.Assert;
 
@@ -66,9 +67,11 @@ public class JNAerationTest {
 	static class TestDesc {
 		String cSource;
 		String libraryName = "test";
+		JNAeratorConfig.Runtime runtime;
 		Map<String, String> extraJavaSourceFilesContents = new HashMap<String, String>();
-		public TestDesc(String cSource) {
+		public TestDesc(String cSource, JNAeratorConfig.Runtime runtime) {
 			this.cSource = cSource;
+			this.runtime = runtime;
 		}
 		public TestDesc addSource(String className, String javaContent) {
 			extraJavaSourceFilesContents.put(className, javaContent);
@@ -80,9 +83,20 @@ public class JNAerationTest {
 			//String lib = libraryName + "." + StringUtils.capitalize(libraryName) + "Library";
 			//imports.add("import " + lib + ";");
 			//imports.add("import static " + lib + ".*;");
-			imports.add("import com.sun.jna.*;");
-			imports.add("import com.sun.jna.ptr.*;");
-			imports.add("import java.nio.*;");
+			switch (runtime) {
+				
+			case JNAerator:
+			case JNA:
+				imports.add("import com.sun.jna.*;");
+				imports.add("import com.sun.jna.ptr.*;");
+				imports.add("import java.nio.*;");
+				break;
+			case BridJ:
+				imports.add("import com.bridj.*;");
+				imports.add("import com.bridj.cpp.*;");
+				imports.add("import java.nio.*;");
+				break;
+			}
 
 			for (String line : javaContent.split("\r?\n")) {
 				if (line.matches("^\\s*import[^\\w].*"))
@@ -107,6 +121,7 @@ public class JNAerationTest {
 		JNAeratorConfig config = new JNAeratorConfig();
 		config.defaultLibrary = test.libraryName;
 		config.compile = true;
+		config.runtime = test.runtime;
 		config.preferJavac = true;
 		config.extraJavaSourceFilesContents.putAll(test.extraJavaSourceFilesContents);
 		config.libraryForElementsInNullFile = test.libraryName;//test.classNameToJavaContent;
@@ -178,7 +193,7 @@ public class JNAerationTest {
 			}
 		});
 	}
-	
+	static Pattern runtimePattern = Pattern.compile("(?m)#runtime\\((BridJ|JNAerator|JNA)\\).*");
 	@Parameters
 	public static List<Object[]> readParameters() throws IOException {
 		//List<String> lines = ReadText.readLines(ObjCppParsingTests.class.getClassLoader().getResource(TEST_FILE));
@@ -198,11 +213,25 @@ public class JNAerationTest {
 		})) {
 			String t = ReadText.readText(testURL);
 			String[] tt = t.split("\n--\n");
-			data.add(new Object[] { 
-				//testURL.toString(), //
-				new File(URLDecoder.decode(testURL.toString(), "utf-8")).getName(), 
-				new TestDesc(tt[0]).addMainContentSource("Test", tt[1]) 
-			});
+			String cSource = tt[0];
+			String n = new File(URLDecoder.decode(testURL.toString(), "utf-8")).getName();
+			for (int i = 1; i < tt.length; i++) {
+				String rawSource = tt[i];
+				JNAeratorConfig.Runtime runtime = JNAeratorConfig.Runtime.JNAerator;
+				Matcher m = runtimePattern.matcher(rawSource);
+				if (m.find()) {
+					runtime = Enum.valueOf(JNAeratorConfig.Runtime.class, m.group(1).trim());	
+				}
+				String javaSource = rawSource.replaceAll("^#", "//#");
+				String testName = n + " / " + runtime.name();
+				data.add(new Object[] { 
+						testName, 
+						new TestDesc(cSource, runtime).addMainContentSource(
+							"Test" + runtime.name(),
+							"// " + testName + "\n" + javaSource
+						) 
+				});
+			}
 		}
 		return data;
 	}

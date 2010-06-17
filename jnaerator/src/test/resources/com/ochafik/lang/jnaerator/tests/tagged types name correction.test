@@ -23,6 +23,7 @@ typedef struct _S2
 } K;
 
 --
+#runtime(JNAerator)
 import test.*;
 import static test.TestLibrary.*;
 

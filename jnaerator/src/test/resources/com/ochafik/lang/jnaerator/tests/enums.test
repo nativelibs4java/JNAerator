@@ -11,6 +11,7 @@ enum E {
 	Item2 = Item1 + 10
 };
 --
+#runtime(JNAerator)
 import test.*;
 import static test.TestLibrary.*;
 

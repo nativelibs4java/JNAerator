@@ -46,6 +46,10 @@ public class ObjectiveCToJavaPreScanner extends Scanner {
 //		else
 //			super.visitStruct(struct);
 //	}
+	Result result;
+	public ObjectiveCToJavaPreScanner(Result result) {
+		this.result = result;
+	}
 	@Override
 	public void visitEnum(Enum e) {
 		Element parent = e.getParentElement();
@@ -115,8 +119,8 @@ public class ObjectiveCToJavaPreScanner extends Scanner {
 		ep.replaceBy(null);
 		typeDef.setValueType(e);
 		
-		
-		System.err.println("Inferred enum name : " + name);
+		if (result.config.verbose)
+			System.err.println("Inferred enum name : " + name);
 		return false;
 	}
 }

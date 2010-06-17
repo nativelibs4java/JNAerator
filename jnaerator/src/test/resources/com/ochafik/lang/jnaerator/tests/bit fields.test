@@ -7,6 +7,7 @@ struct BF {
 	float f;
 };
 --
+#runtime(JNAerator)
 import test.*;
 import static test.TestLibrary.*;
 

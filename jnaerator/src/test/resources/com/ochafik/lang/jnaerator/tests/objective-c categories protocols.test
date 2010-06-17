@@ -14,6 +14,7 @@
 @end
 
 --
+#runtime(JNAerator)
 import test.*;
 import test.protocols.*;
 

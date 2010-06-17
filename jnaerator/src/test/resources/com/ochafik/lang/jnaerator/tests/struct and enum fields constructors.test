@@ -19,6 +19,7 @@ struct S2 : S {
 };
 
 --
+#runtime(JNAerator)
 
 import test.*;
 import static test.TestLibrary.*;

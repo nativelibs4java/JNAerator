@@ -1,5 +1,6 @@
 extern bool operator/=(int&, float);
 --
+#runtime(JNAerator)
 import test.*;
 import static test.TestLibrary.*;
 

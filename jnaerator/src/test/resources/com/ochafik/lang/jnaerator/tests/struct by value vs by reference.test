@@ -42,6 +42,7 @@ simplestruct myfuncV();
 void myfuncV(simplestruct);
 
 --
+#runtime(JNAerator)
 
 import test.*;
 import org.rococoa.cocoa.*;
