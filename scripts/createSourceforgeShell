@@ -1,1 +1,1 @@
-ssh -t opentator,jnaerator@shell.sourceforge.net create
+ssh -t opentator,nativelibs4java@shell.sourceforge.net create
