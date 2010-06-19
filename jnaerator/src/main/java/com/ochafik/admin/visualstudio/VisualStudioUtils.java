@@ -37,11 +37,15 @@ public class VisualStudioUtils {
 			true
 		).split(";"));
 	}
+	public static File getMicrosoftWindowsProgramFilesDirectory() {
+		String propName = com.sun.jna.Platform.is64Bit() ? "ProgramFiles(x86)" : "ProgramFiles";
+		return new File(getProp(propName, "C:\\Program Files", true));
+	}
 	public static String getMicrosoftWindowsSDKHome() {
-		return getProp("WINDOWS_SDK_HOME", "C:\\Program Files\\Microsoft SDKs\\Windows\\v6.0A", true);
+		return getProp("WINDOWS_SDK_HOME", new File(getMicrosoftWindowsProgramFilesDirectory(), "Microsoft SDKs\\Windows\\v6.0A").toString(), true);
 	}
 	private static String getMicrosoftVisualStudioHome() {
-		return getProp("VISUAL_STUDIO_HOME", "C:\\Program Files\\Microsoft Visual Studio 9.0", true);
+		return getProp("VISUAL_STUDIO_HOME", new File(getMicrosoftWindowsProgramFilesDirectory(), "Microsoft Visual Studio 9.0").toString(), true);
 	}
 	static String getProp(String name, String defVal) {
 		return getProp(name, defVal, false);
