@@ -160,7 +160,9 @@ public class JNAeratorConfig {
         public final String runtimeFilesListFileName;
         private String annotationPackage;
         public SimpleTypeRef typeRef(Ann ann) {
-        	String n = ann.toString();
+			if (annotationPackage == null)
+				return null;
+			String n = ann.toString();
         	if (this == BridJ) {
         		if (ann == Ann.Length)
         			n = Array.class.getSimpleName();
