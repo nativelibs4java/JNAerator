@@ -1671,6 +1671,9 @@ public class DeclarationsConverter {
 					Declarator d = v.getDeclarators().get(0);
 					if (d.getBits() > 0) {
 						int bits = d.getBits();
+                                                if (!result.config.runtime.hasBitFields)
+                                                    throw new UnsupportedConversionException(d, "This runtime does not support bit fields : " + result.config.runtime);
+                                                
 						vd.addAnnotation(new Annotation(result.config.runtime.typeRef(JNAeratorConfig.Runtime.Ann.Bits), expr(bits)));
 						String st = vd.getValueType().toString(), mst = st;
 						if (st.equals("int") || st.equals("long") || st.equals("short") || st.equals("long")) {

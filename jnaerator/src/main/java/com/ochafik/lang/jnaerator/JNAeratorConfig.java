@@ -63,7 +63,7 @@ public class JNAeratorConfig {
 		Windows, Linux, MacOSX
 	}
     public enum Runtime {
-        JNA(false, true,
+        JNA(false, true, false,
             com.sun.jna.Callback.class,
             com.sun.jna.Pointer.class,
             com.sun.jna.Memory.class,
@@ -74,7 +74,7 @@ public class JNAeratorConfig {
             com.sun.jna.Library.class,
             null,
             "jna-runtime.jar.files"),
-        JNAerator(false, true,
+        JNAerator(false, true, true,
             com.sun.jna.Callback.class,
             com.sun.jna.Pointer.class,
             com.sun.jna.Memory.class,
@@ -92,7 +92,7 @@ public class JNAeratorConfig {
             }
 
         },
-        BridJ(true, false,
+        BridJ(true, false, true,
             com.bridj.Callback.class,
             com.bridj.Pointer.class,
             null, //com.bridj.Memory.class,
@@ -131,6 +131,7 @@ public class JNAeratorConfig {
         }
         Runtime(boolean hasFastStructs, 
                 boolean hasJNA,
+                boolean hasBitFields,
                 Class<?> callbackClass,
                 Class<?> pointerClass,
                 Class<?> memoryClass,
@@ -143,6 +144,7 @@ public class JNAeratorConfig {
                 String runtimeFilesListFileName)
         {
             this.hasFastStructs = hasFastStructs;
+            this.hasBitFields = hasBitFields;
             this.hasJNA = hasJNA;
             this.callbackClass = callbackClass;
             this.pointerClass = pointerClass;
@@ -171,6 +173,7 @@ public class JNAeratorConfig {
         public final Class callbackClass, pointerClass, memoryClass, structClass, unionClass, structIOClass, arrayClass, libraryClass;
         public final boolean hasFastStructs;
         public final boolean hasJNA;
+        public final boolean hasBitFields;
     }
 	public enum GenFeatures {
 		Compile,
