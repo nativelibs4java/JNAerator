@@ -363,6 +363,7 @@ public class JNAeratorConfig {
 	public File scalaOut;
 	public boolean skipPrivateMembers = true;
 	public File rawParsedSourcesOutFile, normalizedParsedSourcesOutFile;
+	public boolean skipLibraryInstanceDeclarations;
 	public Collection<File> getFiles() {
 		/*return new AdaptedCollection<String, File>(libraryByFile.keySet(), new Adapter<String, File>() {
 			@Override

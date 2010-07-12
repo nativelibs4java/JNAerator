@@ -321,6 +321,9 @@ public class JNAerator {
                     case NoCompile:
 						config.compile = false;
 						break;
+                    case SkipLibInstance:
+                    	config.skipLibraryInstanceDeclarations = true;
+                    	break;
 					case NoStringReturns:
 						config.stringifyConstCStringReturnValues = false;
 						break;
@@ -1177,68 +1180,71 @@ public class JNAerator {
 			interf.addModifiers(Modifier.Public);
 			interf.setTag(simpleLibraryClassName);
 			
-			Expression libNameExpr = opaqueExpr(result.getLibraryFileExpression(library));
-			TypeRef libTypeRef = typeRef(fullLibraryClassName);
-			Expression libClassLiteral = classLiteral(libTypeRef);
-			
-			Expression libraryPathGetterExpr = methodCall(
-				expr(typeRef(LibraryExtractor.class)),
-				MemberRefStyle.Dot,
-				"getLibraryPath",
-				libNameExpr,
-				expr(true),
-				libClassLiteral
-			);
-			
-			String libNameStringFieldName = "JNA_LIBRARY_NAME", nativeLibFieldName = "JNA_NATIVE_LIB";
-			interf.addDeclaration(new VariablesDeclaration(typeRef(String.class), new Declarator.DirectDeclarator(
-				libNameStringFieldName,
-				libraryPathGetterExpr
-			)).addModifiers(Modifier.Public, Modifier.Static, Modifier.Final));
-			
-			Expression libraryNameFieldExpr = memberRef(expr(libTypeRef.clone()), MemberRefStyle.Dot, ident(libNameStringFieldName));
-			Expression optionsMapExpr = memberRef(expr(typeRef(MangledFunctionMapper.class)), MemberRefStyle.Dot, "DEFAULT_OPTIONS");
-			interf.addDeclaration(new VariablesDeclaration(typeRef(NativeLibrary.class), new Declarator.DirectDeclarator(
-				nativeLibFieldName,
-				methodCall(
-					expr(typeRef(NativeLibrary.class)),
-					MemberRefStyle.Dot,
-					"getInstance",
-					libraryNameFieldExpr.clone(),
-					optionsMapExpr.clone()
-				)
-			)).addModifiers(Modifier.Public, Modifier.Static, Modifier.Final));
-			Expression nativeLibFieldExpr = memberRef(expr(libTypeRef.clone()), MemberRefStyle.Dot, ident(nativeLibFieldName));
+			Expression nativeLibFieldExpr = null;
+			if (!result.config.skipLibraryInstanceDeclarations) {
+				Expression libNameExpr = opaqueExpr(result.getLibraryFileExpression(library));
+				TypeRef libTypeRef = typeRef(fullLibraryClassName);
+				Expression libClassLiteral = classLiteral(libTypeRef);
 				
-			if (result.config.useJNADirectCalls) {
-				interf.addDeclaration(new Function(Function.Type.StaticInit, null, null).setBody(block(
-					stat(methodCall(
-						expr(typeRef(Native.class)),
+				Expression libraryPathGetterExpr = methodCall(
+					expr(typeRef(LibraryExtractor.class)),
+					MemberRefStyle.Dot,
+					"getLibraryPath",
+					libNameExpr,
+					expr(true),
+					libClassLiteral
+				);
+				
+				String libNameStringFieldName = "JNA_LIBRARY_NAME", nativeLibFieldName = "JNA_NATIVE_LIB";
+				interf.addDeclaration(new VariablesDeclaration(typeRef(String.class), new Declarator.DirectDeclarator(
+					libNameStringFieldName,
+					libraryPathGetterExpr
+				)).addModifiers(Modifier.Public, Modifier.Static, Modifier.Final));
+				
+				Expression libraryNameFieldExpr = memberRef(expr(libTypeRef.clone()), MemberRefStyle.Dot, ident(libNameStringFieldName));
+				Expression optionsMapExpr = memberRef(expr(typeRef(MangledFunctionMapper.class)), MemberRefStyle.Dot, "DEFAULT_OPTIONS");
+				interf.addDeclaration(new VariablesDeclaration(typeRef(NativeLibrary.class), new Declarator.DirectDeclarator(
+					nativeLibFieldName,
+					methodCall(
+						expr(typeRef(NativeLibrary.class)),
 						MemberRefStyle.Dot,
-						"register",
-						libraryNameFieldExpr.clone()
-					))
-				)).addModifiers(Modifier.Static));
-			} else {
-				VariablesDeclaration instanceDecl = new VariablesDeclaration(libTypeRef, new Declarator.DirectDeclarator(
-					librariesHub == null ? "INSTANCE" : library,
-					cast(
-						libTypeRef, 
-						methodCall(
+						"getInstance",
+						libraryNameFieldExpr.clone(),
+						optionsMapExpr.clone()
+					)
+				)).addModifiers(Modifier.Public, Modifier.Static, Modifier.Final));
+				nativeLibFieldExpr = memberRef(expr(libTypeRef.clone()), MemberRefStyle.Dot, ident(nativeLibFieldName));
+					
+				if (result.config.useJNADirectCalls) {
+					interf.addDeclaration(new Function(Function.Type.StaticInit, null, null).setBody(block(
+						stat(methodCall(
 							expr(typeRef(Native.class)),
 							MemberRefStyle.Dot,
-							"loadLibrary",
-							libraryNameFieldExpr.clone(),
-							libClassLiteral,
-							optionsMapExpr.clone()
+							"register",
+							libraryNameFieldExpr.clone()
+						))
+					)).addModifiers(Modifier.Static));
+				} else {
+					VariablesDeclaration instanceDecl = new VariablesDeclaration(libTypeRef, new Declarator.DirectDeclarator(
+						librariesHub == null ? "INSTANCE" : library,
+						cast(
+							libTypeRef, 
+							methodCall(
+								expr(typeRef(Native.class)),
+								MemberRefStyle.Dot,
+								"loadLibrary",
+								libraryNameFieldExpr.clone(),
+								libClassLiteral,
+								optionsMapExpr.clone()
+							)
 						)
-					)
-				)).addModifiers(Modifier.Public, Modifier.Static, Modifier.Final);
-				if (librariesHub != null) {
-					librariesHub.addDeclaration(instanceDecl);
-					librariesHub.addProtocol(fullLibraryClassName.clone());
-				} else
-					interf.addDeclaration(instanceDecl);
+					)).addModifiers(Modifier.Public, Modifier.Static, Modifier.Final);
+					if (librariesHub != null) {
+						librariesHub.addDeclaration(instanceDecl);
+						librariesHub.addProtocol(fullLibraryClassName.clone());
+					} else
+						interf.addDeclaration(instanceDecl);
+				}
 			}
 
             boolean stdcall = false;

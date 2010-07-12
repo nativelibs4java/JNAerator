@@ -251,7 +251,8 @@ public class GlobalsGenerator {
 	public void convertGlobals(List<VariablesDeclaration> list, Signatures signatures, DeclarationsHolder out, Expression nativeLibFieldExpr, Identifier libraryNameExpression, String library) {		
 		if (list == null)
 			return;
-		
+		if (result.config.skipLibraryInstanceDeclarations)
+			return;
 		for (VariablesDeclaration v : list) {
 			try {
 				convertGlobals(v, signatures, out, nativeLibFieldExpr, libraryNameExpression, library);
