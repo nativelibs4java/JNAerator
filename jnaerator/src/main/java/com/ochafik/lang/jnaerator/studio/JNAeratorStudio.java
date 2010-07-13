@@ -225,7 +225,7 @@ public class JNAeratorStudio extends JPanel {
 	public void close() {
 		try {
 			save();
-		} catch (Exception ex) {
+		} catch (Throwable ex) {
 			error(null, "Error while closing", ex);
 		}
 	}
