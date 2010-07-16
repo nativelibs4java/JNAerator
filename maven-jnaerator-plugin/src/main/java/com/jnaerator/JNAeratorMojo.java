@@ -35,7 +35,7 @@ public class JNAeratorMojo
 {
     /**
      * Output directory for JNAerated sources.
-     * @parameter expression="${project.build.directory}/../src/main/jnaerator/config.jnaerator"
+     * @parameter expression="${project.basedir}/src/main/jnaerator/config.jnaerator"
      * @required
      */
     private File config;
