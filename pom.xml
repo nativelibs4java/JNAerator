@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.jnaerator</groupId>
     <artifactId>jnaerator-root</artifactId>
-    <version>0.9.4-SNAPSHOT</version>
+    <version>0.9.4</version>
     <packaging>pom</packaging>
     <inceptionYear>2009</inceptionYear>
     <name>JNAerator Root Project</name>
@@ -11,7 +11,7 @@
 	<parent>
 		<groupId>com.jnaerator</groupId>
 		<artifactId>jnaerator-parent</artifactId>
-		<version>0.9.4-SNAPSHOT</version>
+		<version>0.9.4</version>
 		<relativePath>parent</relativePath>
 	</parent>
 	

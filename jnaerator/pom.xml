@@ -6,13 +6,13 @@
   <artifactId>jnaerator</artifactId>
   <name>JNAerator CLI and Studio Tools</name>
   <url>http://code.google.com/p/jnaerator/</url>
-  <version>${jnaerator.version}</version>
+  <version>0.9.4</version>
   <packaging>jar</packaging>
   
   <parent>
 	  <groupId>com.jnaerator</groupId>
 	  <artifactId>jnaerator-parent</artifactId>
-	  <version>0.9.4-SNAPSHOT</version>
+	  <version>0.9.4</version>
 	  <relativePath>../parent</relativePath>
   </parent>
   
