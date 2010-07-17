@@ -1,15 +1,3 @@
-Archive:  jnaerator-runtime/target/jnaerator-runtime-0.9.4-SNAPSHOT-shaded.jar
-META-INF/MANIFEST.MF
-META-INF/OCHAFIK2.DSA
-META-INF/OCHAFIK2.SF
-META-INF/maven/com.jnaerator/
-META-INF/maven/com.jnaerator/jnaerator-runtime/
-META-INF/maven/com.jnaerator/jnaerator-runtime/pom.properties
-META-INF/maven/com.jnaerator/jnaerator-runtime/pom.xml
-META-INF/maven/com.ochafik/
-META-INF/maven/com.ochafik/ochafik-util/
-META-INF/maven/com.ochafik/ochafik-util/pom.properties
-META-INF/maven/com.ochafik/ochafik-util/pom.xml
 com/ochafik/beans/BeansUtils$1.class
 com/ochafik/beans/BeansUtils.class
 com/ochafik/io/FileListUtils.class

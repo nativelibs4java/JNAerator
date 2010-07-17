@@ -1,6 +1,16 @@
-Current development version (0.9.4-SNAPSHOT)
+Current development version (0.9.5-SNAPSHOT)
 
 ...
+
+Version 0.9.4 (r1067@nl4j, 20100717)
+
+- better C/C++ parsing (cast operators, templates, anonymous structs...)
+- fixed JNAerator issues #63 ("JNA runtime does not
+support bit fields"), #64 ("on Windows, use
+%ProgramFiles%" to infer Visual Studio install directory.")
+- enhanced BridJ runtime generation support
+- enhanced debug output in verbose mode
+- Added -beanStructs command line option to generate getters and setters for JNA (issue 62 @ jnaerator)
 
 Version 0.9.3 (r760@nl4j, 20100121)
 

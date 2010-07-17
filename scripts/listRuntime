@@ -1,5 +1,5 @@
-unzip -l jna-jnaerator/target/jna-jnaerator-3.2.4.jar | sed -E 's/^.*[0-9]+:[0-9]+ +//' | grep '\.' | sort | tee jnaerator/src/main/resources/jna-runtime.jar.files
-unzip -l jnaerator-runtime/target/jnaerator-runtime-*-SNAPSHOT-shaded.jar | sed -E 's/^.*[0-9]+:[0-9]+ +//' | grep '\.' | sort | tee jnaerator/src/main/resources/jnaerator-runtime.jar.files
-unzip -l ~/nativelibs4java/Runtime/Structs/target/nl4j-runtime-structs-jna-*-SNAPSHOT.jar | sed -E 's/^.*[0-9]+:[0-9]+ +//' | grep '\.' | sort | tee jnaerator/src/main/resources/nl4j-runtime-structs-jna.jar.files
-unzip -l ~/nativelibs4java/Runtime/BridJ/target/bridj-*-SNAPSHOT.jar | sed -E 's/^.*[0-9]+:[0-9]+ +//' | grep '\.' | sort | tee jnaerator/src/main/resources/bridj.jar.files
+unzip -l jna-jnaerator/target/jna-jnaerator-3.2.5.jar | sed -E 's/^.*[0-9]+:[0-9]+ +//' | grep '\.' | sort | tee jnaerator/src/main/resources/jna-runtime.jar.files
+unzip -l jnaerator-runtime/target/jnaerator-runtime-*-shaded.jar | sed -E 's/^.*[0-9]+:[0-9]+ +//' | grep '\.' | sort | tee jnaerator/src/main/resources/jnaerator-runtime.jar.files
+unzip -l ~/nativelibs4java/Runtime/Structs/target/nl4j-runtime-structs-jna-*.jar | sed -E 's/^.*[0-9]+:[0-9]+ +//' | grep '\.' | sort | tee jnaerator/src/main/resources/nl4j-runtime-structs-jna.jar.files
+unzip -l ~/nativelibs4java/Runtime/BridJ/target/bridj-*-shaded.jar | sed -E 's/^.*[0-9]+:[0-9]+ +//' | grep '\.' | sort | tee jnaerator/src/main/resources/bridj.jar.files
 
