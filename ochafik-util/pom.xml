@@ -6,7 +6,7 @@
   <artifactId>ochafik-util</artifactId>
   <name>OChafik's General Utilities</name>
   <url>http://ochafik.free.fr/blog/</url>
-  <version>${jnaerator.version}</version>
+  <version>0.9.4-SNAPSHOT</version>
   <packaging>jar</packaging>
   
   <parent>
