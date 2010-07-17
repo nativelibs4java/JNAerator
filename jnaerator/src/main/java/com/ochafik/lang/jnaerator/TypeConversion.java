@@ -1068,6 +1068,13 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
                 return conv;
             }
         }
+        if (valueType instanceof FunctionSignature) {
+            conv.isPtr = true;
+            conv.typeRef = typeRef(ident(com.bridj.Pointer.class, expr(findCallbackRef((FunctionSignature)valueType, null))));
+            conv.structIOFieldGetterNameRadix = "Pointer";
+            return conv;
+        }
+                    
 
         throw new UnsupportedConversionException(original, "Unsupported type");
     }
