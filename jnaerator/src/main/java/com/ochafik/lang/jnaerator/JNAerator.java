@@ -394,6 +394,9 @@ public class JNAerator {
 					case NoMangling:
 						config.noMangling = true;
 						break;
+                    case ScalaStructSetters:
+                        config.scalaStructSetters = true;
+                        break;
 					case NoComments:
 						config.noComments = true;
 						break;

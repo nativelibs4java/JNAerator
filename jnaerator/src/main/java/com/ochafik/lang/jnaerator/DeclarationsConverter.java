@@ -1592,6 +1592,17 @@ public class DeclarationsConverter {
             setter.addArg(new Arg(name, javaType));
             setter.addModifiers(Modifier.Native);
             out.add(setter);
+            
+            if (result.config.scalaStructSetters) {
+                setter = new Function();
+                setter.setName(ident(name + "_$eq"));
+                setter.setValueType(typeRef(holderName.clone()));//Void.TYPE));
+                setter.addArg(new Arg(name, javaType.clone()));
+                setter.addModifiers(Modifier.Public, Modifier.Final);
+                setter.setBody(block(
+                    new Statement.Return(methodCall(name, varRef(name)))
+                ));
+            }
         }
         return out;
     }

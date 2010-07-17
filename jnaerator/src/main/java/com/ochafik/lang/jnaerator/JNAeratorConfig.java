@@ -359,6 +359,7 @@ public class JNAeratorConfig {
 	public boolean stringifyConstCStringReturnValues = true;
 	public File bridgesupportOutFile;
 	public boolean noMangling;
+    public boolean scalaStructSetters;
 	public boolean noPrimitiveArrays;
 	public File scalaOut;
 	public boolean skipPrivateMembers = true;
