@@ -1,0 +1,36 @@
+#!/bin/bash
+
+# Example :
+# sh jnaerator/scripts/webstartify Runtime/BridJ/target/bridj-0.2-SNAPSHOT-shaded.jar bridj-0.2-SNAPSHOT
+
+JAR=$1
+NAME=$2
+
+ARCHS="linux_x86 linux_x64 win32 win64 darwin_universal"
+
+OUT_DIR=webstart
+TMP_DIR=webstartify_tmp
+
+rm -fR $TMP_DIR
+rm -fR $OUT_DIR
+mkdir $TMP_DIR
+mkdir $OUT_DIR
+
+echo Unzipping $JAR...
+unzip -d $TMP_DIR $JAR > /dev/null
+
+for N in $ARCHS ; do
+	jar -cf $OUT_DIR/$NAME-webstart-$N.jar -C $TMP_DIR/$N `ls $TMP_DIR/$N`
+	rm -fR $TMP_DIR/$N ;
+done
+
+jar -cf $OUT_DIR/$NAME-webstart.jar -C $TMP_DIR .
+
+rm -fR $TMP_DIR
+
+for J in `ls $OUT_DIR/*.jar` ; do
+	echo Signing $J...
+	jarsigner `if [[ "$KEYSTORE_PASS" != "" ]] ; then echo "-storepass $KEYSTORE_PASS" ; fi`  -keystore ~/security/ochafik.keystore $J ochafik2009 ;
+done
+
+open $OUT_DIR
