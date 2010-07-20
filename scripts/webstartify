@@ -33,4 +33,68 @@ for J in `ls $OUT_DIR/*.jar` ; do
 	jarsigner `if [[ "$KEYSTORE_PASS" != "" ]] ; then echo "-storepass $KEYSTORE_PASS" ; fi`  -keystore ~/security/ochafik.keystore $J ochafik2009 ;
 done
 
+echo "
+<?xml version=\"1.0\" encoding=\"UTF-8\"?>
+<jnlp spec=\"1.0+\"
+  codebase=\"$URL\"
+  href="$NAME.jnlp"
+>
+	<information>
+	  <title>BridJ</title>
+	  <vendor>Olivier Chafik</vendor>
+	  <homepage href=\"http://bridj.googlecode.com/\" />
+	  <description>BridJ runtime</description>
+	</information>
+	<security>
+	  <all-permissions/>
+	</security>
+	
+	<resources os=\"Windows\" arch=\"x86\">
+		<property name=\"bridj.library.path\" value=\"C:\Windows\System32\"/>
+    <nativelib href=\"$NAME-win32.jar\"/>
+	</resources>
+	<resources os=\"Windows\" arch=\"amd64\">
+		<property name=\"bridj.library.path\" value=\"C:\Windows\SysWOW64\"/>
+    <nativelib href=\"$NAME-win64.jar\"/>
+	</resources>
+	<!--
+	<resources os=\"FreeBSD\" arch=\"i386\">
+		<nativelib href=\"freebsd-i386.jar\"/>
+	</resources>
+	<resources os=\"FreeBSD\" arch=\"amd64\">
+		<nativelib href=\"freebsd-amd64.jar\"/>
+	</resources>
+	-->
+	<resources os=\"Linux\" arch=\"i386\">
+		<nativelib href=\"$NAME-linux-x86.jar\"/>
+	</resources>
+	<resources os=\"Linux\" arch=\"amd64\">
+		<nativelib href=\"$NAME-linux-x64.jar\"/>
+	</resources>
+	<!--
+	<resources os=\"Linux\" arch=\"ia64\">
+		<nativelib href=\"$NAME-linux-ia64.jar\"/>
+	</resources>
+	
+	<resources os=\"SunOS\" arch=\"x86\">
+		<nativelib href=\"$NAME-sunos-x86.jar\"/>
+	</resources>
+	<resources os=\"SunOS\" arch=\"amd64\">
+		<nativelib href=\"$NAME-sunos-amd64.jar\"/>
+	</resources>
+	<resources os=\"SunOS\" arch=\"sparc\">
+		<nativelib href=\"$NAME-sunos-sparc.jar\"/>
+	</resources>
+	<resources os=\"SunOS\" arch=\"sparcv9\">
+		<nativelib href=\"$NAME-sunos-sparcv9.jar\"/>
+	</resources>
+	-->
+	<resources os=\"Mac\">
+		<nativelib href=\"$NAME-darwin_universal.jar\"/>
+	</resources>
+	
+	<component-desc/>
+</jnlp>
+" > $OUT_DIR/$NAME.jnlp
+
 open $OUT_DIR
