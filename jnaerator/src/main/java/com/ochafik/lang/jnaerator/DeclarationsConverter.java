@@ -716,7 +716,7 @@ public class DeclarationsConverter {
 				if (!isCallback && !isObjectiveC && result.config.features.contains(JNAeratorConfig.GenFeatures.CPlusPlusMangling))
 					addCPlusPlusMangledNames(function, names);
 
-			if (!modifiedMethodName.equals(functionName) && ns.isEmpty())
+			if (function.getName() != null && !modifiedMethodName.equals(function.getName().toString()) && ns.isEmpty())
 				names.add(function.getName().toString());
 			if (function.getAsmName() != null)
 				names.add(function.getAsmName());
@@ -891,6 +891,13 @@ public class DeclarationsConverter {
             isStatic || !isCallback && !isInStruct ? Modifier.Static : null
         );
 
+        if (function.getName() != null && !functionName.toString().equals(function.getName().toString())) {
+        	TypeRef mgc = result.config.runtime.typeRef(JNAeratorConfig.Runtime.Ann.Name);
+			if (mgc != null) {
+				nativeMethod.addAnnotation(new Annotation(mgc, "(\"" + function.getName() + "\")"));
+			}
+		}
+        
         TypeConversion.NL4JTypeConversion retType = result.typeConverter.toNL4JType(function.getValueType(), null, libraryClassName);
 //        typedMethod.setValueType(retType.getTypedTypeRef());
 //        retType.annotateRawType(nativeMethod).setValueType(retType.getRawType());
@@ -2072,7 +2079,7 @@ public class DeclarationsConverter {
 		do {
 			argName = baseArgName + (i == 1 ? "" : i + "");
 			i++;
-		} while (names.contains(argName) || TypeConversion.isJavaKeyword(argName));
+		} while (names.contains(argName) || result.typeConverter.isJavaKeyword(argName));
 		names.add(argName);
 		return argName;
 	}

@@ -602,8 +602,8 @@ public class JNAerator {
 					File firstFile = inputFiles.isEmpty() ? null : inputFiles.iterator().next().getAbsoluteFile();
 					String firstFileName = firstFile == null ? null : firstFile.getName();
 					String entry = config.entryName == null ? RegexUtils.findFirst(firstFileName, fileRadixPattern, 1) : config.entryName; 
-					if (entry != null)
-						entry = TypeConversion.getValidJavaIdentifier(ident(entry)).toString();
+					//if (entry != null)
+					//	entry = config.result.typeConversion.getValidJavaIdentifier(ident(entry)).toString();
 
 					if (config.outputDir == null)
 						config.outputDir = firstFile == null ? new File(".") : firstFile.getAbsoluteFile().getParentFile();

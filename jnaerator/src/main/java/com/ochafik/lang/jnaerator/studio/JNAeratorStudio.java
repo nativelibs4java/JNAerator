@@ -505,7 +505,6 @@ public class JNAeratorStudio extends JPanel {
 				JNAeratorConfig config = new JNAeratorConfig();
 				config.outputJar = getOutputJarFile();
 				config.compile = true;
-				config.beautifyNames = true;
 				config.useJNADirectCalls = directCallingCb.isSelected();
 				config.putTopStructsInSeparateFiles = structsAsTopLevelClassesCb.isSelected();
 				config.scalaStructSetters = scalaSetters.isSelected();

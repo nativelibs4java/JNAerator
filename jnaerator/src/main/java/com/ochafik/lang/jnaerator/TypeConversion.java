@@ -2195,37 +2195,34 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
 		}
 		if (newName == null)
 			newName = getValidJavaIdentifierString(name);
-		
-		if (result.config.beautifyNames) {
-			boolean suff = newName.endsWith("_");
-			newName = StringUtils.underscoredToCamel(newName);
-			if (suff)
-				newName += "$";
-		}
+		else if (result.config.beautifyNames)
+			newName = beautify(newName);
 		
 		return ident(newName);
 	}
-	public static boolean isJavaKeyword(String name) {
+	static String beautify(String name) {
+		String newName = StringUtils.uncapitalize(StringUtils.underscoredToCamel(name));
+		if (name.endsWith("_"))
+			newName += "$";
+		return newName;
+	}
+	public boolean isJavaKeyword(String name) {
 		return JAVA_KEYWORDS.contains(name);
 	}
-	public static Identifier getValidJavaIdentifier(Identifier name) {
-		if (name == null)
-			return null;
-		
-		if (isJavaKeyword(name.toString()))
-			return ident(name + "_");
-		else {
-			return ident(name.toString().replace('-', '_').replaceAll("[^\\w]", "\\$"));
-		}
+	public Identifier getValidJavaIdentifier(Identifier name) {
+		return ident(getValidJavaIdentifierString(name));
 	}
-	public static String getValidJavaIdentifierString(Identifier name) {
+	public String getValidJavaIdentifierString(Identifier name) {
 		if (name == null)
 			return null;
 		
 		if (isJavaKeyword(name.toString()))
 			return name + "$";
 		else {
-			return name.toString().replace('-', '_').replaceAll("[^\\w]", "\\$");
+			String newName = name.toString().replace('-', '_').replaceAll("[^\\w]", "\\$");
+			if (result.config.beautifyNames)
+				newName = beautify(newName);
+			return newName;
 		}
 	}
 
