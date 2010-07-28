@@ -67,7 +67,8 @@ public class ElementsHelper {
         List<SimpleIdentifier> list = new ArrayList<SimpleIdentifier>();
         for (String o : others)
             if (o != null && (o = o.trim()).length() > 0)
-                list.addAll(getClassSimpleIdentifiers(o));
+				for (String elt : o.split("\\."))
+                	list.add(new SimpleIdentifier(elt));
 
         if (list.isEmpty())
             return null;

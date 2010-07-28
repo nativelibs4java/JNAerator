@@ -1595,6 +1595,7 @@ public class DeclarationsConverter {
             
             if (result.config.scalaStructSetters) {
                 setter = new Function();
+                setter.setType(Type.JavaMethod);
                 setter.setName(ident(name + "_$eq"));
                 setter.setValueType(typeRef(holderName.clone()));//Void.TYPE));
                 setter.addArg(new Arg(name, javaType.clone()));
@@ -1602,6 +1603,7 @@ public class DeclarationsConverter {
                 setter.setBody(block(
                     new Statement.Return(methodCall(name, varRef(name)))
                 ));
+                out.add(setter);
             }
         }
         return out;

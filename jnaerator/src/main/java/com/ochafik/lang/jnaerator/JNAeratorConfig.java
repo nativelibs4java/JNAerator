@@ -218,6 +218,7 @@ public class JNAeratorConfig {
 	public boolean limitComments = false, noComments = false;
 	public boolean putTopStructsInSeparateFiles = true;
 	public boolean bundleRuntime = true;
+	public boolean beautifyNames = false;
 	public boolean extractLibSymbols = false;
     //public boolean fastStructs = false;
     public List<Pair<MessageFormat, MessageFormat>> onlineDocumentationURLFormats = new ArrayList<Pair<MessageFormat, MessageFormat>>();

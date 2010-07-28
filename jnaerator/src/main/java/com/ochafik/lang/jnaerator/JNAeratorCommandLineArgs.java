@@ -114,6 +114,7 @@ public class JNAeratorCommandLineArgs {
         GUI(				"-gui",		 			"Show minimalist progression GUI"),
 		NoRuntime(			"-noRuntime",		 	"Don't copy runtime classes to JAR output"),
 		BeanStructs(		"-beanStructs",			"Generate getters and setters for struct fields"),
+		BeautifyNames(		"-beautifyNames",		"Transform C names to Java-looking names : some_func() => someFunc()"),
 		JarOut(				"-jar",					"Jar file where all generated sources and the compiled classes go", new ArgDef(Type.OutputFile, "outFile")),
 		ScalaStructSetters( "-scalaStructSetters",  "Generate Scala-style setters for BridJ structs (with a name like fieldName_$eq)"),
         WCharAsShort(		"-wcharAsShort",		"Force treatment of wchar_t as short (char by default)"),

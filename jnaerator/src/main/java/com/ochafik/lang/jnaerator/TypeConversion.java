@@ -2172,6 +2172,7 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
 	}
 	public Identifier getValidJavaMethodName(Identifier name) {
 		String nameStr = name.toString();
+		String newName = null;
 		if (nameStr.matches("operator[^\\w]+")) {
 			String op = nameStr.substring("operator".length());
 			//int nArgs = method.getArgs().size();
@@ -2188,11 +2189,21 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
 				suffix = e.name();
 			
 			if (suffix != null)
-				return ident("operator" + StringUtils.capitalize(suffix));
+				newName = "operator" + StringUtils.capitalize(suffix);
 		} else if (nameStr.startsWith("~")) {
-			return ident(getValidJavaIdentifier(ident(nameStr.substring(1))) + "Destructor"); 
+			newName = getValidJavaIdentifierString(ident(nameStr.substring(1))) + "Destructor"; 
 		}
-		return getValidJavaIdentifier(name);
+		if (newName == null)
+			newName = getValidJavaIdentifierString(name);
+		
+		if (result.config.beautifyNames) {
+			boolean suff = newName.endsWith("_");
+			newName = StringUtils.underscoredToCamel(newName);
+			if (suff)
+				newName += "$";
+		}
+		
+		return ident(newName);
 	}
 	public static boolean isJavaKeyword(String name) {
 		return JAVA_KEYWORDS.contains(name);
@@ -2205,6 +2216,16 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
 			return ident(name + "_");
 		else {
 			return ident(name.toString().replace('-', '_').replaceAll("[^\\w]", "\\$"));
+		}
+	}
+	public static String getValidJavaIdentifierString(Identifier name) {
+		if (name == null)
+			return null;
+		
+		if (isJavaKeyword(name.toString()))
+			return name + "$";
+		else {
+			return name.toString().replace('-', '_').replaceAll("[^\\w]", "\\$");
 		}
 	}
 

@@ -112,6 +112,7 @@ public class JNAeratorStudio extends JPanel {
 	JCheckBox directCallingCb = new JCheckBox("Direct Calling (experimental)", false),
 		structsAsTopLevelClassesCb = new JCheckBox("Structs as Top-Level classes", true),
 		charPtrAsString = new JCheckBox("char*/wchar_t* as (W)String", false),
+		scalaSetters = new JCheckBox("Scala struct field setters", false),
 		noCommentNoManglingCb = new JCheckBox("No comment & no mangling", false);
 
     JComboBox runtimeCombo;
@@ -231,6 +232,8 @@ public class JNAeratorStudio extends JPanel {
 			setPref("options.libraryName", libraryName.getText());
 			setPref("options.direct", directCallingCb.isSelected());
 			setPref("options.topLevelStructs", structsAsTopLevelClassesCb.isSelected());
+			setPref("options.scalaSetters", scalaSetters.isSelected());
+			setPref("options.charPtrAsString", charPtrAsString.isSelected());
 			setPref("options.targetRuntime", ((JNAeratorConfig.Runtime)runtimeCombo.getSelectedItem()).name());
 			setPref("options.noCommentNoMangling", noCommentNoManglingCb.isSelected());
 			setPref("splitPane.orientation", sp.getOrientation());
@@ -404,6 +407,7 @@ public class JNAeratorStudio extends JPanel {
 		optPanel.add(noCommentNoManglingCb);
 		optPanel.add(structsAsTopLevelClassesCb);
         optPanel.add(charPtrAsString);
+        optPanel.add(scalaSetters);
         optBox.add(optPanel);
 		for (Component c : optBox.getComponents())
 			((JComponent)c).setAlignmentX(0);
@@ -501,8 +505,10 @@ public class JNAeratorStudio extends JPanel {
 				JNAeratorConfig config = new JNAeratorConfig();
 				config.outputJar = getOutputJarFile();
 				config.compile = true;
+				config.beautifyNames = true;
 				config.useJNADirectCalls = directCallingCb.isSelected();
 				config.putTopStructsInSeparateFiles = structsAsTopLevelClassesCb.isSelected();
+				config.scalaStructSetters = scalaSetters.isSelected();
                 config.stringifyConstCStringReturnValues = config.charPtrAsString = charPtrAsString.isSelected();
                 config.runtime = (Runtime) runtimeCombo.getSelectedItem();
 				config.noComments = config.noMangling = noCommentNoManglingCb.isSelected();
@@ -712,6 +718,7 @@ public class JNAeratorStudio extends JPanel {
 			js.directCallingCb.setSelected(getPref("options.direct", false));
 			js.structsAsTopLevelClassesCb.setSelected(getPref("options.topLevelStructs", true));
             js.charPtrAsString.setSelected(getPref("options.charPtrAsString", false));
+            js.scalaSetters.setSelected(getPref("options.scalaSetters", false));
             js.noCommentNoManglingCb.setSelected(getPref("options.noCommentNoMangling", false));
 			
 			js.sp.setOrientation(getPref("splitPane.orientation", JSplitPane.HORIZONTAL_SPLIT));

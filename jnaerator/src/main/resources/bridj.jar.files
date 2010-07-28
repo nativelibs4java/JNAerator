@@ -96,9 +96,7 @@ com/bridj/PointerIO.class
 com/bridj/PointerRefreshable.class
 com/bridj/SizeT.class
 com/bridj/StringList.class
-com/bridj/StructFieldsIO.class
 com/bridj/StructIO$1.class
-com/bridj/StructIO$FieldIO.class
 com/bridj/StructIO.class
 com/bridj/StructObject.class
 com/bridj/TestCPP$1.class
@@ -110,8 +108,6 @@ com/bridj/TestCPP$MyCallback.class
 com/bridj/TestCPP$MyStruct.class
 com/bridj/TestCPP$Toto.class
 com/bridj/TestCPP.class
-com/bridj/Teste$Flags.class
-com/bridj/Teste.class
 com/bridj/TypedPointer.class
 com/bridj/UnmappableTypeException.class
 com/bridj/ValuedEnum.class

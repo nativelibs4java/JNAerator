@@ -345,6 +345,9 @@ public class JNAerator {
                     case OnlineDocURLFormat:
                         config.onlineDocumentationURLFormats.add(new Pair<MessageFormat, MessageFormat>(a.getMessageFormatParam(0), a.getMessageFormatParam(1)));
                         break;
+                    case BeautifyNames:
+                    	config.beautifyNames = true;
+                    	break;
 					case NoLibBundle:
 						config.bundleLibraries = false;
 						break;

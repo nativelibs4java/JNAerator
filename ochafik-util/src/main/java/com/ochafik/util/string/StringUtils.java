@@ -266,6 +266,15 @@ public class StringUtils {
 		return implode(cap, separator);
 	}
 	
+	public static String underscoredToCamel(String string) {
+		String[] a = string.split("_");
+		for (int i = 0, n = a.length; i < n; i++) {
+			String s = a[i].trim();
+			a[i] = capitalize(a[i]);
+		}
+		return implode(a, "");
+	}
+	
 	public static String uncapitalize(String string) {
 		return string.length() == 0 ? "" : Character.toLowerCase(string.charAt(0)) + string.substring(1);
 	}
