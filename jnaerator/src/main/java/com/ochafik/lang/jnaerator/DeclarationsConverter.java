@@ -428,9 +428,9 @@ public class DeclarationsConverter {
 	                body.addDeclaration(new VariablesDeclaration(typeRef(Long.TYPE), new DirectDeclarator(valueArgName)).addModifiers(Modifier.Public, Modifier.Final));
 	                body.addDeclaration(new Function(Type.JavaMethod, ident(valueArgName), typeRef(Long.TYPE)).setBody(block(
 	                    new Statement.Return(memberRef(varRef("this"), MemberRefStyle.Dot, valueArgName))
-	                )).addAnnotation(new Annotation(Override.class)).addModifiers(Modifier.Public));
+	                )).addModifiers(Modifier.Public));
 	
-	                /*
+	                
 	                body.addDeclaration(new Function(Type.JavaMethod, ident("iterator"), typeRef(ident(Iterator.class, expr(typeRef(enumName.clone()))))).setBody(block(
 	                    new Statement.Return(
 	                        methodCall(
@@ -444,7 +444,7 @@ public class DeclarationsConverter {
 	                            "iterator"
 	                        )
 	                    )
-	                )).addAnnotation(new Annotation(Override.class)).addModifiers(Modifier.Public));
+					)).addModifiers(Modifier.Public));
 	
 	                body.addDeclaration(new Function(Type.JavaMethod, ident("fromValue"), typeRef(ident(ValuedEnum.class, expr(typeRef(enumName.clone())))), new Arg(valueArgName, typeRef(Long.TYPE))).setBody(block(
 	                    new Statement.Return(
@@ -458,8 +458,8 @@ public class DeclarationsConverter {
 	                            )
 	                        )
 	                    )
-	                )).addAnnotation(new Annotation(Override.class)).addModifiers(Modifier.Public, Modifier.Static));
-	                */
+	                )).addModifiers(Modifier.Public, Modifier.Static));
+	                
                 } else {
                 	outputEnumItemsAsConstants(results, out, signatures, libraryClassName, hasEnumClass);
                 }

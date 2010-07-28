@@ -222,9 +222,21 @@ public class JNAeratorStudio extends JPanel {
 	}
 	//static final File FILE = new File(".jnaeratorStudio.cpp");
 	
-	public void close() {
+	public void close(JFrame f) {
 		try {
 			save();
+			setPref("window.width", f.getWidth());
+			setPref("window.height", f.getHeight());
+			setPref("window.extendedState", f.getExtendedState());
+			setPref("options.libraryName", libraryName.getText());
+			setPref("options.direct", directCallingCb.isSelected());
+			setPref("options.topLevelStructs", structsAsTopLevelClassesCb.isSelected());
+			setPref("options.targetRuntime", ((JNAeratorConfig.Runtime)runtimeCombo.getSelectedItem()).name());
+			setPref("options.noCommentNoMangling", noCommentNoManglingCb.isSelected());
+			setPref("splitPane.orientation", sp.getOrientation());
+			setPref("splitPane.dividedLocation", getProportionalDividerLocation(sp));
+			prefNode().flush();
+			System.exit(0);
 		} catch (Throwable ex) {
 			error(null, "Error while closing", ex);
 		}
@@ -714,21 +726,12 @@ public class JNAeratorStudio extends JPanel {
 			f.setSize(800, 800);
 		}
 		
+		if (false)
 		java.lang.Runtime.getRuntime().addShutdownHook(new Thread() {
 			public void run() {
 				try {
-					setPref("window.width", f.getWidth());
-					setPref("window.height", f.getHeight());
-					setPref("window.extendedState", f.getExtendedState());
-					setPref("options.libraryName", js.libraryName.getText());
-					setPref("options.direct", js.directCallingCb.isSelected());
-					setPref("options.topLevelStructs", js.structsAsTopLevelClassesCb.isSelected());
-                    setPref("options.targetRuntime", ((JNAeratorConfig.Runtime)js.runtimeCombo.getSelectedItem()).name());
-					setPref("options.noCommentNoMangling", js.noCommentNoManglingCb.isSelected());
-					setPref("splitPane.orientation", js.sp.getOrientation());
-					setPref("splitPane.dividedLocation", getProportionalDividerLocation(js.sp));
-					prefNode().flush();
-				} catch (Exception ex) {
+					
+				} catch (Throwable ex) {
 					ex.printStackTrace();
 				}
 			}
@@ -736,12 +739,9 @@ public class JNAeratorStudio extends JPanel {
 		f.addWindowListener(new WindowAdapter() {
 			@Override
 			public void windowClosing(WindowEvent e) {
-				System.exit(0);
+				js.close(f);
 			}
 		});
-		java.lang.Runtime.getRuntime().addShutdownHook(new Thread() { public void run() {
-			js.close();	
-		}});
 		
 		f.setVisible(true);
 		
