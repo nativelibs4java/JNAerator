@@ -401,7 +401,8 @@ externDeclarations returns [ExternDeclarations declarations]
 			(
 				ed=declaration { 
 					$declarations.addDeclarations($ed.declarations); 
-				}
+				} |
+				lineDirective
 			)* 
 		'}'
 	;
@@ -461,7 +462,8 @@ scope ModContext;
 								d.addNameSpace($ns.text);
 								$declarations.add(d);
 							}
-						}
+						} |
+						lineDirective
 					)*
 				'}'// | 
 				//';' */// allow isolated semi-colons
@@ -621,7 +623,8 @@ objCClassDef returns [Struct struct]
 					functionPointerOrSimpleVarDecl ';' {
 						$struct.addDeclaration($functionPointerOrSimpleVarDecl.decl);
 					}
-				)
+				) |
+				lineDirective
 			)* 
 			'}'
 		)?
@@ -638,7 +641,8 @@ objCClassDef returns [Struct struct]
 			} |
 			vd=varDecl ';' { !($vd.decl instanceof VariablesDeclaration) }? {
 				$struct.addDeclaration($vd.decl);
-			}
+			} |
+			lineDirective
 		)*
 		'@end'
 	;						
@@ -739,7 +743,8 @@ scope ModContext;
 				} |
 				fv=varDecl ';' {
 					$struct.addDeclaration($fv.decl);
-				}
+				} |
+				lineDirective
 			)*
 		'}'
 	;
@@ -1683,7 +1688,8 @@ scope Symbols;
 		(
 			statement {
 				$stat.addStatement($statement.stat);
-			}
+			} |
+			lineDirective
 		)* 
 		'}' 
 	;
@@ -1709,7 +1715,8 @@ statement	returns [Statement stat]
 		'switch' '(' expression ')' '{' // TODO
 			(	
 				'case' topLevelExpr ':' |
-				statement
+				statement |
+				lineDirective
 			)*
 		'}' |
 		';' |
