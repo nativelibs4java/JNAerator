@@ -268,6 +268,8 @@ public class JNAeratorConfigUtils {
 		if (SystemUtils.isWindows()) {
 			//http://msdn.microsoft.com/en-us/library/b0084kay(VS.80).aspx
 			
+			config.preprocessorConfig.includeStrings.add("#define __declspec(x)\n");
+			
 			//http://support.microsoft.com/kb/65472
 			config.preprocessorConfig.macros.put("_CHAR_UNSIGNED", null);
 			

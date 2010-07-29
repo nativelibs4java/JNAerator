@@ -1285,12 +1285,20 @@ public abstract class Expression extends Element {
 			if (string.equals("ffffffffffffffff"))
 				val = 0xffffffffffffffffL;
 			else {
+				if (string.startsWith("+"))
+					string = string.substring(1);
+				
+				int len2 = string.length();
+				if (len2 > 0 && !Character.isDigit(string.charAt(len2 - 1))) {
+					string = string.substring(0, len2 - 1);
+					len2--;
+				}
 				try {
 					val = Long.parseLong(string, radix);
 				} catch (NumberFormatException ex) {
 					unsigned = true;
-					val = Long.parseLong(string.substring(0, string.length() - 1), radix);
-					val = val * radix + Short.parseShort(string.substring(string.length() - 1));
+					val = Long.parseLong(string.substring(0, len2 - 1), radix);
+					val = val * radix + Short.parseShort(string.substring(len2 - 1));
 				}
 			}
 			
@@ -1300,7 +1308,7 @@ public abstract class Expression extends Element {
 			}
 			
 			//TODO handle unsigned properly !
-			if ((form == IntForm.Hex && string.length() <= 8) || val > Integer.MIN_VALUE && val < Integer.MAX_VALUE)
+			if ((form == IntForm.Hex && len <= 8) || val > Integer.MIN_VALUE && val < Integer.MAX_VALUE)
 				return new Constant(unsigned ? Type.UInt : Type.Int, form, (int)val);
 			else if (val >= 0 && val < MAX_UINT_VALUE)
 				return new Constant(Type.UInt, form, (int)val);

@@ -52,11 +52,11 @@ public class PreprocessorUtils {
 	public static String preprocessSources(JNAeratorConfig config, List<Define> defines, boolean verbose, TypeConversion typeConverter, MacroUseCallback macrosDependenciesOut) throws IOException, LexerException {
 
 		Preprocessor preProcessor = PreprocessorUtils.createPreProcessor(config.preprocessorConfig, macrosDependenciesOut);
-		for (File file : config.getFiles())
-			preProcessor.addInput(file);
-		
 		for (String content : config.preprocessorConfig.includeStrings)
 			preProcessor.addInput(new StringLexerSource(content, true));
+		
+		for (File file : config.getFiles())
+			preProcessor.addInput(file);
 		
 		String sourceContent = ReadText.readText(new CppReader(preProcessor));
 		preProcessor.close();
