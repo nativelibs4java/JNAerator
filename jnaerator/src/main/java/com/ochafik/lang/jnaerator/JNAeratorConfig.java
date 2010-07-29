@@ -250,20 +250,22 @@ public class JNAeratorConfig {
 		libraryByFile.put(file, fn);
 		libraryFiles.add(file);
 	}
-	public void addSourceFile(File file, String library, boolean applyFilters) throws IOException {
+	public void addSourceFile(File file, String library, boolean applyFilters, boolean retainAsTarget) throws IOException {
 		if (file.isFile()) {
 			if (fileFilter == null || !applyFilters || fileFilter.accept(file)) {
 				file = file.getCanonicalFile();
                 if (library == null && fileToLibrary != null)
                     library = fileToLibrary.adapt(file);
-				libraryByFile.put(file, library);
 				sourceFiles.add(file);
+				if (retainAsTarget) {
+					libraryByFile.put(file, library);
+				}
 			}
 		} else {
 			File[] fs = file.listFiles();
 			if (fs != null) {
 				for (File f : fs) {
-					addSourceFile(f, library, true);
+					addSourceFile(f, library, true, retainAsTarget);
 				}
 			}
 		}
@@ -375,7 +377,6 @@ public class JNAeratorConfig {
 		});*/
 		return sourceFiles;//libraryByFile.keySet();
 	}
-
 	public String relativizeFileForSourceComments(String path) {
 		if (path == null)
 			return null;

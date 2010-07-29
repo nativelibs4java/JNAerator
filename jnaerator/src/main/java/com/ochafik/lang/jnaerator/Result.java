@@ -175,8 +175,9 @@ public class Result extends Scanner {
 	private Identifier getFakePointerName(Identifier name) {
 
 		String nameStr = name == null ? null : name.toString();
-		if (nameStr != null && nameStr.startsWith("_")) {
-			String nicerName = nameStr.substring(1);
+		String trimmed = StringUtils.TrimUnderscores(nameStr);
+		if (trimmed != null && !nameStr.equals(trimmed)) {
+			String nicerName = trimmed;
 			Pair<TypeDef, Declarator> pair = typeDefs.get(nicerName);
 			if (pair != null) {
 				String target = pair.getFirst().getValueType().toString();
@@ -228,7 +229,8 @@ public class Result extends Scanner {
 						Declarator bestPlainStorage = null;
 						for (Declarator st : typeDef.getDeclarators()) {
 							if (st instanceof DirectDeclarator) {
-								boolean niceName = !st.resolveName().startsWith("_");
+								String name = st.resolveName();
+								boolean niceName = StringUtils.TrimUnderscores(name).equals(name);;
 								if (bestPlainStorage == null || niceName) {
 									bestPlainStorage = st;
 									if (niceName)

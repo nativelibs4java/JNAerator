@@ -38,6 +38,7 @@ import com.ochafik.lang.jnaerator.parser.ModifierKind;
 import com.ochafik.lang.jnaerator.parser.StoredDeclarations.TypeDef;
 import com.ochafik.lang.jnaerator.parser.TypeRef.FunctionSignature;
 import com.ochafik.lang.jnaerator.parser.TypeRef.TaggedTypeRef;
+import com.ochafik.util.string.StringUtils;
 
 public class CToJavaPreScanner extends Scanner {
 	public CToJavaPreScanner() {

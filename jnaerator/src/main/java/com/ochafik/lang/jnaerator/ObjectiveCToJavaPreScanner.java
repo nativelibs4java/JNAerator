@@ -30,6 +30,7 @@ import com.ochafik.lang.jnaerator.parser.VariablesDeclaration;
 import com.ochafik.lang.jnaerator.parser.Declarator.DirectDeclarator;
 import com.ochafik.lang.jnaerator.parser.StoredDeclarations.TypeDef;
 import com.ochafik.lang.jnaerator.parser.TypeRef.TaggedTypeRef;
+import com.ochafik.util.string.StringUtils;
 
 /**
  * <ul>
@@ -109,7 +110,7 @@ public class ObjectiveCToJavaPreScanner extends Scanner {
 			return false;
 		
 		String name = decl.resolveName();
-		if (e.getTag() != null && !e.getTag().equals("_" + name))
+		if (e.getTag() != null && !StringUtils.TrimUnderscores(e.getTag().toString()).equals(name))
 			return false;
 		
 		Element ep = e.getParentElement();

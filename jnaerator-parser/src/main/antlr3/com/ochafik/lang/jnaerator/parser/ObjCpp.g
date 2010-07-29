@@ -1144,31 +1144,41 @@ declarator  returns [Declarator declarator]
 	:
 		modifiers
 		(
-			( 
-				directDeclarator { 
-					$declarator = $directDeclarator.declarator; 
-				} 
-			) |
-			( 
-				pt=('*' | '&' | '^')
-				inner=declarator {
-					$declarator = new PointerDeclarator($inner.declarator, PointerStyle.parsePointerStyle($pt.text));
-				} 
+			((
+				( 
+					directDeclarator { 
+						$declarator = $directDeclarator.declarator; 
+					} 
+				) |
+				( 
+					pt=('*' | '&' | '^')
+					inner=declarator {
+						$declarator = new PointerDeclarator($inner.declarator, PointerStyle.parsePointerStyle($pt.text));
+					} 
+				)
+			)
+			(
+				':' bits=DECIMAL_NUMBER {
+					if ($declarator != null)
+						$declarator.setBits(Integer.parseInt($bits.text));
+				}
+			)?
+			(
+				'=' 
+				dv=topLevelExpr {
+					if ($declarator != null)
+						$declarator.setDefaultValue($dv.expr);
+				}
+			)?
+			)
+			|
+			(
+				':' bits=DECIMAL_NUMBER {
+					$declarator = mark(new DirectDeclarator(null), getLine($bits));
+					$declarator.setBits(Integer.parseInt($bits.text));
+				}
 			)
 		)
-		(
-			':' bits=DECIMAL_NUMBER {
-				if ($declarator != null)
-					$declarator.setBits(Integer.parseInt($bits.text));
-			}
-		)?
-		(
-			'=' 
-			dv=topLevelExpr {
-				if ($declarator != null)
-					$declarator.setDefaultValue($dv.expr);
-			}
-		)?
 		{
 			if ($declarator != null)
 				$declarator.setModifiers($modifiers.modifiers);

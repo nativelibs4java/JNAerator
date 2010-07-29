@@ -426,7 +426,7 @@ public class JNAeratorConfigUtils {
 					try {
 						file = file.getCanonicalFile();
 						System.out.println(file + "\n\t-> " + libraryFile);
-						config.addSourceFile(file, libraryFile, false);
+						config.addSourceFile(file, libraryFile, false, true);
 						
 						//config.preprocessorConfig
 						//config.libraryByFile.put(file, libraryFile)
@@ -462,7 +462,7 @@ public class JNAeratorConfigUtils {
 		File headers = new File(file, "Headers");
 		if (headers.exists()) {
 			config.preprocessorConfig.includes.add(headers.getAbsolutePath());
-			config.addSourceFile(headers, framework, true);
+			config.addSourceFile(headers, framework, true, true);
 		} else
 			new IOException("No Headers subdirectory in framework '" + framework + "' found here : " + file).printStackTrace();
 		

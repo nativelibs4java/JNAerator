@@ -286,7 +286,11 @@ public class JNAerator {
 					switch (a.def) {					
 					
 					case AddIncludePath:
-						config.preprocessorConfig.includes.add(a.getFileParam(0).toString());
+						File includedFile = a.getFileParam(0);
+						if (includedFile.isFile())
+							parsedActualFile(includedFile, false);
+						else
+							config.preprocessorConfig.includes.add(includedFile.toString());
 						break;
 					case AddFrameworksPath:
 						config.preprocessorConfig.frameworksPath.add(a.getFileParam(0).toString());
@@ -495,7 +499,20 @@ public class JNAerator {
 					}
 					return Collections.emptyList();
 				}
-
+				private void parsedActualFile(File file, boolean retainAsTarget) throws Exception {
+					String lib = currentLibrary;
+					String fn = file.getName();
+					if (lib == null) {
+						String name = fn;
+						int i = name.indexOf('.');
+						if (i >= 0)
+							name = name.substring(0, i).trim();
+						if (name.length() > 0)
+							lib = name;
+						System.out.println("Warning: no -library option for file '" + fn + "', using \"" + lib + "\".");
+					}
+					config.addSourceFile(file, lib, !file.isFile(), retainAsTarget);
+				}
 				private List<String> parsedFile(ParsedArg a) throws Exception {
 					File file = a.getFileParam(0);
 					if (file != null) {
@@ -517,16 +534,7 @@ public class JNAerator {
 							{
 								JNAeratorConfigUtils.readProjectConfig(file, null, config);
 							} else {
-								if (lib == null) {
-									String name = fn;
-									int i = name.indexOf('.');
-									if (i >= 0)
-										name = name.substring(0, i).trim();
-									if (name.length() > 0)
-										lib = name;
-									System.out.println("Warning: no -library option for file '" + fn + "', using \"" + lib + "\".");
-								}
-								config.addSourceFile(file, lib, !file.isFile());//config.defaultLibrary);
+								parsedActualFile(file, true);
 							}
 						}
 					}

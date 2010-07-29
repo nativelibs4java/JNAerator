@@ -48,6 +48,30 @@ public class StringUtils {
 		return v;
 	}
 	
+	public static String TrimUnderscores(String s) {
+		return TrimChar(s, '_');
+	}
+	
+	public static String TrimChar(String s, char t) {
+		if (s == null)
+			return null;
+		int start = 0, n = s.length(), end = n;
+		for (int i = 0; i < n; i++) {
+			char c = s.charAt(i);
+			if (c != t) {
+				start = i;
+				break;
+			}
+		}
+		for (int i = n - 1; i >= 0; i--) {
+			char c = s.charAt(i);
+			if (c != t) {
+				end = i + 1;
+				break;
+			}
+		}
+		return s.substring(start, end);
+	}
 /*
 	public static final String implode(Object[] strings, String separator) {
 		return implode(Arrays.asList(strings), separator);

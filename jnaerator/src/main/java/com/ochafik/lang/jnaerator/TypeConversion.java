@@ -496,9 +496,6 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
 							String strs = simpleTypeRef.toString();
 							String trs = tr == null ? null : tr.toString();
 							if (trs != null && !strs.equals(trs)) {
-								if (trs.equals("_" + strs) && !strs.startsWith("_") || trs.equals(strs + "_") && !strs.endsWith("_")) {
-									trs.toString();
-								}
 								TypeRef clo = tr.clone();
 								simpleTypeRef.replaceBy(clo);
 								if (depth < 10) {
@@ -979,18 +976,20 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
                     if (targetRef instanceof SimpleTypeRef) {
                         Identifier targetName = ((SimpleTypeRef)targetRef).getName();
                         JavaPrim prim = getPrimitive(targetRef, libraryClassName);
-                        Pair<Integer, Class<?>> p = buffersAndArityByType.get(targetName.toString());
+                        Pair<Integer, Class<?>> p = targetName == null ? null : buffersAndArityByType.get(targetName.toString());
                         if (prim != null) {
                             Class<? extends Buffer> bufClass = primToBuffer.get(prim);
-                            conv.typeRef = typeRef(bufClass);
-                            conv.structIOFieldGetterNameRadix = structIOFieldGetterNameRadixByType.get(targetName.toString());
-                            if (p != null && p.getFirst().intValue() != 1) {
-                                conv.arrayLength = expr(conv.arrayLength, BinaryOperator.Multiply, expr(p.getFirst()));
-                                conv.structIOFieldGetterNameRadix += "Buffer";
-                            }
+                            if (bufClass != null) {
+								conv.typeRef = typeRef(bufClass);
+								conv.structIOFieldGetterNameRadix = structIOFieldGetterNameRadixByType.get(targetName.toString());
+								if (p != null && p.getFirst().intValue() != 1) {
+									conv.arrayLength = expr(conv.arrayLength, BinaryOperator.Multiply, expr(p.getFirst()));
+									conv.structIOFieldGetterNameRadix += "Buffer";
+								}
 
-                            return conv;
-                        } else {
+								return conv;
+							}
+                        } else if (targetName != null) {
                             TypeRef targetConvRef = typeRef(findStructRef(targetName, libraryClassName));
                             if (targetConvRef == null)
                                 targetConvRef = findEnum(targetName, libraryClassName);
@@ -1364,9 +1363,6 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
                         String strs = valueType.toString();
                         String trs = tr == null ? null : tr.toString();
                         if (trs != null && !strs.equals(trs)) {
-                            if (trs.equals("_" + strs) && !strs.startsWith("_") || trs.equals(strs + "_") && !strs.endsWith("_")) {
-                                trs.toString();
-                            }
                             try {
 	                            TypeRef clo = tr.clone();
 	                            return toNL4JType(clo, namesStack, library);

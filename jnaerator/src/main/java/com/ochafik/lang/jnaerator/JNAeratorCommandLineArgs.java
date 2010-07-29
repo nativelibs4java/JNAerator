@@ -101,7 +101,7 @@ public class JNAeratorCommandLineArgs {
 		IncludeArgs(		"@(.+)?",				"Read command-line arguments from a file. File may contain multiple lines (those beginning with \"//\" will be skipped), file wildcards will be resolved within the file content, as well as variables substitutions : $(someEnvOrJavaVarName), with $(DIR) being the parent directory of the current arguments file.", new ArgDef(Type.ExistingFile, "argumentsFile.jnaerator")),
 		OutputDir(			"-o", 					"Output directory for all artifacts", new ArgDef(Type.OutputDir, "outDir")),
 		ExtractSymbols(		"-scanSymbols", 		"Extract, unmangle and parse the symbols all listed shared libraries"),
-		AddIncludePath(		"-I(.+)?", 				"Add a directory to the include path. See doc of JNAERATOR_INCLUDE_PATH", new ArgDef(Type.File, "dir")),
+		AddIncludePath(		"-I(.+)?", 				"Add a directory to the include path or include a file. See doc of JNAERATOR_INCLUDE_PATH", new ArgDef(Type.File, "dir")),
 		AddFrameworksPath(	"-F(.+)?", 				"Add a directory to the frameworks path. See doc of JNAERATOR_FRAMEWORKS_PATH", new ArgDef(Type.File, "dir")),
 		FrameworksPath(		"-frameworksPath", 		"See doc of JNAERATOR_FRAMEWORKS_PATH", new ArgDef(Type.String, "path1:path2...")),
 		Framework(			"-framework", 			"JNAerate a framework using its headers and its *.bridgesupport files if available", new ArgDef(Type.String, "frameworkName")),

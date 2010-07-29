@@ -1626,8 +1626,9 @@ public class DeclarationsConverter {
 			TypeRef valueType = v.getValueType();
 			for (Declarator vs : v.getDeclarators()) {
 				String name = vs.resolveName();
-				if (name == null || name.length() == 0)
-					continue;
+				if (name == null || name.length() == 0) {
+					name = "anonymous" + (nextAnonymousFieldId++);
+				}
 
 				TypeRef mutatedType = valueType;
 				if (!(vs instanceof DirectDeclarator))
@@ -1675,14 +1676,16 @@ public class DeclarationsConverter {
 				out.addDeclaration(new EmptyDeclaration(e.toString()));
 		}
     }
+    int nextAnonymousFieldId;
 	public void convertVariablesDeclarationToJNA(VariablesDeclaration v, DeclarationsHolder out, int[] iChild, Identifier callerLibraryClass) {
 		//List<Declaration> out = new ArrayList<Declaration>();
 		try {
 			TypeRef valueType = v.getValueType();
 			for (Declarator vs : v.getDeclarators()) {
 				String name = vs.resolveName();
-				if (name == null || name.length() == 0)
-					continue;
+				if (name == null || name.length() == 0) {
+					name = "anonymous" + (nextAnonymousFieldId++);
+				}
 	
 				TypeRef mutatedType = valueType;
 				if (!(vs instanceof DirectDeclarator))

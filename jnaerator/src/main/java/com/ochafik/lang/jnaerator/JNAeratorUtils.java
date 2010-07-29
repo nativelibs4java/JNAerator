@@ -99,7 +99,7 @@ public class JNAeratorUtils {
 					idealDecl = decl;
 					break;
 				}
-				boolean hasNiceName = !decl.getName().startsWith("_");
+				boolean hasNiceName = !decl.getName().endsWith("_") && !decl.getName().startsWith("_");
 				if (hasMoreThanOnePlainDecl || plainDecl != null && !(!plainHasNiceName && hasNiceName)) {
 					hasMoreThanOnePlainDecl = true;
 					continue;

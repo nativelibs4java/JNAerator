@@ -159,6 +159,9 @@ public class ElementsHelper {
 		return new FunctionCall(memberRef(null, null, name), exprs);
 	}
 	public static TypeRef typeRef(Class<?> cl) {
+		if (cl == null)
+			return null;
+		
 		if (cl.isArray())
 			return new TypeRef.ArrayRef(typeRef(cl.getComponentType()));
         if (cl.isPrimitive() || cl == Void.class)
