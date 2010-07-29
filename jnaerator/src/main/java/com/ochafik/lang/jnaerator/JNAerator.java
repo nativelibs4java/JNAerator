@@ -609,7 +609,11 @@ public class JNAerator {
 					Collection<File> inputFiles = config.getInputFiles();
 					File firstFile = inputFiles.isEmpty() ? null : inputFiles.iterator().next().getAbsoluteFile();
 					String firstFileName = firstFile == null ? null : firstFile.getName();
-					String entry = config.entryName == null ? RegexUtils.findFirst(firstFileName, fileRadixPattern, 1) : config.entryName; 
+					Set<String> libraries = config.getLibraries();
+					String entry = 
+						config.entryName != null ? config.entryName :
+						!libraries.isEmpty() ? libraries.iterator().next() : 
+						RegexUtils.findFirst(firstFileName, fileRadixPattern, 1); 
 					//if (entry != null)
 					//	entry = config.result.typeConversion.getValidJavaIdentifier(ident(entry)).toString();
 

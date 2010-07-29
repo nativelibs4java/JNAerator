@@ -329,7 +329,13 @@ public class JNAeratorConfig {
 			return libraryByFile.containsKey(f);
 		}
 	};
-	
+	public Set<String> getLibraries() {
+		Set<String> ret = new HashSet<String>();
+		for (Map.Entry<File, String> e : libraryByFile.entrySet())
+			if (e.getValue() != null)
+				ret.add(e.getValue());
+		return ret;
+	}
 	public String libraryForElementsInNullFile;
 	public String cPlusPlusNameSpaceSeparator = "_";
 	public boolean preferJavac = false;
