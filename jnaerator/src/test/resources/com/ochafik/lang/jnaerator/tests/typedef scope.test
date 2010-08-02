@@ -17,6 +17,6 @@ f(S, void (*fptr)(), T*, lfptr p2);
 import test.*;
 
 S s = new S();
-(s.p = (test.TestLibrary.lfptr)null).invoke();
-(s.p2 = (test.S.fp2)null).invoke();
+(s.p = (test.TestLibrary.lfptr)null).apply();
+(s.p2 = (test.S.fp2)null).apply();
 TestLibrary.INSTANCE.f((S.ByValue)null, (TestLibrary.fptr)null, (TestLibrary.T)null, (test.TestLibrary.lfptr)null);

@@ -19,7 +19,7 @@ S s = new S();
 s.iarr[2] = 10;
 s.csarr[10] = (Pointer)null;
 s.s[10] = (byte)0;
-NativeLongByReference lp = s.foo2[10].invoke();
+NativeLongByReference lp = s.foo2[10].apply();
 
 Months m = null;
 m.names = (byte[])null;
