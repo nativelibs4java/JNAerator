@@ -6,7 +6,7 @@
   <artifactId>jna-jnaerator</artifactId>
   <name>JNAerator's Patched JNA Library</name>
   <url>http://code.google.com/p/jnaerator/</url>
-  <version>3.2.5</version>
+  <version>3.2.7</version>
   <packaging>jar</packaging>
   
   <properties>

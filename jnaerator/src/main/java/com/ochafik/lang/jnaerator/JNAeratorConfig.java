@@ -374,6 +374,7 @@ public class JNAeratorConfig {
 	public boolean skipPrivateMembers = true;
 	public File rawParsedSourcesOutFile, normalizedParsedSourcesOutFile;
 	public boolean skipLibraryInstanceDeclarations;
+	public String callbackInvokeMethodName = "apply";
 	public Collection<File> getFiles() {
 		/*return new AdaptedCollection<String, File>(libraryByFile.keySet(), new Adapter<String, File>() {
 			@Override

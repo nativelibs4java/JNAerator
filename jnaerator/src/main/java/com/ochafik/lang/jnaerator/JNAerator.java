@@ -292,6 +292,9 @@ public class JNAerator {
 						else
 							config.preprocessorConfig.includes.add(includedFile.toString());
 						break;
+					case CallbackInvokeName:
+						config.callbackInvokeMethodName = a.getStringParam(0);
+						break;
 					case AddFrameworksPath:
 						config.preprocessorConfig.frameworksPath.add(a.getFileParam(0).toString());
 						break;

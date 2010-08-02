@@ -14,6 +14,9 @@ import com.ochafik.lang.jnaerator.parser.TypeRef.TaggedTypeRef;
 import java.util.ArrayList;
 import java.util.List;
 public class ElementsHelper {
+	public static Expression memberRef(Expression x, String name) {
+		return memberRef(x, MemberRefStyle.Dot, name);
+	}
 	public static Expression memberRef(Expression x, MemberRefStyle style, String name) {
 		return new Expression.MemberRef(x, style, new SimpleIdentifier(name));
 	}
@@ -45,11 +48,23 @@ public class ElementsHelper {
 	public static Expression staticField(Class<?> c, String name) {
 		return memberRef(expr(typeRef(ident(c))), MemberRefStyle.Dot, name);
 	}
+
+	public static Expression thisField(String name) {
+		return memberRef(thisRef(), MemberRefStyle.Dot, name);
+	}
+
+	public static Expression thisRef() {
+		return varRef("this");
+	}
 	public static Expression classLiteral(TypeRef c) {
 		return memberRef(expr(c), MemberRefStyle.Dot, "class");
 	}
 	public static Expression memberRef(Expression x, MemberRefStyle style, Identifier name) {
 		return new Expression.MemberRef(x, style, name);
+	}
+
+	public static Expression memberRef(Expression x, Identifier name) {
+		return memberRef(x, MemberRefStyle.Dot, name);
 	}
 	public static Expression varRef(String name) {
 		return new Expression.VariableRef(new SimpleIdentifier(name));
@@ -152,8 +167,11 @@ public class ElementsHelper {
             clone.add((T)e.clone());
         return clone;
     }
-	public static FunctionCall methodCall(Expression x, MemberRefStyle style, String name, Expression... exprs) {
+    public static FunctionCall methodCall(Expression x, MemberRefStyle style, String name, Expression... exprs) {
 		return new FunctionCall(memberRef(x, style, name), exprs);
+	}
+    public static FunctionCall methodCall(Expression x, String name, Expression... exprs) {
+    	return methodCall(x, MemberRefStyle.Dot, name, exprs);
 	}
 	public static FunctionCall methodCall(String name, Expression... exprs) {
 		return new FunctionCall(memberRef(null, null, name), exprs);

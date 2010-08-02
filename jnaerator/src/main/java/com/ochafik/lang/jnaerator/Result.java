@@ -77,6 +77,7 @@ public class Result extends Scanner {
 	
 	public final Set<Identifier> 
 		structsFullNames = new HashSet<Identifier>(),
+		enumsFullNames = new HashSet<Identifier>(),
 		unionsFullNames = new HashSet<Identifier>(),
 		callbacksFullNames = new HashSet<Identifier>();
 
@@ -253,6 +254,11 @@ public class Result extends Scanner {
 		}
 		
 		getList(enumsByLibrary, getLibrary(e)).add(e);
+		
+		Identifier identifier = getTaggedTypeIdentifierInJava(e);
+		if (identifier != null) {
+			enumsFullNames.add(identifier);
+		}
 	}
 	
 	@Override
@@ -371,12 +377,11 @@ public class Result extends Scanner {
 		
 		name = name.clone();
 		Struct parentStruct = s.findParentOfType(Struct.class);
-		if (config.putTopStructsInSeparateFiles) {
-			if (parentStruct != null && parentStruct != s)
-				return ident(getTaggedTypeIdentifierInJava(parentStruct), name);
-			else
-				return ident(getLibraryPackage(library), name);
-		} else
+		if (parentStruct != null && parentStruct != s)
+			return ident(getTaggedTypeIdentifierInJava(parentStruct), name);
+		else if ((s instanceof Struct) && config.putTopStructsInSeparateFiles)
+			return ident(getLibraryPackage(library), name);
+		else
 			return typeConverter.libMember(getLibraryClassFullName(library), null, name);
 	}
 

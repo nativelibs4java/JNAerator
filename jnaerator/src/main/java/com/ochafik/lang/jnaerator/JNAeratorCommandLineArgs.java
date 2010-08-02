@@ -118,6 +118,7 @@ public class JNAeratorCommandLineArgs {
 		JarOut(				"-jar",					"Jar file where all generated sources and the compiled classes go", new ArgDef(Type.OutputFile, "outFile")),
 		ScalaStructSetters( "-scalaStructSetters",  "Generate Scala-style setters for BridJ structs (with a name like fieldName_$eq)"),
         WCharAsShort(		"-wcharAsShort",		"Force treatment of wchar_t as short (char by default)"),
+        CallbackInvokeName( "-callbacksInvokeMethodName", "Name of the invocation method of callbacks ('apply' by default)", new ArgDef(Type.String, "methodName")),
 		//Test(				"-test",				"Launch JNAerator's unit tests (DEBUG option)"),
 		Studio(				"-studio",				"Launch JNAeratorStudio"),
 		ScalaOut(			"-scalaOut",				"[Experimental] Output Scala wrappers (callbacks implicits...)", new ArgDef(Type.OutputDir, "outDir")),

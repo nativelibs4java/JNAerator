@@ -17,7 +17,10 @@ import java.nio.Buffer;
 import java.util.AbstractCollection;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -78,22 +81,36 @@ public abstract class Structure {
     public interface ByReference { }
 
     private static class MemberOrder {
+        private static final String[] FIELDS = {
+            "first", "second", "middle", "penultimate", "last",
+        };
         public int first;
+		public int second;
         public int middle;
+        public int penultimate;
         public int last;
     }
 
     private static final boolean REVERSE_FIELDS;
-    static boolean REQUIRES_FIELD_ORDER;
+    private static final boolean REQUIRES_FIELD_ORDER;
 
     static final boolean isPPC;
     static final boolean isSPARC;
 
     static {
-        // IBM and JRockit store fields in reverse order; check for it
+        // Check for predictable field order; IBM and JRockit store fields in
+        // reverse order; Excelsior JET requires explicit order
         Field[] fields = MemberOrder.class.getFields();
-        REVERSE_FIELDS = "last".equals(fields[0].getName());
-        REQUIRES_FIELD_ORDER = !"middle".equals(fields[1].getName());
+        List names = new ArrayList();
+        for(int i=0;i < fields.length;i++) {
+            names.add(fields[i].getName());
+        }
+        List expected = Arrays.asList(MemberOrder.FIELDS);
+        List reversed = new ArrayList(expected);
+        Collections.reverse(reversed);
+
+        REVERSE_FIELDS = names.equals(reversed);
+        REQUIRES_FIELD_ORDER = !(names.equals(expected) || REVERSE_FIELDS);
         String arch = System.getProperty("os.arch").toLowerCase();
         isPPC = "ppc".equals(arch) || "powerpc".equals(arch);
         isSPARC = "sparc".equals(arch);
@@ -107,6 +124,13 @@ public abstract class Structure {
     public static final int ALIGN_GNUC = 2;
     /** validated for w32/msvc; align on field size */
     public static final int ALIGN_MSVC = 3;
+
+    /** Align to a 2-byte boundary. */
+    //public static final int ALIGN_2 = 4; 
+    /** Align to a 4-byte boundary. */
+    //public static final int ALIGN_4 = 5;
+    /** Align to an 8-byte boundary. */
+    //public static final int ALIGN_8 = 6;
 
     private static final int MAX_GNUC_ALIGNMENT = isSPARC ? 8 : Native.LONG_SIZE;
     protected static final int CALCULATE_SIZE = -1;
@@ -135,7 +159,7 @@ public abstract class Structure {
         this((Pointer)null, ALIGN_DEFAULT, mapper);
     }
 
-    /** Create a structure cast onto pre-allocated memory. */
+    /** Create a structure cast onto preallocated memory. */
     protected Structure(Pointer p) {
         this(p, ALIGN_DEFAULT);
     }
@@ -202,6 +226,10 @@ public abstract class Structure {
         }
     }
 
+    protected Memory autoAllocate(int size) {
+        return new AutoAllocated(size);
+    }
+
     /** Set the memory used by this structure.  This method is used to
      * indicate the given structure is nested within another or otherwise
      * overlaid on some other memory block and thus does not own its own
@@ -220,7 +248,15 @@ public abstract class Structure {
         // Invoking size() here is important when this method is invoked
         // from the ctor, to ensure fields are properly scanned and allocated
         try {
-            this.memory = m.share(offset, size());
+            // Set the structure's memory field temporarily to avoid
+            // auto-allocating memory in the call to size()
+            this.memory = m;
+            if (size == CALCULATE_SIZE) {
+                size = calculateSize(false);
+            }
+            if (size != CALCULATE_SIZE) {
+                this.memory = m.share(offset, size);
+            }
             this.array = null;
         }
         catch(IndexOutOfBoundsException e) {
@@ -229,7 +265,7 @@ public abstract class Structure {
     }
 
     protected void ensureAllocated() {
-        if (size == CALCULATE_SIZE) {
+        if (memory == null) {
             allocateMemory();
         }
     }
@@ -259,9 +295,7 @@ public abstract class Structure {
         if (size != CALCULATE_SIZE) {
             if (this.memory == null 
                 || this.memory instanceof AutoAllocated) {
-                this.memory = new AutoAllocated(size);
-                // Always clear new structure memory
-                this.memory.clear(size);
+                this.memory = autoAllocate(size);
             }
             this.size = size;
         }
@@ -269,6 +303,9 @@ public abstract class Structure {
 
     public int size() {
         ensureAllocated();
+        if (size == CALCULATE_SIZE) {
+            size = calculateSize(true);
+        }
         return size;
     }
 
@@ -291,6 +328,14 @@ public abstract class Structure {
     //////////////////////////////////////////////////////////////////////////
     // Data synchronization methods
     //////////////////////////////////////////////////////////////////////////
+
+    // Keep track of ByReference reads to avoid creating multiple structures
+    // mapped to the same address
+    private static final ThreadLocal reads = new ThreadLocal() {
+        protected synchronized Object initialValue() {
+            return new HashMap();
+        }
+    };
 
     // Keep track of what is currently being read/written to avoid redundant
     // reads (avoids problems with circular references).
@@ -325,9 +370,9 @@ public abstract class Structure {
             private int indexOf(Object o) {
                 Structure s1 = (Structure)o;
                 for (int i=0;i < count;i++) {
-                    Structure s2 = (Structure)elements[i];
+                    Structure s2 = elements[i];
                     if (s1 == s2
-                        || (s1.baseClass() == s2.baseClass()
+                        || (s1.getClass() == s2.getClass()
                             && s1.size() == s2.size()
                             && s1.getPointer().equals(s2.getPointer()))) {
                         return i;
@@ -355,8 +400,11 @@ public abstract class Structure {
             return new StructureSet();
         }
     };
-    Set busy() {
+    static Set busy() {
         return (Set)busy.get();
+    }
+    static Map reading() {
+        return (Map)reads.get();
     }
 
     /**
@@ -367,11 +415,14 @@ public abstract class Structure {
         // allows structures to do field-based initialization of arrays and not
         // have to explicitly call allocateMemory in a ctor
         ensureAllocated();
-        // Avoid recursive reads
+        // Avoid redundant reads
         if (busy().contains(this)) {
             return;
         }
         busy().add(this);
+        if (this instanceof Structure.ByReference) {
+            reading().put(getPointer(), this);
+        }
         try {
             for (Iterator i=structFields.values().iterator();i.hasNext();) {
                 readField((StructField)i.next());
@@ -379,6 +430,9 @@ public abstract class Structure {
         }
         finally {
             busy().remove(this);
+            if (reading().get(getPointer()) == this) {
+                reading().remove(getPointer());
+            }
         }
     }
 
@@ -433,8 +487,14 @@ public abstract class Structure {
         }
         else {
             if (s == null || !address.equals(s.getPointer())) {
-                s = newInstance(type);
-                s.useMemory(address);
+                Structure s1 = (Structure)reading().get(address);
+                if (s1 != null && type.equals(s1.getClass())) {
+                    s = s1;
+                }
+                else {
+                    s = newInstance(type);
+                    s.useMemory(address);
+                }
             }
             s.autoRead();
         }
@@ -461,6 +521,7 @@ public abstract class Structure {
                                || Callback.class.isAssignableFrom(fieldType)
                                || Buffer.class.isAssignableFrom(fieldType)
                                || Pointer.class.isAssignableFrom(fieldType)
+                               || NativeMapped.class.isAssignableFrom(fieldType)
                                || fieldType.isArray())
             ? getField(structField) : null;
         Object result = memory.getValue(offset, structField.bitOffset, structField.bits, fieldType, currentValue);
@@ -489,6 +550,7 @@ public abstract class Structure {
             getTypeInfo();
         }
 
+        // Avoid redundant writes
         if (busy().contains(this)) {
             return;
         }
@@ -585,6 +647,12 @@ public abstract class Structure {
         }
     }
 
+    private boolean hasFieldOrder() {
+        synchronized(this) {
+            return fieldOrder != null;
+        }
+    }
+
     protected List getFieldOrder() {
         synchronized(this) {
             if (fieldOrder == null) {
@@ -599,20 +667,58 @@ public abstract class Structure {
      */
     protected void setFieldOrder(String[] fields) {
         getFieldOrder().addAll(Arrays.asList(fields));
+        // Force recalculation of size/field layout
+        this.size = CALCULATE_SIZE;
+        if (this.memory instanceof AutoAllocated) {
+            this.memory = null;
+        }
     }
 
     /** Sort the structure fields according to the given array of names. */
-    protected void sortFields(Field[] fields, String[] names) {
-        for (int i=0;i < names.length;i++) {
-            for (int f=i;f < fields.length;f++) {
-                if (names[i].equals(fields[f].getName())) {
-                    Field tmp = fields[f];
-                    fields[f] = fields[i];
-                    fields[i] = tmp;
+    protected void sortFields(List fields, List names) {
+        for (int i=0;i < names.size();i++) {
+            String name = (String)names.get(i);
+            for (int f=0;f < fields.size();f++) {
+                Field field = (Field)fields.get(f);
+                if (name.equals(field.getName())) {
+                    Collections.swap(fields, i, f);
                     break;
                 }
             }
         }
+    }
+
+    protected List getFields(boolean force) {
+        // Restrict to valid fields
+        List flist = new ArrayList();
+        for (Class cls = getClass();
+             !cls.equals(Structure.class);
+             cls = cls.getSuperclass()) {
+            List classFields = new ArrayList();
+            Field[] fields = cls.getDeclaredFields();
+            for (int i=0;i < fields.length;i++) {
+                int modifiers = fields[i].getModifiers();
+                if (Modifier.isStatic(modifiers)
+                    || !Modifier.isPublic(modifiers))
+                    continue;
+                classFields.add(fields[i]);
+            }
+            if (REVERSE_FIELDS) {
+                Collections.reverse(classFields);
+            }
+            flist.addAll(0, classFields);
+        }
+        if (REQUIRES_FIELD_ORDER || hasFieldOrder()) {
+            List fieldOrder = getFieldOrder();
+            if (fieldOrder.size() < flist.size()) {
+                if (force) {
+                    throw new Error("This VM does not store fields in a predictable order; you must use Structure.setFieldOrder to explicitly indicate the field order: " + System.getProperty("java.vendor") + ", " + System.getProperty("java.version"));
+                }
+                return null;
+            }
+            sortFields(flist, fieldOrder);
+        }
+        return flist;
     }
 
     /** Calculate the amount of native memory required for this structure.
@@ -633,39 +739,15 @@ public abstract class Structure {
 
         structAlignment = 1;
         int calculatedSize = 0;
-        Field[] fields = getClass().getFields();
-        // Restrict to valid fields
-        List flist = new ArrayList();
-        for (int i=0;i < fields.length;i++) {
-            int modifiers = fields[i].getModifiers();
-            if (Modifier.isStatic(modifiers) || !Modifier.isPublic(modifiers))
-                continue;
-            flist.add(fields[i]);
+        int cumulativeBitOffset = 0;
+        List fields = getFields(force);
+        if (fields == null) {
+            return CALCULATE_SIZE;
         }
-        fields = (Field[])flist.toArray(new Field[flist.size()]);
 
-        if (REVERSE_FIELDS) {
-            for (int i=0;i < fields.length/2;i++) {
-                int idx = fields.length-1-i;
-                Field tmp = fields[i];
-                fields[i] = fields[idx];
-                fields[idx] = tmp;
-            }
-        }
-        else if (REQUIRES_FIELD_ORDER) {
-            List fieldOrder = getFieldOrder();
-            if (fieldOrder.size() < fields.length) {
-                if (force) {
-                    throw new Error("This VM does not store fields in a predictable order; you must use setFieldOrder: " + System.getProperty("java.vendor") + ", " + System.getProperty("java.version"));
-                }
-                return CALCULATE_SIZE;
-            }
-            sortFields(fields, (String[])fieldOrder.toArray(new String[fieldOrder.size()]));
-        }
-		
-		int cumulativeBitOffset = 0;
-        for (int i=0; i<fields.length; i++) {
-            Field field = fields[i];
+        boolean firstField = true;
+        for (Iterator i=fields.iterator();i.hasNext();firstField=false) {
+            Field field = (Field)i.next();
             int modifiers = field.getModifiers();
 
 			if (Modifier.isTransient(modifiers))
@@ -752,7 +834,7 @@ public abstract class Structure {
             }
             try {
                 structField.size = Native.getNativeSize(nativeType, value);
-                fieldAlignment = getNativeAlignment(nativeType, value, i==0);
+                fieldAlignment = getNativeAlignment(nativeType, value, firstField);
             }
             catch(IllegalArgumentException e) {
                 // Might simply not yet have a type mapper set
@@ -764,7 +846,7 @@ public abstract class Structure {
             }
 
 			Integer bits = getBitsAnnotation(field);
-			if (bits == null || i == 0) {
+			if (bits == null || firstField) {
 				// Align fields as appropriate
 				if (cumulativeBitOffset != 0) {
 					cumulativeBitOffset = 0;
@@ -801,6 +883,11 @@ public abstract class Structure {
             // Update native FFI type information, if needed
             if (this instanceof ByValue) {
                 getTypeInfo();
+            }
+            if (this.memory != null
+                && !(this.memory instanceof AutoAllocated)) {
+                // Ensure we've set bounds on the memory used
+                this.memory = this.memory.share(0, size);
             }
             return size;
         }
@@ -995,14 +1082,12 @@ public abstract class Structure {
      */
     public Structure[] toArray(Structure[] array) {
         ensureAllocated();
-        if (memory instanceof AutoAllocated) {
+        if (this.memory instanceof AutoAllocated) {
             // reallocate if necessary
-            Memory m = (Memory)memory;
+            Memory m = (Memory)this.memory;
             int requiredSize = array.length * size();
-            if (m.getSize() < requiredSize) {
-                m = new AutoAllocated(requiredSize);
-                m.clear();
-                useMemory(m);
+            if (m.size() < requiredSize) {
+                useMemory(autoAllocate(requiredSize));
             }
         }
         array[0] = this;
@@ -1044,10 +1129,12 @@ public abstract class Structure {
      * and visible data fields.
      */
     public boolean equals(Object o) {
-        if (o == this)
+        if (o == this) {
             return true;
-        if (o == null)
+        }
+        if (!(o instanceof Structure)) {
             return false;
+        }
         if (o.getClass() != getClass()
             && ((Structure)o).baseClass() != baseClass()) {
             return false;
@@ -1082,7 +1169,7 @@ public abstract class Structure {
         return p;
     }
 
-    /** Set whether the structure is automatically synched to native memory
+    /** Set whether the structure is automatically synchronized to native memory
         before and after a native function call.  Convenience method for
         <pre><code>
         boolean auto = ...;
@@ -1095,28 +1182,28 @@ public abstract class Structure {
         setAutoWrite(auto);
     }
 
-    /** Set whether the struture is written to native memory prior to
+    /** Set whether the structure is read from native memory prior to
         a native function call.
     */
     public void setAutoRead(boolean auto) {
         this.autoRead = auto;
     }
 
-    /** Returns whether the struture is written to native memory prior to
+    /** Returns whether the structure is read from native memory prior to
         a native function call.
     */
     public boolean getAutoRead() {
         return this.autoRead;
     }
 
-    /** Set whether the structure is read from native memory after a native
-        function call. 
+    /** Set whether the structure is written to native memory after a native
+        function call.
     */
     public void setAutoWrite(boolean auto) {
         this.autoWrite = auto;
     }
 
-    /** Returns whether the structure is read from native memory after a native
+    /** Returns whether the structure is written to native memory after a native
         function call. 
     */
     public boolean getAutoWrite() {
@@ -1314,6 +1401,8 @@ public abstract class Structure {
     private class AutoAllocated extends Memory {
         public AutoAllocated(int size) {
             super(size);
+            // Always clear new structure memory
+            super.clear();
         }
     }
 

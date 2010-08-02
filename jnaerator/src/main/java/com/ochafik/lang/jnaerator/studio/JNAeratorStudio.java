@@ -558,7 +558,7 @@ public class JNAeratorStudio extends JPanel {
 						setStatus("JNAeration failed : " + e.toString());
 						statusBar.setValue(statusBar.getMinimum());
 						statusBar.setIndeterminate(false);
-						error(null, null, e);
+						//error(null, null, e);
 					}
 					@Override
 					public void wrappersGenerated(final Result result) {
