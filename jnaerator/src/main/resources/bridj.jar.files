@@ -48,7 +48,6 @@ com/bridj/Demangler$FunctionTypeRef.class
 com/bridj/Demangler$JavaTypeRef.class
 com/bridj/Demangler$MemberRef.class
 com/bridj/Demangler$NamespaceRef.class
-com/bridj/Demangler$PointerType.class
 com/bridj/Demangler$SpecialName.class
 com/bridj/Demangler$Symbol.class
 com/bridj/Demangler$TemplateArg.class

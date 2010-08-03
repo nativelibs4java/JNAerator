@@ -867,11 +867,12 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
 		return (i instanceof Identifier.QualifiedIdentifier) && 
 			Identifier.QualificationSeparator.Dot.equals(((Identifier.QualifiedIdentifier)i).getSeparator());
 	}
-    public static class NL4JConversion {
-    	public enum Type {
-            Enum, Pointer, Primitive, Struct, NativeLong, NativeSize, Void, Callback
-        }
-        public Type type;
+	public enum ConvType {
+		Enum, Pointer, Primitive, Struct, NativeLong, NativeSize, Void, Callback
+	}
+        
+    public class NL4JConversion {
+    	public ConvType type;
         public TypeRef typeRef, indirectType;
         public Expression arrayLength;
         public Expression bits;
@@ -882,8 +883,14 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
         public String pointerFieldGetterNameRadix;
         
         public TypeRef getIndirectTypeRef() {
-            if (type == NL4JConversion.Type.Void)
+            if (type == ConvType.Void)
                 return typeRef(ident("?"));
+            if (result.config.runtime == JNAeratorConfig.Runtime.BridJ) {
+            	if (type == ConvType.NativeSize)
+            		return typeRef(SizeT.class);
+            	if (type == ConvType.NativeLong)
+            		return typeRef(com.bridj.CLong.class);
+            }
             TypeRef t = indirectType == null ? typeRef : indirectType;
             return t == null ? null : t.clone();
         }
@@ -915,7 +922,7 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
         }
 
         public <M extends ModifiableElement> M annotateTypedType(M element) throws UnsupportedConversionException {
-        	if (type != Type.Pointer)
+        	if (type != ConvType.Pointer)
         		annotateRawType(element);
             return element;
         }
@@ -958,7 +965,7 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
     }
     
     public NL4JConversion convertTypeToNL4J(TypeRef valueType, Identifier libraryClassName, Expression structPeerExpr, Expression structIOExpr, Expression valueExpr, int fieldIndex, int bits) throws UnsupportedConversionException {
-		TypeRef original = valueType;
+    	TypeRef original = valueType;
 		valueType =  resolveTypeDef(valueType, libraryClassName, true);
 
 		Expression offsetExpr = structIOExpr == null ? null : methodCall(structIOExpr, "getFieldOffset", expr(fieldIndex));  
@@ -967,7 +974,12 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
 		
         NL4JConversion conv = new NL4JConversion();
         
-        //if (valueType instanceof Struct)
+        if (valueType == null) {
+    		conv.type = ConvType.Void;
+    		conv.typeRef = primRef(JavaPrim.Void);
+    		return conv;
+    	}
+		//if (valueType instanceof Struct)
         //	valueType = typeRef(findStructRef((Struct)valueType, libraryClassName));
         
         if (valueType instanceof TargettedTypeRef) {
@@ -984,13 +996,22 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
             
             NL4JConversion targetConv = convertTypeToNL4J(targetRef, libraryClassName, null, null, null, -1, -1);
             TypeRef pointedTypeRef = targetConv.getIndirectTypeRef();
-            if (targetConv.type != NL4JConversion.Type.Void) {
-            	if (targetConv.type == NL4JConversion.Type.NativeSize)
+            if (targetConv.type != ConvType.Void) {
+            	if (targetConv.type == ConvType.NativeSize)
             		pointedTypeRef = typeRef(SizeT.class);
-            	else if (targetConv.type == NL4JConversion.Type.NativeLong)
+            	else if (targetConv.type == ConvType.NativeLong)
             		pointedTypeRef = typeRef(CLong.class);
             }
-            
+            if (pointedTypeRef != null) {
+            	if (structPeerExpr != null) {
+					if (conv.arrayLength == null)
+						conv.setExpr = methodCall(structPeerExpr.clone(), "setPointer", offsetExpr.clone(), valueExpr);
+					conv.getExpr = methodCall(structPeerExpr.clone(), "getPointer", offsetExpr.clone(), classLiteral(pointedTypeRef.clone()));
+				}
+				conv.typeRef = typeRef(ident(result.config.runtime.pointerClass, expr(pointedTypeRef.clone())));
+				return conv;
+	        }
+            /*
             if (targetRef instanceof SimpleTypeRef) {
             	SimpleTypeRef simpleTargetRef = (SimpleTypeRef)targetRef;
             	Identifier targetName = simpleTargetRef.getName();
@@ -1007,7 +1028,8 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
                 }
                 if (targetConvRef != null) {
                 	if (structPeerExpr != null) {
-	                	conv.setExpr = methodCall(structPeerExpr.clone(), "setPointer", offsetExpr.clone(), valueExpr);
+                		if (conv.arrayLength == null)
+                			conv.setExpr = methodCall(structPeerExpr.clone(), "setPointer", offsetExpr.clone(), valueExpr);
 	                	conv.getExpr = methodCall(structPeerExpr.clone(), "getPointer", offsetExpr.clone(), classLiteral(targetConvRef.clone()));
 	            	}
 	        		conv.typeRef = typeRef(ident(result.config.runtime.pointerClass, expr(targetConvRef.clone())));
@@ -1018,37 +1040,39 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
                     //    conv.typeRef = target;
             		conv.typeRef = typeRef(result.getFakePointer(libraryClassName, targetName));
             		if (structPeerExpr != null) {
-	                	conv.setExpr = methodCall(structPeerExpr.clone(), "setPointer", offsetExpr.clone(), valueExpr);
+	                	if (conv.arrayLength == null)
+                			conv.setExpr = methodCall(structPeerExpr.clone(), "setPointer", offsetExpr.clone(), valueExpr);
 	                	conv.getExpr = methodCall(structPeerExpr.clone(), "getTypedPointer", offsetExpr.clone(), classLiteral(conv.typeRef.clone()));
 	            	}
 	        		return conv;
                 }
-            }
+            }*/
         } else {//if (valueType instanceof SimpleTypeRef || valueType instanceof TaggedTypeRef || valueType) {
         	JavaPrim prim = getPrimitive(valueType, libraryClassName);
             if (prim != null) {
             	String radix;
             	switch (prim) {
 	                case NativeLong:
-	                	conv.type = NL4JConversion.Type.NativeLong;
+	                	conv.type = ConvType.NativeLong;
 	                	conv.typeRef = typeRef(Long.TYPE);
-	                	conv.indirectType = typeRef(Long.class);
+	                	conv.indirectType = typeRef(com.bridj.CLong.class);
 	                	radix = "CLong";
 	                    break;
 	                case NativeSize:
-	                	conv.type = NL4JConversion.Type.NativeSize;
+	                	conv.type = ConvType.NativeSize;
 	                	conv.typeRef = typeRef(Long.TYPE);
-	                	conv.indirectType = typeRef(Long.class);
+	                	conv.indirectType = typeRef(com.bridj.SizeT.class);
 	                	radix = "SizeT";
 	                    break;
 	                case Void:
-	                	conv.type = NL4JConversion.Type.Void;
+	                	conv.type = ConvType.Void;
 	                	conv.typeRef = primRef(prim);
 	                	radix = null;
 	                    break;
 	                default:
-	                	conv.type = NL4JConversion.Type.Primitive;
+	                	conv.type = ConvType.Primitive;
 	                	conv.typeRef = primRef(prim);
+	                	conv.indirectType = typeRef(prim.wrapperType);
 	                	radix = StringUtils.capitalize(prim.type.getName());
 	                	break;
 	            }
@@ -1068,7 +1092,7 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
                 	if (structPeerExpr != null) {
                     	conv.getExpr = new Expression.New(conv.typeRef, (Expression)methodCall(structPeerExpr.clone(), "offset", offsetExpr.clone()));
                 	}
-                	conv.type = NL4JConversion.Type.Struct;
+                	conv.type = ConvType.Struct;
                 	return conv;
                 } else if ((conv.typeRef =
             		result.enumsFullNames.contains(valueName) ? 
@@ -1081,7 +1105,7 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
                 		conv.setExpr = methodCall(structPeerExpr.clone(), "setInt", new Expression.Cast(typeRef(Integer.TYPE), methodCall(valueExpr, "value")));
 	                	conv.getExpr = methodCall(expr(typeRef(FlagSet.class)), "fromValue", methodCall(structPeerExpr.clone(), "getInt", offsetExpr.clone()), classLiteral(conv.typeRef.clone()));
                 	}
-                	conv.type = NL4JConversion.Type.Enum;
+                	conv.type = ConvType.Enum;
                 	conv.typeRef = typeRef(ident(ValuedEnum.class, expr(conv.typeRef)));
                 	return conv;
                 } else if ((conv.typeRef = 
@@ -1095,7 +1119,7 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
 	                	conv.setExpr = methodCall(structPeerExpr.clone(), "setPointer", offsetExpr.clone(), valueExpr);
 	                	conv.getExpr = methodCall(structPeerExpr.clone(), "getPointer", offsetExpr.clone(), classLiteral(conv.typeRef.clone()));
 	            	}
-	        		conv.type = NL4JConversion.Type.Pointer;
+	        		conv.type = ConvType.Pointer;
                 	conv.typeRef = typeRef(ident(result.config.runtime.pointerClass, expr(conv.typeRef)));
 	        		return conv;
                     

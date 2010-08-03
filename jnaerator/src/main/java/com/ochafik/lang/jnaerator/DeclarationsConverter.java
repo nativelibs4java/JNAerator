@@ -904,6 +904,7 @@ public class DeclarationsConverter {
         NL4JConversion retType = result.typeConverter.convertTypeToNL4J(function.getValueType(), libraryClassName, null, null, null, -1, -1);
 //        typedMethod.setValueType(retType.getTypedTypeRef());
 //        retType.annotateRawType(nativeMethod).setValueType(retType.getRawType());
+		retType.annotateTypedType(nativeMethod);//.getTypedTypeRef())));
         nativeMethod.setValueType(retType.typeRef);
 
         Map<String, NL4JConversion> argTypes = new LinkedHashMap<String, NL4JConversion>();
@@ -1238,13 +1239,15 @@ public class DeclarationsConverter {
 			Struct byRef = publicStaticClass(ident("ByReference"), structName, Struct.Type.JavaClass, null, ident(ident(result.config.runtime.structClass), "ByReference"));
 			Struct byVal = publicStaticClass(ident("ByValue"), structName, Struct.Type.JavaClass, null, ident(ident(result.config.runtime.structClass), "ByValue"));
 			
-			if (!inheritsFromStruct) {
-				structJavaClass.addDeclaration(createNewStructMethod("newByReference", byRef));
-				structJavaClass.addDeclaration(createNewStructMethod("newByValue", byVal));
+			if (result.config.runtime != JNAeratorConfig.Runtime.JNA) {
+				if (!inheritsFromStruct) {
+					structJavaClass.addDeclaration(createNewStructMethod("newByReference", byRef));
+					structJavaClass.addDeclaration(createNewStructMethod("newByValue", byVal));
+				}
+				structJavaClass.addDeclaration(createNewStructMethod("newInstance", structJavaClass));
+	
+				structJavaClass.addDeclaration(createNewStructArrayMethod(structJavaClass, isUnion));
 			}
-			structJavaClass.addDeclaration(createNewStructMethod("newInstance", structJavaClass));
-
-			structJavaClass.addDeclaration(createNewStructArrayMethod(structJavaClass, isUnion));
 
 			structJavaClass.addDeclaration(decl(byRef));
 			structJavaClass.addDeclaration(decl(byVal));
@@ -1575,6 +1578,7 @@ public class DeclarationsConverter {
 		}
 
         Function convDecl = new Function();
+        conv.annotateTypedType(convDecl);
         convDecl.setType(Type.JavaMethod);
 		convDecl.addModifiers(Modifier.Public);
 
