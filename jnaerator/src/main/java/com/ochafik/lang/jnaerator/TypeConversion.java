@@ -1027,29 +1027,33 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
         } else {//if (valueType instanceof SimpleTypeRef || valueType instanceof TaggedTypeRef || valueType) {
         	JavaPrim prim = getPrimitive(valueType, libraryClassName);
             if (prim != null) {
+            	String radix;
             	switch (prim) {
 	                case NativeLong:
 	                	conv.type = NL4JConversion.Type.NativeLong;
 	                	conv.typeRef = typeRef(Long.TYPE);
 	                	conv.indirectType = typeRef(Long.class);
+	                	radix = "CLong";
 	                    break;
 	                case NativeSize:
 	                	conv.type = NL4JConversion.Type.NativeSize;
 	                	conv.typeRef = typeRef(Long.TYPE);
 	                	conv.indirectType = typeRef(Long.class);
+	                	radix = "SizeT";
 	                    break;
 	                case Void:
 	                	conv.type = NL4JConversion.Type.Void;
 	                	conv.typeRef = primRef(prim);
+	                	radix = null;
 	                    break;
 	                default:
 	                	conv.type = NL4JConversion.Type.Primitive;
 	                	conv.typeRef = primRef(prim);
+	                	radix = StringUtils.capitalize(prim.type.getName());
 	                	break;
 	            }
-            	if (structPeerExpr != null) {
-            		String radix = StringUtils.capitalize(prim.type.getName());
-                	conv.setExpr = methodCall(structPeerExpr.clone(), "set" + radix, offsetExpr.clone(), valueExpr);
+            	if (structPeerExpr != null && radix != null) {
+            		conv.setExpr = methodCall(structPeerExpr.clone(), "set" + radix, offsetExpr.clone(), valueExpr);
                 	conv.getExpr = methodCall(structPeerExpr.clone(), "get" + radix, offsetExpr.clone());
             	}
                 return conv;
