@@ -901,7 +901,7 @@ public class DeclarationsConverter {
 			}
 		}
         //(TypeRef valueType, Identifier libraryClassName, Expression structPeerExpr, Expression structIOExpr, Expression valueExpr, int fieldIndex, int bits) throws UnsupportedConversionException {
-        NL4JConversion retType = result.typeConverter.convertTypeToNL4J(function.getValueType(), libraryClassName, null, null, null, -1, -1);
+        NL4JConversion retType = result.typeConverter.convertTypeToNL4J(function.getValueType(), libraryClassName, null, null, -1, -1);
 //        typedMethod.setValueType(retType.getTypedTypeRef());
 //        retType.annotateRawType(nativeMethod).setValueType(retType.getRawType());
 		retType.annotateTypedType(nativeMethod);//.getTypedTypeRef())));
@@ -911,7 +911,7 @@ public class DeclarationsConverter {
         for (Arg arg : function.getArgs()) {
             String argName = arg.getName();
 
-            NL4JConversion argType = result.typeConverter.convertTypeToNL4J(arg.getValueType(), libraryClassName, null, null, null, -1, -1);
+            NL4JConversion argType = result.typeConverter.convertTypeToNL4J(arg.getValueType(), libraryClassName, null, null, -1, -1);
             argTypes.put(argName, argType);
 //            typedMethod.addArg(new Arg(argName, argType.getTypedTypeRef()));
             nativeMethod.addArg(argType.annotateTypedType(new Arg(argName, argType.typeRef)));//.getTypedTypeRef())));
@@ -1563,7 +1563,6 @@ public class DeclarationsConverter {
         TypeConversion.NL4JConversion conv = result.typeConverter.convertTypeToNL4J(
     		mutatedType, 
     		callerLibraryName,
-    		thisField("peer"),
     		thisField("io"),
     		varRef(name),
     		fieldIndex,

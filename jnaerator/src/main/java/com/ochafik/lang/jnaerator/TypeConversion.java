@@ -23,6 +23,7 @@ import static com.ochafik.lang.jnaerator.parser.ElementsHelper.classLiteral;
 import static com.ochafik.lang.jnaerator.parser.ElementsHelper.expr;
 import static com.ochafik.lang.jnaerator.parser.ElementsHelper.ident;
 import static com.ochafik.lang.jnaerator.parser.ElementsHelper.memberRef;
+import static com.ochafik.lang.jnaerator.parser.ElementsHelper.thisRef;
 import static com.ochafik.lang.jnaerator.parser.ElementsHelper.methodCall;
 import static com.ochafik.lang.jnaerator.parser.ElementsHelper.staticField;
 import static com.ochafik.lang.jnaerator.parser.ElementsHelper.thisField;
@@ -964,13 +965,13 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
         }
     }
     
-    public NL4JConversion convertTypeToNL4J(TypeRef valueType, Identifier libraryClassName, Expression structPeerExpr, Expression structIOExpr, Expression valueExpr, int fieldIndex, int bits) throws UnsupportedConversionException {
+    public NL4JConversion convertTypeToNL4J(TypeRef valueType, Identifier libraryClassName, Expression structIOExpr, Expression valueExpr, int fieldIndex, int bits) throws UnsupportedConversionException {
     	TypeRef original = valueType;
 		valueType =  resolveTypeDef(valueType, libraryClassName, true);
 
-		Expression offsetExpr = structIOExpr == null ? null : methodCall(structIOExpr, "getFieldOffset", expr(fieldIndex));  
-		Expression bitOffsetExpr = structIOExpr == null || bits <= 0 ? null : methodCall(structIOExpr, "getFieldBitOffset", expr(fieldIndex));  
-		Expression bitLengthExpr = structIOExpr == null || bits <= 0  ? null : methodCall(structIOExpr, "getFieldBitLength", expr(fieldIndex));
+		//Expression offsetExpr = structIOExpr == null ? null : methodCall(structIOExpr, "getFieldOffset", expr(fieldIndex));  
+		//Expression bitOffsetExpr = structIOExpr == null || bits <= 0 ? null : methodCall(structIOExpr, "getFieldBitOffset", expr(fieldIndex));  
+		//Expression bitLengthExpr = structIOExpr == null || bits <= 0  ? null : methodCall(structIOExpr, "getFieldBitLength", expr(fieldIndex));
 		
         NL4JConversion conv = new NL4JConversion();
         
@@ -994,59 +995,35 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
                 }
             }
             
-            NL4JConversion targetConv = convertTypeToNL4J(targetRef, libraryClassName, null, null, null, -1, -1);
-            TypeRef pointedTypeRef = targetConv.getIndirectTypeRef();
-            if (targetConv.type != ConvType.Void) {
-            	if (targetConv.type == ConvType.NativeSize)
-            		pointedTypeRef = typeRef(SizeT.class);
-            	else if (targetConv.type == ConvType.NativeLong)
-            		pointedTypeRef = typeRef(CLong.class);
-            }
-            if (pointedTypeRef != null) {
-            	if (structPeerExpr != null) {
-					if (conv.arrayLength == null)
-						conv.setExpr = methodCall(structPeerExpr.clone(), "setPointer", offsetExpr.clone(), valueExpr);
-					conv.getExpr = methodCall(structPeerExpr.clone(), "getPointer", offsetExpr.clone(), classLiteral(pointedTypeRef.clone()));
+            try {
+				NL4JConversion targetConv = convertTypeToNL4J(targetRef, libraryClassName, null, null, -1, -1);
+				TypeRef pointedTypeRef = targetConv.getIndirectTypeRef();
+				if (targetConv.type != ConvType.Void) {
+					if (targetConv.type == ConvType.NativeSize)
+						pointedTypeRef = typeRef(SizeT.class);
+					else if (targetConv.type == ConvType.NativeLong)
+						pointedTypeRef = typeRef(CLong.class);
 				}
-				conv.typeRef = typeRef(ident(result.config.runtime.pointerClass, expr(pointedTypeRef.clone())));
-				return conv;
+				if (pointedTypeRef != null) {
+					if (structIOExpr != null) {
+						if (conv.arrayLength == null)
+							conv.setExpr = methodCall(structIOExpr.clone(), "setPointerField", thisRef(), expr(fieldIndex), valueExpr);
+						conv.getExpr = methodCall(structIOExpr.clone(), "getPointerField", thisRef(), expr(fieldIndex), classLiteral(pointedTypeRef.clone()));
+					}
+					conv.typeRef = typeRef(ident(result.config.runtime.pointerClass, expr(pointedTypeRef.clone())));
+					return conv;
+				}
+	        } catch (UnsupportedConversionException ex) {
+	        	if (valueType instanceof TypeRef.Pointer && targetRef instanceof SimpleTypeRef && allowFakePointers) {
+	        		conv.typeRef = typeRef(result.getFakePointer(libraryClassName, ((SimpleTypeRef)targetRef).getName().clone()));
+	        		if (structIOExpr != null) {
+						if (conv.arrayLength == null)
+							conv.setExpr = methodCall(structIOExpr.clone(), "setPointerField", thisRef(), expr(fieldIndex), valueExpr);
+						conv.getExpr = methodCall(structIOExpr.clone(), "getTypedPointerField", thisRef(), expr(fieldIndex), classLiteral(conv.typeRef.clone()));
+					}
+	        		return conv;
+	        	}
 	        }
-            /*
-            if (targetRef instanceof SimpleTypeRef) {
-            	SimpleTypeRef simpleTargetRef = (SimpleTypeRef)targetRef;
-            	Identifier targetName = simpleTargetRef.getName();
-            	TypeRef targetConvRef = null;
-            	JavaPrim prim;
-            	if (isResolved(simpleTargetRef))
-            		targetConvRef = targetRef;
-            	else if ((prim = getPrimitive(targetRef, libraryClassName)) != null) {
-                	targetConvRef = typeRef(prim.wrapperType);
-                } else {
-                	targetConvRef = typeRef(findStructRef(targetName, libraryClassName));
-                    if (targetConvRef == null)
-                        targetConvRef = findEnum(targetName, libraryClassName);
-                }
-                if (targetConvRef != null) {
-                	if (structPeerExpr != null) {
-                		if (conv.arrayLength == null)
-                			conv.setExpr = methodCall(structPeerExpr.clone(), "setPointer", offsetExpr.clone(), valueExpr);
-	                	conv.getExpr = methodCall(structPeerExpr.clone(), "getPointer", offsetExpr.clone(), classLiteral(targetConvRef.clone()));
-	            	}
-	        		conv.typeRef = typeRef(ident(result.config.runtime.pointerClass, expr(targetConvRef.clone())));
-	        		return conv;
-            	}
-                if (result.config.features.contains(JNAeratorConfig.GenFeatures.TypedPointersForForwardDeclarations) && allowFakePointers) {
-                    //if (isResolved(simpleTargetRef)) {
-                    //    conv.typeRef = target;
-            		conv.typeRef = typeRef(result.getFakePointer(libraryClassName, targetName));
-            		if (structPeerExpr != null) {
-	                	if (conv.arrayLength == null)
-                			conv.setExpr = methodCall(structPeerExpr.clone(), "setPointer", offsetExpr.clone(), valueExpr);
-	                	conv.getExpr = methodCall(structPeerExpr.clone(), "getTypedPointer", offsetExpr.clone(), classLiteral(conv.typeRef.clone()));
-	            	}
-	        		return conv;
-                }
-            }*/
         } else {//if (valueType instanceof SimpleTypeRef || valueType instanceof TaggedTypeRef || valueType) {
         	JavaPrim prim = getPrimitive(valueType, libraryClassName);
             if (prim != null) {
@@ -1076,9 +1053,9 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
 	                	radix = StringUtils.capitalize(prim.type.getName());
 	                	break;
 	            }
-            	if (structPeerExpr != null && radix != null) {
-            		conv.setExpr = methodCall(structPeerExpr.clone(), "set" + radix, offsetExpr.clone(), valueExpr);
-                	conv.getExpr = methodCall(structPeerExpr.clone(), "get" + radix, offsetExpr.clone());
+            	if (structIOExpr != null && radix != null) {
+            		conv.setExpr = methodCall(structIOExpr.clone(), "set" + radix + "Field", thisRef(), expr(fieldIndex), valueExpr);
+                	conv.getExpr = methodCall(structIOExpr.clone(), "get" + radix + "Field", thisRef(), expr(fieldIndex));
             	}
                 return conv;
             } else {
@@ -1089,8 +1066,10 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
                     		typeRef(valueType instanceof Struct ? findStructRef((Struct)valueType, libraryClassName) : findStructRef(valueName, libraryClassName))) != null) 
                 {
             		//conv.setExpr = methodCall(structPeerExpr.clone(), "set" + radix, offsetExpr.clone(), valueExpr);
-                	if (structPeerExpr != null) {
-                    	conv.getExpr = new Expression.New(conv.typeRef, (Expression)methodCall(structPeerExpr.clone(), "offset", offsetExpr.clone()));
+                	if (structIOExpr != null) {
+                    	conv.getExpr = methodCall(structIOExpr, "getNativeObjectField", thisRef(), expr(fieldIndex), classLiteral(conv.typeRef.clone())); 
+                		
+                		//conv.getExpr = new Expression.New(conv.typeRef, (Expression)methodCall(structIOExpr.clone(), "offset", offsetExpr.clone()));
                 	}
                 	conv.type = ConvType.Struct;
                 	return conv;
@@ -1101,9 +1080,9 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
         				findEnumRef((Enum)valueType, libraryClassName) : 
     					findEnum(valueName, libraryClassName)) != null) 
                 {
-                	if (structPeerExpr != null) {
-                		conv.setExpr = methodCall(structPeerExpr.clone(), "setInt", new Expression.Cast(typeRef(Integer.TYPE), methodCall(valueExpr, "value")));
-	                	conv.getExpr = methodCall(expr(typeRef(FlagSet.class)), "fromValue", methodCall(structPeerExpr.clone(), "getInt", offsetExpr.clone()), classLiteral(conv.typeRef.clone()));
+                	if (structIOExpr != null) {
+                		conv.setExpr = methodCall(structIOExpr, "setIntEnumField", thisRef(), expr(fieldIndex), valueExpr);
+	                	conv.getExpr = methodCall(structIOExpr, "getIntEnumField", thisRef(), expr(fieldIndex), classLiteral(conv.typeRef.clone()));//expr(typeRef(FlagSet.class)), "fromValue", methodCall(structPeerExpr.clone(), "getInt", expr(fieldIndex)), classLiteral(conv.typeRef.clone()));
                 	}
                 	conv.type = ConvType.Enum;
                 	conv.typeRef = typeRef(ident(ValuedEnum.class, expr(conv.typeRef)));
@@ -1115,9 +1094,9 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
     					findCallbackRef((FunctionSignature)valueType, libraryClassName) : 
         				findCallbackRef(valueName, libraryClassName)) != null) 
                 {
-                	if (structPeerExpr != null) {
-	                	conv.setExpr = methodCall(structPeerExpr.clone(), "setPointer", offsetExpr.clone(), valueExpr);
-	                	conv.getExpr = methodCall(structPeerExpr.clone(), "getPointer", offsetExpr.clone(), classLiteral(conv.typeRef.clone()));
+                	if (structIOExpr != null) {
+	                	conv.setExpr = methodCall(structIOExpr.clone(), "setPointerField", thisRef(), expr(fieldIndex), valueExpr);
+	                	conv.getExpr = methodCall(structIOExpr.clone(), "getPointerField", thisRef(), expr(fieldIndex), classLiteral(conv.typeRef.clone()));
 	            	}
 	        		conv.type = ConvType.Pointer;
                 	conv.typeRef = typeRef(ident(result.config.runtime.pointerClass, expr(conv.typeRef)));

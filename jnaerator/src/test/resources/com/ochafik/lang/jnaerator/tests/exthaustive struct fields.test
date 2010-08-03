@@ -1,0 +1,40 @@
+struct S {
+	char c;
+	short s;
+	int i;
+	long l;
+	size_t t;
+	long long L;
+	float f;
+	double d;
+
+	char *pc;
+	short *ps;
+	int *pi;
+	long *pl;
+	size_t *pt;
+	long long *pL;
+	float *pf;
+	double *pd;
+
+	S* next;
+	struct T {
+		int o;
+	} inner;
+
+	enum E {
+		A, B, C
+	} e, *pE;
+};
+
+
+void f(PyObject*);
+
+
+--
+#runtime(BridJ)
+
+import test.*;
+import static test.TestLibrary.*;
+
+
