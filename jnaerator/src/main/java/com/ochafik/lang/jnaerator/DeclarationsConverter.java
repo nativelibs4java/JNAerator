@@ -1254,6 +1254,23 @@ public class DeclarationsConverter {
 		}
 		return structJavaClass;
 	}
+	
+	public int countFieldsInStruct(Struct s) {
+		int count = 0;
+		for (Declaration declaration : s.getDeclarations()) {
+			if (declaration instanceof VariablesDeclaration) {
+				count += declaration.getDeclarators();
+			}
+		}
+		for (SimpleTypeRef parentName : struct.getParents()) {
+			Struct parent = result.structsByName.get(parentName.getName());
+			if (parent == null)
+				throw new UnsupportedConversionException("Cannot find parent " + parentName + " of struct " + s);
+			
+			count += countFieldsInStruct(parent);
+		}
+		return count;
+	}
 
     public Struct convertStructToBridJ(Struct struct, Signatures signatures, Identifier callerLibraryClass, boolean onlyFields) throws IOException {
 		Identifier structName = getActualTaggedTypeName(struct);
@@ -1272,18 +1289,18 @@ public class DeclarationsConverter {
 		boolean isUnion = struct.getType() == Struct.Type.CUnion;
 		boolean inheritsFromStruct = false;
 		Identifier baseClass = null;
-		if (!struct.getParents().isEmpty()) {
-			for (SimpleTypeRef parentName : struct.getParents()) {
-				Struct parent = result.structsByName.get(parentName.getName());
-				if (parent == null) {
-					// TODO report error
-					continue;
-				}
-				baseClass = result.getTaggedTypeIdentifierInJava(parent);
-				if (baseClass != null) {
-					inheritsFromStruct = true;
-					break; // TODO handle multiple and virtual inheritage
-				}
+		int parentFieldsCount = 0;
+		for (SimpleTypeRef parentName : struct.getParents()) {
+			Struct parent = result.structsByName.get(parentName.getName());
+			if (parent == null) {
+				// TODO report error
+				continue;
+			}
+			parentFieldsCount += countFieldsInStruct(struct);
+			baseClass = result.getTaggedTypeIdentifierInJava(parent);
+			if (baseClass != null) {
+				inheritsFromStruct = true;
+				break; // TODO handle multiple and virtual inheritage
 			}
 		}
 		boolean hasMemberFunctions = false;
@@ -1310,7 +1327,7 @@ public class DeclarationsConverter {
 		}
 		Struct structJavaClass = publicStaticClass(structName, baseClass, Struct.Type.JavaClass, struct);
 
-		final int iChild[] = new int[] {0};
+		final int iChild[] = new int[] { parentFieldsCount };
 
 		//cl.addDeclaration(new EmptyDeclaration())
 		Signatures childSignatures = new Signatures();
