@@ -280,6 +280,7 @@ public class JNAeratorConfigUtils {
 			config.preprocessorConfig.macros.put("_NATIVE_WCHAR_T_DEFINED", null);
 			
 			config.preprocessorConfig.macros.put("_MSC_VER", "800");
+			config.preprocessorConfig.macros.put("WINAPI", "__stdcall");
 			
 			config.functionsAccepter = new Adapter<Function, Boolean>() {
 	
