@@ -704,7 +704,6 @@ public class JNAerator {
 				System.err.println("Finished with errors.");
 		} catch (Exception e) {
 			System.err.println("Finished with errors.");
-			JNAeratorCommandLineArgs.displayHelp(false);
 			e.printStackTrace();
 		}
 	}
