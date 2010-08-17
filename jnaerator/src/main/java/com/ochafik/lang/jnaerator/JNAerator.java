@@ -170,7 +170,7 @@ public class JNAerator {
 				argsArray = list.toArray(new String[list.size()]);
 			}
 			if (argsArray.length == 0) {
-				if (new File("/Users/ochafik").exists()) {
+				/*if (new File("/Users/ochafik").exists()) {
 					argsArray = new String[] {
 	//						"-wikiHelp",
 							//"/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator2.0.sdk/System/Library/Frameworks/Foundation.framework/Versions/C/Headers/NSURL.h",
@@ -261,11 +261,13 @@ public class JNAerator {
 	//						"-o", "/Users/ochafik/src/opencl",
 //							"-v"
 					};
-				} else if (new File(DEFAULT_CONFIG_FILE).exists()){
+				} else */
+				if (new File(DEFAULT_CONFIG_FILE).exists()){
 					argsArray = new String[] { "@", DEFAULT_CONFIG_FILE };
 				} else {
-					JNAeratorCommandLineArgs.displayHelp(false);
-					return;
+					argsArray = new String[] { "-studio" };
+					//JNAeratorCommandLineArgs.displayHelp(false);
+					//return;
 				}
 			}
 		
@@ -520,6 +522,10 @@ public class JNAerator {
 					File file = a.getFileParam(0);
 					if (file != null) {
 						String fn = file.getName();
+						if (fn.startsWith("-") && !file.exists()) {
+							JNAeratorCommandLineArgs.displayHelp(false);
+							System.exit(1);
+						}
 						if (file.isDirectory() && fn.matches(".*\\.framework"))
 							config.frameworks.add(file.toString());
 						else if (file.isFile() && fn.matches(".*\\.jnaerator"))
@@ -698,6 +704,7 @@ public class JNAerator {
 				System.err.println("Finished with errors.");
 		} catch (Exception e) {
 			System.err.println("Finished with errors.");
+			JNAeratorCommandLineArgs.displayHelp(false);
 			e.printStackTrace();
 		}
 	}
