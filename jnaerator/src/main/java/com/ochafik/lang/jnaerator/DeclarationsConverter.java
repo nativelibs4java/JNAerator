@@ -1495,7 +1495,7 @@ public class DeclarationsConverter {
 					expr(typeRef(isUnion ? result.config.runtime.unionClass : result.config.runtime.structClass)),
 					MemberRefStyle.Dot,
 					"newArray",
-					classLiteral(tr),
+					result.typeConverter.typeLiteral(tr),
 					varRef(varName)
 				)
 			)

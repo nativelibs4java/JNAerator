@@ -438,7 +438,7 @@ public class ObjectiveCGenerator {
 					MemberRefStyle.Dot,
 					"cast",
 					varRef("this"),
-					classLiteral(typeRef(classId.clone()))
+					result.typeConverter.typeLiteral(typeRef(classId.clone()))
 				)
 			)
 		));
