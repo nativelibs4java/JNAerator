@@ -56,9 +56,7 @@ public class ElementsHelper {
 	public static Expression thisRef() {
 		return varRef("this");
 	}
-	public static Expression classLiteral(TypeRef c) {
-		return memberRef(expr(c), MemberRefStyle.Dot, "class");
-	}
+	
 	public static Expression memberRef(Expression x, MemberRefStyle style, Identifier name) {
 		return new Expression.MemberRef(x, style, name);
 	}

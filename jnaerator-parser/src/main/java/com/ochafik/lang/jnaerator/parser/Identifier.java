@@ -42,6 +42,8 @@ public abstract class Identifier extends Element implements Comparable<Object> {
 	public abstract boolean isPlain();
 	public abstract SimpleIdentifier resolveLastSimpleIdentifier();
 	public abstract List<SimpleIdentifier> resolveSimpleIdentifiers();
+    
+    public abstract Identifier eraseTemplateArguments();
 	
 	public static class SimpleIdentifier extends Identifier {
 		private String name;
@@ -58,6 +60,10 @@ public abstract class Identifier extends Element implements Comparable<Object> {
 			x.setParentElement(this);
 			templateArguments.add(x);
 		}
+        
+        public Identifier eraseTemplateArguments() {
+            return new SimpleIdentifier(getName());
+        }
 		public List<Expression> getTemplateArguments() {
 			return unmodifiableList(templateArguments);
 		}
@@ -180,6 +186,10 @@ public abstract class Identifier extends Element implements Comparable<Object> {
 		public SimpleIdentifier resolveLastSimpleIdentifier() {
 			return identifiers.isEmpty() ? null : identifiers.get(identifiers.size() - 1);
 		}
+        @Override
+		public QualifiedIdentifier eraseTemplateArguments() {
+            return resolveAllButLastIdentifier().derive(getSeparator(), resolveLastSimpleIdentifier().eraseTemplateArguments());
+        }
 		@Override
 		public List<SimpleIdentifier> resolveSimpleIdentifiers() {
 			return getIdentifiers();

@@ -61,6 +61,7 @@ import com.bridj.SizeT;
 import com.bridj.ValuedEnum;
 import com.bridj.ann.CLong;
 import com.bridj.ann.Ptr;
+import com.bridj.util.DefaultParameterizedType;
 import com.ochafik.lang.SyntaxUtils;
 import com.ochafik.lang.jnaerator.JNAeratorConfig.GenFeatures;
 import com.ochafik.lang.jnaerator.parser.Annotation;
@@ -97,6 +98,7 @@ import com.ochafik.lang.jnaerator.parser.Expression.TypeRefExpression;
 import com.ochafik.lang.jnaerator.parser.Expression.UnaryOp;
 import com.ochafik.lang.jnaerator.parser.Expression.UnaryOperator;
 import com.ochafik.lang.jnaerator.parser.Expression.VariableRef;
+import com.ochafik.lang.jnaerator.parser.Identifier.QualifiedIdentifier;
 import com.ochafik.lang.jnaerator.parser.Identifier.SimpleIdentifier;
 import com.ochafik.lang.jnaerator.parser.StoredDeclarations.TypeDef;
 import com.ochafik.lang.jnaerator.parser.TypeRef.ArrayRef;
@@ -237,6 +239,24 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
 			this.isPrimitive = type == null || type.isPrimitive();
 			this.simpleName = type == null ? "void" : type.getSimpleName();
 		}
+	}
+    public Expression typeLiteral(TypeRef c) {
+		if (c instanceof SimpleTypeRef && result.config.runtime == JNAeratorConfig.Runtime.BridJ) {
+            Identifier id = ((SimpleTypeRef)c).getName();
+            SimpleIdentifier sid = id.resolveLastSimpleIdentifier();
+            if (!sid.getTemplateArguments().isEmpty()) {
+                Identifier erased = id.eraseTemplateArguments();
+			
+                List<Expression> exprs = new ArrayList<Expression>();
+                exprs.add(typeLiteral(typeRef(erased.clone())));
+                for (Expression t : sid.getTemplateArguments()) {
+                    if (t instanceof Expression.TypeRefExpression)
+                        exprs.add(typeLiteral(((Expression.TypeRefExpression)t).getType().clone()));
+                }
+                return methodCall(expr(typeRef(DefaultParameterizedType.class)), "paramType", exprs.toArray(new Expression[exprs.size()]));
+            }
+		}
+		return memberRef(expr(c), MemberRefStyle.Dot, "class");
 	}
 	public void initTypes() {
 		
@@ -1008,7 +1028,7 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
 					if (structIOExpr != null) {
 						if (conv.arrayLength == null)
 							conv.setExpr = methodCall(structIOExpr.clone(), "setPointerField", thisRef(), expr(fieldIndex), valueExpr);
-						conv.getExpr = methodCall(structIOExpr.clone(), "getPointerField", thisRef(), expr(fieldIndex), classLiteral(pointedTypeRef.clone()));
+						conv.getExpr = methodCall(structIOExpr.clone(), "getPointerField", thisRef(), expr(fieldIndex), typeLiteral(pointedTypeRef.clone()));
 					}
 					conv.typeRef = typeRef(ident(result.config.runtime.pointerClass, expr(pointedTypeRef.clone())));
 					return conv;
@@ -1019,7 +1039,7 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
 	        		if (structIOExpr != null) {
 						if (conv.arrayLength == null)
 							conv.setExpr = methodCall(structIOExpr.clone(), "setPointerField", thisRef(), expr(fieldIndex), valueExpr);
-						conv.getExpr = methodCall(structIOExpr.clone(), "getTypedPointerField", thisRef(), expr(fieldIndex), classLiteral(conv.typeRef.clone()));
+						conv.getExpr = methodCall(structIOExpr.clone(), "getTypedPointerField", thisRef(), expr(fieldIndex), typeLiteral(conv.typeRef.clone()));
 					}
 	        		return conv;
 	        	}
@@ -1067,7 +1087,7 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
                 {
             		//conv.setExpr = methodCall(structPeerExpr.clone(), "set" + radix, offsetExpr.clone(), valueExpr);
                 	if (structIOExpr != null) {
-                    	conv.getExpr = methodCall(structIOExpr, "getNativeObjectField", thisRef(), expr(fieldIndex), classLiteral(conv.typeRef.clone())); 
+                    	conv.getExpr = methodCall(structIOExpr, "getNativeObjectField", thisRef(), expr(fieldIndex), typeLiteral(conv.typeRef.clone())); 
                 		
                 		//conv.getExpr = new Expression.New(conv.typeRef, (Expression)methodCall(structIOExpr.clone(), "offset", offsetExpr.clone()));
                 	}
@@ -1082,7 +1102,7 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
                 {
                 	if (structIOExpr != null) {
                 		conv.setExpr = methodCall(structIOExpr, "setIntEnumField", thisRef(), expr(fieldIndex), valueExpr);
-	                	conv.getExpr = methodCall(structIOExpr, "getIntEnumField", thisRef(), expr(fieldIndex), classLiteral(conv.typeRef.clone()));//expr(typeRef(FlagSet.class)), "fromValue", methodCall(structPeerExpr.clone(), "getInt", expr(fieldIndex)), classLiteral(conv.typeRef.clone()));
+	                	conv.getExpr = methodCall(structIOExpr, "getIntEnumField", thisRef(), expr(fieldIndex), typeLiteral(conv.typeRef.clone()));//expr(typeRef(FlagSet.class)), "fromValue", methodCall(structPeerExpr.clone(), "getInt", expr(fieldIndex)), classLiteral(conv.typeRef.clone()));
                 	}
                 	conv.type = ConvType.Enum;
                 	conv.typeRef = typeRef(ident(ValuedEnum.class, expr(conv.typeRef)));
@@ -1096,7 +1116,7 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
                 {
                 	if (structIOExpr != null) {
 	                	conv.setExpr = methodCall(structIOExpr.clone(), "setPointerField", thisRef(), expr(fieldIndex), valueExpr);
-	                	conv.getExpr = methodCall(structIOExpr.clone(), "getPointerField", thisRef(), expr(fieldIndex), classLiteral(conv.typeRef.clone()));
+	                	conv.getExpr = methodCall(structIOExpr.clone(), "getPointerField", thisRef(), expr(fieldIndex), typeLiteral(conv.typeRef.clone()));
 	            	}
 	        		conv.type = ConvType.Pointer;
                 	conv.typeRef = typeRef(ident(result.config.runtime.pointerClass, expr(conv.typeRef)));
@@ -2132,7 +2152,7 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
 		
 		return ident(newName);
 	}
-	static String beautify(String name) {
+	String beautify(String name) {
 		String newName = StringUtils.uncapitalize(StringUtils.underscoredToCamel(name));
 		if (name.endsWith("_"))
 			newName += "$";
@@ -2164,7 +2184,7 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
 
 	public Expression getJavaClassLitteralExpression(TypeRef tr) {
 		JavaPrim prim = result.typeConverter.getPrimitive(tr, null);
-		return prim != null ? classLiteral(prim.type) : classLiteral(tr.clone());
+		return prim != null ? classLiteral(prim.type) : typeLiteral(tr.clone());
 	}
 
 
