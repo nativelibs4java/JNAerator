@@ -50,9 +50,9 @@ import org.antlr.runtime.RecognitionException;
 import org.rococoa.cocoa.foundation.NSClass;
 import org.rococoa.Rococoa;
 
-import com.bridj.BridJ;
-import com.bridj.TypedPointer;
-import com.bridj.cpp.CPPRuntime;
+import org.bridj.BridJ;
+import org.bridj.TypedPointer;
+import org.bridj.cpp.CPPRuntime;
 import com.ochafik.io.FileListUtils;
 import com.ochafik.io.ReadText;
 import com.ochafik.io.WriteText;
@@ -1353,7 +1353,7 @@ public class JNAerator {
                     block(stat(methodCall("super", varRef(addressVarName)))))
                 );
                 ptClass.addDeclaration(new Function(Function.Type.JavaMethod, fakePointer, null,
-                    new Arg(addressVarName, typeRef(com.bridj.Pointer.class))
+                    new Arg(addressVarName, typeRef(org.bridj.Pointer.class))
                 ).addModifiers(Modifier.Public).setBody(
                     block(stat(methodCall("super", varRef(addressVarName)))))
                 );
@@ -1362,8 +1362,8 @@ public class JNAerator {
         }
 
         if (result.config.runtime == JNAeratorConfig.Runtime.BridJ) {
-	        interf.addAnnotation(new Annotation(com.bridj.ann.Library.class, expr(library)));
-	        interf.addAnnotation(new Annotation(com.bridj.ann.Runtime.class, classLiteral(CPPRuntime.class)));
+	        interf.addAnnotation(new Annotation(org.bridj.ann.Library.class, expr(library)));
+	        interf.addAnnotation(new Annotation(org.bridj.ann.Runtime.class, classLiteral(CPPRuntime.class)));
         }
 		
         interf = result.notifyBeforeWritingClass(fullLibraryClassName, interf, signatures, library);

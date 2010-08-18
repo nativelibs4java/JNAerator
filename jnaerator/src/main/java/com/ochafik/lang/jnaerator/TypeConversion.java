@@ -55,13 +55,13 @@ import org.rococoa.ObjCClass;
 import org.rococoa.ObjCObject;
 import org.rococoa.cocoa.foundation.NSObject;
 
-import com.bridj.FlagSet;
-import com.bridj.IntValuedEnum;
-import com.bridj.SizeT;
-import com.bridj.ValuedEnum;
-import com.bridj.ann.CLong;
-import com.bridj.ann.Ptr;
-import com.bridj.util.DefaultParameterizedType;
+import org.bridj.FlagSet;
+import org.bridj.IntValuedEnum;
+import org.bridj.SizeT;
+import org.bridj.ValuedEnum;
+import org.bridj.ann.CLong;
+import org.bridj.ann.Ptr;
+import org.bridj.util.DefaultParameterizedType;
 import com.ochafik.lang.SyntaxUtils;
 import com.ochafik.lang.jnaerator.JNAeratorConfig.GenFeatures;
 import com.ochafik.lang.jnaerator.parser.Annotation;
@@ -910,7 +910,7 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
             	if (type == ConvType.NativeSize)
             		return typeRef(SizeT.class);
             	if (type == ConvType.NativeLong)
-            		return typeRef(com.bridj.CLong.class);
+            		return typeRef(org.bridj.CLong.class);
             }
             TypeRef t = indirectType == null ? typeRef : indirectType;
             return t == null ? null : t.clone();
@@ -1052,13 +1052,13 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
 	                case NativeLong:
 	                	conv.type = ConvType.NativeLong;
 	                	conv.typeRef = typeRef(Long.TYPE);
-	                	conv.indirectType = typeRef(com.bridj.CLong.class);
+	                	conv.indirectType = typeRef(org.bridj.CLong.class);
 	                	radix = "CLong";
 	                    break;
 	                case NativeSize:
 	                	conv.type = ConvType.NativeSize;
 	                	conv.typeRef = typeRef(Long.TYPE);
-	                	conv.indirectType = typeRef(com.bridj.SizeT.class);
+	                	conv.indirectType = typeRef(org.bridj.SizeT.class);
 	                	radix = "SizeT";
 	                    break;
 	                case Void:

@@ -31,7 +31,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.bridj.ann.Array;
+import org.bridj.ann.Array;
 import com.ochafik.lang.jnaerator.JNAeratorConfigUtils.FileExtensionFilter;
 import com.ochafik.lang.jnaerator.cplusplus.CPlusPlusMangler;
 import com.ochafik.lang.jnaerator.parser.Element;
@@ -93,15 +93,15 @@ public class JNAeratorConfig {
 
         },
         BridJ(true, false, true,
-            com.bridj.Callback.class,
-            com.bridj.Pointer.class,
-            null, //com.bridj.Memory.class,
-            null,//com.bridj.Struct.class,
-            null,//com.bridj.Struct.class,
-            null, //com.bridj.StructIO.class,
-            com.bridj.Pointer.class,// "array" class
-            null, //com.bridj.NativeLib.class,
-            com.bridj.ann.Bits.class,
+            org.bridj.Callback.class,
+            org.bridj.Pointer.class,
+            null, //org.bridj.Memory.class,
+            null,//org.bridj.Struct.class,
+            null,//org.bridj.Struct.class,
+            null, //org.bridj.StructIO.class,
+            org.bridj.Pointer.class,// "array" class
+            null, //org.bridj.NativeLib.class,
+            org.bridj.ann.Bits.class,
             "bridj.jar.files") {
 
             @Override

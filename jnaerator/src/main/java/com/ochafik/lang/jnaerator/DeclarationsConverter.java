@@ -18,15 +18,15 @@
 */
 package com.ochafik.lang.jnaerator;
 
-import com.bridj.FlagSet;
-import com.bridj.IntValuedEnum;
-import com.bridj.StructObject;
-import com.bridj.ValuedEnum;
-import com.bridj.cpp.CPPObject;
+import org.bridj.FlagSet;
+import org.bridj.IntValuedEnum;
+import org.bridj.StructObject;
+import org.bridj.ValuedEnum;
+import org.bridj.cpp.CPPObject;
 
 import static com.ochafik.lang.SyntaxUtils.as;
-//import com.bridj.structs.StructIO;
-//import com.bridj.structs.Array;
+//import org.bridj.structs.StructIO;
+//import org.bridj.structs.Array;
 
 import java.io.File;
 import java.io.IOException;
@@ -1413,7 +1413,7 @@ public class DeclarationsConverter {
 			Identifier fullClassName = ident(javaPackage, structJavaClass.getTag().clone());
 			
 			if (result.config.runtime == JNAeratorConfig.Runtime.BridJ)
-				structJavaClass.addAnnotation(new Annotation(com.bridj.ann.Library.class, expr(library)));
+				structJavaClass.addAnnotation(new Annotation(org.bridj.ann.Library.class, expr(library)));
 			structJavaClass.removeModifiers(Modifier.Static);
 			structJavaClass = result.notifyBeforeWritingClass(fullClassName, structJavaClass, signatures, library);
 			if (structJavaClass != null) {

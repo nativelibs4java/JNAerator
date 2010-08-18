@@ -92,8 +92,8 @@ public class JNAerationTest {
 				imports.add("import java.nio.*;");
 				break;
 			case BridJ:
-				imports.add("import com.bridj.*;");
-				imports.add("import com.bridj.cpp.*;");
+				imports.add("import org.bridj.*;");
+				imports.add("import org.bridj.cpp.*;");
 				imports.add("import java.nio.*;");
 				break;
 			}
