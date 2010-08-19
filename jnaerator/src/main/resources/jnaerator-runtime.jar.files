@@ -228,7 +228,6 @@ com/sun/jna/Pointer.class
 com/sun/jna/PointerType.class
 com/sun/jna/PointerUtils.class
 com/sun/jna/StringArray.class
-com/sun/jna/Structure$1$StructureSet.class
 com/sun/jna/Structure$1.class
 com/sun/jna/Structure$2$StructureSet.class
 com/sun/jna/Structure$2.class
@@ -275,6 +274,9 @@ com/sun/jna/win32/StdCallFunctionMapper.class
 com/sun/jna/win32/StdCallLibrary$StdCallCallback.class
 com/sun/jna/win32/StdCallLibrary.class
 com/sun/jna/win32/W32APIFunctionMapper.class
+com/sun/jna/win32/W32APIOptions$1.class
+com/sun/jna/win32/W32APIOptions$2.class
+com/sun/jna/win32/W32APIOptions.class
 com/sun/jna/win32/W32APITypeMapper$1.class
 com/sun/jna/win32/W32APITypeMapper$2.class
 com/sun/jna/win32/W32APITypeMapper.class
