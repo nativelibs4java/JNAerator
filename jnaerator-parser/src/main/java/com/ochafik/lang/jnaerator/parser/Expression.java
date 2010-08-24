@@ -1288,17 +1288,17 @@ public abstract class Expression extends Element {
 				if (string.startsWith("+"))
 					string = string.substring(1);
 				
-				int len2 = string.length();
+				/*int len2 = string.length();
 				if (len2 > 0 && !Character.isDigit(string.charAt(len2 - 1))) {
 					string = string.substring(0, len2 - 1);
 					len2--;
-				}
+				}*/
 				try {
 					val = Long.parseLong(string, radix);
 				} catch (NumberFormatException ex) {
 					unsigned = true;
-					val = Long.parseLong(string.substring(0, len2 - 1), radix);
-					val = val * radix + Short.parseShort(string.substring(len2 - 1));
+					val = Long.parseLong(string.substring(0, string.length() - 1), radix);
+					val = val * radix + Short.parseShort(string.substring(string.length() - 1));
 				}
 			}
 			

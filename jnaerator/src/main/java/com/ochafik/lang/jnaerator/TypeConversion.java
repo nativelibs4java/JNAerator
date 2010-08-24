@@ -1563,7 +1563,10 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
 						SimpleTypeRef ptargett = (SimpleTypeRef) ptarget;
 						Identifier tname = ptargett.getName();
 						if (result.structsFullNames.contains(tname)) {
-							return typeRef(PointerByReference.class);//new ArrayRef(typeRef(ident(ptargett.getName(), "ByReference")));
+							if (conversionMode == TypeConversionMode.FieldType)
+								return typeRef(PointerByReference.class);
+							else
+								return new ArrayRef(typeRef(ident(ptargett.getName(), "ByReference")));
 						} else if ((tname = result.findFakePointer(tname)) != null)
 							return new ArrayRef(typeRef(tname.clone()));
 					}
