@@ -1028,7 +1028,7 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
 					if (structIOExpr != null) {
 						if (conv.arrayLength == null)
 							conv.setExpr = methodCall(structIOExpr.clone(), "setPointerField", thisRef(), expr(fieldIndex), valueExpr);
-						conv.getExpr = methodCall(structIOExpr.clone(), "getPointerField", thisRef(), expr(fieldIndex), typeLiteral(pointedTypeRef.clone()));
+						conv.getExpr = methodCall(structIOExpr.clone(), "getPointerField", thisRef(), expr(fieldIndex));
 					}
 					conv.typeRef = typeRef(ident(result.config.runtime.pointerClass, expr(pointedTypeRef.clone())));
 					return conv;
@@ -1039,7 +1039,7 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
 	        		if (structIOExpr != null) {
 						if (conv.arrayLength == null)
 							conv.setExpr = methodCall(structIOExpr.clone(), "setPointerField", thisRef(), expr(fieldIndex), valueExpr);
-						conv.getExpr = methodCall(structIOExpr.clone(), "getTypedPointerField", thisRef(), expr(fieldIndex), typeLiteral(conv.typeRef.clone()));
+						conv.getExpr = methodCall(structIOExpr.clone(), "getTypedPointerField", thisRef(), expr(fieldIndex));
 					}
 	        		return conv;
 	        	}
@@ -1087,7 +1087,7 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
                 {
             		//conv.setExpr = methodCall(structPeerExpr.clone(), "set" + radix, offsetExpr.clone(), valueExpr);
                 	if (structIOExpr != null) {
-                    	conv.getExpr = methodCall(structIOExpr, "getNativeObjectField", thisRef(), expr(fieldIndex), typeLiteral(conv.typeRef.clone())); 
+                    	conv.getExpr = methodCall(structIOExpr, "getNativeObjectField", thisRef(), expr(fieldIndex)); 
                 		
                 		//conv.getExpr = new Expression.New(conv.typeRef, (Expression)methodCall(structIOExpr.clone(), "offset", offsetExpr.clone()));
                 	}
@@ -1102,7 +1102,7 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
                 {
                 	if (structIOExpr != null) {
                 		conv.setExpr = methodCall(structIOExpr, "setIntEnumField", thisRef(), expr(fieldIndex), valueExpr);
-	                	conv.getExpr = methodCall(structIOExpr, "getIntEnumField", thisRef(), expr(fieldIndex), typeLiteral(conv.typeRef.clone()));//expr(typeRef(FlagSet.class)), "fromValue", methodCall(structPeerExpr.clone(), "getInt", expr(fieldIndex)), classLiteral(conv.typeRef.clone()));
+	                	conv.getExpr = methodCall(structIOExpr, "getIntEnumField", thisRef(), expr(fieldIndex));//expr(typeRef(FlagSet.class)), "fromValue", methodCall(structPeerExpr.clone(), "getInt", expr(fieldIndex)), classLiteral(conv.typeRef.clone()));
                 	}
                 	conv.type = ConvType.Enum;
                 	conv.typeRef = typeRef(ident(ValuedEnum.class, expr(conv.typeRef)));
@@ -1116,7 +1116,7 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
                 {
                 	if (structIOExpr != null) {
 	                	conv.setExpr = methodCall(structIOExpr.clone(), "setPointerField", thisRef(), expr(fieldIndex), valueExpr);
-	                	conv.getExpr = methodCall(structIOExpr.clone(), "getPointerField", thisRef(), expr(fieldIndex), typeLiteral(conv.typeRef.clone()));
+	                	conv.getExpr = methodCall(structIOExpr.clone(), "getPointerField", thisRef(), expr(fieldIndex));
 	            	}
 	        		conv.type = ConvType.Pointer;
                 	conv.typeRef = typeRef(ident(result.config.runtime.pointerClass, expr(conv.typeRef)));
