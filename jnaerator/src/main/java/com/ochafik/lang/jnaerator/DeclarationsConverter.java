@@ -282,6 +282,9 @@ public class DeclarationsConverter {
 							vd.addToCommentBefore(decl.getCommentAfter());
 							vd.addToCommentBefore(v.getCommentAfter());
 						}
+
+                        if (result.config.runtime == JNAeratorConfig.Runtime.BridJ)
+                            vd.addModifiers(Modifier.Public, Modifier.Static, Modifier.Final);
 						
 						out.addDeclaration(vd);
 					} catch (UnsupportedConversionException e) {
@@ -602,10 +605,11 @@ public class DeclarationsConverter {
 		}
 		if (function.getParentElement() instanceof FriendDeclaration)
 			return;
-		
-		if (functionName.toString().contains("<")) {
-			return;
-		}
+
+        String n = functionName.toString();
+        if (n.contains("<") || n.startsWith("~"))
+            return;
+                
 		functionName = result.typeConverter.getValidJavaMethodName(functionName);
 		if (functionName == null)
 			return;
@@ -1603,8 +1607,8 @@ public class DeclarationsConverter {
         convDecl.setType(Type.JavaMethod);
 		convDecl.addModifiers(Modifier.Public);
 
-		if (conv.arrayLength != null)
-            convDecl.addAnnotation(new Annotation(result.config.runtime.typeRef(JNAeratorConfig.Runtime.Ann.Length), conv.arrayLength));
+		if (conv.arrayLengths != null)
+            convDecl.addAnnotation(new Annotation(result.config.runtime.typeRef(JNAeratorConfig.Runtime.Ann.Length), "({" + StringUtils.implode(conv.arrayLengths, ", ") + "})"));
         if (conv.bits != null)
             convDecl.addAnnotation(new Annotation(result.config.runtime.typeRef(JNAeratorConfig.Runtime.Ann.Bits), conv.bits));
         if (conv.byValue)
@@ -1632,9 +1636,8 @@ public class DeclarationsConverter {
         List<Declaration> out = new ArrayList<Declaration>();
         if (conv.getExpr != null) {
 	        Function getter = convDecl.clone();
-	        //getter.addModifiers(Modifier.Native);
 	        getter.setBody(block(
-	            new Statement.Return(conv.arrayLength == null ? conv.getExpr : methodCall(conv.getExpr, "validElements", conv.arrayLength))
+	            new Statement.Return(conv.getExpr)
 	        ));
 	        out.add(getter);
         }
