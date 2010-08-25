@@ -101,6 +101,8 @@ org/bridj/Pointer$1.class
 org/bridj/Pointer$2.class
 org/bridj/Pointer$3.class
 org/bridj/Pointer$4.class
+org/bridj/Pointer$5.class
+org/bridj/Pointer$6.class
 org/bridj/Pointer$FreeReleaser.class
 org/bridj/Pointer$Releaser.class
 org/bridj/Pointer$StringType.class

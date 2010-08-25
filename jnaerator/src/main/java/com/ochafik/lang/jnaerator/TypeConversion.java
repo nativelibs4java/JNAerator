@@ -57,9 +57,8 @@ import org.rococoa.ObjCObject;
 import org.rococoa.cocoa.foundation.NSObject;
 
 import org.bridj.FlagSet;
-import org.bridj.IntValuedEnum;
-import org.bridj.SizeT;
 import org.bridj.ValuedEnum;
+import org.bridj.SizeT;
 import org.bridj.ann.CLong;
 import org.bridj.ann.Ptr;
 import org.bridj.util.DefaultParameterizedType;
@@ -1207,8 +1206,8 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
     					findEnum(valueName, libraryClassName)) != null) 
                 {
                 	if (structIOExpr != null) {
-                		conv.setExpr = methodCall(structIOExpr, "setIntEnumField", thisRef(), expr(fieldIndex), valueExpr);
-	                	conv.getExpr = methodCall(structIOExpr, "getIntEnumField", thisRef(), expr(fieldIndex));//expr(typeRef(FlagSet.class)), "fromValue", methodCall(structPeerExpr.clone(), "getInt", expr(fieldIndex)), classLiteral(conv.typeRef.clone()));
+                		conv.setExpr = methodCall(structIOExpr, "setEnumField", thisRef(), expr(fieldIndex), valueExpr);
+	                	conv.getExpr = methodCall(structIOExpr, "getEnumField", thisRef(), expr(fieldIndex));//expr(typeRef(FlagSet.class)), "fromValue", methodCall(structPeerExpr.clone(), "getInt", expr(fieldIndex)), classLiteral(conv.typeRef.clone()));
                 	}
                 	conv.type = ConvType.Enum;
                 	conv.typeRef = typeRef(ident(ValuedEnum.class, expr(conv.typeRef)));
