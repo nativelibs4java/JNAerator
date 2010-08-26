@@ -123,6 +123,10 @@ public enum Modifier {
 	ByCopy(of(ObjectiveC, OnlyInArgDef)),
 	ByRef(of(ObjectiveC, OnlyInArgDef)),
 
+	Package(of(ObjectiveC)),
+	Optional(of(ObjectiveC)),
+	Required(of(ObjectiveC)),
+	
 	Align(of(Declspec, HasArguments)),
 	Allocate(of(Declspec, HasArguments)),
 	AppDomain(of(Declspec)),
