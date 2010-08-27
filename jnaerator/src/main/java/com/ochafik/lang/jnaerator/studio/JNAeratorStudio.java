@@ -112,6 +112,7 @@ public class JNAeratorStudio extends JPanel {
 	JCheckBox directCallingCb = new JCheckBox("Direct Calling (experimental)", false),
 		structsAsTopLevelClassesCb = new JCheckBox("Structs as Top-Level classes", true),
 		charPtrAsString = new JCheckBox("char*/wchar_t* as (W)String", false),
+		reificationCb = new JCheckBox("Reification", false),
 		scalaSetters = new JCheckBox("Scala struct field setters", false),
 		noCommentNoManglingCb = new JCheckBox("No comment & no mangling", false);
 
@@ -232,6 +233,7 @@ public class JNAeratorStudio extends JPanel {
 			setPref("options.libraryName", libraryName.getText());
 			setPref("options.direct", directCallingCb.isSelected());
 			setPref("options.topLevelStructs", structsAsTopLevelClassesCb.isSelected());
+			setPref("options.reification", reificationCb.isSelected());
 			setPref("options.scalaSetters", scalaSetters.isSelected());
 			setPref("options.charPtrAsString", charPtrAsString.isSelected());
 			setPref("options.targetRuntime", ((JNAeratorConfig.Runtime)runtimeCombo.getSelectedItem()).name());
@@ -279,30 +281,10 @@ public class JNAeratorStudio extends JPanel {
 				generateButton.requestFocus();
 			}
 		},
-		aboutJNAeratorAction = new AbstractAction("About JNAerator") {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				try {
-					URL url = new URL("http://code.google.com/p/jnaerator/wiki/AboutJNAerator");
-					System.out.println("About JNAerator: " + url);
-					SystemUtils.runSystemOpenURL(url);
-				} catch (Exception ex) {
-					error(null, "Error while opening about page", ex);
-				}
-			}
-		},
-		aboutJNAAction = new AbstractAction("About JNA") {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				try {
-					URL url = new URL("http://jna.dev.java.net/");
-					System.out.println("About JNA: " + url);
-					SystemUtils.runSystemOpenURL(url);
-				} catch (Exception ex) {
-					error(null, "Error while opening about page", ex);
-				}
-			}
-		},
+		aboutJNAeratorAction = aboutLink("About JNAerator", "http://code.google.com/p/jnaerator/wiki/AboutJNAerator"),
+		aboutRococoaAction = aboutLink("About Rococoa", "http://code.google.com/p/rococoa"),
+		aboutBridJAction = aboutLink("About BridJ", "http://code.google.com/p/bridj/wiki"),
+		aboutJNAAction = aboutLink("About JNA", "http://jna.dev.java.net/"),
 		showExampleAction = new AbstractAction("Open Example") {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -315,6 +297,21 @@ public class JNAeratorStudio extends JPanel {
 			}
 		}
 	;
+
+    AbstractAction aboutLink(final String title, final String urlString) {
+        return new AbstractAction(title) {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				try {
+					URL url = new URL(urlString);
+					System.out.println(title + ": " + url);
+					SystemUtils.runSystemOpenURL(url);
+				} catch (Exception ex) {
+					error(null, "Error while opening page '" + title + "'", ex);
+				}
+			}
+		};
+    }
 	Object lastJNAeratedArtifact;
 	//JLabel statusLabel = new JLabel("", JLabel.RIGHT);
 	JButton showJarButton;
@@ -344,8 +341,12 @@ public class JNAeratorStudio extends JPanel {
 		tb.add(donateAction);
 		tb.add(showExampleAction);
 		tb.add(switchOrientationAction);
+		tb.addSeparator();
 		tb.add(aboutJNAeratorAction);
+        tb.addSeparator();
+		tb.add(aboutBridJAction);
 		tb.add(aboutJNAAction);
+		tb.add(aboutRococoaAction);
 		//tb.setOrientation(JToolBar.VERTICAL);
 		add("North", tb);
 		
@@ -408,6 +409,7 @@ public class JNAeratorStudio extends JPanel {
 		optPanel.add(structsAsTopLevelClassesCb);
         optPanel.add(charPtrAsString);
         optPanel.add(scalaSetters);
+        optPanel.add(reificationCb);
         optBox.add(optPanel);
 		for (Component c : optBox.getComponents())
 			((JComponent)c).setAlignmentX(0);
@@ -507,6 +509,7 @@ public class JNAeratorStudio extends JPanel {
 				config.compile = true;
 				config.useJNADirectCalls = directCallingCb.isSelected();
 				config.putTopStructsInSeparateFiles = structsAsTopLevelClassesCb.isSelected();
+				config.reification = reificationCb.isSelected();
 				config.scalaStructSetters = scalaSetters.isSelected();
                 config.stringifyConstCStringReturnValues = config.charPtrAsString = charPtrAsString.isSelected();
                 config.runtime = (Runtime) runtimeCombo.getSelectedItem();
@@ -716,6 +719,7 @@ public class JNAeratorStudio extends JPanel {
 			js.libraryName.setText(getPref("options.libraryName", "test"));
 			js.directCallingCb.setSelected(getPref("options.direct", false));
 			js.structsAsTopLevelClassesCb.setSelected(getPref("options.topLevelStructs", true));
+			js.reificationCb.setSelected(getPref("options.reification", false));
             js.charPtrAsString.setSelected(getPref("options.charPtrAsString", false));
             js.scalaSetters.setSelected(getPref("options.scalaSetters", false));
             js.noCommentNoManglingCb.setSelected(getPref("options.noCommentNoMangling", false));

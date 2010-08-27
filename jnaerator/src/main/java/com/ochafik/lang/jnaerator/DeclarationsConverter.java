@@ -629,10 +629,14 @@ public class DeclarationsConverter {
                     if (d instanceof Function) {
                         Function f = (Function)d;
                         List<Arg> args = f.getArgs();
-                        if (!args.isEmpty()) {
-                            Arg arg = args.get(0);
-                            if (arg.getValueType() instanceof SimpleTypeRef) {
-                                Identifier id = ((SimpleTypeRef)arg.getValueType()).getName();
+                        List<TypeRef> trs = new ArrayList<TypeRef>(2);
+                        trs.add(f.getValueType());
+                        if (!args.isEmpty())
+                            trs.add(args.get(0).getValueType());
+
+                        for (TypeRef tr: trs) {
+                            if (tr instanceof SimpleTypeRef) {
+                                Identifier id = ((SimpleTypeRef)tr).getName();
                                 if (result.isFakePointer(id)) {
                                     result.addFunctionReifiableInFakePointer(id, libraryClassName, f);
                                 }

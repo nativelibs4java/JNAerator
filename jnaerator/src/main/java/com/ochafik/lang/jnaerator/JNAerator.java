@@ -18,6 +18,7 @@
 */
 package com.ochafik.lang.jnaerator;
 
+import com.ochafik.lang.jnaerator.parser.TypeRef.SimpleTypeRef;
 import org.bridj.ann.Ptr;
 import com.ochafik.lang.jnaerator.parser.DeclarationsHolder;
 import java.io.File;
@@ -125,6 +126,14 @@ import static com.ochafik.lang.jnaerator.nativesupport.NativeExportUtils.*;
  */
 
 public class JNAerator {
+
+    private void privatize(Declaration d) {
+        List<Modifier> modifiers = new ArrayList<Modifier>(d.getModifiers());
+        modifiers.remove(Modifier.Public);
+        modifiers.remove(Modifier.Protected);
+        modifiers.add(0, Modifier.Private);
+        d.setModifiers(modifiers);
+    }
 
 	public static interface Feedback {
 		void setStatus(final String string);
@@ -1372,39 +1381,95 @@ public class JNAerator {
             if (result.config.reification) {
                 Identifier resolvedFakePointer = result.getFakePointer(fullLibraryClassName, ident(fakePointerName));
                 List<Pair<Identifier, Function>> functionsReifiableInFakePointers = result.getFunctionsReifiableInFakePointer(resolvedFakePointer);
+                String thisFakePtrRefStr = typeRef(resolvedFakePointer).toString();
+
                 if (functionsReifiableInFakePointers != null)
                 for (Pair<Identifier, Function> p : functionsReifiableInFakePointers) {
-                    Function fDirect = p.getSecond().clone();
-                    List<Arg> directArgs = new ArrayList<Arg>(fDirect.getArgs());
-                    directArgs.set(0, (Arg)new Arg(directArgs.get(0).getName(), typeRef(long.class)).addAnnotation(new Annotation(typeRef(Ptr.class))));
-                    ((DeclarationsHolder)p.getSecond().getParentElement()).addDeclaration(fDirect);
+                    Function original = p.getSecond();
+                    Function fDirect = original.clone();
+
+                    int thisLocation = -1;
+                    List<Integer> fakePointersLocations = new ArrayList<Integer>();
+                    int iArg = 0;
+                    for (Arg arg : fDirect.getArgs()) {
+                        if (isFakePointerRef(result, arg.getValueType())) {
+                            if (iArg == 0 && arg.getValueType().toString().equals(thisFakePtrRefStr))
+                                thisLocation = iArg;
+                            fakePointersLocations.add(iArg);
+                            toDirectFakePointer(result, arg);
+                        }
+                        iArg++;
+                    }
+                        
+
+                    String indirectRetVarName = "$";
+                    boolean returnsFakePointer = isFakePointerRef(result, fDirect.getValueType());
+                    boolean needsDirect = !fakePointersLocations.isEmpty() || returnsFakePointer;
+
+                    Expression finalCall = null;
+                    //boolean needsDirect = fDirect.toString().equals(original.toString());
+                    String directFunctionName = null;
+                    if (needsDirect) {
+                        if (returnsFakePointer) {
+                            finalCall = new Expression.New(fDirect.getValueType(), varRef(indirectRetVarName));
+                            toDirectFakePointer(result, fDirect);
+                        }
+                        privatize(fDirect);
+                        if (signatures.methodsSignatures.add(fDirect.computeSignature(false)))
+                            ((DeclarationsHolder)original.getParentElement()).addDeclaration(fDirect);
+                        if (original.computeSignature(false).equals(fDirect.computeSignature(false))) {
+                            fDirect.setName(ident(original.getName() + "$direct"));
+                        }
+                        directFunctionName = fDirect.getName().toString();
+                    }
+
+
                     // TODO private
                     // TODO -reify:ptrname
                     // TODO -reify:function=name
                     //
 
-                    Function f = p.getSecond().clone();
+                    Function f = original.clone();
                     List<Arg> args = new ArrayList<Arg>(f.getArgs());
                     f.setModifiers(Collections.EMPTY_LIST);
                     f.addModifiers(Modifier.Public);
+                    if (thisLocation < 0)
+                        f.addModifiers(Modifier.Static);
                     String functionName = f.getName().toString();
                     f.setName(ident(reifyFunctionName(result, fakePointerName, functionName)));
-                    args.remove(0);
-                    f.setArgs(args);
                     Identifier id = p.getFirst();
                     List<Expression> followedArgs = new ArrayList<Expression>();
                     //followedArgs.add(thisRef());
-                    followedArgs.add(varRef("peer"));
-                    for (Arg arg : args)
-                        followedArgs.add(varRef(arg.getName()));
 
-                    Expression nlib = nativeLibFieldExpr.clone(); // expr(typeRef(id.clone()))
-                    Expression x = methodCall(nlib, functionName, followedArgs.toArray(new Expression[followedArgs.size()]));
-                    f.setBody(block(
-                        "void".equals(String.valueOf(f.getValueType())) ?
-                            stat(x) :
-                            new Statement.Return(x)
-                    ));
+                    iArg = 0;
+                    for (Arg arg : args) {
+                        if (iArg == thisLocation)
+                            followedArgs.add(methodCall(thisRef(), "getPeer"));
+                        else if (fakePointersLocations.contains(iArg))
+                            followedArgs.add(methodCall(varRef(arg.getName()), "getPeer"));
+                        else
+                            followedArgs.add(varRef(arg.getName()));
+                        iArg++;
+                    }
+                    if (thisLocation >= 0)
+                        args.remove(thisLocation);
+                    f.setArgs(args);
+
+                    Expression nlib = expr(typeRef(p.getFirst().clone()));//nativeLibFieldExpr.clone(); // expr(typeRef(id.clone()))
+                    Expression x = methodCall(nlib, needsDirect ? directFunctionName : functionName, followedArgs.toArray(new Expression[followedArgs.size()]));
+                    boolean retVoid = "void".equals(String.valueOf(f.getValueType()));
+                    if (retVoid)
+                        f.setBody(block(stat(x)));
+                    else if (needsDirect && finalCall != null) {
+                        VariablesDeclaration vd = new VariablesDeclaration(typeRef(long.class), new Declarator.DirectDeclarator(indirectRetVarName, x));
+                        Expression.ConditionalExpression ce = new Expression.ConditionalExpression();
+                        ce.setTest(expr(varRef(indirectRetVarName), Expression.BinaryOperator.IsEqual, expr(0)));
+                        ce.setThenValue(nullExpr());
+                        ce.setElseValue(finalCall);
+                        f.setBody(block(stat(vd), new Statement.Return(ce)));
+                    } else {
+                        f.setBody(block(new Statement.Return(x)));
+                    }
                     ptClass.addDeclaration(f);
                 }
             }
@@ -1427,6 +1492,20 @@ public class JNAerator {
         }
     }
 
+    boolean isFakePointerRef(Result result, TypeRef tr) {
+        if (tr instanceof SimpleTypeRef) {
+            Identifier id = ((SimpleTypeRef)tr).getName();
+            if (result.isFakePointer(id))
+            //if (id.equals(ident(result.config.runtime.pointerClass)))
+                return true;
+        }
+        return false;
+    }
+
+    void toDirectFakePointer(Result result, Declaration decl) {
+        decl.setValueType(typeRef(long.class));
+        decl.addAnnotation(new Annotation(typeRef(Ptr.class)));
+    }
     static String trimAny(String s, String[] prefixes, String[] suffixes) {
         String l = s.toLowerCase();
         if (prefixes != null)
@@ -1448,7 +1527,12 @@ public class JNAerator {
     Pattern rxObj1 = Pattern.compile("(\\w+)_([\\w_]+)_.*");
     public String reifyFunctionName(Result result, String fakePointerName, String functionName) {
         String simplifiedPointerName = StringUtils.trimUnderscores(trimAny(fakePointerName, result.config.libraryNamingPrefixes, null));
-        String s = StringUtils.uncapitalize(StringUtils.trimUnderscores(trimAny(functionName, result.config.libraryNamingPrefixes, new String[] {
+        List<String> prefs = new ArrayList<String>();
+        if (result.config.libraryNamingPrefixes != null)
+            prefs.addAll(Arrays.asList(result.config.libraryNamingPrefixes));
+        prefs.add(fakePointerName);
+        prefs.add(simplifiedPointerName);
+        String s = StringUtils.uncapitalize(StringUtils.trimUnderscores(trimAny(functionName, prefs.toArray(new String[prefs.size()]), new String[] {
             simplifiedPointerName,
             simplifiedPointerName.replaceAll("_", "")
         })));
