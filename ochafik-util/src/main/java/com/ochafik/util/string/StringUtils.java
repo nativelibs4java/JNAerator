@@ -48,11 +48,11 @@ public class StringUtils {
 		return v;
 	}
 	
-	public static String TrimUnderscores(String s) {
-		return TrimChar(s, '_');
+	public static String trimUnderscores(String s) {
+		return trimChar(s, '_');
 	}
 	
-	public static String TrimChar(String s, char t) {
+	public static String trimChar(String s, char t) {
 		if (s == null)
 			return null;
 		int start = 0, n = s.length(), end = n;

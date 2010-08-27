@@ -590,13 +590,14 @@ public class DeclarationsConverter {
 	void throwBadRuntime() {
         throw new RuntimeException("Unhandled runtime : " + result.config.runtime.name());
     }
-	public void convertFunction(Function function, Signatures signatures, boolean isCallback, DeclarationsHolder out, Identifier libraryClassName) {
+	public void convertFunction(Function function, Signatures signatures, boolean isCallback, final DeclarationsHolder out, final Identifier libraryClassName) {
 		if (result.config.functionsAccepter != null && !result.config.functionsAccepter.adapt(function))
 			return;
 		
 		//if (function.findParentOfType(Template))
 		String library = result.getLibrary(function);
 		Identifier functionName = function.getName();
+        boolean isMethod = function.getParentElement() instanceof Struct;
 		if (functionName == null || isCallback) {
 			if (function.getParentElement() instanceof FunctionSignature)
 				functionName = ident(result.config.callbackInvokeMethodName);
@@ -616,15 +617,48 @@ public class DeclarationsConverter {
 
 		String sig = function.computeSignature(false);
 
+        DeclarationsHolder objOut = 
+            result.config.reification &&
+            !isCallback &&
+            !isMethod ?
+            new DeclarationsHolder() {
+
+                @Override
+                public void addDeclaration(Declaration d) {
+                    out.addDeclaration(d);
+                    if (d instanceof Function) {
+                        Function f = (Function)d;
+                        List<Arg> args = f.getArgs();
+                        if (!args.isEmpty()) {
+                            Arg arg = args.get(0);
+                            if (arg.getValueType() instanceof SimpleTypeRef) {
+                                Identifier id = ((SimpleTypeRef)arg.getValueType()).getName();
+                                if (result.isFakePointer(id)) {
+                                    result.addFunctionReifiableInFakePointer(id, libraryClassName, f);
+                                }
+                            }
+                        }
+                    }
+                }
+
+                @Override
+                public List<Declaration> getDeclarations() {
+                    return out.getDeclarations();
+                }
+
+            } :
+            out
+        ;
+        
         try {
             switch (result.config.runtime) {
                 case JNA:
                 case JNAerator:
 //                case JNAeratorNL4JStructs:
-                    convertJNAFunction(function, signatures, isCallback, out, libraryClassName, sig, functionName, library);
+                    convertJNAFunction(function, signatures, isCallback, objOut, libraryClassName, sig, functionName, library);
                     break;
                 case BridJ:
-                    convertNL4JFunction(function, signatures, isCallback, out, libraryClassName, sig, functionName, library);
+                    convertNL4JFunction(function, signatures, isCallback, objOut, libraryClassName, sig, functionName, library);
                     break;
                 default:
                     throwBadRuntime();
@@ -637,8 +671,6 @@ public class DeclarationsConverter {
             }
         }
 	}
-
-
 
     private void convertJNAFunction(Function function, Signatures signatures, boolean isCallback, DeclarationsHolder out, Identifier libraryClassName, String sig, Identifier functionName, String library) {
         Pair<Function, List<Function>> alternativesPair = functionAlternativesByNativeSignature.get(sig);

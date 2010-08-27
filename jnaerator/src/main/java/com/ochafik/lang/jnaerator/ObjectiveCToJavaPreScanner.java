@@ -110,7 +110,7 @@ public class ObjectiveCToJavaPreScanner extends Scanner {
 			return false;
 		
 		String name = decl.resolveName();
-		if (e.getTag() != null && !StringUtils.TrimUnderscores(e.getTag().toString()).equals(name))
+		if (e.getTag() != null && !StringUtils.trimUnderscores(e.getTag().toString()).equals(name))
 			return false;
 		
 		Element ep = e.getParentElement();
