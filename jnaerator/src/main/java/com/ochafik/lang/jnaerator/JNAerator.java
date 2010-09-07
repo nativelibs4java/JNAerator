@@ -412,6 +412,9 @@ public class JNAerator {
 					case WCharAsShort:
 						config.wcharAsShort = true;
 						break;
+					case Synchronized:
+						config.synchronizedMethods = true;
+						break;
 					case JarOut:
 						config.outputJar = a.getFileParam(0);
 						break;

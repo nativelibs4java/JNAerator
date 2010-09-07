@@ -372,6 +372,7 @@ public class JNAeratorConfig {
 	public boolean noMangling;
     public boolean scalaStructSetters;
 	public boolean noPrimitiveArrays;
+	public boolean synchronizedMethods;
 	public File scalaOut;
 	public boolean skipPrivateMembers = true;
 	public File rawParsedSourcesOutFile, normalizedParsedSourcesOutFile;

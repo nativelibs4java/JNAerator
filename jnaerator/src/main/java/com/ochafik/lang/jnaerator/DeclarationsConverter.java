@@ -727,6 +727,8 @@ public class DeclarationsConverter {
 		boolean isObjectiveC = function.getType() == Type.ObjCMethod;
 
 		natFunc.setType(Function.Type.JavaMethod);
+		if (result.config.synchronizedMethods && !isCallback && (result.config.useJNADirectCalls || result.config.runtime == JNAeratorConfig.Runtime.BridJ))
+			natFunc.addModifiers(Modifier.Synchronized);
 		if (result.config.useJNADirectCalls && !isCallback && !isObjectiveC) {
 			natFunc.addModifiers(Modifier.Public, Modifier.Static, Modifier.Native);
 		}
@@ -928,12 +930,15 @@ public class DeclarationsConverter {
 //        typedMethod.addModifiers(Modifier.Public, isStatic ? Modifier.Static : null);
         
         Function nativeMethod = new Function(Type.JavaMethod, ident(functionName), null);
+        
         nativeMethod.addModifiers(
             isProtected ? Modifier.Protected : Modifier.Public, 
             isCallback ? Modifier.Abstract : Modifier.Native, 
             isStatic || !isCallback && !isInStruct ? Modifier.Static : null
         );
-
+        if (result.config.synchronizedMethods && !isCallback)
+			nativeMethod.addModifiers(Modifier.Synchronized);
+		
         if (function.getName() != null && !functionName.toString().equals(function.getName().toString()) && !isCallback) {
         	TypeRef mgc = result.config.runtime.typeRef(JNAeratorConfig.Runtime.Ann.Name);
 			if (mgc != null) {
