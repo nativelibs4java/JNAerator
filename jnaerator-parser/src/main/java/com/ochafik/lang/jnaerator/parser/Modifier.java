@@ -143,6 +143,8 @@ public enum Modifier {
 	Process(of(Declspec)),
 	Property(of(Declspec, HasArguments, StorageClassSpecifier, COMSpecific)), //TODO handle args
 	Restrict(of(Declspec, StorageClassSpecifier)),
+	__restrict(Restrict),
+	
 	SelectAny(of(Declspec, StorageClassSpecifier, COMSpecific)),
 	Thread(of(Declspec)),
 	UUID(of(Declspec, HasArguments, StorageClassSpecifier, COMSpecific)),
