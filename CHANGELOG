@@ -1,8 +1,7 @@
 Current development version (0.9.5-SNAPSHOT)
 
 - Moved to JNA 3.2.7
-- Support anonymous bit fields : struct S { int :7; int
-b; }
+- Support anonymous bit fields : struct S { int :7; int b; }
 - Better beautification of underscored typedefs : typedef struct _Toto___ { ... } Toto; now handled properly
 - Extended -I command line syntax to include files directly (which does the same as an #include statement) : files are parsed but their content is not targetted for code generation
 - Added -beautifyNames switch to transform some_func() into someFunc()
