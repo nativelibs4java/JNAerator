@@ -553,7 +553,7 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
                             if (trs != null && !strs.equals(trs)) {
                                 TypeRef clo = tr.clone();
                                 simpleTypeRef.replaceBy(clo);
-                                if (depth < 10) {
+                                if (depth < 30) {
                                     clo.accept(this);
                                 } else {
                                     System.err.println("Infinite loop in type conversion ? " + tr);
