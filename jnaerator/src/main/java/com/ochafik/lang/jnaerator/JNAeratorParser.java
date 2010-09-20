@@ -65,7 +65,7 @@ public class JNAeratorParser {
 			this.text = text;
 		}
 	}
-	private static final boolean EASILY_DEBUGGABLE_BUT_FRAGILE_PARSING_MODE = true;
+	private static final boolean EASILY_DEBUGGABLE_BUT_FRAGILE_PARSING_MODE = false;
 	
 	private static List<Slice> cutSourceContentInSlices(String sourceContent, PrintStream originalOut) {
 		StringBuffer currentEmptyLines = new StringBuffer();
