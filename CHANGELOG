@@ -1,6 +1,68 @@
 Current development version (0.9.5-SNAPSHOT)
 
-...
+- Moved to JNA 3.2.7
+- Support anonymous bit fields : struct S { int :7; int
+b; }
+- Better beautification of underscored typedefs : typedef struct _Toto___ { ... } Toto; now handled properly
+- Extended -I command line syntax to include files directly (which does the same as an #include statement) : files are parsed but their content is not targetted for code generation
+- Added -beautifyNames switch to transform some_func() into someFunc()
+(http://code.google.com/p/jnaerator/issues/detail?id=59)
+- Fixed names with dollars (and Scala struct field setters in particular !)
+- Added -scalaStructSetters option
+- Fixed callbacks fields
+- Fixed studio JVM hanging issue (http://code.google.com/p/jnaerator/issues/detail?id=66)
+- JNAerator Studio now launched when there's no command line args (JAR is double-clickable, at last !)
+- Fixed struct** fields (PointerByReference instead of faulty Struct.ByReference[] !)
+- Changed name of callbacks's single method from "invoke" to "apply" (to make them Scala-friendly)
+- Fixed parsing of large files (reverted EASILY_DEBUGGABLE_BUT_FRAGILE_PARSING_MODE to false)
+- Added __restrict keyword
+- Added -synchronized switch to mark generated methods as synchronized (only in direct-mode JNA and BridJ outputs)
+- Fixed generation of BridJ enums, constants and arrays
+- Parse(skip) GCC inline assembler (__asm__)
+- Parse some ObjectiveC 2 constructs : @package, @required and @optional member modifiers + new @property syntax
+- Fixed parser regressions (0x7f, +10)
+- Added experimental reification feature for BridJ output (-reification switch) : transforms functions that have a first "this-like" pointer argument into methods of the
+corresponding pointer type. 
+	Instead of getting :
+	{{{
+	public native static TestLibrary.GXEntity gxCreateEntity(int someParam);
+	public native static void gxEntitySetValue(TestLibrary.GXEntity entity, int key,
+	int value);
+	public native static int gxEntityGetValue(TestLibrary.GXEntity entity, int key);
+	/// Pointer to unknown (opaque) type
+	public static class GXEntity extends TypedPointer {
+			public GXEntity(long address) {
+					super(address);
+			}
+			public GXEntity(Pointer address) {
+					super(address);
+			}
+	};
+	}}}
+	You'd get the assembly-optimizable BridJ binding :
+	{{{
+	native static @Ptr long gxCreateEntity(int someParam);
+	native static void gxEntitySetValue(@Ptr long entity, int key, int value);
+	native static int gxEntityGetValue(@Ptr long entity, int key);
+	public static class GXEntity extends TypedPointer {
+			public GXEntity(long address) {
+					super(address);
+			}
+			public GXEntity(Pointer address) {
+					super(address);
+			}
+			public static GXEntity create(int someParam) {
+					long ret = gxCreateEntity(someParam);
+					return ret == null ? null : new GXEntity(ret);
+			}
+			public void setValue(int key, int value) {
+					gxEntitySetValue(this.peer, key, value);
+			}
+			public int getValue(int key) {
+					return gxEntityGetValue(this.peer, key);
+			}
+	}
+	}}}
 
 Version 0.9.4 (r1067@nl4j, 20100717)
 
