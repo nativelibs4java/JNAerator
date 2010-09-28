@@ -61,7 +61,7 @@ public abstract class Structure<S extends Structure<S, V, R>, V extends S, R ext
 	
 	protected <T extends Structure<S, V, R>> T setupClone(T clone, StructureType dependency) {
 		write();
-		clone.useMemory(getPointer());
+		clone.use(getPointer());
 		clone.setDependency(this);
 		return clone;
 	}
@@ -228,6 +228,7 @@ public abstract class Structure<S extends Structure<S, V, R>, V extends S, R ext
 	@SuppressWarnings("unchecked")
 	public S use(Pointer m, long byteOffset) {
 		useMemory(m, (int)byteOffset);
+		read();
 		return (S)this;
 	}
 	public S use(Buffer m) {
