@@ -139,6 +139,7 @@ org/bridj/ann/EnumValue.class
 org/bridj/ann/Field.class
 org/bridj/ann/Library.class
 org/bridj/ann/Name.class
+org/bridj/ann/Optional.class
 org/bridj/ann/Ptr.class
 org/bridj/ann/Runtime.class
 org/bridj/ann/Struct.class
