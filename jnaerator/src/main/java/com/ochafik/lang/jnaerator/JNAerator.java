@@ -642,8 +642,8 @@ public class JNAerator {
 					Set<String> libraries = config.getLibraries();
 					String entry = 
 						config.entryName != null ? config.entryName :
-						!libraries.isEmpty() ? libraries.iterator().next() : 
-						RegexUtils.findFirst(firstFileName, fileRadixPattern, 1); 
+						libraries.size() == 1 ? libraries.iterator().next() : 
+						null;//RegexUtils.findFirst(firstFileName, fileRadixPattern, 1); 
 					//if (entry != null)
 					//	entry = config.result.typeConversion.getValidJavaIdentifier(ident(entry)).toString();
 
