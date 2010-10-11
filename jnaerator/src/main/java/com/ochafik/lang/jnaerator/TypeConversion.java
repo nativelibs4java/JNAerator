@@ -795,6 +795,9 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
 
     public SimpleTypeRef findEnumRef(Enum s, Identifier libraryClassName) {
 
+        if (result.config.runtime == JNAeratorConfig.Runtime.BridJ)
+            return typeRef(result.getTaggedTypeIdentifierInJava(s));
+        
         Identifier name = result.declarationsConverter.getActualTaggedTypeName(s);
 
         String library = result.getLibrary(s);
@@ -804,9 +807,9 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
         Identifier libClass = result.getLibraryClassFullName(library);
         //return new SimpleTypeRef(SyntaxUtils.equal(libClass, callerLibraryClass) ? name : libClass + "." + name);
 
-        if (result.config.runtime == JNAeratorConfig.Runtime.BridJ) {
+        /*if (result.config.runtime == JNAeratorConfig.Runtime.BridJ) {
             return typeRef(findRef(name, s, libraryClassName, result.config.putTopStructsInSeparateFiles));
-        }
+        }*/
         SimpleTypeRef tr = new SimpleTypeRef("int");
         if (result.config.features.contains(JNAeratorConfig.GenFeatures.EnumTypeLocationComments)) {
             tr.setCommentBefore("@see " + (SyntaxUtils.equal(libClass, libraryClassName) ? name : libClass + "#" + name));

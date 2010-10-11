@@ -73,6 +73,7 @@ public class CompilerUtils {
 			if (errors.isEmpty())
 				return;
 
+			System.err.println("INPUTS = " + inputs);
 			throw new CompilationError(sb.toString(), errors, inputs, compilerClass/*, bootclasspath*/);
 		}
 	}
