@@ -1,4 +1,8 @@
-Current development version (0.9.5-SNAPSHOT)
+Current development version (0.9.6-SNAPSHOT)
+
+...
+
+Version 0.9.5 (r1330, 20101011):
 
 - Moved to JNA 3.2.7
 - Support anonymous bit fields : struct S { int :7; int b; }
