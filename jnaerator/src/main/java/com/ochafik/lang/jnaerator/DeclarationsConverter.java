@@ -1343,7 +1343,7 @@ public class DeclarationsConverter {
 				continue;
 			}
 			try {
-				parentFieldsCount += countFieldsInStruct(struct);
+				parentFieldsCount += countFieldsInStruct(parent);
 			} catch (UnsupportedConversionException ex) {
 				preComments.add("Error: " + ex);
 			}
@@ -1377,6 +1377,7 @@ public class DeclarationsConverter {
 		}
 		Struct structJavaClass = publicStaticClass(structName, baseClass, Struct.Type.JavaClass, struct);
 		structJavaClass.addToCommentBefore(preComments);
+		System.out.println("parentFieldsCount(structName = " + structName + ") = " + parentFieldsCount);
 		final int iChild[] = new int[] { parentFieldsCount };
 
 		//cl.addDeclaration(new EmptyDeclaration())
@@ -1981,7 +1982,7 @@ public class DeclarationsConverter {
 				if (!result.config.noComments)
 					fieldsConstr.addToCommentBefore("@param " + name + " @see " + parentTgName + "#" + vd.getDeclarators().get(0).resolveName());
 				superCall.addArgument(varRef(uname));
-                orderedFieldNames.add(expr(name));
+                //orderedFieldNames.add(expr(name));
 			}
 			fieldsConstr.getBody().addStatement(stat(superCall));
 			

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jnlp spec="1.0+"
-  codebase="http://jnaerator.sourceforge.net/webstart/jna/3.2.4"
+  codebase="http://jnaerator.sourceforge.net/webstart/jna/3.2.7"
   href="jnidispatch.jnlp"
 >
 	<information>
@@ -15,45 +15,45 @@
 	
 	<resources os="Windows" arch="x86">
 		<property name="jna.library.path" value="C:\Windows\System32"/>
-    <nativelib href="win32-x86.jar"/>
+    <nativelib href="jna-win32-x86.jar"/>
 	</resources>
 	<resources os="Windows" arch="amd64">
 		<property name="jna.library.path" value="C:\Windows\SysWOW64"/>
-    <nativelib href="win32-amd64.jar"/>
+    <nativelib href="jna-win32-amd64.jar"/>
 	</resources>
 	
 	<resources os="FreeBSD" arch="i386">
-		<nativelib href="freebsd-i386.jar"/>
+		<nativelib href="jna-freebsd-i386.jar"/>
 	</resources>
 	<resources os="FreeBSD" arch="amd64">
-		<nativelib href="freebsd-amd64.jar"/>
+		<nativelib href="jna-freebsd-amd64.jar"/>
 	</resources>
 	
 	<resources os="Linux" arch="i386">
-		<nativelib href="linux-i386.jar"/>
+		<nativelib href="jna-linux-i386.jar"/>
 	</resources>
 	<resources os="Linux" arch="amd64">
-		<nativelib href="linux-amd64.jar"/>
+		<nativelib href="jna-linux-amd64.jar"/>
 	</resources>
 	<resources os="Linux" arch="ia64">
-		<nativelib href="linux-ia64.jar"/>
+		<nativelib href="jna-linux-ia64.jar"/>
 	</resources>
 	
 	<resources os="SunOS" arch="x86">
-		<nativelib href="sunos-x86.jar"/>
+		<nativelib href="jna-sunos-x86.jar"/>
 	</resources>
 	<resources os="SunOS" arch="amd64">
-		<nativelib href="sunos-amd64.jar"/>
+		<nativelib href="jna-sunos-amd64.jar"/>
 	</resources>
 	<resources os="SunOS" arch="sparc">
-		<nativelib href="sunos-sparc.jar"/>
+		<nativelib href="jna-sunos-sparc.jar"/>
 	</resources>
 	<resources os="SunOS" arch="sparcv9">
-		<nativelib href="sunos-sparcv9.jar"/>
+		<nativelib href="jna-sunos-sparcv9.jar"/>
 	</resources>
 	
 	<resources os="Mac">
-		<nativelib href="darwin.jar"/>
+		<nativelib href="jna-darwin.jar"/>
 	</resources>
 	
 	<component-desc/>

@@ -6,10 +6,17 @@
 JAR=$1
 NAME=$2
 
-ARCHS="linux_x86 linux_x64 win32 win64 darwin_universal"
+# BridJ:
+#ARCHS="linux_x86 linux_x64 win32 win64 darwin_universal"
+#ARCHS_ROOT=""
 
-OUT_DIR=webstart
-TMP_DIR=webstartify_tmp
+# JNA:
+ARCHS="darwin linux-i386 linux-amd64 linux-ia64 sunos-x86 sunos-amd64 sunos-sparc sunos-sparcv9 freebsd-i386 freebsd-amd64 win32-x86 win32-amd64"
+ARCHS_ROOT="com/sun/jna/"
+
+
+OUT_DIR="webstart"
+TMP_DIR="webstartify_tmp"
 
 rm -fR $TMP_DIR
 rm -fR $OUT_DIR
@@ -20,8 +27,11 @@ echo Unzipping $JAR...
 unzip -d $TMP_DIR $JAR > /dev/null
 
 for N in $ARCHS ; do
-	jar -cf $OUT_DIR/$NAME-webstart-$N.jar -C $TMP_DIR/$N `ls $TMP_DIR/$N`
-	rm -fR $TMP_DIR/$N ;
+	if [[ -d "$TMP_DIR/$ARCHS_ROOT$N" ]] ; then
+		echo Repackaging arch $N...
+		jar -cf $OUT_DIR/$NAME-$N.jar -C $TMP_DIR/$ARCHS_ROOT$N `ls $TMP_DIR/$ARCHS_ROOT$N`
+		rm -fR $TMP_DIR/$ARCHS_ROOT$N ;
+	fi ;
 done
 
 jar -cf $OUT_DIR/$NAME-webstart.jar -C $TMP_DIR .
@@ -57,21 +67,21 @@ echo "
 		<property name=\"bridj.library.path\" value=\"C:\Windows\SysWOW64\"/>
     <nativelib href=\"$NAME-win64.jar\"/>
 	</resources>
-	<!--
+	
 	<resources os=\"FreeBSD\" arch=\"i386\">
-		<nativelib href=\"freebsd-i386.jar\"/>
+		<nativelib href=\"$NAME-freebsd-i386.jar\"/>
 	</resources>
 	<resources os=\"FreeBSD\" arch=\"amd64\">
-		<nativelib href=\"freebsd-amd64.jar\"/>
+		<nativelib href=\"$NAME-freebsd-amd64.jar\"/>
 	</resources>
-	-->
+	
 	<resources os=\"Linux\" arch=\"i386\">
 		<nativelib href=\"$NAME-linux-x86.jar\"/>
 	</resources>
 	<resources os=\"Linux\" arch=\"amd64\">
 		<nativelib href=\"$NAME-linux-x64.jar\"/>
 	</resources>
-	<!--
+	
 	<resources os=\"Linux\" arch=\"ia64\">
 		<nativelib href=\"$NAME-linux-ia64.jar\"/>
 	</resources>
@@ -88,7 +98,7 @@ echo "
 	<resources os=\"SunOS\" arch=\"sparcv9\">
 		<nativelib href=\"$NAME-sunos-sparcv9.jar\"/>
 	</resources>
-	-->
+	
 	<resources os=\"Mac\">
 		<nativelib href=\"$NAME-darwin_universal.jar\"/>
 	</resources>

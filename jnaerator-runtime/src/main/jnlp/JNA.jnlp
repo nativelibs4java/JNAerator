@@ -14,8 +14,8 @@
 	</security>
 	<resources>
 		<j2se version="1.5+"/>
-		<extension name="jnidispatch" href="http://jnaerator.sourceforge.net/webstart/jna/3.2.4/jnidispatch.jnlp"/>
-		<jar href="http://jnaerator.sourceforge.net/webstart/jna/3.2.4/jna.jar"/>
+		<extension name="jnidispatch" href="http://jnaerator.sourceforge.net/webstart/jna/3.2.7/jnidispatch.jnlp"/>
+		<jar href="http://jnaerator.sourceforge.net/webstart/jna/3.2.7/jna-webstart.jar"/>
 	</resources>
 	
 	<component-desc/>

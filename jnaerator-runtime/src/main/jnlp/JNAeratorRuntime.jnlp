@@ -15,8 +15,8 @@
 	</security>
 	<resources>
 		<j2se version="1.5+"/>
-		<extension name="jnidispatch" href="http://jnaerator.sourceforge.net/webstart/jna/3.2.4/jnidispatch.jnlp"/>
-		<jar href="http://nativelibs4java.sourceforge.net/maven/com/jnaerator/jnaerator-runtime/0.9.5-SNAPSHOT/jnaerator-runtime-0.9.5-SNAPSHOT-webstart.jar"/>
+		<extension name="jnidispatch" href="http://jnaerator.sourceforge.net/webstart/jna/3.2.7/jnidispatch.jnlp"/>
+		<jar href="http://nativelibs4java.sourceforge.net/maven/com/jnaerator/jnaerator-runtime/0.9.6-SNAPSHOT/jnaerator-runtime-0.9.6-SNAPSHOT-webstart.jar"/>
 	</resources>
 	
 	<component-desc/>
