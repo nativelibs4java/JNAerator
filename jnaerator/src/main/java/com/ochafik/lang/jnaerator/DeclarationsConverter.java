@@ -1594,7 +1594,7 @@ public class DeclarationsConverter {
 						mul = expr(c.getFirst(), BinaryOperator.Multiply, mul);
 				}
 			}
-			initVal = new Expression.NewArray(jr.getTarget(), mul);
+			initVal = new Expression.NewArray(jr.getTarget(), new Expression[] { mul }, new Expression[0]);
 		}
 		if (javaType == null) {
 			throw new UnsupportedConversionException(mutatedType, "failed to convert type to Java");
@@ -1963,6 +1963,7 @@ public class DeclarationsConverter {
 			Pair<List<VariablesDeclaration>, List<VariablesDeclaration>> decls = getParentAndOwnDeclarations(structJavaClass, nativeStruct);
 			Map<Integer, String> namesById = new TreeMap<Integer, String>();
 			Set<String> names = new HashSet<String>();
+			List<Expression> orderedFieldNames = new ArrayList<Expression>();
 			int iArg = 0;
 			for (VariablesDeclaration vd : new CompoundCollection<VariablesDeclaration>(decls.getFirst(), decls.getSecond())) {
 				String name = chooseJavaArgName(vd.getDeclarators().get(0).resolveName(), iArg, names);
@@ -1970,7 +1971,9 @@ public class DeclarationsConverter {
 				fieldsConstr.addArg(new Arg(name, vd.getValueType().clone()));
 				iArg++;
 			}
+            
 			FunctionCall superCall = methodCall("super");
+            // Adding parent fields
 			for (VariablesDeclaration vd : decls.getFirst()) {
 				String name = vd.getDeclarators().get(0).resolveName(), uname = namesById.get(vd.getId());
 				Struct parent = (Struct)vd.getParentElement();
@@ -1978,9 +1981,11 @@ public class DeclarationsConverter {
 				if (!result.config.noComments)
 					fieldsConstr.addToCommentBefore("@param " + name + " @see " + parentTgName + "#" + vd.getDeclarators().get(0).resolveName());
 				superCall.addArgument(varRef(uname));
+                orderedFieldNames.add(expr(name));
 			}
 			fieldsConstr.getBody().addStatement(stat(superCall));
 			
+			// Adding class' own fields
 			for (VariablesDeclaration vd : decls.getSecond()) {
 				String name = vd.getDeclarators().get(0).resolveName(), uname = namesById.get(vd.getId());
 				if (!result.config.noComments)
@@ -1990,7 +1995,25 @@ public class DeclarationsConverter {
 					fieldsConstr.getBody().addStatement(throwIfArraySizeDifferent(uname));
 				fieldsConstr.getBody().addStatement(stat(
 						new Expression.AssignmentOp(memberRef(thisRef(), MemberRefStyle.Dot, ident(name)), AssignmentOperator.Equal, varRef(uname))));
+                
+                orderedFieldNames.add(expr(name));
 			}
+            
+            if (result.config.runtime != JNAeratorConfig.Runtime.BridJ) {
+                String initOrderName = "initFieldOrder";
+                Function initOrder = new Function(Type.JavaMethod, ident(initOrderName), typeRef(Void.TYPE)).setBody(block(
+					stat(
+						methodCall("setFieldOrder", new Expression.NewArray(typeRef(String.class), new Expression[0], orderedFieldNames.toArray(new Expression[orderedFieldNames.size()])))
+					)
+				)).addModifiers(Modifier.Protected);
+                if (signatures.add(initOrder.computeSignature(false))) {
+                		structJavaClass.addDeclaration(initOrder);
+	                 Statement callInitOrder = stat(methodCall(initOrderName));
+					emptyConstructor.getBody().addStatement(callInitOrder);
+					fieldsConstr.getBody().addStatement(callInitOrder.clone());
+				}
+            }
+            
 			int nArgs = fieldsConstr.getArgs().size();
 			if (nArgs == 0)
 				System.err.println("Struct with no field : " + structName);
