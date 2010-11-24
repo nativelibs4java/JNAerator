@@ -24,7 +24,10 @@ import java.util.Collections;
 import java.util.List;
 
 public abstract class Statement extends Element {
-	
+    @Override
+	public Statement clone() {
+        return (Statement)super.clone();
+    }
 	public static class Throw extends Statement {
 		Expression expression;
 		public Expression getExpression() {

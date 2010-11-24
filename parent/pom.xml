@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.jnaerator</groupId>
 	<artifactId>jnaerator-parent</artifactId>
-	<version>0.9.5</version>
+	<version>0.9.6-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<name>JNAerator Abstract Parent Project</name>
 

@@ -253,18 +253,26 @@ public abstract class Expression extends Element {
 	public static class NewArray extends Expression {
 		TypeRef type;
 		List<Expression> dimensions = new ArrayList<Expression>();
+		List<Expression> initialValues = new ArrayList<Expression>();
 		
 		public NewArray() {}
 		
-		public NewArray(TypeRef type, Expression... dimensions) {
+		public NewArray(TypeRef type, Expression[] dimensions, Expression[] initialValues) {
 			setType(type);
 			setDimensions(Arrays.asList(dimensions));
+            setInitialValues(Arrays.asList(initialValues));
 		}
 		public List<Expression> getDimensions() {
 			return unmodifiableList(dimensions);
 		}
 		public void setDimensions(List<Expression> dimensions) {
 			changeValue(this, this.dimensions, dimensions);
+		}
+		public List<Expression> getInitialValues() {
+			return unmodifiableList(initialValues);
+		}
+		public void setInitialValues(List<Expression> initialValues) {
+			changeValue(this, this.initialValues, initialValues);
 		}
 		public TypeRef getType() {
 			return type;
@@ -279,12 +287,18 @@ public abstract class Expression extends Element {
 
 		@Override
 		public Element getNextChild(Element child) {
-			return getNextSibling(dimensions, child);
+            Element e = getNextSibling(dimensions, child);
+            if (e == null)
+                e = getNextSibling(initialValues, child);
+			return e;
 		}
 
 		@Override
 		public Element getPreviousChild(Element child) {
-			return getPreviousSibling(dimensions, child);
+            Element e = getPreviousSibling(dimensions, child);
+            if (e == null)
+                e = getPreviousSibling(initialValues, child);
+			return e;
 		}
 
 		@Override
@@ -293,7 +307,9 @@ public abstract class Expression extends Element {
 				setType((TypeRef)by);
 				return true;
 			}
-			return replaceChild(dimensions, Expression.class, this, child, by);
+            return 
+                replaceChild(initialValues, Expression.class, this, child, by) ||
+                replaceChild(dimensions, Expression.class, this, child, by);
 		}
 
 	}

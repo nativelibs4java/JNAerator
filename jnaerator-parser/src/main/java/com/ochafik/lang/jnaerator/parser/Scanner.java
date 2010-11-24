@@ -324,6 +324,7 @@ public class Scanner implements Visitor {
 		visitExpression(newArray);
 		visit(newArray.getType());
 		visit(newArray.getDimensions());
+        visit(newArray.getInitialValues());
 	}
 
 	public void visitArrayDeclarator(ArrayDeclarator arrayDeclarator) {

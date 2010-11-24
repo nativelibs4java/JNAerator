@@ -606,6 +606,8 @@ public class Printer implements Visitor {
     public void visitNewArray(NewArray e) {
         expressionPre(e);
         append("new ").append(e.getType()).append("[").implode(e.getDimensions(), "][").append("]");
+        if (e.getDimensions().isEmpty() && !e.getInitialValues().isEmpty())
+            append("{").implode(e.getInitialValues(), ", ").append("}");
         expressionPost(e);
     }
 
