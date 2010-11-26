@@ -194,6 +194,64 @@ public abstract class Statement extends Element {
 			return false;
 		}
 	}
+    
+	public static class While extends Statement {
+		public While() {}
+		public While(Expression condition, Statement body) {
+			setCondition(condition);
+			setBody(body);
+		}
+		Expression condition;
+		Statement body;
+		
+		public void setCondition(Expression condition) {
+			this.condition = changeValue(this, this.condition, condition);
+		}
+		public void setBody(Statement body) {
+			this.body = changeValue(this, this.body, body);
+		}
+		public Statement getBody() {
+			return body;
+		}
+		public Expression getCondition() {
+			return condition;
+		}
+		@Override
+		public void accept(Visitor visitor) {
+			visitor.visitWhile(this);
+		}
+		@Override
+		public Element getNextChild(Element child) {
+			return null;
+		}
+		@Override
+		public Element getPreviousChild(Element child) {
+			return null;
+		}
+		@Override
+		public boolean replaceChild(Element child, Element by) {
+			if (child == getCondition()) {
+				setCondition((Expression)by);
+				return true;
+			}
+			if (child == getBody()) {
+				setBody((Statement)by);
+				return true;
+			}
+			return false;
+		}
+	}
+    public static class DoWhile extends While {
+        public DoWhile() {}
+		public DoWhile(Expression condition, Statement body) {
+            super(condition, body);
+		}
+		
+		@Override
+		public void accept(Visitor visitor) {
+			visitor.visitDoWhile(this);
+		}
+    }
 	public static class ExpressionStatement extends Statement {
 
 		public ExpressionStatement() {}

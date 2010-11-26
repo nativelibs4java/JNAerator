@@ -53,6 +53,41 @@ register unsigned int g;
 --
 void srand(unsigned);
 --
+void f(int* pA, int* pB) {
+	int a = *pA, b = *pB;
+}
+--
+void f(int* pA, int* pB) {
+	int a = *pA;
+	int b = *pB;
+	int c;
+	bool b;
+	c = a + b;
+	c = a - b;
+	c = a * b;
+	c = a / b;
+	c = a % b;
+	c = a ^ b;
+	c = a | b;
+	c = a & b;
+	c = a << b;
+	c = a >> b;
+	b = a > b;
+	b = a >= b;
+	b = a < b;
+	b = a <= b;
+	b = a == b;
+	b = a != b;
+	b = a && b;
+	b = a || b;
+	*pA = a + 1;
+}
+void test() {
+	int a = 10;
+	int * pA = &a;
+	f(pA);
+}
+--
 /**
  * Need to see public final ByteByReference[] data = new ByteByReference[3]; in results<br>
  * https://jna.dev.java.net/servlets/ReadMsg?list=users&msgNo=2335

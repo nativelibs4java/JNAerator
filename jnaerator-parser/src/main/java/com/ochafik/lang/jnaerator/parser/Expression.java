@@ -625,6 +625,8 @@ public abstract class Expression extends Element {
 		Not("!"), 
 		Parenthesis("()"),
 		Complement("~"),
+		Reference("&"),
+		Dereference("*"),
 		PreIncr("++"), 
 		PreDecr("--"),
 		PostIncr("++"), 

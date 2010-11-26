@@ -379,8 +379,7 @@ scope Symbols;
 		{ $sourceFile = new SourceFile(); }//mark(new SourceFile(), getLine()); }
 		(
 			declaration { 
-				for (Declaration d : $declaration.declarations)
-					$sourceFile.addDeclaration(d); 
+				$sourceFile.addDeclaration($declaration.declaration); 
 			} |
 			lineDirective {
 				if ($sourceFile.getElementFile() == null)
@@ -390,40 +389,41 @@ scope Symbols;
 	 	EOF
 	 ;
 
-externDeclarations returns [ExternDeclarations declarations]
+externDeclarations returns [ExternDeclarations declaration]
 	:	{ next("extern") }?=> IDENTIFIER
 		STRING {
-			$declarations = mark(new ExternDeclarations(), getLine($STRING));
-			$declarations.setLanguage($STRING.text);
+			$declaration = mark(new ExternDeclarations(), getLine($STRING));
+			$declaration.setLanguage($STRING.text);
 		}
 		'{' 
 			(
 				ed=declaration { 
-					$declarations.addDeclarations($ed.declarations); 
+					$declaration.addDeclaration($ed.declaration); 
 				} |
 				lineDirective
 			)* 
 		'}'
 	;
 
-declaration returns [List<Declaration> declarations, List<Modifier> modifiers, String preComment, int startTokenIndex]
+declaration returns [Declaration declaration, List<Modifier> modifiers, String preComment, int startTokenIndex]
 scope IsTypeDef;
 scope ModContext;
 @after {
+	if ($declaration == null)
 	try {
 		int i = $start.getTokenIndex();
 		if (i > 0) {
 			String s1 = getTokenStream().get(i - 1).getText(), s2 = i > 1 ? getTokenStream().get(i - 2).getText() : null;
            		String s = (s2 == null ? "" : s2) + s1;
            		if (s.matches(".*\n\\s*\n"))
-				$declarations.add(0, new EmptyDeclaration());
+				$declaration = new EmptyDeclaration();
 		}
 	} catch (Exception ex) {
 		ex.printStackTrace();
 	}
 }
 	:	
-		{ $declarations = new ArrayList<Declaration>(); 
+		{
 		  $modifiers = new ArrayList<Modifier>();
 		  $startTokenIndex = getTokenStream().index();
 		  $preComment = getCommentBefore($startTokenIndex);
@@ -432,53 +432,57 @@ scope ModContext;
 			(
 				{ next("__pragma") }?=> pragmaContent |
 				templateDef {
-					$declarations.add($templateDef.template);
+					$declaration = $templateDef.template;
 				} |
 				functionDeclaration {
-					$declarations.add($functionDeclaration.function);
+					$declaration = $functionDeclaration.function;
 				} |
 				{ next("extern") }?=> externDeclarations {
-					$declarations.add($externDeclarations.declarations); 
+					$declaration = $externDeclarations.declaration; 
 				} |
 				varDecl ';' { 
-					$declarations.add($varDecl.decl); 
+					$declaration = $varDecl.decl; 
 				} |
 				objCClassDef { 
-					$declarations.add(decl($objCClassDef.struct)); 
+					$declaration = decl($objCClassDef.struct); 
 				} |
 				typeDef {
-					$declarations.add($typeDef.typeDef); 
+					$declaration = $typeDef.typeDef; 
 				} |
 				forwardClassDecl {
-					$declarations.addAll($forwardClassDecl.declarations); 
+					$declaration = new Declarations($forwardClassDecl.declarations); 
 				} |
-				'namespace' ns=IDENTIFIER '{' 
-					(
-						subD=declaration { 
-							for (Declaration d : $subD.declarations) {
-								if (d == null)
-									continue;
-								d.addNameSpace($ns.text);
-								$declarations.add(d);
-							}
-						} |
-						lineDirective
-					)*
-				'}'// | 
+				namespaceDecl {
+					$declaration = $namespaceDecl.namespace;
+				}// | 
 				//';' */// allow isolated semi-colons
 			)
 			{
 				String commentAfter = getCommentAfterOnSameLine($startTokenIndex, null);
-				for (Declaration d  : $declarations) {
-					if (d == null)
-						continue;
-					d.setCommentBefore($preComment);
-					d.setCommentAfter(commentAfter);
-					d.addModifiers($modifiers);
+				if ($declaration != null) {
+					$declaration.setCommentBefore($preComment);
+					$declaration.setCommentAfter(commentAfter);
+					$declaration.addModifiers($modifiers);
 				}
-				
 			}
 		)
+	;
+	
+namespaceDecl returns [Namespace namespace]
+	:
+		{
+			$namespace = new Namespace();
+		}
+		'namespace' ns=IDENTIFIER '{' {
+			$namespace.setName(new SimpleIdentifier($ns.text));
+		}
+		(
+			subD=declaration {
+				$namespace.addDeclaration($subD.declaration);
+			} |
+			lineDirective
+		)*
+		'}'
 	;
 	
 forwardClassDecl returns [List<Declaration> declarations]
@@ -739,11 +743,10 @@ scope ModContext;
 					'protected' { $struct.setNextMemberVisibility(Struct.MemberVisibility.Protected); } 
 				) ':' |
 				{ next("friend") }? IDENTIFIER friend=declaration ';' {
-					for (Declaration d : $friend.declarations)
-						$struct.addDeclaration(new FriendDeclaration(d));
+					$struct.addDeclaration(new FriendDeclaration(friend.declaration));
 				} |
 				decl=declaration {
-					$struct.addDeclarations($decl.declarations);
+					$struct.addDeclaration($decl.declaration);
 				} |
 				fv=varDecl ';' {
 					$struct.addDeclaration($fv.decl);
@@ -870,7 +873,7 @@ scope Symbols;
 			)?
 			';' |
 			statementsBlock {
-				$function.setBody($statementsBlock.stat);
+				$function.setBody($statementsBlock.statement);
 			}
 		)
 	;
@@ -1031,8 +1034,8 @@ scope IsTypeDef;
 			)* 
 		)? '>'
 		declaration {
-			if (!$declaration.declarations.isEmpty()) {
-				Declaration decl = $declaration.declarations.get(0);
+			if ($declaration.declaration != null) {
+				Declaration decl = $declaration.declaration;
 				$template.setDeclaration(decl);
 				if (decl instanceof TaggedTypeRefDeclaration) {
 					TaggedTypeRefDeclaration ttrd = (TaggedTypeRefDeclaration)decl;
@@ -1210,8 +1213,8 @@ varDeclEOF returns [Declaration decl]
 	: varDecl ';' EOF { $decl = $varDecl.decl; }
 	;
 
-declarationEOF returns [List<Declaration> declarations]
-	: 	d=declaration EOF { $declarations = $d.declarations; }
+declarationEOF returns [Declaration declaration]
+	: 	d=declaration EOF { $declaration = $d.declaration; }
 	;
 
 varDecl returns [VariablesDeclaration decl]
@@ -1605,7 +1608,7 @@ compareExpr returns [Expression expr]
 castExpr returns [Expression expr]
 	:	'(' tr=mutableTypeRef ')' (
 			inner=castExpr { $expr = new Cast($tr.type, $inner.expr); } |
-			'(' expression ( ',' expression ) + ')' // OpenCL tuple cast 
+			'(' expression ( ',' expression ) + ')' // TODO OpenCL tuple cast 
 		) | 
 		e=unaryExpr { $expr = $e.expr; }
 	;
@@ -1682,16 +1685,16 @@ expression returns [Expression expr]
 	;
 
 	
-statementsBlock returns [Block stat]
+statementsBlock returns [Block statement]
 scope Symbols; 
 @init {
 	$Symbols::typeIdentifiers = new HashSet<String>();
 }
-	:	{ $stat = new Block(); }
-		'{' 
+	:	{ $statement = new Block(); }
+		'{'
 		(
 			statement {
-				$stat.addStatement($statement.stat);
+				$statement.addStatement($statement.statement);
 			} |
 			lineDirective
 		)* 
@@ -1707,38 +1710,56 @@ gccAsmInOuts
 		gccAsmInOut ( ',' gccAsmInOut )*
 	;
 	
-statement	returns [Statement stat]
+statement returns [Statement statement]
 	:
-		b=statementsBlock { $stat = $b.stat; } |
-		declaration | // TODO
-		// see http://ibiblio.org/gferg/ldp/GCC-Inline-Assembly-HOWTO.html
-		{ next("__asm__") }? IDENTIFIER '('
-			STRING* ( ':' gccAsmInOuts )*
-		')' ';' ? |
-		es=expression ';' { $stat = new ExpressionStatement($es.expr); } |
-		rt='return' rex=expression? ';' { 
-			$stat = mark(new Return($rex.expr), getLine($rt));
-		} |
-		IDENTIFIER ':' | // label
-		'break' ';' |
-		'if' '(' topLevelExpr ')' statement ('else' statement)? | // TODO
-		'while' '(' topLevelExpr ')' statement | // TODO
-		'do' statement 'while' '(' topLevelExpr ')' ';' | // TODO
-		'for' '('
-            (
-                (varDecl | expression) ? ';' expression? ';' expression?  |
-                varDecl ':' expression // Java foreach
-            )
-        ')' statement | // TODO
-		'switch' '(' expression ')' '{' // TODO
-			(	
-				'case' topLevelExpr ':' |
-				statement |
-				lineDirective
-			)*
-		'}' |
-		';' |
-		{ next("foreach") }? IDENTIFIER '(' varDecl { next("in") }? IDENTIFIER expression ')' statement // TODO
+		(
+			b=statementsBlock { 
+				$statement = $b.statement; 
+			} |
+			// see http://ibiblio.org/gferg/ldp/GCC-Inline-Assembly-HOWTO.html
+			{ next("__asm__") }? IDENTIFIER '('
+				STRING* ( ':' gccAsmInOuts )*
+			')' ';' ? |
+			es=expression ';' { 
+				$statement = new ExpressionStatement($es.expr); 
+			} |
+			rt='return' rex=expression? ';' { 
+				$statement = mark(new Return($rex.expr), getLine($rt));
+			} |
+			IDENTIFIER ':' | // label
+			'break' ';' |
+			'if' '(' ifTest=topLevelExpr ')' thn=statement ('else' els=statement)? { 
+				$statement = new Statement.If(ifTest.expr, thn, els);
+			} | 
+			'while' '(' whileTest=topLevelExpr ')' wh=statement { 
+				$statement = new Statement.While(whileTest.expr, wh);
+			} | 
+			'do' doStat=statement 'while' '(' doWhileTest=topLevelExpr ')' ';' { 
+				$statement = new Statement.DoWhile(doWhileTest.expr, doStat);
+			} | 
+			'for' '('
+				(
+					(varDecl | expression) ? ';' expression? ';' expression?  |
+					varDecl ':' expression // Java foreach
+				)
+	        		')' forStat=statement { 
+				// TODO
+			} | 
+			'switch' '(' expression ')' '{' // TODO
+				(	
+					'case' topLevelExpr ':' |
+					statement |
+					lineDirective
+				)*
+			'}' |
+			';' |
+			{ next("foreach") }? IDENTIFIER '(' varDecl { next("in") }? IDENTIFIER expression ')' statement { 
+				// TODO
+			} |
+			declaration { 
+				$statement = stat($declaration.declaration); 
+			}
+		)
 	;
 	
 constant returns [Constant constant]

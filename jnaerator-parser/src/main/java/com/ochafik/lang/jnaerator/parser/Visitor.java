@@ -25,6 +25,7 @@ import com.ochafik.lang.jnaerator.parser.Expression.BinaryOp;
 import com.ochafik.lang.jnaerator.parser.Statement.Block;
 import com.ochafik.lang.jnaerator.parser.Statement.Catch;
 import com.ochafik.lang.jnaerator.parser.Statement.DeclarationStatement;
+import com.ochafik.lang.jnaerator.parser.Statement.DoWhile;
 import com.ochafik.lang.jnaerator.parser.Statement.If;
 import com.ochafik.lang.jnaerator.parser.Statement.Return;
 import com.ochafik.lang.jnaerator.parser.Statement.Throw;
@@ -48,6 +49,7 @@ import com.ochafik.lang.jnaerator.parser.Identifier.QualifiedIdentifier;
 import com.ochafik.lang.jnaerator.parser.Identifier.SimpleIdentifier;
 import com.ochafik.lang.jnaerator.parser.Statement.ExpressionStatement;
 import com.ochafik.lang.jnaerator.parser.Statement.Try;
+import com.ochafik.lang.jnaerator.parser.Statement.While;
 import com.ochafik.lang.jnaerator.parser.StoredDeclarations.TypeDef;
 import com.ochafik.lang.jnaerator.parser.TypeRef.ArrayRef;
 import com.ochafik.lang.jnaerator.parser.TypeRef.FunctionSignature;
@@ -170,5 +172,13 @@ public interface Visitor {
     public void visitCatch(Catch aThis);
 
 	void visitTemplate(Template template);
+
+    public void visitWhile(While aThis);
+
+    public void visitDoWhile(DoWhile aThis);
+
+    public void visitNamespace(Namespace aThis);
+
+    public void visitDeclarations(Declarations aThis);
 	
 }

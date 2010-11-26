@@ -21,6 +21,7 @@ package com.ochafik.lang.jnaerator.parser;
 import com.ochafik.lang.jnaerator.parser.Struct.MemberVisibility;
 
 public abstract class Declaration extends ModifiableElement {
+    
 	protected TypeRef valueType;
 	protected MemberVisibility visibility;
 	/*protected int bits = -1;
