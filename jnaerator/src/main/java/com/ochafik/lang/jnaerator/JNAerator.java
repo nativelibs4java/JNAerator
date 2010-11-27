@@ -889,11 +889,11 @@ public class JNAerator {
 							dem + ";";
 						ObjCppParser parser = JNAeratorParser.newObjCppParser(result.typeConverter, text, false);//config.verbose);
 						parser.setupSymbolsStack();
-						List<Declaration> decls = parser.declarationEOF();
-						if (decls == null)
+						Declaration decl = parser.declarationEOF();
+						if (decl == null)
 							continue;
 						
-						for (Declaration decl : decls) {
+						//for (Declaration decl : decls) {
 							if (decl instanceof VariablesDeclaration && decl.getValueType() != null)
 								decl.getValueType().addModifiers(Modifier.Extern);
 							decl.addModifiers(Modifier.parseModifier(pub));
@@ -935,7 +935,7 @@ public class JNAerator {
 								s.addDeclaration(f);
 							} else
 								sf.addDeclaration(decl);
-						}
+						//}
 					}
 					if (!sf.getDeclarations().isEmpty()) {
 						sourceFiles.add(sf);
