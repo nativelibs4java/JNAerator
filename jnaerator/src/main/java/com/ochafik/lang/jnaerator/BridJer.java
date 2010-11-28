@@ -113,6 +113,14 @@ public class BridJer {
             }
 
             @Override
+            public void visitMemberRef(MemberRef memberRef) {
+                super.visitMemberRef(memberRef);
+                // TODO restrict to struct/class fields
+                memberRef.replaceBy(methodCall(memberRef.getTarget(), memberRef.getName().toString()));
+            }
+
+            
+            @Override
             public void visitVariablesDeclaration(VariablesDeclaration v) {
                 if (v.getDeclarators().size() == 1) {
                     Declarator d = v.getDeclarators().get(0);
@@ -128,6 +136,53 @@ public class BridJer {
             Class ptrClass() {
                 return result.config.runtime.pointerClass;
             }
+
+            @Override
+            public void visitAssignmentOp(AssignmentOp assignment) {
+                BinaryOperator binOp = assignment.getOperator().getCorrespondingBinaryOp();
+                Expression value = assignment.getValue();
+                value.setParenthesis(true);
+                if (assignment.getTarget() instanceof UnaryOp) {
+                    UnaryOp uop = (UnaryOp)assignment.getTarget();
+                    if (uop.getOperator() == UnaryOperator.Dereference) {
+                        visit(uop.getOperand());
+                        visit(assignment.getValue());
+                        Expression target = uop.getOperand();
+                        if (binOp != null) {
+                            value = expr(methodCall(target.clone(), "get"), binOp, value);
+                        }
+                        assignment.replaceBy(methodCall(target, "set", value));
+                        return;
+                    }
+                }
+                if (assignment.getTarget() instanceof ArrayAccess) {
+                    ArrayAccess aa = (ArrayAccess)assignment.getTarget();
+                    visit(aa.getTarget());
+                    visit(aa.getIndex());
+                    visit(assignment.getValue());
+                    Expression target = aa.getTarget();
+                    Expression index = aa.getIndex();
+                    if (binOp != null) {
+                        value = expr(methodCall(target.clone(), "get", index.clone()), binOp, value);
+                    }
+                    assignment.replaceBy(methodCall(target, "set", index, value));
+                    return;
+                }
+                if (assignment.getTarget() instanceof MemberRef) {
+                    MemberRef mr = (MemberRef)assignment.getTarget();
+                    Expression target = mr.getTarget();
+                    String name = mr.getName().toString();
+                    if (binOp != null) {
+                        value = expr(methodCall(target.clone(), name), binOp, value);
+                    }
+                    assignment.replaceBy(methodCall(target, name, value));
+                    return;
+                }
+                super.visitAssignmentOp(assignment);
+                
+            }
+            
+            
             @Override
             public void visitNew(New new1) {
                 super.visitNew(new1);
@@ -141,7 +196,7 @@ public class BridJer {
             @Override
             public void visitNewArray(NewArray newArray) {
                 super.visitNewArray(newArray);
-                if (newArray.getType() instanceof JavaPrimitive) {
+                if (newArray.getType() instanceof Primitive) {
                     if (newArray.getDimensions().size() != 1)
                         notSup(newArray, "TODO only dimensions 1 to 3 are supported for primitive array creations !");
                 
@@ -166,9 +221,12 @@ public class BridJer {
                     );
                 }
             }
-            
-            
 
+            @Override
+            public void visitPointer(Pointer pointer) {
+                super.visitPointer(pointer);
+            }
+            
             @Override
             protected void visitTargettedTypeRef(TargettedTypeRef targettedTypeRef) {
                 super.visitTargettedTypeRef(targettedTypeRef);

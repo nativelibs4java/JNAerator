@@ -609,28 +609,33 @@ public abstract class Expression extends Element {
 		
 	}
 	public enum AssignmentOperator implements Operator {
-		Equal("="),
-		MultiplyEqual("*="),
-		DivideEqual("/="),
-		ModuloEqual("%="),
-		PlusEqual("+="),
-		MinusEqual("-="),
-		LeftShiftEqual("<<="),
-		RightShiftEqual(">>="),
-		SignedRightShiftEqual(">>>="),
-		BitAndEqual("&="),
-		XOREqual("^="),
-		ComplementEqual("~="),
-		BitOrEqual("|=");
+		Equal("=", null),
+		MultiplyEqual("*=", BinaryOperator.Multiply),
+		DivideEqual("/=", BinaryOperator.Divide),
+		ModuloEqual("%=", BinaryOperator.Modulo),
+		PlusEqual("+=", BinaryOperator.Plus),
+		MinusEqual("-=", BinaryOperator.Minus),
+		LeftShiftEqual("<<=", BinaryOperator.LeftShift),
+		RightShiftEqual(">>=", BinaryOperator.RightShift),
+		SignedRightShiftEqual(">>>=", BinaryOperator.SignedRightShift),
+		BitAndEqual("&=", BinaryOperator.BitAnd),
+		XOREqual("^=", BinaryOperator.XOR),
+		//ComplementEqual("~=", BinaryOperator.C),
+		BitOrEqual("|=", BinaryOperator.BitOr);
 		
 		String s;
-		AssignmentOperator(String s) {
+		AssignmentOperator(String s, BinaryOperator correspondingBinaryOp) {
 			this.s = s;
+            this.correspondingBinaryOp = correspondingBinaryOp;
 		}
 		@Override
 		public String toString() {
 			return s;
 		}
+        BinaryOperator correspondingBinaryOp;
+        public BinaryOperator getCorrespondingBinaryOp() {
+            return correspondingBinaryOp;
+        }
 	}
 	public enum UnaryOperator  implements Operator {
 		Not("!"), 
