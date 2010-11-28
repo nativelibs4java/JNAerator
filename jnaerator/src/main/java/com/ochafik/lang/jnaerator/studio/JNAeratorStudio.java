@@ -572,7 +572,7 @@ public class JNAeratorStudio extends JPanel {
 					}
 					@Override
 					public void sourcesParsed(SourceFiles sourceFiles) {
-						final SourceFiles sourceFilesClone = sourceFiles;
+						final SourceFiles sourceFilesClone = sourceFiles;//.clone();
 						SwingUtilities.invokeLater(new Runnable() { public void run() {
 							String title = "Parsing Tree";
 							for (int i = sourceTabs.getTabCount(); i-- != 0;) {

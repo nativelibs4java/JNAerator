@@ -29,7 +29,7 @@ options {
 	backtrack = true;
 	//output = AST;
 	memoize = true;
-	//k = 3;
+//	k = 2;
 }
 
 scope Symbols {
@@ -1632,7 +1632,34 @@ unaryOp returns [Expression.UnaryOperator op]
 	;
 
 postfixExpr returns [Expression expr] 
+@init {
+	List<Expression> multiArrayDims = new ArrayList<Expression>();
+}
 	: 
+		{ next("new") }? IDENTIFIER tr=nonMutableTypeRef
+		(
+			(
+				topLevelExprList? {
+					if ($topLevelExprList.exprs == null)
+						$expr = new New(tr);
+					else
+						$expr = new New(tr, $topLevelExprList.exprs);
+				} 
+			) |
+			(
+				(
+					'[' dim=expression ']' {
+						multiArrayDims.add($expression.expr);
+					}
+				)+
+				{
+					NewArray na = new NewArray();
+					na.setType(tr);
+					na.setDimensions(multiArrayDims);
+					$expr = na;
+				}
+			)
+		) |
 		baseExpression { $expr = $baseExpression.expr; }
 		(
 			'[' expression ']' { 

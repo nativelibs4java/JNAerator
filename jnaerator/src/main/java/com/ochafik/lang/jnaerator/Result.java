@@ -74,6 +74,7 @@ public class Result extends Scanner {
 	public GlobalsGenerator globalsGenerator;
 	public ObjectiveCGenerator objectiveCGenerator;
 	public UniversalReconciliator universalReconciliator;
+    public BridJer bridjer;
 	
 	public final Set<Identifier> 
 		structsFullNames = new HashSet<Identifier>(),
@@ -99,6 +100,7 @@ public class Result extends Scanner {
 		globalsGenerator = new GlobalsGenerator(this);
 		objectiveCGenerator = new ObjectiveCGenerator(this);
 		universalReconciliator = new UniversalReconciliator();
+        bridjer = new BridJer(this);
 	}
 
 	Set<Identifier> javaPackages = new TreeSet<Identifier>();

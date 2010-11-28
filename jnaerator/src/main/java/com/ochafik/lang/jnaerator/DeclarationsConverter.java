@@ -662,7 +662,7 @@ public class DeclarationsConverter {
                     convertJNAFunction(function, signatures, isCallback, objOut, libraryClassName, sig, functionName, library);
                     break;
                 case BridJ:
-                    convertNL4JFunction(function, signatures, isCallback, objOut, libraryClassName, sig, functionName, library);
+                    convertBridJFunction(function, signatures, isCallback, objOut, libraryClassName, sig, functionName, library);
                     break;
                 default:
                     throwBadRuntime();
@@ -914,7 +914,7 @@ public class DeclarationsConverter {
 		}
     }
 
-    private void convertNL4JFunction(Function function, Signatures signatures, boolean isCallback, DeclarationsHolder out, Identifier libraryClassName, String sig, Identifier functionName, String library) throws UnsupportedConversionException {
+    private void convertBridJFunction(Function function, Signatures signatures, boolean isCallback, DeclarationsHolder out, Identifier libraryClassName, String sig, Identifier functionName, String library) throws UnsupportedConversionException {
 		Element parent = function.getParentElement();
     	List<Modifier> modifiers = function.getModifiers();
     	MemberVisibility visibility = function.getVisibility();
@@ -933,7 +933,6 @@ public class DeclarationsConverter {
         
         nativeMethod.addModifiers(
             isProtected ? Modifier.Protected : Modifier.Public, 
-            isCallback ? Modifier.Abstract : Modifier.Native, 
             isStatic || !isCallback && !isInStruct ? Modifier.Static : null
         );
         if (result.config.synchronizedMethods && !isCallback)
@@ -977,6 +976,21 @@ public class DeclarationsConverter {
         if (!signatures.methodsSignatures.add(natSig))
             return;
 
+        Block convertedBody = null;
+        if (!result.config.dontConvertBodies && function.getBody() != null)
+        {
+            try {
+                convertedBody = (Block)result.bridjer.convertToJava(function.getBody());
+            } catch (UnsupportedConversionException ex) {
+                nativeMethod.addToCommentBefore("TRANSLATION OF BODY FAILED: " + ex);
+            }
+        }
+        
+        if (convertedBody == null)
+            nativeMethod.addModifiers(isCallback ? Modifier.Abstract : Modifier.Native);
+        else
+            nativeMethod.setBody(convertedBody);
+        
 //        if (!natFullSig.equals(typFullSig)) {
 //            
 //            if (!signatures.methodsSignatures.add(typSig))

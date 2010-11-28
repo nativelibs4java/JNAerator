@@ -19,7 +19,7 @@ package com.ochafik.lang.jnaerator;
 
 import com.ochafik.lang.jnaerator.parser.Element;
 
-public class UnsupportedConversionException extends Exception {
+public class UnsupportedConversionException extends RuntimeException {
 	/**
 	 * 
 	 */

@@ -336,6 +336,9 @@ public class JNAerator {
                     case AddRootDir:
                         config.addRootDir(a.getFileParam("dir"));
                         break;
+                    case NoBodies:
+                        config.dontConvertBodies = true;
+                        break;
                     case NoAutoImports:
                         config.noAutoImports = true;
                         break;

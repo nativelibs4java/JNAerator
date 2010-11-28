@@ -227,6 +227,7 @@ public class JNAeratorConfig {
 	public int maxConstructedFields = 10;
 	public boolean beanStructs;
     public boolean reification = false;
+    public boolean dontConvertBodies = false;
 	
 	public Map<String, String> extraJavaSourceFilesContents = new LinkedHashMap<String, String>();
 	public Set<String> frameworks = new LinkedHashSet<String>();

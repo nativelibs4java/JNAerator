@@ -265,6 +265,14 @@ public abstract class Expression extends Element {
 		public List<Expression> getDimensions() {
 			return unmodifiableList(dimensions);
 		}
+        public void addDimension(Expression dimension) {
+			if (dimension == null)
+				return;
+			
+			dimension.setParentElement(this);
+			dimensions.add(dimension);
+		}
+		
 		public void setDimensions(List<Expression> dimensions) {
 			changeValue(this, this.dimensions, dimensions);
 		}
@@ -327,6 +335,9 @@ public abstract class Expression extends Element {
 		public New(TypeRef type, Expression... arguments) {
 			setType(type);
 			setConstruction(new FunctionCall(null, arguments));
+		}
+		public New(TypeRef type, List<Expression> arguments) {
+            this(type, arguments.toArray(new Expression[arguments.size()]));
 		}
 		public New() {}
 		public void setType(TypeRef type) {
