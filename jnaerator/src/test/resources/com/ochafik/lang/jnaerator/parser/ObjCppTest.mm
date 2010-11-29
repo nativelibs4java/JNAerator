@@ -84,7 +84,7 @@ void f(int* pA, int* pB) {
 }
 void test() {
 	int a = 10;
-	int * pA = &a;
+	int *pA = &a;
 	f(pA);
 }
 --

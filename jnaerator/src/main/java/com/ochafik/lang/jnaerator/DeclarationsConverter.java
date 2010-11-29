@@ -977,11 +977,12 @@ public class DeclarationsConverter {
             return;
 
         Block convertedBody = null;
-        if (!result.config.dontConvertBodies && function.getBody() != null)
+        if (result.config.convertBodies && function.getBody() != null)
         {
             try {
                 convertedBody = (Block)result.bridjer.convertToJava(function.getBody());
-            } catch (UnsupportedConversionException ex) {
+            } catch (Exception ex) {
+                ex.printStackTrace(System.out);
                 nativeMethod.addToCommentBefore("TRANSLATION OF BODY FAILED: " + ex);
             }
         }

@@ -2,6 +2,7 @@ Current development version (0.9.6-SNAPSHOT)
 
 - Added explicit call to setFieldOrder in JNAerated JNA structures (no need for BridJ, which has its @Field annotations to guarantee proper order)
 - Enhanced parsing and AST generation of C/C++ expressions
+- Fixed BridJ inherited struct fields indexes computation
 
 Version 0.9.5 (r1330, 20101011):
 

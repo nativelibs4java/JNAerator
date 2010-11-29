@@ -19,6 +19,7 @@
 package com.ochafik.lang.jnaerator;
 
 import com.ochafik.lang.jnaerator.parser.Identifier.SimpleIdentifier;
+import com.ochafik.lang.jnaerator.parser.Statement.ExpressionStatement;
 import org.bridj.FlagSet;
 import org.bridj.IntValuedEnum;
 import org.bridj.StructObject;
@@ -116,7 +117,8 @@ public class BridJer {
             public void visitMemberRef(MemberRef memberRef) {
                 super.visitMemberRef(memberRef);
                 // TODO restrict to struct/class fields
-                memberRef.replaceBy(methodCall(memberRef.getTarget(), memberRef.getName().toString()));
+                if (memberRef.getName() != null)
+                    memberRef.replaceBy(methodCall(memberRef.getTarget(), memberRef.getName().toString()));
             }
 
             
@@ -193,6 +195,22 @@ public class BridJer {
             public void notSup(Element x, String msg) throws UnsupportedConversionException {
                 throw new UnsupportedConversionException(x, msg);
             }
+
+            /*
+            @Override
+            public void visitExpressionStatement(ExpressionStatement expressionStatement) {
+                super.visitExpressionStatement(expressionStatement);
+                if (expressionStatement.getExpression() instanceof UnaryOp) {
+                    UnaryOp uop = (UnaryOp)expressionStatement.getExpression();
+                    Expression target = uop.getOperand();
+                    switch (uop.getOperator()) {
+                        case PostIncr:
+                        case PreIncr:
+                            expressionStatement.replaceBy(expr(target));
+                    }
+                }
+            }*/
+            
             @Override
             public void visitNewArray(NewArray newArray) {
                 super.visitNewArray(newArray);
