@@ -67,14 +67,14 @@ import static com.ochafik.lang.jnaerator.parser.ElementsHelper.*;
 import static com.ochafik.lang.jnaerator.TypeConversion.*;
 
 public class Symbols {
-		public final Map<Identifier, Element> resolvedVariables = new HashMap<Identifier, Element>();
-	public final Map<Identifier, Element> resolvedTypes = new HashMap<Identifier, Element>();
+		public final Map<Integer, Element> resolvedVariables = new HashMap<Integer, Element>();
+	public final Map<Integer, Element> resolvedTypes = new HashMap<Integer, Element>();
 	public final Map<Element, SymbolTable> elementTables = new HashMap<Element, SymbolTable>();
 	public Element getType(Identifier ident) {
-		return resolvedTypes.get(ident);	
+		return resolvedTypes.get(ident.getId());	
 	}
 	public Element getVariable(Identifier ident) {
-		return resolvedVariables.get(ident);	
+		return resolvedVariables.get(ident.getId());	
 	}
 	public SymbolTable getEnclosingSymbolTable(Element element) {
 		while (element != null) {
@@ -158,7 +158,7 @@ public class Symbols {
 			}
 			//System.out.println("Resolved " + ident + " as " + resolved);
 			//System.err.println("Resolved " + ident + " as " + resolved);
-			(varOrType ? symbols.resolvedVariables : symbols.resolvedTypes).put(ident, resolved);
+            (varOrType ? symbols.resolvedVariables : symbols.resolvedTypes).put(ident.getId(), resolved);
 			return resolved;
 		}
     }
