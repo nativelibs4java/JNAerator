@@ -1374,10 +1374,10 @@ public abstract class Expression extends Element {
 
 		public static Constant parseOctal(String string, boolean negate) {
 			string = string.trim().toLowerCase();
-			if (!string.startsWith("\\"))
+			if (!string.startsWith("0"))
 				throw new IllegalArgumentException("Expected octal literal, got " + string);
 			
-			return parseDecimal(string.substring(2), 8, IntForm.Octal, negate);
+			return parseDecimal(string.substring(1), 8, IntForm.Octal, negate);
 		}
 
 		public static Constant parseFloat(String string) {
