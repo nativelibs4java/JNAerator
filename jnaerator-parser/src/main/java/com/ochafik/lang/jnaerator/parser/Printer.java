@@ -54,6 +54,7 @@ import com.ochafik.lang.jnaerator.parser.Statement.ExpressionStatement;
 import com.ochafik.lang.jnaerator.parser.Statement.If;
 import com.ochafik.lang.jnaerator.parser.Statement.Return;
 import com.ochafik.lang.jnaerator.parser.Statement.Throw;
+import com.ochafik.lang.jnaerator.parser.Statement.For;
 import com.ochafik.lang.jnaerator.parser.Statement.Try;
 import com.ochafik.lang.jnaerator.parser.Statement.While;
 import com.ochafik.lang.jnaerator.parser.StoredDeclarations.TypeDef;
@@ -1076,5 +1077,14 @@ public class Printer implements Visitor {
     @Override
     public void visitDeclarations(Declarations decls) {
         implode(decls.getDeclarations(), "\n" + indent);
+    }
+    
+    @Override
+    public void visitFor(For aFor) {
+    		append("for (").implode(aFor.getInitStatements(), ", ").append(";").append(aFor.getCondition()).append(";").implode(aFor.getPostStatements(), ", ").append(") {\n");
+    		indent();
+        append(aFor.getBody());
+        deindent();
+        append("\n", indent, "}");
     }
 }

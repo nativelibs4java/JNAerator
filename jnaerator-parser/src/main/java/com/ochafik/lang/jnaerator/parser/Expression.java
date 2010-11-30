@@ -101,6 +101,15 @@ public abstract class Expression extends Element {
 		this.parenthesis = parenthesis;
 		return this;
 	}
+    public Expression setParenthesisIfNeeded() {
+        setParenthesis(!(
+            this instanceof VariableRef ||
+            this instanceof FunctionCall ||
+            this instanceof MemberRef ||
+            this instanceof ArrayAccess
+        ));
+        return this; 
+    }
 	public boolean getParenthesis() {
 		return parenthesis;
 	}

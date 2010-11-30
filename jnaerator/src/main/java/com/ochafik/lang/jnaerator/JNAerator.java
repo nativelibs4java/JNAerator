@@ -122,6 +122,8 @@ import static com.ochafik.lang.jnaerator.nativesupport.NativeExportUtils.*;
 
 
 /**
+
+mvn -o compile exec:java -Dexec.mainClass=com.ochafik.lang.jnaerator.JNAerator
  * java -Xmx2000m -jar ../bin/jnaerator.jar `for F in /System/Library/Frameworks/*.framework ; do echo $F| sed -E 's/^.*\/([^/]+)\.framework$/-framework \1/' ; done` -out apple-frameworks.jar
  */
 
@@ -1717,6 +1719,7 @@ public class JNAerator {
 			}
 		}
 		
+		result.symbols = Symbols.resolveSymbols(sourceFiles);
 		generateLibraryFiles(sourceFiles, result);
 
 		if (config.verbose)

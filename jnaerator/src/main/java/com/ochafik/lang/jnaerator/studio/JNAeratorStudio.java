@@ -109,11 +109,11 @@ public class JNAeratorStudio extends JPanel {
 	JLabel classCountLabel = new JLabel("JNAerated class :");
 //	JList resultsList = new JList();
 	JComboBox resultsListCombo = new JComboBox();
-	JCheckBox directCallingCb = new JCheckBox("Direct Calling (experimental)", false),
+	JCheckBox directCallingCb = new JCheckBox("Direct Calling", false),
 		structsAsTopLevelClassesCb = new JCheckBox("Structs as Top-Level classes", true),
 		charPtrAsString = new JCheckBox("char*/wchar_t* as (W)String", false),
 		reificationCb = new JCheckBox("Reification", false),
-		convertBodiesCb = new JCheckBox("Convert statements", false),
+		convertBodiesCb = new JCheckBox("Convert Statements (experimental, BridJ only)", false),
 		scalaSetters = new JCheckBox("Scala struct field setters", false),
 		noCommentNoManglingCb = new JCheckBox("No comment & no mangling", false);
 

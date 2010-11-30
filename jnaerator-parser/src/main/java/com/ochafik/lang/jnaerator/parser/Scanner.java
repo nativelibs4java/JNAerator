@@ -54,6 +54,7 @@ import com.ochafik.lang.jnaerator.parser.Statement.DeclarationStatement;
 import com.ochafik.lang.jnaerator.parser.Statement.DoWhile;
 import com.ochafik.lang.jnaerator.parser.Statement.ExpressionStatement;
 import com.ochafik.lang.jnaerator.parser.Statement.If;
+import com.ochafik.lang.jnaerator.parser.Statement.For;
 import com.ochafik.lang.jnaerator.parser.Statement.Return;
 import com.ochafik.lang.jnaerator.parser.Statement.Throw;
 import com.ochafik.lang.jnaerator.parser.StoredDeclarations.TypeDef;
@@ -379,7 +380,7 @@ public class Scanner implements Visitor {
 	}
 
 	public void visitIf(If if1) {
-		visitStatement(if1);
+		visitControlStructure(if1);
 		visit(if1.getCondition());
 		visit(if1.getThenBranch());
 		visit(if1.getElseBranch());
@@ -481,15 +482,25 @@ public class Scanner implements Visitor {
 		visit(friendDeclaration.getFriend());
 	}
 
-    public void visitTry(Try tr) {
+	public void visitControlStructure(Statement tr) {
         visitStatement(tr);
+    }
+	
+    public void visitTry(Try tr) {
+        visitControlStructure(tr);
 		visit(tr.getTryStatement());
         visit(tr.getFinallyStatement());
         visit(tr.getCatches());
     }
-
+    public void visitFor(For aFor) {
+    		visitControlStructure(aFor);
+    		visit(aFor.getInitStatements());
+    		visit(aFor.getCondition());
+    		visit(aFor.getPostStatements());
+    		visit(aFor.getBody());
+    }
     public void visitCatch(Catch ca) {
-        visitStatement(ca);
+        visitControlStructure(ca);
 		visit(ca.getDeclaration());
         visit(ca.getBody());
     }
@@ -502,7 +513,7 @@ public class Scanner implements Visitor {
 
     @Override
     public void visitWhile(While whileStat) {
-    	visitStatement(whileStat);
+    		visitControlStructure(whileStat);
 		visit(whileStat.getCondition());
 		visit(whileStat.getBody());
 	}

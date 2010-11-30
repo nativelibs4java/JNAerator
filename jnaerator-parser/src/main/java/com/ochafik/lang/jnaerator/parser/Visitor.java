@@ -27,6 +27,7 @@ import com.ochafik.lang.jnaerator.parser.Statement.Catch;
 import com.ochafik.lang.jnaerator.parser.Statement.DeclarationStatement;
 import com.ochafik.lang.jnaerator.parser.Statement.DoWhile;
 import com.ochafik.lang.jnaerator.parser.Statement.If;
+import com.ochafik.lang.jnaerator.parser.Statement.For;
 import com.ochafik.lang.jnaerator.parser.Statement.Return;
 import com.ochafik.lang.jnaerator.parser.Statement.Throw;
 import com.ochafik.lang.jnaerator.parser.Expression.ArrayAccess;
@@ -172,6 +173,8 @@ public interface Visitor {
     public void visitCatch(Catch aThis);
 
 	void visitTemplate(Template template);
+
+    public void visitFor(For aFor);
 
     public void visitWhile(While aThis);
 

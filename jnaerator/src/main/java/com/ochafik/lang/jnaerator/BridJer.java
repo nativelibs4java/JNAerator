@@ -21,6 +21,7 @@ package com.ochafik.lang.jnaerator;
 import com.ochafik.lang.jnaerator.parser.Identifier.SimpleIdentifier;
 import com.ochafik.lang.jnaerator.parser.Statement.ExpressionStatement;
 import org.bridj.FlagSet;
+import org.bridj.BridJ;
 import org.bridj.IntValuedEnum;
 import org.bridj.StructObject;
 import org.bridj.ValuedEnum;
@@ -34,16 +35,20 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.Set;
+import java.util.HashSet;
+import java.util.Arrays;
+import java.util.List;
+import java.util.ArrayList;
 import java.util.regex.Pattern;
 
 import com.ochafik.lang.jnaerator.JNAeratorConfig.GenFeatures;
 import com.ochafik.lang.jnaerator.TypeConversion.NL4JConversion;
 import com.ochafik.lang.jnaerator.cplusplus.CPlusPlusMangler;
 import com.ochafik.lang.jnaerator.parser.*;
-import com.ochafik.lang.jnaerator.parser.Enum;
-import com.ochafik.lang.jnaerator.parser.Scanner;
-import com.ochafik.lang.jnaerator.parser.Statement.Block;
+import static com.ochafik.lang.jnaerator.parser.Statement.*;
 import com.ochafik.lang.jnaerator.parser.StoredDeclarations.*;
 import com.ochafik.lang.jnaerator.parser.Struct.MemberVisibility;
 import com.ochafik.lang.jnaerator.parser.TypeRef.*;
@@ -62,13 +67,18 @@ import java.text.MessageFormat;
 import static com.ochafik.lang.jnaerator.parser.ElementsHelper.*;
 import static com.ochafik.lang.jnaerator.TypeConversion.*;
 
+/*
+mvn -o compile exec:java -Dexec.mainClass=com.ochafik.lang.jnaerator.JNAerator
+
+*/
 public class BridJer {
     Result result;
     public BridJer(Result result) {
         this.result = result;
     }
+    
 	public Element convertToJava(Element element) {
-        element = element.clone();
+        //element = element.clone();
         final HashSet<Element> referencedElements = new HashSet<Element>();
         element.accept(new Scanner() {
 
@@ -117,22 +127,23 @@ public class BridJer {
             public void visitMemberRef(MemberRef memberRef) {
                 super.visitMemberRef(memberRef);
                 // TODO restrict to struct/class fields
-                if (memberRef.getName() != null)
-                    memberRef.replaceBy(methodCall(memberRef.getTarget(), memberRef.getName().toString()));
+                if (!(memberRef.getParentElement() instanceof FunctionCall))
+					if (memberRef.getName() != null)
+						memberRef.replaceBy(methodCall(memberRef.getTarget(), memberRef.getName().toString()));
             }
-
             
             @Override
             public void visitVariablesDeclaration(VariablesDeclaration v) {
-                if (v.getDeclarators().size() == 1) {
-                    Declarator d = v.getDeclarators().get(0);
-                    MutableByDeclarator t = d.mutateType(v.getValueType());
-                    if (t instanceof TypeRef) {
-                        v.setValueType((TypeRef)t);
-                        v.setDeclarators(Arrays.asList((Declarator)new DirectDeclarator(d.resolveName(), d.getDefaultValue())));
-                    }
-                }
                 super.visitVariablesDeclaration(v);
+                if (v.getDeclarators().size() == 1) {
+					DirectDeclarator decl = (DirectDeclarator)v.getDeclarators().get(0);
+					TypeRef t = v.getValueType();
+					if (decl.getDefaultValue() == null && result.symbols.isClassType(t)) {
+						decl.setDefaultValue(new Expression.New(t.clone()));
+                        Expression vr = varRef(new SimpleIdentifier(decl.getName()));
+						((Statement.Block)v.getParentElement().getParentElement()).addStatement(stat(methodCall(expr(typeRef(BridJ.class)), "delete", vr)));
+					}
+                }
             }
 
             Class ptrClass() {
@@ -143,7 +154,7 @@ public class BridJer {
             public void visitAssignmentOp(AssignmentOp assignment) {
                 BinaryOperator binOp = assignment.getOperator().getCorrespondingBinaryOp();
                 Expression value = assignment.getValue();
-                value.setParenthesis(true);
+                value.setParenthesisIfNeeded();
                 if (assignment.getTarget() instanceof UnaryOp) {
                     UnaryOp uop = (UnaryOp)assignment.getTarget();
                     if (uop.getOperator() == UnaryOperator.Dereference) {

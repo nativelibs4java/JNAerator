@@ -71,6 +71,8 @@ public class ElementsHelper {
 		return new Expression.VariableRef(name);
 	}
 	public static Expression varRef(Identifier name) {
+        if (name instanceof SimpleIdentifier)
+            return varRef((SimpleIdentifier)name);
 		return memberRef(expr(typeRef(name.resolveAllButLastIdentifier())), MemberRefStyle.Dot, name.resolveLastSimpleIdentifier());
 	}
 	public static Identifier ident(String... others) {

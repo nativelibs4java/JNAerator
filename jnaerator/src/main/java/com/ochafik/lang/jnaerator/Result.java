@@ -75,6 +75,7 @@ public class Result extends Scanner {
 	public ObjectiveCGenerator objectiveCGenerator;
 	public UniversalReconciliator universalReconciliator;
     public BridJer bridjer;
+    public Symbols symbols;
 	
 	public final Set<Identifier> 
 		structsFullNames = new HashSet<Identifier>(),
