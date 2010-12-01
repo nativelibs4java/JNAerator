@@ -132,6 +132,8 @@ public class BridJer {
 				}
             }
             boolean isReferenced(Element e) {
+            		if (e == null)
+            			return false;
                 return referencedElements.contains(new Pair<Element, Integer>(e, e.getId()));
             }
             @Override
