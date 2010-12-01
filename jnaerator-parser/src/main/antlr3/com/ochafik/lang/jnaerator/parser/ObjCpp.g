@@ -408,7 +408,7 @@ externDeclarations returns [ExternDeclarations declaration]
 declaration returns [Declaration declaration, List<Modifier> modifiers, String preComment, int startTokenIndex]
 scope IsTypeDef;
 scope ModContext;
-@after {
+/*@after {
 	if ($declaration == null)
 	try {
 		int i = $start.getTokenIndex();
@@ -421,7 +421,7 @@ scope ModContext;
 	} catch (Exception ex) {
 		ex.printStackTrace();
 	}
-}
+}*/
 	:	
 		{
 		  $modifiers = new ArrayList<Modifier>();
@@ -470,10 +470,8 @@ scope ModContext;
 	
 namespaceDecl returns [Namespace namespace]
 	:
-		{
-			$namespace = new Namespace();
-		}
 		'namespace' ns=IDENTIFIER '{' {
+			$namespace = new Namespace();
 			$namespace.setName(new SimpleIdentifier($ns.text));
 		}
 		(
@@ -1156,40 +1154,38 @@ declarator  returns [Declarator declarator]
 	:
 		modifiers
 		(
-			((
-				( 
-					directDeclarator { 
-						$declarator = $directDeclarator.declarator; 
-					} 
-				) |
-				( 
-					pt=('*' | '&' | '^')
-					inner=declarator {
-						$declarator = new PointerDeclarator($inner.declarator, PointerStyle.parsePointerStyle($pt.text));
-					} 
+			(
+				(
+					( 
+						directDeclarator { 
+							$declarator = $directDeclarator.declarator; 
+						} 
+					) |
+					( 
+						pt=('*' | '&' | '^')
+						inner=declarator {
+							$declarator = new PointerDeclarator($inner.declarator, PointerStyle.parsePointerStyle($pt.text));
+						} 
+					)
 				)
-			)
-			(
-				':' bits=DECIMAL_NUMBER {
-					if ($declarator != null)
-						$declarator.setBits(Integer.parseInt($bits.text));
-				}
-			)?
-			(
-				'=' 
-				dv=topLevelExpr {
-					if ($declarator != null)
-						$declarator.setDefaultValue($dv.expr);
-				}
-			)?
-			)
-			|
-			(
-				':' bits=DECIMAL_NUMBER {
-					$declarator = mark(new DirectDeclarator(null), getLine($bits));
-					$declarator.setBits(Integer.parseInt($bits.text));
-				}
-			)
+				(
+					':' bits=DECIMAL_NUMBER {
+						if ($declarator != null)
+							$declarator.setBits(Integer.parseInt($bits.text));
+					}
+				)?
+				(
+					'=' 
+					dv=topLevelExpr {
+						if ($declarator != null)
+							$declarator.setDefaultValue($dv.expr);
+					}
+				)?
+			) |
+			':' bits=DECIMAL_NUMBER {
+				$declarator = mark(new DirectDeclarator(null), getLine($bits));
+				$declarator.setBits(Integer.parseInt($bits.text));
+			}
 		)
 		{
 			if ($declarator != null)
@@ -1223,11 +1219,9 @@ varDecl returns [VariablesDeclaration decl]
 			$decl = new VariablesDeclaration($tr.type); 
 			//$decl.addModifiers($modifiers.modifiers);
 		}
-		(
-			d1=declaratorsList {
-				$decl.setDeclarators($d1.declarators);
-			}
-		)?
+		d1=declaratorsList {
+			$decl.setDeclarators($d1.declarators);
+		}
 	;
 	
 objCProtocolRefList
@@ -1739,54 +1733,52 @@ gccAsmInOuts
 	
 statement returns [Statement statement]
 	:
-		(
-			b=statementsBlock { 
-				$statement = $b.statement; 
-			} |
-			// see http://ibiblio.org/gferg/ldp/GCC-Inline-Assembly-HOWTO.html
-			{ next("__asm__") }? IDENTIFIER '('
-				STRING* ( ':' gccAsmInOuts )*
-			')' ';' ? |
-			es=expression ';' { 
-				$statement = new ExpressionStatement($es.expr); 
-			} |
-			rt='return' rex=expression? ';' { 
-				$statement = mark(new Return($rex.expr), getLine($rt));
-			} |
-			IDENTIFIER ':' | // label
-			'break' ';' |
-			'if' '(' ifTest=topLevelExpr ')' thn=statement ('else' els=statement)? { 
-				$statement = new Statement.If(ifTest.expr, thn, els);
-			} | 
-			'while' '(' whileTest=topLevelExpr ')' wh=statement { 
-				$statement = new Statement.While(whileTest.expr, wh);
-			} | 
-			'do' doStat=statement 'while' '(' doWhileTest=topLevelExpr ')' ';' { 
-				$statement = new Statement.DoWhile(doWhileTest.expr, doStat);
-			} | 
-			'for' '('
-				(
-					(varDecl | expression) ? ';' expression? ';' expression?  |
-					varDecl ':' expression // Java foreach
-				)
-	        		')' forStat=statement { 
-				// TODO
-			} | 
-			'switch' '(' expression ')' '{' // TODO
-				(	
-					'case' topLevelExpr ':' |
-					statement |
-					lineDirective
-				)*
-			'}' |
-			';' |
-			{ next("foreach") }? IDENTIFIER '(' varDecl { next("in") }? IDENTIFIER expression ')' statement { 
-				// TODO
-			} |
-			declaration { 
-				$statement = stat($declaration.declaration); 
-			}
-		)
+		b=statementsBlock { 
+			$statement = $b.statement; 
+		} |
+		// see http://ibiblio.org/gferg/ldp/GCC-Inline-Assembly-HOWTO.html
+		{ next("__asm__") }? IDENTIFIER '('
+			STRING* ( ':' gccAsmInOuts )*
+		')' ';' ? |
+		{ next("foreach") }? IDENTIFIER '(' varDecl { next("in") }? IDENTIFIER expression ')' statement { 
+			// TODO
+		} |
+		declaration { 
+			$statement = stat($declaration.declaration); 
+		} |
+		es=expression ';' { 
+			$statement = new ExpressionStatement($es.expr); 
+		} |
+		rt='return' rex=expression? ';' { 
+			$statement = mark(new Return($rex.expr), getLine($rt));
+		} |
+		IDENTIFIER ':' | // label
+		'break' ';' |
+		'if' '(' ifTest=topLevelExpr ')' thn=statement ('else' els=statement)? { 
+			$statement = new Statement.If(ifTest.expr, thn, els);
+		} | 
+		'while' '(' whileTest=topLevelExpr ')' wh=statement { 
+			$statement = new Statement.While(whileTest.expr, wh);
+		} | 
+		'do' doStat=statement 'while' '(' doWhileTest=topLevelExpr ')' ';' { 
+			$statement = new Statement.DoWhile(doWhileTest.expr, doStat);
+		} | 
+		'for' '('
+			(
+				(varDecl | expression) ? ';' expression? ';' expression?  |
+				varDecl ':' expression // Java foreach
+			)
+				')' forStat=statement { 
+			// TODO
+		} | 
+		'switch' '(' expression ')' '{' // TODO
+			(	
+				'case' topLevelExpr ':' |
+				statement |
+				lineDirective
+			)*
+		'}' |
+		';'
 	;
 	
 constant returns [Constant constant]
