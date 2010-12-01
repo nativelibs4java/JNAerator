@@ -146,6 +146,8 @@ public class Symbols {
 			return resolve(ident, false);
 		}
 		private Element resolve(Identifier ident, boolean varOrType) {
+			if (ident == null)
+				return null;
 			// TODO handle new namespace
 			Identifier lastIdent = ident.resolveLastSimpleIdentifier();
 			Element resolved = (varOrType ? variableDefinitions : typeDefinitions).get(lastIdent);
