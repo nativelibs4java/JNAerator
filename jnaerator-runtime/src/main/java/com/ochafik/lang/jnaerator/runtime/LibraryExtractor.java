@@ -208,9 +208,6 @@ public class LibraryExtractor {
 				out.close();
 				in.close();
 			}
-			String str = System.getProperty("library.custom");
-			String str2 = localFile.getAbsolutePath();
-			System.setProperty("library.custom", (str == null ? "" : str + File.pathSeparator) + str2);
 		}
 		return localFile;
 	}
