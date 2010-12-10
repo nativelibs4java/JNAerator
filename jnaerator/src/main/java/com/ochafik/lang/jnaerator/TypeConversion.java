@@ -455,7 +455,7 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
         return p;
     }
 
-    public TypeRef resolveTypeDef(TypeRef valueType, final Identifier libraryClassName, final boolean convertToJavaRef) {
+    public TypeRef resolveTypeDef(TypeRef valueType, final Identifier libraryClassName, final boolean convertToJavaRef, final boolean convertEnumToJavaRef) {
         if (valueType == null) {
             return null;
         }
@@ -463,13 +463,13 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
 //		if (valueType.toString().equals("CGFunctionEvaluateCallback"))
 //			valueType = valueType;
 
-        if (valueType instanceof TaggedTypeRef & convertToJavaRef) {
+        if (valueType instanceof TaggedTypeRef && convertToJavaRef) {
             TaggedTypeRef ttr = (TaggedTypeRef) valueType;
             if (ttr.getTag() != null) {
 
                 TypeRef ref = ttr instanceof Struct ? typeRef(findStructRef(ttr.getTag(), libraryClassName))
-                        : ttr instanceof Enum ? findEnum(ttr.getTag(), libraryClassName) : null;
-                if (ref == null) {
+                        : ttr instanceof Enum && convertEnumToJavaRef ? findEnum(ttr.getTag(), libraryClassName) : null;
+                if (ref == null && convertEnumToJavaRef) {
                     return ref;
                 }
             }
@@ -524,6 +524,10 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
                         Pair<TypeDef, Declarator> p = getTypeDef(name);
                         if (p != null) {
                             TypeRef tr = p.getFirst().getValueType();//as(p.getSecond().mutateType(p.getFirst().getValueType()), TypeRef.class);
+                            if (tr instanceof Enum && !convertEnumToJavaRef) {
+                                simpleTypeRef.replaceBy(typeRef(int.class));
+                                return;
+                            }
                             if (tr instanceof TaggedTypeRef) {
                                 Identifier name2 = result.declarationsConverter.getActualTaggedTypeName((TaggedTypeRef) tr);
                                 if (name2 != null) {
@@ -581,7 +585,7 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
 
                         TypeRef enumRef = result.typeConverter.findEnum(name, libraryClassName);
                         if (enumRef != null) {
-                            if (!convertToJavaRef) {
+                            if (!convertToJavaRef || !convertEnumToJavaRef) {
                                 return;
                             }
                             simpleTypeRef.replaceBy(enumRef);
@@ -601,7 +605,7 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
                             }
 
                             if (fieldName != null && !fieldName.equals(name)) {
-                                simpleTypeRef.replaceBy(resolveTypeDef(new TypeRef.SimpleTypeRef(fieldName), libraryClassName, true));
+                                simpleTypeRef.replaceBy(resolveTypeDef(new TypeRef.SimpleTypeRef(fieldName), libraryClassName, true /*convertToJavaRef*/, convertEnumToJavaRef));
                                 return;
                             }
                         }
@@ -659,7 +663,7 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
 
     public JavaPrim getPrimitive(TypeRef valueType, Identifier libraryClassName) {
 
-        valueType = resolveTypeDef(valueType, libraryClassName, true);
+        valueType = resolveTypeDef(valueType, libraryClassName, true, true);
         if (valueType == null) {
             return null;
         }
@@ -1087,7 +1091,7 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
 
     public NL4JConversion convertTypeToNL4J(TypeRef valueType, Identifier libraryClassName, Expression structIOExpr, Expression valueExpr, int fieldIndex, int bits) throws UnsupportedConversionException {
         TypeRef original = valueType;
-        valueType = resolveTypeDef(valueType, libraryClassName, true);
+        valueType = resolveTypeDef(valueType, libraryClassName, true, true);
 
         //Expression offsetExpr = structIOExpr == null ? null : methodCall(structIOExpr, "getFieldOffset", expr(fieldIndex));
         //Expression bitOffsetExpr = structIOExpr == null || bits <= 0 ? null : methodCall(structIOExpr, "getFieldBitOffset", expr(fieldIndex));
@@ -1537,7 +1541,7 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
 //			valueType.toString();
 
         TypeRef original = valueType;
-        valueType = resolveTypeDef(valueType, libraryClassName, true);
+        valueType = resolveTypeDef(valueType, libraryClassName, true, false);
 
 
 //		if (String.valueOf(valueType).contains("MonoObject"))
@@ -1657,7 +1661,7 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
 				else if (target instanceof Struct) {
 					Struct struct = (Struct)target;
 					if (struct == null) {
-						valueType =  resolveTypeDef(original, libraryClassName, true);
+						valueType =  resolveTypeDef(original, libraryClassName, true, false);
 						struct = null;
 					} else {
 						name = result.declarationsConverter.getActualTaggedTypeName(struct);
@@ -2144,7 +2148,7 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
     }
 
     private Expression sizeofToJava(TypeRef type, Identifier libraryClassName) throws UnsupportedConversionException {
-        type = resolveTypeDef(type, libraryClassName, true);
+        type = resolveTypeDef(type, libraryClassName, true, false);
 //		type = type;
 
         Expression res = null;

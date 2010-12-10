@@ -53,7 +53,7 @@ public class GCC4Mangler implements CPlusPlusMangler {
 			mangleType(((TypeRef.TargettedTypeRef)tr).getTarget(), b, result);
 		} else if (tr instanceof TypeRef.SimpleTypeRef) {
 			SimpleTypeRef str = (SimpleTypeRef) tr;
-			TypeRef resolved = result.typeConverter.resolveTypeDef(str, null, false);
+			TypeRef resolved = result.typeConverter.resolveTypeDef(str, null, false, false);
 			if (resolved != null && !resolved.toString().equals(str.toString())) {
 				mangleType(resolved, b, result);
 				return;

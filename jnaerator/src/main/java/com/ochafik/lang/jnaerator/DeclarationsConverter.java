@@ -1585,7 +1585,7 @@ public class DeclarationsConverter {
 			TypeConversion.TypeConversionMode.FieldType,
 			callerLibraryName
 		);
-		mutatedType = result.typeConverter.resolveTypeDef(mutatedType, callerLibraryName, true);
+		mutatedType = result.typeConverter.resolveTypeDef(mutatedType, callerLibraryName, true, false);
 		
 		VariablesDeclaration convDecl = new VariablesDeclaration();
 		convDecl.addModifiers(Modifier.Public);

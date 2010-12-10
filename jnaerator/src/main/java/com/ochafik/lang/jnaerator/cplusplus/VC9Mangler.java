@@ -66,7 +66,7 @@ public class VC9Mangler implements CPlusPlusMangler {
 			mangleType(((TypeRef.TargettedTypeRef)tr).getTarget(), b, result, referenceList);
 		} else if (tr instanceof TypeRef.SimpleTypeRef) {
 			SimpleTypeRef str = (SimpleTypeRef) tr;
-			TypeRef resolved = result.typeConverter.resolveTypeDef(str, null, false);
+			TypeRef resolved = result.typeConverter.resolveTypeDef(str, null, false, false);
 			if (resolved != null && !resolved.toString().equals(str.toString())) {
 				mangleType(resolved, b, result, referenceList);
 				return;
