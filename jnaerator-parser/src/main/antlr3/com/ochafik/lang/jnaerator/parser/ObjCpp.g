@@ -1745,11 +1745,11 @@ statement returns [Statement statement]
 		{ next("foreach") }? IDENTIFIER '(' varDecl { next("in") }? IDENTIFIER expression ')' statement { 
 			// TODO
 		} |
-		declaration { 
-			$statement = stat($declaration.declaration); 
-		} |
 		es=expression ';' { 
 			$statement = new ExpressionStatement($es.expr); 
+		} |
+		declaration { 
+			$statement = stat($declaration.declaration); 
 		} |
 		rt='return' rex=expression? ';' { 
 			$statement = mark(new Return($rex.expr), getLine($rt));
