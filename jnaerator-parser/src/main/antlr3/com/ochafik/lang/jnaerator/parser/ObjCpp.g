@@ -1219,9 +1219,11 @@ varDecl returns [VariablesDeclaration decl]
 			$decl = new VariablesDeclaration($tr.type); 
 			//$decl.addModifiers($modifiers.modifiers);
 		}
-		d1=declaratorsList {
-			$decl.setDeclarators($d1.declarators);
-		}
+		(
+			d1=declaratorsList {
+				$decl.setDeclarators($d1.declarators);
+			}
+		)?
 	;
 	
 objCProtocolRefList
