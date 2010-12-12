@@ -140,9 +140,21 @@ public class BridJer {
             public void visitVariableRef(VariableRef vr) {
                 super.visitVariableRef(vr);
                 Identifier ident = vr.getName();
-				if (isReferenced(ident)) {
+                if (isReferenced(ident)) {
                     vr.replaceBy(methodCall(varRef(ident), "get"));
-				}
+				} else {
+                    String identStr = ident.toString();
+                    if ("NULL".equals(identStr))
+                        vr.replaceBy(nullExpr());
+                    
+                }
+            }
+            @Override
+            public void visitIf(If ifStat) {
+                super.visitIf(ifStat);
+                Expression cond = ifStat.getCondition();
+                if (!(cond instanceof BinaryOp)) // TODO use typing rather than this hack to detect implicit boolean conversion in if statements (and not only there)
+                    cond.replaceBy(expr(cond, BinaryOperator.IsDifferent, expr(0)));
             }
             @Override
             public void visitUnaryOp(UnaryOp unaryOp) {
@@ -330,7 +342,8 @@ public class BridJer {
             @Override
             protected void visitTargettedTypeRef(TargettedTypeRef targettedTypeRef) {
                 super.visitTargettedTypeRef(targettedTypeRef);
-                targettedTypeRef.replaceBy(pointerToTypeRef(targettedTypeRef.getTarget().clone()));
+                if (targettedTypeRef.getTarget() != null)
+                    targettedTypeRef.replaceBy(pointerToTypeRef(targettedTypeRef.getTarget().clone()));
             }
         });
         return element;
