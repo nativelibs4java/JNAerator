@@ -980,7 +980,10 @@ public class DeclarationsConverter {
         if (result.config.convertBodies && function.getBody() != null)
         {
             try {
-                convertedBody = (Block)result.bridjer.convertToJava(function.getBody());
+                Pair<Element, List<Declaration>> bodyAndExtraDeclarations = result.bridjer.convertToJava(function.getBody());
+                convertedBody = (Block)bodyAndExtraDeclarations.getFirst();
+                for (Declaration d : bodyAndExtraDeclarations.getSecond())
+                    out.addDeclaration(d);
             } catch (Exception ex) {
                 ex.printStackTrace(System.out);
                 nativeMethod.addToCommentBefore("TRANSLATION OF BODY FAILED: " + ex);

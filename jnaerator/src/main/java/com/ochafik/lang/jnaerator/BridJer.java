@@ -18,6 +18,7 @@
 */
 package com.ochafik.lang.jnaerator;
 
+import java.io.PrintStream;
 import com.ochafik.lang.jnaerator.parser.Identifier.SimpleIdentifier;
 import com.ochafik.lang.jnaerator.parser.Statement.ExpressionStatement;
 import org.bridj.FlagSet;
@@ -77,8 +78,21 @@ public class BridJer {
         this.result = result;
     }
     
-	public Element convertToJava(Element element) {
+    Expression staticPtrMethod(String name, Expression... args) {
+        return methodCall(expr(typeRef(ptrClass())), name, args);
+    }
+    int iFile = 0;
+	public Pair<Element, List<Declaration>> convertToJava(Element element) {
         //element = element.clone();
+        try {
+            PrintStream out = new PrintStream("jnaerator-" + (iFile++) + ".out");
+            out.println(element);
+            out.close();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        final List<Declaration> extraDeclarationsOut = new ArrayList<Declaration>();
+        
         final Set<Pair<Element, Integer>> referencedElements = new HashSet<Pair<Element, Integer>>();
         element.accept(new Scanner() {
             @Override
@@ -112,7 +126,7 @@ public class BridJer {
 				vd.setValueType(pointerToTypeRef(wrapper));
                 Expression defVal = decl.getDefaultValue();
 				if (defVal != null) {
-					decl.setDefaultValue(methodCall(expr(typeRef(ptrClass())), "pointerTo" + StringUtils.capitalize(tr.toString()), defVal));
+					decl.setDefaultValue(staticPtrMethod("pointerTo" + StringUtils.capitalize(tr.toString()), defVal));
 				}
 			}
         }
@@ -131,6 +145,33 @@ public class BridJer {
 					}
 				}
             }
+            
+            int nConstants = 0;
+            
+            @Override
+            public void visitConstant(Constant c) {
+                if (c.getValue() instanceof String) {
+                    //Struct s = c.findParentOfType(Struct.class);
+                    Class charClass;
+                    String ptrMethodName;
+                    if (c.getType() == Constant.Type.LongString) {
+                        charClass = Short.class;
+                        ptrMethodName = "pointerToWideCString";
+                    } else {
+                        charClass = Byte.class;
+                        ptrMethodName = "pointerToCString";
+                    }
+                    String fieldName = "strConstant" + (++nConstants);
+                    VariablesDeclaration staticConstField = new VariablesDeclaration(typeRef(ident(ptrClass(), expr(typeRef(charClass)))), new DirectDeclarator(fieldName, staticPtrMethod(ptrMethodName, c.clone())));
+                    staticConstField.addModifiers(Modifier.Static, Modifier.Private, Modifier.Final);
+                    //s.addDeclaration(staticConstField);
+                    extraDeclarationsOut.add(staticConstField);
+                    c.replaceBy(varRef(fieldName));
+                    return;
+                }
+                
+                super.visitConstant(c);
+            }
             boolean isReferenced(Element e) {
             		if (e == null)
             			return false;
@@ -148,6 +189,83 @@ public class BridJer {
                         vr.replaceBy(nullExpr());
                     
                 }
+            }
+            
+            void replaceMalloc(TypeRef pointedType, Element toReplace, Expression sizeExpression) {
+                // TODO handle casts and sizeof expressions !
+                toReplace.replaceBy(staticPtrMethod("allocateBytes", sizeExpression));
+            }
+            
+            @Override
+            public void visitFunctionCall(FunctionCall fc) {
+                super.visitFunctionCall(fc);
+                if (fc.getTarget() == null && (fc.getFunction() instanceof VariableRef)) {
+                    Identifier ident = ((VariableRef)fc.getFunction()).getName();
+                    if ((ident instanceof SimpleIdentifier) && ((SimpleIdentifier)ident).getTemplateArguments().isEmpty()) {
+                        String name = ident.toString();
+                        List<Pair<String, Expression>> arguments = fc.getArguments();
+                        int nArgs = arguments.size();
+                        
+                        Expression 
+                            arg1 = nArgs > 0 ? arguments.get(0).getValue() : null, 
+                            arg2 = nArgs > 1 ? arguments.get(1).getValue() : null, 
+                            arg3 = nArgs > 2 ? arguments.get(2).getValue() : null;
+                                
+                        switch (nArgs) {
+                            case 1:
+                                if ("malloc".equals(name)) {
+                                    replaceMalloc(null, fc, arg1);
+                                    return;
+                                } else if ("free".equals(name)) {
+                                    fc.replaceBy(methodCall(arg1, "release"));
+                                    return;
+                                }
+                                break;
+                            case 3:
+                                if ("memset".equals(name)) {
+                                    Expression value = arg2, num = arg3;
+                                    if ("0".equals(value + ""))
+                                        fc.replaceBy(methodCall(arg1, "clearBytes", expr(0), num));
+                                    else
+                                        fc.replaceBy(methodCall(arg1, "clearBytes", expr(0), num, value));
+                                    return;
+                                } else if ("memcpy".equals(name)) {
+                                    Expression dest = arg1, source = arg2, num = arg3;
+                                    fc.replaceBy(methodCall(source, "copyBytesTo", expr(0), dest, expr(0), num));
+                                    return;
+                                } else if ("memmov".equals(name)) {
+                                    Expression dest = arg1, source = arg2, num = arg3;
+                                    fc.replaceBy(methodCall(source, "moveBytesTo", expr(0), dest, expr(0), num));
+                                    return;
+                                } else if ("memcmp".equals(name)) {
+                                    Expression ptr1 = arg1, ptr2 = arg2, num = arg3;
+                                    fc.replaceBy(methodCall(ptr1, "compareBytes", ptr2, num));
+                                    return;
+                                }
+                                break;
+                        }
+                        
+                        if ("printf".equals(name)) {
+                            fc.replaceBy(methodCall(memberRef(expr(typeRef(System.class)), "out"), "println", formatStr(arg1, arguments, 1)));
+                            return;
+                        } else if ("sprintf".equals(name)) {
+                            fc.replaceBy(methodCall(arg1, "setCString", formatStr(arg2, arguments, 2)));
+                            return;
+                        }
+                    }
+                }
+            }
+            
+            
+            Expression formatStr(Expression str, List<Pair<String, Expression>> arguments, int argsToSkip) {
+                List<Expression> fmtArgs = new ArrayList<Expression>();
+                for (int i = argsToSkip, nArgs = arguments.size(); i < nArgs; i++) 
+                    fmtArgs.add(arguments.get(i).getValue());
+
+                if (fmtArgs.isEmpty())
+                    return str;
+                else
+                    return methodCall(str, "format", fmtArgs.toArray(new Expression[fmtArgs.size()]));
             }
             @Override
             public void visitIf(If ifStat) {
@@ -212,24 +330,33 @@ public class BridJer {
 
             @Override
             public void visitMemberRef(MemberRef memberRef) {
-                super.visitMemberRef(memberRef);
                 // TODO restrict to struct/class fields
                 if (!(memberRef.getParentElement() instanceof FunctionCall))
-					if (memberRef.getName() != null)
-						memberRef.replaceBy(methodCall(memberRef.getTarget(), memberRef.getName().toString()));
+					if (memberRef.getName() != null) {
+                        Expression rep = methodCall(memberRef.getTarget(), memberRef.getName().toString());
+						memberRef.replaceBy(rep);
+                        rep.accept(this);
+                        return;
+                    }
+                
+                super.visitMemberRef(memberRef);
             }
             
             @Override
             public void visitVariablesDeclaration(VariablesDeclaration v) {
                 super.visitVariablesDeclaration(v);
                 if (v.getDeclarators().size() == 1) {
-					DirectDeclarator decl = (DirectDeclarator)v.getDeclarators().get(0);
-					TypeRef t = v.getValueType();
-					if (decl.getDefaultValue() == null && result.symbols.isClassType(t)) {
-						decl.setDefaultValue(new Expression.New(t.clone()));
-                        Expression vr = varRef(new SimpleIdentifier(decl.getName()));
-						((Statement.Block)v.getParentElement().getParentElement()).addStatement(stat(methodCall(expr(typeRef(BridJ.class)), "delete", vr)));
-					}
+                    Declarator decl = v.getDeclarators().get(0);
+                    //DirectDeclarator decl = (DirectDeclarator);
+                    MutableByDeclarator mutatedType = decl.mutateType(v.getValueType());
+                    if (mutatedType instanceof TypeRef) {
+                        TypeRef t = (TypeRef)mutatedType;
+                        if (decl.getDefaultValue() == null && result.symbols.isClassType(t)) {
+                            decl.setDefaultValue(new Expression.New(t.clone()));
+                            Expression vr = varRef(new SimpleIdentifier(decl.resolveName()));
+                            ((Statement.Block)v.getParentElement().getParentElement()).addStatement(stat(methodCall(expr(typeRef(BridJ.class)), "delete", vr)));
+                        }
+                    }
                 }
             }
 
@@ -283,7 +410,7 @@ public class BridJer {
             public void visitNew(New new1) {
                 super.visitNew(new1);
                 if (new1.getConstruction() == null)
-                    new1.replaceBy(methodCall(expr(typeRef(ptrClass())), "allocate" + StringUtils.capitalize(new1.getType().toString())));
+                    new1.replaceBy(staticPtrMethod("allocate" + StringUtils.capitalize(new1.getType().toString())));
             }
 
             public void notSup(Element x, String msg) throws UnsupportedConversionException {
@@ -313,8 +440,7 @@ public class BridJer {
                         notSup(newArray, "TODO only dimensions 1 to 3 are supported for primitive array creations !");
                 
                     newArray.replaceBy(
-                        methodCall(
-                            expr(typeRef(ptrClass())), 
+                        staticPtrMethod(
                             "allocate" + StringUtils.capitalize(newArray.getType().toString()) + "s", 
                             newArray.getDimensions().toArray(new Expression[newArray.getDimensions().size()])
                         )
@@ -324,8 +450,7 @@ public class BridJer {
                         notSup(newArray, "TODO only dimension 1 is supported for reference array creations !");
                 
                     newArray.replaceBy(
-                        methodCall(
-                            expr(typeRef(ptrClass())), 
+                        staticPtrMethod(
                             "allocateArray",  
                             result.typeConverter.typeLiteral(newArray.getType()), 
                             newArray.getDimensions().get(0)
@@ -346,7 +471,7 @@ public class BridJer {
                     targettedTypeRef.replaceBy(pointerToTypeRef(targettedTypeRef.getTarget().clone()));
             }
         });
-        return element;
+        return new Pair<Element, List<Declaration>>(element, extraDeclarationsOut);
     }
     TypeRef getWrapperType(TypeRef tr) {
     		JavaPrim prim = result.typeConverter.getPrimitive(tr, null);
