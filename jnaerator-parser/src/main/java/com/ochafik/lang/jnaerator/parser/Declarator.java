@@ -41,7 +41,10 @@ public abstract class Declarator extends ModifiableElement {
 	public void setBits(int bits) {
 		this.bits = bits;
 	}
-	
+	@Override 
+    public Declarator clone() {
+        return (Declarator)super.clone();
+    }
 	public static interface MutableByDeclarator {
 		MutableByDeclarator clone();
 	}
@@ -69,9 +72,10 @@ public abstract class Declarator extends ModifiableElement {
 	public abstract MutableByDeclarator mutateType(MutableByDeclarator t);
 	
 	public static class DirectDeclarator extends Declarator {
-		public DirectDeclarator(String name, int bits) {
+		public DirectDeclarator(String name, int bits, Expression defaultValue) {
 			setName(name);
 			setBits(bits);
+			setDefaultValue(defaultValue);
 		}
 		public DirectDeclarator(String name) {
 			setName(name);

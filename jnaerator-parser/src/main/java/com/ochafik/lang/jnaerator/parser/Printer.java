@@ -48,7 +48,7 @@ import com.ochafik.lang.jnaerator.parser.Identifier.QualifiedIdentifier;
 import com.ochafik.lang.jnaerator.parser.Identifier.SimpleIdentifier;
 import com.ochafik.lang.jnaerator.parser.Statement.Block;
 import com.ochafik.lang.jnaerator.parser.Statement.Catch;
-import com.ochafik.lang.jnaerator.parser.Statement.DeclarationStatement;
+//import com.ochafik.lang.jnaerator.parser.Statement.DeclarationStatement;
 import com.ochafik.lang.jnaerator.parser.Statement.DoWhile;
 import com.ochafik.lang.jnaerator.parser.Statement.ExpressionStatement;
 import com.ochafik.lang.jnaerator.parser.Statement.If;
@@ -758,9 +758,9 @@ public class Printer implements Visitor {
         implode(e.getIdentifiers(), String.valueOf(e.getSeparator()));
     }
 
-    public void visitDeclarationStatement(DeclarationStatement e) {
+    /*public void visitDeclarationStatement(DeclarationStatement e) {
         append(e.getDeclaration());
-    }
+    }*/
 
     public void visitThrow(Throw e) {
         append("throw ", e.getExpression(), ";");
@@ -986,10 +986,11 @@ public class Printer implements Visitor {
                     continue;
 
                 String ps = pack.toString();
+                importedClassesStrings.add(ids);
+                
                 if (ps.equals("java.lang") || ps.equals(outputPackage) || ids.startsWith(outputClassPrefix))
                     continue;
 
-                importedClassesStrings.add(ids);
                 importStatements.add("import " + ids + ";");
             }
         }

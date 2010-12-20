@@ -169,10 +169,16 @@ public class Symbols {
 		final SymbolTable rootTable = new SymbolTable(symbols);
 		root.accept(new Scanner() {
 			SymbolTable currentTable = rootTable;
+            
+            /*public void visitTypeRef(TypeRef element) {
+                super.visitTypeRef(element);
+            }*/
 			public void visitSimpleTypeRef(SimpleTypeRef element) {
+                super.visitSimpleTypeRef(element);
 				currentTable.resolveType(element.getName());
 			}
 			public void visitVariableRef(VariableRef element) {
+                super.visitVariableRef(element);
 				currentTable.resolveVariable(element.getName());
 			}
 			

@@ -18,6 +18,8 @@
 */
 package com.ochafik.lang.jnaerator;
 
+import java.util.Collections;
+import java.util.Collection;
 import java.io.PrintStream;
 import com.ochafik.lang.jnaerator.parser.Identifier.SimpleIdentifier;
 import com.ochafik.lang.jnaerator.parser.Statement.ExpressionStatement;
@@ -43,6 +45,7 @@ import java.util.HashSet;
 import java.util.Arrays;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.regex.Pattern;
 
 import com.ochafik.lang.jnaerator.JNAeratorConfig.GenFeatures;
@@ -78,6 +81,15 @@ public class BridJer {
         this.result = result;
     }
     
+    
+    String primName(TypeRef tr) {
+        tr = tr.clone();
+        tr.setModifiers(Collections.EMPTY_LIST);
+        return tr.toString();
+    }
+    String primCapName(TypeRef tr) {
+        return StringUtils.capitalize(primName(tr));
+    }
     Expression staticPtrMethod(String name, Expression... args) {
         return methodCall(expr(typeRef(ptrClass())), name, args);
     }
@@ -122,15 +134,18 @@ public class BridJer {
 				decl.setName(changedName);
 				VariablesDeclaration vd = (VariablesDeclaration)decl.getParentElement();
 				TypeRef tr = vd.getValueType();
-				TypeRef wrapper = getWrapperType(tr);
-				vd.setValueType(pointerToTypeRef(wrapper));
+				//TypeRef wrapper = getWrapperType(tr);
+				//vd.setValueType(pointerToTypeRef(wrapper));
+                vd.setValueType(new Pointer(tr, PointerStyle.Pointer));
                 Expression defVal = decl.getDefaultValue();
 				if (defVal != null) {
-					decl.setDefaultValue(staticPtrMethod("pointerTo" + StringUtils.capitalize(tr.toString()), defVal));
+					decl.setDefaultValue(staticPtrMethod("pointerTo" + primCapName(tr), defVal));
 				}
 			}
         }
         
+        
+        // First pass to detect referenced variables (no replacement here) :
         element.accept(new Scanner() {
             @Override
             public void visitIdentifier(Identifier identifier) {
@@ -144,6 +159,56 @@ public class BridJer {
 						referencedElements.add(new Pair<Element, Integer>(replacedIdentifier, replacedIdentifier.getId()));
 					}
 				}
+            }
+            
+            boolean isReferenced(Element e) {
+            		if (e == null)
+            			return false;
+                return referencedElements.contains(new Pair<Element, Integer>(e, e.getId()));
+            }
+            
+            @Override
+            public void visitVariableRef(VariableRef vr) {
+                super.visitVariableRef(vr);
+                Identifier ident = vr.getName();
+                if (isReferenced(ident)) {
+                    vr.replaceBy(methodCall(varRef(ident), "get"));
+				}
+            }
+            
+            @Override
+            public void visitUnaryOp(UnaryOp unaryOp) {
+                if (unaryOp.getOperator() == UnaryOperator.Reference) {
+                    if (unaryOp.getOperand() instanceof VariableRef) {
+                        VariableRef vr = (VariableRef)unaryOp.getOperand();
+
+                        Identifier ident = vr.getName();
+                        Element e = result.symbols.getVariable(ident);
+						if ((e != null || isReferenced(e)) || isReferenced(ident)) {
+                            String changedName = referencedElementsChangedNames.get(e.getId());
+                            if (changedName != null) {
+                                Element rep = varRef(changedName);
+                                unaryOp.replaceBy(rep);
+                                visit(rep);
+                                return;
+                            }
+						}
+					}
+                }
+                super.visitUnaryOp(unaryOp);
+            }
+        });
+        
+        
+        // Second pass : replacement !
+        element.accept(new Scanner() {
+            
+            @Override
+            public void visitVariableRef(VariableRef vr) {
+                super.visitVariableRef(vr);
+                String identStr = vr.getName() + "";
+                if ("NULL".equals(identStr))
+                    vr.replaceBy(nullExpr());
             }
             
             int nConstants = 0;
@@ -172,24 +237,7 @@ public class BridJer {
                 
                 super.visitConstant(c);
             }
-            boolean isReferenced(Element e) {
-            		if (e == null)
-            			return false;
-                return referencedElements.contains(new Pair<Element, Integer>(e, e.getId()));
-            }
-            @Override
-            public void visitVariableRef(VariableRef vr) {
-                super.visitVariableRef(vr);
-                Identifier ident = vr.getName();
-                if (isReferenced(ident)) {
-                    vr.replaceBy(methodCall(varRef(ident), "get"));
-				} else {
-                    String identStr = ident.toString();
-                    if ("NULL".equals(identStr))
-                        vr.replaceBy(nullExpr());
-                    
-                }
-            }
+            
             
             void replaceMalloc(TypeRef pointedType, Element toReplace, Expression sizeExpression) {
                 // TODO handle casts and sizeof expressions !
@@ -274,30 +322,6 @@ public class BridJer {
                 if (!(cond instanceof BinaryOp)) // TODO use typing rather than this hack to detect implicit boolean conversion in if statements (and not only there)
                     cond.replaceBy(expr(cond, BinaryOperator.IsDifferent, expr(0)));
             }
-            @Override
-            public void visitUnaryOp(UnaryOp unaryOp) {
-                if (unaryOp.getOperator() == UnaryOperator.Reference) {
-                    if (unaryOp.getOperand() instanceof VariableRef) {
-                        VariableRef vr = (VariableRef)unaryOp.getOperand();
-
-                        Identifier ident = vr.getName();
-                        Element e = result.symbols.getVariable(ident);
-						if ((e != null || isReferenced(e)) || isReferenced(ident)) {
-                            String changedName = referencedElementsChangedNames.get(e.getId());
-                            if (changedName != null) {
-                                Element rep = varRef(changedName);
-                                unaryOp.replaceBy(rep);
-                                visit(rep);
-                                return;
-                            }
-						}
-					}
-                }
-                super.visitUnaryOp(unaryOp);
-            }
-        });
-        
-        element.accept(new Scanner() {
             
             @Override
             public void visitUnaryOp(UnaryOp unaryOp) {
@@ -348,13 +372,31 @@ public class BridJer {
                 if (v.getDeclarators().size() == 1) {
                     Declarator decl = v.getDeclarators().get(0);
                     //DirectDeclarator decl = (DirectDeclarator);
-                    MutableByDeclarator mutatedType = decl.mutateType(v.getValueType());
-                    if (mutatedType instanceof TypeRef) {
-                        TypeRef t = (TypeRef)mutatedType;
-                        if (decl.getDefaultValue() == null && result.symbols.isClassType(t)) {
-                            decl.setDefaultValue(new Expression.New(t.clone()));
+                    TypeRef vt = v.getValueType();
+                    MutableByDeclarator mt = decl instanceof DirectDeclarator ? vt : decl.mutateType(vt);
+                    
+                    if (mt instanceof TypeRef) {
+                        TypeRef mutatedType = (TypeRef)mt;
+                        
+                        if (decl.getDefaultValue() == null && result.symbols.isClassType(mutatedType)) {
+                            decl.setDefaultValue(new Expression.New(mutatedType.clone()));
                             Expression vr = varRef(new SimpleIdentifier(decl.resolveName()));
-                            ((Statement.Block)v.getParentElement().getParentElement()).addStatement(stat(methodCall(expr(typeRef(BridJ.class)), "delete", vr)));
+                            ((Statement.Block)v.getParentElement()).addStatement(stat(methodCall(expr(typeRef(BridJ.class)), "delete", vr)));
+                        } else {
+                            TypeConversion.NL4JConversion conv = result.typeConverter.convertTypeToNL4J(
+                                mutatedType, 
+                                null,//callerLibraryName,
+                                null,//thisField("io"),
+                                null,//varRef(name),
+                                -1,//fieldIndex,
+                                -1//bits
+                            );
+                            
+                            v.setValueType(conv.typeRef);
+                            
+                            if (conv.arrayLengths != null && (mutatedType instanceof TargettedTypeRef) && decl.getDefaultValue() == null)
+                                v.setDeclarators(Arrays.asList((Declarator)new DirectDeclarator(decl.resolveName(), newAllocateArray(((TargettedTypeRef)mutatedType).getTarget(), conv.arrayLengths))));
+                                
                         }
                     }
                 }
@@ -410,7 +452,7 @@ public class BridJer {
             public void visitNew(New new1) {
                 super.visitNew(new1);
                 if (new1.getConstruction() == null)
-                    new1.replaceBy(staticPtrMethod("allocate" + StringUtils.capitalize(new1.getType().toString())));
+                    new1.replaceBy(staticPtrMethod("allocate" + primCapName(new1.getType())));
             }
 
             public void notSup(Element x, String msg) throws UnsupportedConversionException {
@@ -432,19 +474,21 @@ public class BridJer {
                 }
             }*/
             
+            Expression newAllocateArray(TypeRef tr, Collection<Expression> sizes) {
+                return staticPtrMethod(
+                    "allocate" + primCapName(tr) + "s", 
+                    sizes.toArray(new Expression[sizes.size()])
+                );
+            }
+            
             @Override
             public void visitNewArray(NewArray newArray) {
                 super.visitNewArray(newArray);
                 if (newArray.getType() instanceof Primitive) {
-                    if (newArray.getDimensions().size() != 1)
+                    if (newArray.getDimensions().size() > 3)
                         notSup(newArray, "TODO only dimensions 1 to 3 are supported for primitive array creations !");
                 
-                    newArray.replaceBy(
-                        staticPtrMethod(
-                            "allocate" + StringUtils.capitalize(newArray.getType().toString()) + "s", 
-                            newArray.getDimensions().toArray(new Expression[newArray.getDimensions().size()])
-                        )
-                    );
+                    newArray.replaceBy(newAllocateArray(newArray.getType(), newArray.getDimensions()));
                 } else {
                     if (newArray.getDimensions().size() != 1)
                         notSup(newArray, "TODO only dimension 1 is supported for reference array creations !");
@@ -464,12 +508,13 @@ public class BridJer {
                 super.visitPointer(pointer);
             }
             
+            /*
             @Override
             protected void visitTargettedTypeRef(TargettedTypeRef targettedTypeRef) {
                 super.visitTargettedTypeRef(targettedTypeRef);
                 if (targettedTypeRef.getTarget() != null)
                     targettedTypeRef.replaceBy(pointerToTypeRef(targettedTypeRef.getTarget().clone()));
-            }
+            }*/
         });
         return new Pair<Element, List<Declaration>>(element, extraDeclarationsOut);
     }

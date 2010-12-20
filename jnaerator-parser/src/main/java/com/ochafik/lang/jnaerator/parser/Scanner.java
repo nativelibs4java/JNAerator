@@ -50,7 +50,7 @@ import com.ochafik.lang.jnaerator.parser.Expression.VariableRef;
 import com.ochafik.lang.jnaerator.parser.Identifier.QualifiedIdentifier;
 import com.ochafik.lang.jnaerator.parser.Identifier.SimpleIdentifier;
 import com.ochafik.lang.jnaerator.parser.Statement.Block;
-import com.ochafik.lang.jnaerator.parser.Statement.DeclarationStatement;
+//import com.ochafik.lang.jnaerator.parser.Statement.DeclarationStatement;
 import com.ochafik.lang.jnaerator.parser.Statement.DoWhile;
 import com.ochafik.lang.jnaerator.parser.Statement.ExpressionStatement;
 import com.ochafik.lang.jnaerator.parser.Statement.If;
@@ -109,7 +109,7 @@ public class Scanner implements Visitor {
 	}
 	
 	protected void visitDeclaration(Declaration d) {
-		visitModifiableElement(d);
+        visitStatement(d);
 		
 		visit(d.getValueType());		
 	}
@@ -376,7 +376,8 @@ public class Scanner implements Visitor {
 	}
 
 	public void visitStatement(Statement statement) {
-		visitElement(statement);
+		visitModifiableElement(statement);
+		//visitElement(statement);
 	}
 
 	public void visitIf(If if1) {
@@ -443,11 +444,11 @@ public class Scanner implements Visitor {
 		visit(qualifiedIdentifier.getIdentifiers());
 	}
 
-	public void visitDeclarationStatement(
+	/*public void visitDeclarationStatement(
 			DeclarationStatement declarationStatement) {
 		visitStatement(declarationStatement);
 		visit(declarationStatement.getDeclaration());
-	}
+	}*/
 	
 	protected Scanner visit(Element e) {
 		if (e != null) {

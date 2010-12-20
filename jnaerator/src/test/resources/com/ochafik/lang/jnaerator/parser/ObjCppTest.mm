@@ -178,7 +178,7 @@ typedef struct {
 --
 int x[4];
 --
-bool (*)(const void* buffer, unsigned int length) x;
+bool (*x)(const void* buffer, unsigned int length);
 --
 unsigned long long int d;
 --

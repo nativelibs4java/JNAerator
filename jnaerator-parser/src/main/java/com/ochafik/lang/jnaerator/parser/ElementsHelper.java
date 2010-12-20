@@ -195,14 +195,14 @@ public class ElementsHelper {
 		return name == null ? null : new SimpleTypeRef(name);
 	}
     public static Statement stat(Declaration d) {
-        return new Statement.DeclarationStatement(d);
+        return d;//new Statement.DeclarationStatement(d);
     }
 	public static Statement stat(Expression x) {
 		return new ExpressionStatement(x);
 	}
 	public static Statement stat(TypeRef tr, String varName, Expression ass) {
 		VariablesDeclaration vd = new VariablesDeclaration(tr, new Declarator.DirectDeclarator(varName, ass));
-		return new Statement.DeclarationStatement(vd);
+		return vd;//new Statement.DeclarationStatement(vd);
 	}
 	public static Block block(Statement... x) {
 		return new Block(x);

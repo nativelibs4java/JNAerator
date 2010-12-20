@@ -112,7 +112,7 @@ public class CToJavaPreScanner extends Scanner {
 			Declarator.MutableByDeclarator type = vs.mutateType(v.getValueType());
 			if (type instanceof TypeRef) {
 				TypeRef tr = (TypeRef)type;
-				decl = new StoredDeclarations.TypeDef(tr, new DirectDeclarator(name, vs.getBits()));
+				decl = new StoredDeclarations.TypeDef(tr, new DirectDeclarator(name));
 				decl.importDetails(v, false);
 				decl.importDetails(vs, false);
 				decl.importDetails(tr, true);
@@ -166,13 +166,16 @@ public class CToJavaPreScanner extends Scanner {
 			MutableByDeclarator type = d.mutateType(arg.getValueType());
 			if (type instanceof TypeRef) {
 				arg.setValueType((TypeRef)type);
-				arg.setDeclarator(new DirectDeclarator(d.resolveName(), d.getBits()));
+				arg.setDeclarator(new DirectDeclarator(d.resolveName(), d.getBits(), arg.getDefaultValue()));
 			} else {
 				type = null;
 			}
 		}
 		super.visitArg(arg);
 	}
+    
+    private static final boolean mutateDeclaratorTypes = true;
+            
 	@Override
 	public void visitVariablesDeclaration(VariablesDeclaration v) {
 		super.visitVariablesDeclaration(v);
@@ -180,36 +183,46 @@ public class CToJavaPreScanner extends Scanner {
 		Element toAddAfter = v;
 		
 		/// Explode comma-separated variables declarations
-		int nDecl = v.getDeclarators().size();
+        int nDecl = v.getDeclarators().size();
 		for (Declarator vs : v.getDeclarators()) {
 			if (vs == null || vs instanceof DirectDeclarator && nDecl == 1)
 				continue;
 			
 			Declaration decl = null;
 		
-			Declarator.MutableByDeclarator type = vs.mutateType(v.getValueType());
-			if (type instanceof TypeRef) {
-				TypeRef tr = (TypeRef)type;
-				decl = new VariablesDeclaration(tr, new DirectDeclarator(vs.resolveName(), vs.getBits()));
-				decl.importDetails(v, false);
-				decl.importDetails(vs, false);
-				decl.importDetails(tr, true);
-			} else if (type instanceof Function) {
-				Function f = (Function)type;
+            
+			Declarator.MutableByDeclarator mutatedType = vs.mutateType(v.getValueType());
+			if (mutatedType instanceof Function) {
+				Function f = (Function)mutatedType;
 				f.setName(new SimpleIdentifier(vs.resolveName()));
-				decl = (Function)type;
+				decl = (Function)mutatedType;
 				decl.importDetails(v, false);
 				decl.importDetails(vs, false);
-			} else if (type instanceof Declaration) {
-				decl = (Declaration)type;
 			} else {
-				continue;
+                if (mutateDeclaratorTypes) {
+                    if (mutatedType instanceof TypeRef) {
+                        TypeRef tr = (TypeRef)mutatedType;
+                        decl = new VariablesDeclaration(tr, new DirectDeclarator(vs.resolveName(), vs.getBits(), vs.getDefaultValue()));
+                        decl.importDetails(v, false);
+                        decl.importDetails(vs, false);
+                        decl.importDetails(tr, true);
+                    } else if (mutatedType instanceof Declaration) {
+                        decl = (Declaration)mutatedType;
+                    }
+                }
+                if (decl == null) {
+                		TypeRef vt = v.getValueType();
+                		decl = new VariablesDeclaration(vt == null ? null : vt.clone(), vs.clone());
+					decl.importDetails(v, false);
+					decl.importDetails(vs, false);
+					decl.importDetails(v.getValueType(), true);
+                }
 			}
 			
 			toAddAfter.insertSibling(decl, false);
 			toAddAfter = decl;
 
-			decl.accept(this);//super.visitVariablesDeclaration(decl);
+			//decl.accept(this);//super.visitVariablesDeclaration(decl);
 		}
 		if (toAddAfter != v)
 			v.replaceBy(null);

@@ -20,8 +20,6 @@
 /**
 	This grammar is by no mean complete.
 	It is able to parse preprocessed C & Objective-C files and can tolerate some amount of C++. 
-	It lacks serious expression support, which is being worked on.
-	Complex variable declarations may not be supported, such as complex signatures of functions that return function pointers...
 */
 
 grammar ObjCpp;
@@ -114,7 +112,13 @@ import static com.ochafik.lang.jnaerator.parser.StoredDeclarations.*;
 		ModifierKinds_scope scope = (ModifierKinds_scope)ModifierKinds_stack.get(ModifierKinds_stack.size() - 1);
 		return scope.allowedKinds.contains(kind);
 	}
-	
+	public void addTypeIdent(String ident) {
+		try {
+			$Symbols::typeIdentifiers.add(ident);
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
+	}
 	boolean isObjCArgDef() {
 		if (ModContext_stack.isEmpty())
 			return false;
@@ -408,7 +412,7 @@ externDeclarations returns [ExternDeclarations declaration]
 declaration returns [Declaration declaration, List<Modifier> modifiers, String preComment, int startTokenIndex]
 scope IsTypeDef;
 scope ModContext;
-/*@after {
+@after {
 	if ($declaration == null)
 	try {
 		int i = $start.getTokenIndex();
@@ -421,7 +425,7 @@ scope ModContext;
 	} catch (Exception ex) {
 		ex.printStackTrace();
 	}
-}*/
+}
 	:	
 		{
 		  $modifiers = new ArrayList<Modifier>();
@@ -548,7 +552,7 @@ enumCore returns [Enum e]
 	:
 		t='enum'
 		(
-			m1=modifiers { modifiers.addAll($m1.modifiers); }
+			( m1=modifiers { modifiers.addAll($m1.modifiers); } )?
 			(
 				ab=enumBody {
 					$e = $ab.e;
@@ -556,7 +560,7 @@ enumCore returns [Enum e]
 				} |
 				tag=qualifiedIdentifier
 				(
-					m2=modifiers { modifiers.addAll($m2.modifiers); }
+					( m2=modifiers { modifiers.addAll($m2.modifiers); } )?
 					nb=enumBody {
 						$e = $nb.e;
 						$e.setForwardDeclaration(false);
@@ -783,7 +787,7 @@ scope Symbols;
 		//typeToken=('struct' | 'union' | { next("class") }?=> IDENTIFIER)
 		typeToken=('struct' | 'union' | 'class')
 		(
-			m1=modifiers { modifiers.addAll($m1.modifiers); }
+			( m1=modifiers { modifiers.addAll($m1.modifiers); } )?
 			(
 				ab=structBody {
 					$struct = $ab.struct;
@@ -794,7 +798,7 @@ scope Symbols;
 				}
 				(
 					(
-						m2=modifiers { modifiers.addAll($m2.modifiers); }
+						( m2=modifiers { modifiers.addAll($m2.modifiers); } )?
 						(
 							':'
 							'public'?//m3=modifiers
@@ -840,15 +844,15 @@ scope Symbols;
 				$function.setName(ident("operator")); 
 				mark($function, getLine($start));
 			} 
-			castPreMods=modifiers { $function.addModifiers($castPreMods.modifiers); }
+			( castPreMods=modifiers { $function.addModifiers($castPreMods.modifiers); } )?
 			castTypeRef=mutableTypeRef { 
 				$function.setValueType($castTypeRef.type); 
 			} |
-			preMods1=modifiers { $function.addModifiers($preMods1.modifiers); }
-			returnTypeRef=mutableTypeRef? { 
+			( preMods1=modifiers { $function.addModifiers($preMods1.modifiers); } )?
+			returnTypeRef=mutableTypeRef { 
 				$function.setValueType($returnTypeRef.type); 
 			}
-			preMods2=modifiers { $function.addModifiers($preMods2.modifiers); }
+			( preMods2=modifiers { $function.addModifiers($preMods2.modifiers); } )?
 			name=qualifiedCppFunctionName {
 				$function.setName($name.identifier); 
 				mark($function, getLine($start));
@@ -857,7 +861,7 @@ scope Symbols;
 		argList {
 			$function.setArgs($argList.args);
 		}
-		postMods=modifiers { $function.addModifiers($postMods.modifiers); }
+		( postMods=modifiers { $function.addModifiers($postMods.modifiers); } )?
 		(
 			':'
 			i1=constructorInitializer { $function.addInitializer($i1.init); }
@@ -887,7 +891,15 @@ constructorInitializer returns [FunctionCall init]
 	
 modifiers returns [List<Modifier> modifiers]
 @init { $modifiers = new ArrayList<Modifier>(); }
-	: 	( modifier { $modifiers.addAll($modifier.modifiers); } )*
+	: 	
+		m=modifier {
+			$modifiers.addAll($m.modifiers); 
+		}
+		(  
+			x=modifier { 
+				$modifiers.addAll($x.modifiers); 
+			} 
+		)*
 	;
 
 pragmaContent	:	
@@ -928,9 +940,7 @@ modifier returns [List<Modifier> modifiers, String asmName]
 				else 
 					$asmName += s; 
 			} )* |
-			extendedModifiers {
-				$modifiers.addAll($extendedModifiers.modifiers);
-			}
+			( extendedModifiers { $modifiers.addAll($extendedModifiers.modifiers); } )?
 		) ')'
 	;
 
@@ -967,24 +977,16 @@ argDef	returns [Arg arg]
 			}
 		)
 		(
-			declarator? { 
+			declarator { 
 				if ($arg != null) {
-					if ($declarator.declarator != null)
-						$arg.setDeclarator($declarator.declarator); 
-					/*else if ($arg.getValueType() instanceof FunctionSignature) {
-						FunctionSignature fs = (FunctionSignature)$arg.getValueType();
-						if (fs != null && fs.getFunction() != null) {
-							//$arg.setName(fs.getFunction().getName());
-							//fs.getFunction().setName(null);
-						}
-					}*/
+					$arg.setDeclarator($declarator.decl); 
 				}
 			}
-		)
-		('=' dv=topLevelExpr {
+		)?
+		( '=' dv=topLevelExpr {
 			if ($arg != null)
 				$arg.setDefaultValue($dv.expr);
-		})? 
+		} )? 
 		| 
 		'...' { 
 			$arg = Arg.createVarArgs(); 
@@ -1049,7 +1051,7 @@ scope IsTypeDef;
 templateArgDecl returns [Arg arg]
 	:	t=('class' | 'typename') n=IDENTIFIER {
 			$arg = new Arg($n.text, new SimpleTypeRef($t.text));
-			$Symbols::typeIdentifiers.add($t.text);
+			addTypeIdent($t.text);
 		} |
 		argDef ('=' expression)? {
 			$arg = $argDef.arg;
@@ -1057,15 +1059,17 @@ templateArgDecl returns [Arg arg]
 	;	
 	
 functionSignatureSuffix returns [FunctionSignature signature]
-	:	tk='(' m1=modifiers pt=('*' | '^') m2=modifiers IDENTIFIER? ')' { 
+	:	tk='(' m1=modifiers? pt=('*' | '^') m2=modifiers? IDENTIFIER? ')' { 
 			$signature = mark(new FunctionSignature(new Function(Function.Type.CFunction, $IDENTIFIER.text == null ? null : new SimpleIdentifier($IDENTIFIER.text), null)), getLine($tk));
 			if ($pt.text.equals("^"))
 				$signature.setType(FunctionSignature.Type.ObjCBlock);
 			$signature.getFunction().setType(Function.Type.CFunction);
-			$signature.getFunction().addModifiers($m1.modifiers);
-			$signature.getFunction().addModifiers($m2.modifiers);
+			if ($m1.modifiers != null)
+				$signature.getFunction().addModifiers($m1.modifiers);
+			if ($m2.modifiers != null)
+				$signature.getFunction().addModifiers($m2.modifiers);
 			if ($IDENTIFIER.text != null && isTypeDef()) {
-				$Symbols::typeIdentifiers.add($IDENTIFIER.text);
+				addTypeIdent($IDENTIFIER.text);
 			}
 		}
 		'(' (
@@ -1083,12 +1087,13 @@ functionSignatureSuffix returns [FunctionSignature signature]
 	;
 
 functionSignatureSuffixNoName returns [FunctionSignature signature]
-	:	tk='(' modifiers pt=('*' | '^') ')' { 
+	:	tk='(' m=modifiers? pt=('*' | '^') ')' { 
 			$signature = mark(new FunctionSignature(new Function(Function.Type.CFunction, null, null)), getLine($tk));
 			if ($pt.text.equals("^"))
 				$signature.setType(FunctionSignature.Type.ObjCBlock);
 			$signature.getFunction().setType(Function.Type.CFunction);
-			$signature.getFunction().addModifiers($modifiers.modifiers);
+			if ($m.modifiers != null)
+				$signature.getFunction().addModifiers($m.modifiers);
 		}
 		'(' (
 			a1=argDef { 
@@ -1106,9 +1111,9 @@ functionSignatureSuffixNoName returns [FunctionSignature signature]
 
 mutableTypeRef returns [TypeRef type]
 	:	
-		( typeRefCore { 
-			$type = $typeRefCore.type; 
-		} )
+		nonMutableTypeRef {
+			$type = $nonMutableTypeRef.type;
+		}
 		(
 			(
 				m1=typeMutator {
@@ -1127,69 +1132,42 @@ mutableTypeRef returns [TypeRef type]
 		)*
 	;
 
-nonMutableTypeRef returns [TypeRef type]
+declarator  returns [Declarator decl]
 	:
-		typeRefCore { 
-			$type = $typeRefCore.type; 
-		}
-		(
-			(
-				typeMutator {
-					$type = $typeMutator.mutator.mutateType($type);
-				}
-			)*
-			(
-				fs=functionSignatureSuffix { 
-					assert $fs.signature != null && $fs.signature.getFunction() != null;
-					if ($fs.signature != null && $fs.signature.getFunction() != null) {
-						$fs.signature.getFunction().setValueType($type); 
-						$type = $functionSignatureSuffix.signature;
-					}
-				}
-			)
-		)*
-	;
-
-declarator  returns [Declarator declarator]
-	:
-		modifiers
+		m=modifiers?
 		(
 			(
 				(
 					( 
 						directDeclarator { 
-							$declarator = $directDeclarator.declarator; 
+							$decl = $directDeclarator.decl; 
 						} 
 					) |
 					( 
 						pt=('*' | '&' | '^')
 						inner=declarator {
-							$declarator = new PointerDeclarator($inner.declarator, PointerStyle.parsePointerStyle($pt.text));
+							// TODO EMPTY DECLARATOR... maybe not the brightest idea one can have...
+							$decl = new PointerDeclarator($inner.decl == null ? new DirectDeclarator(null) : $inner.decl, PointerStyle.parsePointerStyle($pt.text));
+							//$decl = new PointerDeclarator(new DirectDeclarator("toto")/*$inner.decl*/, PointerStyle.parsePointerStyle($pt.text));
+							//$decl = new DirectDeclarator("toto");
 						} 
 					)
 				)
 				(
 					':' bits=DECIMAL_NUMBER {
-						if ($declarator != null)
-							$declarator.setBits(Integer.parseInt($bits.text));
-					}
-				)?
-				(
-					'=' 
-					dv=topLevelExpr {
-						if ($declarator != null)
-							$declarator.setDefaultValue($dv.expr);
+						if ($decl != null)
+							$decl.setBits(Integer.parseInt($bits.text));
 					}
 				)?
 			) |
 			':' bits=DECIMAL_NUMBER {
-				$declarator = mark(new DirectDeclarator(null), getLine($bits));
-				$declarator.setBits(Integer.parseInt($bits.text));
+				$decl = mark(new DirectDeclarator(null), getLine($bits));
+				$decl.setBits(Integer.parseInt($bits.text));
 			}
 		)
 		{
-			if ($declarator != null)
-				$declarator.setModifiers($modifiers.modifiers);
+			if ($decl != null && $m.modifiers != null)
+				$decl.setModifiers($m.modifiers);
 		}
 	;
 
@@ -1216,8 +1194,7 @@ declarationEOF returns [Declaration declaration]
 varDecl returns [VariablesDeclaration decl]
 	:	
 		tr=nonMutableTypeRef { 
-			$decl = new VariablesDeclaration($tr.type); 
-			//$decl.addModifiers($modifiers.modifiers);
+			$decl = new VariablesDeclaration($tr.type);
 		}
 		(
 			d1=declaratorsList {
@@ -1236,46 +1213,67 @@ objCProtocolRefList
 		'>'
 	;
 
+declaratorWithValue returns [Declarator decl]
+	:
+		declarator {
+			$decl = $declarator.decl;
+		}
+		(
+			'=' 
+			dv=topLevelExpr {
+				$decl.setDefaultValue($dv.expr);
+			}
+		)?
+	;
+
 declaratorsList returns [List<Declarator> declarators]
 	:	{ $declarators = new ArrayList<Declarator>(); }
-		d=declarator { $declarators.add($d.declarator); }
+		d=declaratorWithValue { 
+			$declarators.add($d.decl); 
+		}
 		(
 			',' 
-			x=declarator { $declarators.add($x.declarator); }
+			x=declaratorWithValue { 
+				$declarators.add($x.decl); 
+			}
 		)*
 	;
 
-directDeclarator returns [Declarator declarator]
+directDeclarator returns [Declarator decl]
 	:	
 		(
 			{ parseModifier(next()) == null }?=> IDENTIFIER {
-				$declarator = mark(new DirectDeclarator($IDENTIFIER.text), getLine($IDENTIFIER));
+				$decl = mark(new DirectDeclarator($IDENTIFIER.text), getLine($IDENTIFIER));
 				if (isTypeDef()) {
-					$Symbols::typeIdentifiers.add($IDENTIFIER.text);
+					addTypeIdent($IDENTIFIER.text);
 				}
 			} | 
 			'(' inner=declarator ')' {
-				$declarator = $inner.declarator;
-				if ($declarator != null)
-					$declarator.setParenthesized(true);
+				$decl = $inner.decl;
+				if ($decl != null)
+					$decl.setParenthesized(true);
 			} 
 		)
 		(
 			'[' 
 			(
-				expression? {
-					if ($expression.text != null) {
-						if ($declarator instanceof ArrayDeclarator)
-							((ArrayDeclarator)$declarator).addDimension($expression.expr);
+				(
+					expression {
+						if ($decl instanceof ArrayDeclarator)
+							((ArrayDeclarator)$decl).addDimension($expression.expr);
 						else
-							$declarator = new ArrayDeclarator($declarator, $expression.expr);
-					} else
-						$declarator = new ArrayDeclarator($declarator, new Expression.EmptyArraySize());
-				}
+							$decl = new ArrayDeclarator($decl, $expression.expr);
+					} 
+				) |
+				(
+					{
+						$decl = new ArrayDeclarator($decl, new Expression.EmptyArraySize());
+					}
+				)
 			)
 			']' | 
 			argList {
-				$declarator = new FunctionDeclarator($declarator, $argList.args);
+				$decl = new FunctionDeclarator($decl, $argList.args);
 			}
 		)*
 	;
@@ -1307,7 +1305,7 @@ argList returns [List<Arg> args, boolean isObjC]
 		cp=')'
 	;
 
-typeRefCore returns [TypeRef type]
+nonMutableTypeRef returns [TypeRef type]
 @init {
 	List<Modifier> modifiers = new ArrayList<Modifier>();
 	//TypeRef ref = null;
@@ -1322,8 +1320,8 @@ typeRefCore returns [TypeRef type]
 		mark($type, line);
 	}
 }
-	:	
-		preMods=modifiers { modifiers.addAll($preMods.modifiers); }
+	:
+		( preMods=modifiers { modifiers.addAll($preMods.modifiers); } )?
 		(
 			'typename' pn=typeName { $type = $pn.type; } |
 			{ 
@@ -1336,7 +1334,40 @@ typeRefCore returns [TypeRef type]
 			structCore { $type = $structCore.struct; } |
 			enumCore { $type = $enumCore.e; }
 		)?
-		postMods=modifiers { modifiers.addAll($postMods.modifiers); }
+		( postMods=modifiers { modifiers.addAll($postMods.modifiers); } )?
+		/*
+		(
+			( preMods=modifiers { modifiers.addAll($preMods.modifiers); } )?
+			(
+				//{ parseModifier(next()) == null }?=> 
+				tr1=typeRefInsides {
+					$type = $tr1.type;
+				}
+				( postMods1=modifiers { modifiers.addAll($postMods1.modifiers); } )? 
+			)?
+		) |
+		//{ parseModifier(next()) == null }? 
+		(
+			tr2=typeRefInsides {
+				$type = $tr2.type;
+			}
+			( postMods2=modifiers { modifiers.addAll($postMods2.modifiers); } )?
+		)*/
+	;
+	
+
+typeRefInsides returns [TypeRef type]
+	:
+		'typename' pn=typeName { $type = $pn.type; } |
+		{ 
+			isTypeIdentifier(next()) || 
+			(
+				parseModifier(next(1)) == null && 
+				!next(2, "=", ",", ";", ":", "[", "(", ")")
+			) 
+		}?=> an=typeName { $type = $an.type; } |
+		structCore { $type = $structCore.struct; } |
+		enumCore { $type = $enumCore.e; }
 	;
 	
 typeName returns [TypeRef type]
@@ -1347,7 +1378,7 @@ typeName returns [TypeRef type]
 			else
 				$type = new SimpleTypeRef($i.identifier);
 			if ($i.identifier.isPlain())
-				$Symbols::typeIdentifiers.add($i.identifier.toString());
+				addTypeIdent($i.identifier.toString());
 		}
 	;
 	
@@ -1717,7 +1748,7 @@ scope Symbols;
 		'{'
 		(
 			statement {
-				$statement.addStatement($statement.statement);
+				$statement.addStatement($statement.stat);
 			} |
 			lineDirective
 		)* 
@@ -1733,37 +1764,42 @@ gccAsmInOuts
 		gccAsmInOut ( ',' gccAsmInOut )*
 	;
 	
-statement returns [Statement statement]
+statement returns [Statement stat]
 	:
 		b=statementsBlock { 
-			$statement = $b.statement; 
+			$stat = $b.statement; 
 		} |
 		// see http://ibiblio.org/gferg/ldp/GCC-Inline-Assembly-HOWTO.html
-		{ next("__asm__") }? IDENTIFIER '('
+		{ next("__asm__") }?=> IDENTIFIER '('
 			STRING* ( ':' gccAsmInOuts )*
 		')' ';' ? |
-		{ next("foreach") }? IDENTIFIER '(' varDecl { next("in") }? IDENTIFIER expression ')' statement { 
+		{ next("foreach") }?=> IDENTIFIER '(' varDecl { next("in") }? IDENTIFIER expression ')' statement { 
 			// TODO
 		} |
-		es=expression ';' { 
-			$statement = new ExpressionStatement($es.expr); 
+		pe=postfixExpr ';' {
+			// Hack to make sure that f(x); is not parsed as a declaration !
+			// Must stay before declaration.
+			$stat = new ExpressionStatement($pe.expr); 
 		} |
 		declaration { 
-			$statement = stat($declaration.declaration); 
+			$stat = stat($declaration.declaration); 
+		} |
+		es=expression ';' { 
+			$stat = new ExpressionStatement($es.expr); 
 		} |
 		rt='return' rex=expression? ';' { 
-			$statement = mark(new Return($rex.expr), getLine($rt));
+			$stat = mark(new Return($rex.expr), getLine($rt));
 		} |
 		IDENTIFIER ':' | // label
 		'break' ';' |
 		'if' '(' ifTest=topLevelExpr ')' thn=statement ('else' els=statement)? { 
-			$statement = new Statement.If(ifTest.expr, thn, els);
+			$stat = new Statement.If(ifTest.expr, thn, els);
 		} | 
 		'while' '(' whileTest=topLevelExpr ')' wh=statement { 
-			$statement = new Statement.While(whileTest.expr, wh);
+			$stat = new Statement.While(whileTest.expr, wh);
 		} | 
 		'do' doStat=statement 'while' '(' doWhileTest=topLevelExpr ')' ';' { 
-			$statement = new Statement.DoWhile(doWhileTest.expr, doStat);
+			$stat = new Statement.DoWhile(doWhileTest.expr, doStat);
 		} | 
 		'for' '('
 			(

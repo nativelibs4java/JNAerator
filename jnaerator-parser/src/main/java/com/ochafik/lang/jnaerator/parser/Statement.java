@@ -23,7 +23,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-public abstract class Statement extends Element {
+public abstract class Statement extends ModifiableElement { // HACK : statement is not modifiable ! it's just so that Declaration is a Statement and a ModifiableElement (damned single inheritance !)
     @Override
 	public Statement clone() {
         return (Statement)super.clone();
@@ -46,17 +46,9 @@ public abstract class Statement extends Element {
 		}
 
 		@Override
-		public Element getNextChild(Element child) {
-			return null;
-		}
-
-		@Override
-		public Element getPreviousChild(Element child) {
-			return null;
-		}
-
-		@Override
 		public boolean replaceChild(Element child, Element by) {
+			if (super.replaceChild(child, by))
+				return true;
 			if (child == getExpression()) {
 				setExpression((Expression)by);
 				return true;
@@ -65,6 +57,7 @@ public abstract class Statement extends Element {
 		}
 
 	}
+    /*
 	public static class DeclarationStatement extends Statement {
 		Declaration declaration;
 		public void setDeclaration(Declaration declaration) {
@@ -97,7 +90,7 @@ public abstract class Statement extends Element {
 			}
 			return false;
 		}
-	}
+	}*/
 	public static class Return extends Statement {
 		Expression value;
 		
@@ -119,16 +112,24 @@ public abstract class Statement extends Element {
 
 		@Override
 		public Element getNextChild(Element child) {
+			Element e = super.getNextChild(child);
+			if (e != null)
+				return e;
 			return null;
 		}
 
 		@Override
 		public Element getPreviousChild(Element child) {
+			Element e = super.getPreviousChild(child);
+			if (e != null)
+				return e;
 			return null;
 		}
 
 		@Override
 		public boolean replaceChild(Element child, Element by) {
+			if (super.replaceChild(child, by))
+				return true;
 			if (child == getValue()) {
 				setValue((Expression)by);
 				return true;
@@ -170,15 +171,9 @@ public abstract class Statement extends Element {
 			visitor.visitIf(this);
 		}
 		@Override
-		public Element getNextChild(Element child) {
-			return null;
-		}
-		@Override
-		public Element getPreviousChild(Element child) {
-			return null;
-		}
-		@Override
 		public boolean replaceChild(Element child, Element by) {
+			if (super.replaceChild(child, by))
+				return true;
 			if (child == getCondition()) {
 				setCondition((Expression)by);
 				return true;
@@ -238,20 +233,28 @@ public abstract class Statement extends Element {
 		}
 		@Override
 		public Element getNextChild(Element child) {
-			Element e = getNextSibling(initStatements, child);
+			Element e = super.getNextChild(child);
+			if (e != null)
+				return e;
+			e = getNextSibling(initStatements, child);
 			if (e != null)
 				return e;
 			return getNextSibling(postStatements, child);
 		}
 		@Override
 		public Element getPreviousChild(Element child) {
-			Element e = getPreviousSibling(initStatements, child);
+			Element e = super.getPreviousChild(child);
+			if (e != null)
+				return e;
+			e = getPreviousSibling(initStatements, child);
 			if (e != null)
 				return e;
 			return getPreviousSibling(postStatements, child);
 		}
 		@Override
 		public boolean replaceChild(Element child, Element by) {
+			if (super.replaceChild(child, by))
+				return true;
 			if (child == getCondition()) {
 				setCondition((Expression)by);
 				return true;
@@ -292,15 +295,9 @@ public abstract class Statement extends Element {
 			visitor.visitWhile(this);
 		}
 		@Override
-		public Element getNextChild(Element child) {
-			return null;
-		}
-		@Override
-		public Element getPreviousChild(Element child) {
-			return null;
-		}
-		@Override
 		public boolean replaceChild(Element child, Element by) {
+			if (super.replaceChild(child, by))
+				return true;
 			if (child == getCondition()) {
 				setCondition((Expression)by);
 				return true;
@@ -345,17 +342,9 @@ public abstract class Statement extends Element {
 		}
 
 		@Override
-		public Element getNextChild(Element child) {
-			return null;
-		}
-
-		@Override
-		public Element getPreviousChild(Element child) {
-			return null;
-		}
-
-		@Override
 		public boolean replaceChild(Element child, Element by) {
+			if (super.replaceChild(child, by))
+				return true;
 			if (getExpression() == child) {
 				setExpression((Expression)by);
 				return true;
@@ -409,16 +398,24 @@ public abstract class Statement extends Element {
 		}
 		@Override
 		public Element getNextChild(Element child) {
+			Element e = super.getNextChild(child);
+			if (e != null)
+				return e;
 			return getNextSibling(statements, child);
 		}
 
 		@Override
 		public Element getPreviousChild(Element child) {
+			Element e = super.getPreviousChild(child);
+			if (e != null)
+				return e;
 			return getPreviousSibling(statements, child);
 		}
 
 		@Override
 		public boolean replaceChild(Element child, Element by) {
+			if (super.replaceChild(child, by))
+				return true;
 			return replaceChild(statements, Statement.class, this, child, by);
 		}
 	}
@@ -451,7 +448,9 @@ public abstract class Statement extends Element {
 
         @Override
         public boolean replaceChild(Element child, Element by) {
-            if (child == getDeclaration()) {
+            if (super.replaceChild(child, by))
+				return true;
+			if (child == getDeclaration()) {
                 setDeclaration((VariablesDeclaration)by);
                 return true;
             }
@@ -460,16 +459,6 @@ public abstract class Statement extends Element {
                 return true;
             }
             return false;
-        }
-
-        @Override
-        public Element getNextChild(Element child) {
-            return null;
-        }
-
-        @Override
-        public Element getPreviousChild(Element child) {
-            return null;
         }
 
         @Override
@@ -516,7 +505,9 @@ public abstract class Statement extends Element {
 
         @Override
         public boolean replaceChild(Element child, Element by) {
-            if (child == getTryStatement()) {
+            if (super.replaceChild(child, by))
+				return true;
+			if (child == getTryStatement()) {
 				setTryStatement((Statement)by);
 				return true;
 			}
@@ -525,16 +516,6 @@ public abstract class Statement extends Element {
 				return true;
 			}
             return replaceChild(catches, Catch.class, this, child, by);
-        }
-
-        @Override
-        public Element getNextChild(Element child) {
-            return getNextSibling(catches, child);
-        }
-
-        @Override
-        public Element getPreviousChild(Element child) {
-            return getPreviousSibling(catches, child);
         }
 
         @Override

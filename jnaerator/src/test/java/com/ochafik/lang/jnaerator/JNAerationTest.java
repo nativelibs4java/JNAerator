@@ -176,7 +176,7 @@ public class JNAerationTest {
 						}
 					}));
 				}*/
-				Assert.assertTrue("Error : " + ex, false);
+				Assert.assertTrue("Error : " + ex + " in :\n" + test.extraJavaSourceFilesContents, false);
 //				throw new RuntimeException(e);
 			}
 			
