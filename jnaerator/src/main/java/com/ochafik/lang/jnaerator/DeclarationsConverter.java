@@ -1395,7 +1395,7 @@ public class DeclarationsConverter {
 		}
 		Struct structJavaClass = publicStaticClass(structName, baseClass, Struct.Type.JavaClass, struct);
 		structJavaClass.addToCommentBefore(preComments);
-		System.out.println("parentFieldsCount(structName = " + structName + ") = " + parentFieldsCount);
+		//System.out.println("parentFieldsCount(structName = " + structName + ") = " + parentFieldsCount);
 		final int iChild[] = new int[] { parentFieldsCount };
 
 		//cl.addDeclaration(new EmptyDeclaration())
