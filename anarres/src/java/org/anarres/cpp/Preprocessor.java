@@ -139,8 +139,7 @@ public class Preprocessor implements Closeable {
 
 		this.quoteincludepath = new ArrayList<String>();
 		this.sysincludepath = new ArrayList<String>();
-		this.frameworkspath = new ArrayList<String>(); 
-		
+		this.frameworkspath = new ArrayList<String>();
 		this.features = EnumSet.noneOf(Feature.class);
 		this.warnings = EnumSet.noneOf(Warning.class);
 		this.filesystem = new JavaFileSystem();
@@ -540,11 +539,21 @@ public class Preprocessor implements Closeable {
 	/* XXX Make this include the NL, and make all cpp directives eat
 	 * their own NL. */
 	private Token line_token(int line, String name, String extra) {
+		/*StringBuilder	buf = new StringBuilder();
+		buf.append("#line ").append(line)
+			.append(" \"");
+		/* XXX This call to escape(name) is correct but ugly. * /
+		MacroTokenSource.escape(buf, name);
+		buf.append("\"").append(extra).append("\n");
+		return new Token(P_LINE, line, 0, buf.toString(), null);
+		*/
+		//*
 		return new Token(P_LINE, line, 0, 
 			name == null ? "" :
 			"\n#line " + line + " \"" + (properStringTokensInLinePragmas ? String.valueOf(name).replace("\\", "\\\\") : name) + "\"" + extra + "\n",
 			null
 				);
+		//*/
 	}
 
 	private Token source_token()
@@ -1081,8 +1090,7 @@ public class Preprocessor implements Closeable {
 		if (!file.isFile())
 			return false;
 		if (getFeature(Feature.DEBUG))
-			System.err.println("Including: " + file);
-		
+			System.err.println("pp: including " + file);
 		push_source(file.getSource(), true);
 		return true;
 	}

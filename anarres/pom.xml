@@ -6,7 +6,7 @@
   <artifactId>anarres-cpp-jnaerator</artifactId>
   <name>Anarres JCPP (with JNAerator modifications)</name>
   <url>http://www.anarres.org/projects/jcpp/</url>
-  <version>1.2.5-JNAerator.2</version>
+  <version>1.2.6-JNAerator.1</version>
   <packaging>jar</packaging>
   <description>
   </description>

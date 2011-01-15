@@ -1,13 +1,13 @@
 mvn "-Dstorepass=$KEYSTORE_PASS" deploy:deploy-file  \
 	-Dfile=build/tar/lib/anarres-cpp.jar \
-	-Durl=scp://shell.sourceforge.net/home/groups/j/jn/jnaerator/htdocs/maven \
-	-DrepositoryId=jnaerator-repo \
+	-Durl=sftp://frs.sourceforge.net:/home/groups/n/na/nativelibs4java/htdocs/maven \
+	-DrepositoryId=nativelibs4java-repo \
 	-DgroupId=org.anarres.cpp \
 	-DartifactId=anarres-cpp-jnaerator \
 	-Dpackaging=jar \
 	-DgeneratePom.description="JNAerator's version of Anarres JCPP" \
 	-DuniqueVersion=true \
-	"-Dversion=1.2.5-JNAerator.3" \
+	"-Dversion=1.2.6-JNAerator.1" \
 	-f pom.xml
 	
 #	-f scripts/deploy.pom \
