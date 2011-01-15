@@ -108,6 +108,7 @@ testInput("one /* one */\n", NL, I("one"), WHITESPACE, CCOMMENT);
 
 		/* Variadic macros. */
 		testInput("#define var(x...) a x b\n", NL);
+		testInput("#define var(...) a __VA_ARGS__ b\n", NL);
 		testInput("var(e, f, g)\n", NL,
 			I("a"), WHITESPACE,
 			I("e"), ',', WHITESPACE,

@@ -910,6 +910,11 @@ public class Preprocessor implements Closeable {
 							error(tok,
 								"Unterminated macro parameter list");
 							return tok;
+						case ELLIPSIS:
+							// Unnamed Variadic Macros 
+							args.add("__VA_ARGS__");
+							source_untoken(tok);
+							break;
 						default:
 							error(tok,
 								"error in macro parameters: " +
