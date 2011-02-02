@@ -6,22 +6,24 @@
 JAR=$1
 NAME=$2
 
+URL="http://nativelibs4java.sourceforge.net/webstart/$NAME/$PROJECT_VERSION/"
+
 # BridJ:
 #ARCHS="linux_x86 linux_x64 win32 win64 darwin_universal"
 #ARCHS_ROOT=""
 
 # JNA:
-ARCHS="darwin linux-i386 linux-amd64 linux-ia64 sunos-x86 sunos-amd64 sunos-sparc sunos-sparcv9 freebsd-i386 freebsd-amd64 win32-x86 win32-amd64"
-ARCHS_ROOT="com/sun/jna/"
+#ARCHS="darwin linux-i386 linux-amd64 linux-ia64 sunos-x86 sunos-amd64 sunos-sparc sunos-sparcv9 freebsd-i386 freebsd-amd64 win32-x86 win32-amd64"
+#ARCHS_ROOT="com/sun/jna/"
 
 
 OUT_DIR="webstart"
 TMP_DIR="webstartify_tmp"
 
 rm -fR $TMP_DIR
-rm -fR $OUT_DIR
+rm -fR $OUT_DIR/$NAME/$PROJECT_VERSION
 mkdir $TMP_DIR
-mkdir $OUT_DIR
+mkdir -p $OUT_DIR/$NAME/$PROJECT_VERSION
 
 echo Unzipping $JAR...
 unzip -d $TMP_DIR $JAR > /dev/null
@@ -29,31 +31,30 @@ unzip -d $TMP_DIR $JAR > /dev/null
 for N in $ARCHS ; do
 	if [[ -d "$TMP_DIR/$ARCHS_ROOT$N" ]] ; then
 		echo Repackaging arch $N...
-		jar -cf $OUT_DIR/$NAME-$N.jar -C $TMP_DIR/$ARCHS_ROOT$N `ls $TMP_DIR/$ARCHS_ROOT$N`
+		jar -cf $OUT_DIR/$NAME/$PROJECT_VERSION/$NAME-$N.jar -C $TMP_DIR/$ARCHS_ROOT$N `ls $TMP_DIR/$ARCHS_ROOT$N`
 		rm -fR $TMP_DIR/$ARCHS_ROOT$N ;
 	fi ;
 done
 
-jar -cf $OUT_DIR/$NAME-webstart.jar -C $TMP_DIR .
+jar -cf $OUT_DIR/$NAME/$PROJECT_VERSION/$NAME-stripped.jar -C $TMP_DIR .
 
 rm -fR $TMP_DIR
 
-for J in `ls $OUT_DIR/*.jar` ; do
+for J in `ls $OUT_DIR/$NAME/$PROJECT_VERSION/*.jar` ; do
 	echo Signing $J...
 	jarsigner `if [[ "$KEYSTORE_PASS" != "" ]] ; then echo "-storepass $KEYSTORE_PASS" ; fi`  -keystore ~/security/ochafik.keystore $J ochafik2009 ;
 done
 
-echo "
-<?xml version=\"1.0\" encoding=\"UTF-8\"?>
+echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
 <jnlp spec=\"1.0+\"
   codebase=\"$URL\"
-  href="$NAME.jnlp"
+  href=\"$NAME-nativelibs.jnlp\"
 >
 	<information>
-	  <title>BridJ</title>
-	  <vendor>Olivier Chafik</vendor>
-	  <homepage href=\"http://bridj.googlecode.com/\" />
-	  <description>BridJ runtime</description>
+	  <title>$PROJECT_TITLE native libraries (version $PROJECT_VERSION)</title>
+	  <vendor>$PROJECT_VENDOR</vendor>
+	  <homepage href=\"$PROJECT_URL\" />
+	  <description>$PROJECT_DESCRIPTION</description>
 	</information>
 	<security>
 	  <all-permissions/>
@@ -105,6 +106,30 @@ echo "
 	
 	<component-desc/>
 </jnlp>
-" > $OUT_DIR/$NAME.jnlp
+" > $OUT_DIR/$NAME/$PROJECT_VERSION/$NAME-nativelibs.jnlp
 
-open $OUT_DIR
+echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
+<jnlp spec=\"1.0+\"
+  codebase=\"$URL\"
+  href=\"$NAME.jnlp\"
+>
+	<information>
+	  <title>$PROJECT_TITLE (version $PROJECT_VERSION)</title>
+	  <vendor>$PROJECT_VENDOR</vendor>
+	  <homepage href=\"$PROJECT_URL\" />
+	  <description>$PROJECT_DESCRIPTION</description>
+	</information>
+	<security>
+	  <all-permissions/>
+	</security>
+	<resources>
+		<j2se version=\"1.5+\"/>
+		<extension name=\"$NAME-nativelibs\" href=\"$URL$NAME-nativelibs.jnlp\"/>
+		<jar href=\"$URL$NAME-stripped.jar\"/>
+	</resources>
+	
+	<component-desc/>
+</jnlp>
+" > $OUT_DIR/$NAME/$PROJECT_VERSION/$NAME.jnlp
+
+open $OUT_DIR/$NAME/$PROJECT_VERSION/

@@ -1,0 +1,13 @@
+#!/bin/bash
+
+export ARCHS="darwin linux-i386 linux-amd64 linux-ia64 sunos-x86 sunos-amd64 sunos-sparc sunos-sparcv9 freebsd-i386 freebsd-amd64 win32-x86 win32-amd64"
+export ARCHS_ROOT="com/sun/jna/"
+
+export PROJECT_TITLE="JNA"
+export PROJECT_VENDOR="JNA (repackaged by ochafik)"
+export PROJECT_URL="http://jna.java.net/"
+export PROJECT_DESCRIPTION="Dynamic C interoperability layer for Java with many supported platforms."	
+export PROJECT_VERSION="3.2.7"
+
+sh jnaerator/scripts/webstartify ~/.m2/repository/net/java/dev/jna/jna/$PROJECT_VERSION/jna-$PROJECT_VERSION.jar jna
+
