@@ -387,7 +387,7 @@ public class JNAeratorConfigUtils {
 
 	public static void readProjectConfig(File projectFile, String configName, final JNAeratorConfig config) throws Exception {
 		String projectFileName = projectFile.getName();
-		config.rootDirectoriesPrefixesForSourceComments.add(projectFile.getParentFile().getCanonicalPath() + File.separator);
+		config.rootDirectoriesPrefixesForSourceComments.add(projectFile.getCanonicalFile().getParent() + File.separator);
 		
 		if (projectFileName.endsWith(".sln")) {
 			if (configName == null)
