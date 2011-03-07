@@ -1416,11 +1416,14 @@ public class DeclarationsConverter {
 		String ptrName = "pointer";
 		structJavaClass.addDeclaration(new Function(Type.JavaMethod, ident(structName), null, new Arg(ptrName, typeRef(result.config.runtime.pointerClass))).setBody(block(stat(methodCall("super", varRef(ptrName))))).addModifiers(Modifier.Public));
 
+        if (isUnion)
+            structJavaClass.addAnnotation(new Annotation(result.config.runtime.typeRef(JNAeratorConfig.Runtime.Ann.Union)));
+
         int iVirtual = 0;
 		//List<Declaration> children = new ArrayList<Declaration>();
 		for (Declaration d : struct.getDeclarations()) {
-            if (isUnion)
-                iChild[0] = 0;
+            //if (isUnion)
+            //    iChild[0] = 0;
 
 			if (d instanceof VariablesDeclaration) {
 				convertVariablesDeclaration((VariablesDeclaration)d, structJavaClass, iChild, structName, callerLibraryClass);

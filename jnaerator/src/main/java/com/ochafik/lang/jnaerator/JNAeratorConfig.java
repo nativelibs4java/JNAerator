@@ -127,7 +127,7 @@ public class JNAeratorConfig {
 
         public static final Runtime DEFAULT = JNAerator;
         public enum Ann {
-            Bits, FastCall, Mangling, ObjCBlock, This, ThisCall, Length, ByValue, Field, Virtual, Symbol, Name
+            Bits, FastCall, Mangling, ObjCBlock, This, ThisCall, Length, ByValue, Field, Virtual, Symbol, Name, Union
         }
         Runtime(boolean hasFastStructs, 
                 boolean hasJNA,
