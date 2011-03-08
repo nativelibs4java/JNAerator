@@ -366,7 +366,11 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
         prim("NSDouble", JavaPrim.Double);
         prim("CGDouble", JavaPrim.Double);
 
-        prim("BOOL", JavaPrim.Boolean);
+        if (result.config.runtime == JNAeratorConfig.Runtime.BridJ)
+        		prim("BOOL", JavaPrim.Integer);
+        	else
+        		prim("BOOL", JavaPrim.Boolean);
+        	
         prim("bool", JavaPrim.Boolean);
         prim("Boolean", JavaPrim.Boolean);
         prim("boolean_t", JavaPrim.Boolean);
