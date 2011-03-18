@@ -319,7 +319,8 @@ public class MissingNamesChooser extends Scanner {
 	 */
 	private boolean chooseNameIfMissing(FunctionSignature functionSignature) {
 		Function function = functionSignature.getFunction();
-		if (function != null && (isNull(function.getName()) || functionSignature.getParentElement() instanceof VariablesDeclaration)) {
+        Element parent = functionSignature.getParentElement();
+		if (function != null && (isNull(function.getName()) || parent instanceof VariablesDeclaration || parent instanceof Arg)) {
 			String name = null;
 			String exact = JNAeratorUtils.getExactTypeDefName(functionSignature);
 			if (exact != null)

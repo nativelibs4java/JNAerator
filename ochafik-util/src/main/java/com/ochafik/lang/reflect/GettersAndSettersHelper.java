@@ -98,9 +98,11 @@ public class GettersAndSettersHelper {
 					GetterAndSetterInfo getterAndSetter = getOrCreatePair(fieldName);
 					//assertNull("Already found setter " + getterAndSetter.setter, getterAndSetter.setter);
 					//assert getterAndSetter.setter == null;
-					getterAndSetter.setter = method;
-					if (!getterAndSetter.isConsistent())
-						getterAndSetter.setter = null;
+                    if (getterAndSetter.setter == null) {
+                        getterAndSetter.setter = method;
+                        if (!getterAndSetter.isConsistent())
+                            getterAndSetter.setter = null;
+                    }
 				}
 			}
 		}

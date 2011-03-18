@@ -1060,28 +1060,40 @@ templateArgDecl returns [Arg arg]
 	;	
 	
 functionSignatureSuffix returns [FunctionSignature signature]
-	:	tk='(' m1=modifiers? pt=('*' | '^')? m2=modifiers? IDENTIFIER? ')' { 
-			$signature = mark(new FunctionSignature(new Function(Function.Type.CFunction, $IDENTIFIER.text == null ? null : new SimpleIdentifier($IDENTIFIER.text), null)), getLine($tk));
-			if ($pt.text != null && $pt.text.equals("^"))
-				$signature.setType(FunctionSignature.Type.ObjCBlock);
+	:	tk='(' {
+			$signature = mark(new FunctionSignature(new Function(Function.Type.CFunction, null, null)), getLine($tk));
 			$signature.getFunction().setType(Function.Type.CFunction);
+		}
+		m1=modifiers? {
 			if ($m1.modifiers != null)
 				$signature.getFunction().addModifiers($m1.modifiers);
-			if ($m2.modifiers != null)
-				$signature.getFunction().addModifiers($m2.modifiers);
-			if ($IDENTIFIER.text != null && isTypeDef()) {
-				addTypeIdent($IDENTIFIER.text);
-			}
 		}
+		(
+			pt=('*' | '^') 
+			m2=modifiers? {
+				if ($m2.modifiers != null)
+					$signature.getFunction().addModifiers($m2.modifiers);
+				if ($pt.text != null && $pt.text.equals("^"))
+					$signature.setType(FunctionSignature.Type.ObjCBlock);
+			}
+		)?
+		(
+			ii=IDENTIFIER {
+				if (isTypeDef())
+					addTypeIdent($ii.text);
+				$signature.getFunction().setName(new SimpleIdentifier($IDENTIFIER.text));
+			}
+		)?
+		')'
 		'(' (
 			a1=argDef { 
 				if (!$a1.text.equals("void"))
-					((FunctionSignature)$signature).getFunction().addArg($a1.arg); 
+					$signature.getFunction().addArg($a1.arg); 
 			}
 			(
 				',' 
 				ax=argDef { 
-					((FunctionSignature)$signature).getFunction().addArg($ax.arg); 
+					$signature.getFunction().addArg($ax.arg); 
 				}
 			)*
 		)? ')'

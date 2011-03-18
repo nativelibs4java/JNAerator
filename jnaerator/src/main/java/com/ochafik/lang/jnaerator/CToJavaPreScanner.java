@@ -34,12 +34,14 @@ import com.ochafik.lang.jnaerator.parser.TypeRef;
 import com.ochafik.lang.jnaerator.parser.Declarator;
 import com.ochafik.lang.jnaerator.parser.VariablesDeclaration;
 import com.ochafik.lang.jnaerator.parser.Declarator.DirectDeclarator;
+import com.ochafik.lang.jnaerator.parser.Declarator.FunctionDeclarator;
 import com.ochafik.lang.jnaerator.parser.Declarator.MutableByDeclarator;
 import com.ochafik.lang.jnaerator.parser.ModifierKind;
 import com.ochafik.lang.jnaerator.parser.StoredDeclarations.TypeDef;
 import com.ochafik.lang.jnaerator.parser.TypeRef.FunctionSignature;
 import com.ochafik.lang.jnaerator.parser.TypeRef.TaggedTypeRef;
 import com.ochafik.util.string.StringUtils;
+import java.util.Arrays;
 
 public class CToJavaPreScanner extends Scanner {
 	public CToJavaPreScanner() {
@@ -78,6 +80,22 @@ public class CToJavaPreScanner extends Scanner {
 			taggedTypeRefDeclaration.setCommentBefore(null);
 		}
 	}
+
+    @Override
+    protected void visitStoredDeclarations(StoredDeclarations d) {
+        super.visitStoredDeclarations(d);
+        if (d.getDeclarators().size() == 1) {
+            Declarator declarator = d.getDeclarators().get(0);
+            if (declarator instanceof FunctionDeclarator) {
+                FunctionDeclarator fd = (FunctionDeclarator)declarator;
+                FunctionSignature fs = new FunctionSignature(new Function(Function.Type.CFunction, null, d.getValueType(), fd.getArgs()));
+                d.setValueType(fs);
+                d.setDeclarators(new DirectDeclarator(fd.resolveName(), fd.getDefaultValue()));
+            }
+        }
+    }
+
+
 	
 	@Override
 	public void visitTypeDef(TypeDef v) {
