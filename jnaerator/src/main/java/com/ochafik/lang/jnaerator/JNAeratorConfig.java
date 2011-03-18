@@ -18,6 +18,7 @@
 */
 package com.ochafik.lang.jnaerator;
 
+import org.bridj.cpp.com.IID;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
@@ -52,7 +53,7 @@ import java.util.HashSet;
 import static com.ochafik.lang.jnaerator.parser.ElementsHelper.*;
 
 public class JNAeratorConfig {
-	
+
 	public enum Compiler {
 		GCC4, MSVC9
 	}
@@ -127,7 +128,8 @@ public class JNAeratorConfig {
 
         public static final Runtime DEFAULT = JNAerator;
         public enum Ann {
-            Bits, FastCall, Mangling, ObjCBlock, This, ThisCall, Length, ByValue, Field, Virtual, Symbol, Name, Union
+            Bits, FastCall, Mangling, ObjCBlock, This, ThisCall, Length, ByValue, Field, Virtual, Symbol, Name, Union,
+            IID
         }
         Runtime(boolean hasFastStructs, 
                 boolean hasJNA,
@@ -166,6 +168,8 @@ public class JNAeratorConfig {
         	if (this == BridJ) {
         		if (ann == Ann.Length)
         			n = Array.class.getSimpleName();
+                else if (ann == Ann.IID)
+                    return ElementsHelper.typeRef(ident(IID.class));
         	}
             List<String> elts = new ArrayList<String>();
             elts.addAll(Arrays.asList(annotationPackage.split("\\.")));
@@ -211,27 +215,28 @@ public class JNAeratorConfig {
 	}
 	
 	public final JNAeratorConfig.PreprocessorConfig preprocessorConfig = new JNAeratorConfig.PreprocessorConfig();
-	public boolean followIncludes = false;
+	public boolean followIncludes;
+	boolean microsoftCOM;
 	public File preprocessingOutFile, macrosOutFile;
 	public File choicesOutFile, choicesInputFile;
-	public boolean useJNADirectCalls = false;
-	public boolean limitComments = false, noComments = false;
+	public boolean useJNADirectCalls;
+	public boolean limitComments, noComments;
 	public boolean putTopStructsInSeparateFiles = true;
 	public boolean bundleRuntime = true;
-	public boolean beautifyNames = false;
+	public boolean beautifyNames;
     public String[] libraryNamingPrefixes;
-	public boolean extractLibSymbols = false;
-    //public boolean fastStructs = false;
+	public boolean extractLibSymbols;
+    //public boolean fastStructs;
     public List<Pair<MessageFormat, MessageFormat>> onlineDocumentationURLFormats = new ArrayList<Pair<MessageFormat, MessageFormat>>();
 	public String entryName;
 	public int maxConstructedFields = 10;
 	public boolean beanStructs;
-    public boolean reification = false;
-    public boolean convertBodies = false;
+    public boolean reification;
+    public boolean convertBodies;
 	
 	public Map<String, String> extraJavaSourceFilesContents = new LinkedHashMap<String, String>();
 	public Set<String> frameworks = new LinkedHashSet<String>();
-	boolean skipIncludedFrameworks = false;
+	boolean skipIncludedFrameworks;
 	public FileFilter fileFilter = new FileExtensionFilter(DEFAULT_HEADER_EXTENSIONS.split("[:;]"));
 	
 	public Map<String, List<File>> libraryFilesByArch = new LinkedHashMap<String, List<File>>();
@@ -278,7 +283,7 @@ public class JNAeratorConfig {
 //		if (System.getenv("POINTER_CLASSES") == null)
 //			features.remove(GenFeatures.TypedPointersForForwardDeclarations);
 	}
-	public boolean verbose = false;
+	public boolean verbose;
 	public File outputDir;
 	public List<String> rootDirectoriesPrefixesForSourceComments = new ArrayList<String>();
 	public Adapter<Function, Boolean> functionsAccepter;
@@ -341,15 +346,15 @@ public class JNAeratorConfig {
 	}
 	public String libraryForElementsInNullFile;
 	public String cPlusPlusNameSpaceSeparator = "_";
-	public boolean preferJavac = false;
+	public boolean preferJavac;
 	public Set<File> bridgeSupportFiles = new LinkedHashSet<File>();
 	public File outputJar;
 	public File cacheDir;
 	public boolean autoConf = true;
     public Set<String> undefines = new HashSet<String>();
-	public boolean gccLong = false, sizeAsLong = false;
+	public boolean gccLong, sizeAsLong;
 	public boolean compile = true;
-    public boolean noAutoImports = false;
+    public boolean noAutoImports;
 	public boolean bundleSources = true;
 	public boolean noCPlusPlus;
 	
@@ -364,9 +369,9 @@ public class JNAeratorConfig {
 
 	Set<File> sourceFiles = new LinkedHashSet<File>();
 	public boolean bundleLibraries = true;
-	public boolean wcharAsShort = false;
-    public boolean charPtrAsString = false;
-	public boolean genCPlusPlus = false;
+	public boolean wcharAsShort;
+    public boolean charPtrAsString;
+	public boolean genCPlusPlus;
 	public File extractedSymbolsOut;
 	public boolean stringifyConstCStringReturnValues = true;
 	public File bridgesupportOutFile;

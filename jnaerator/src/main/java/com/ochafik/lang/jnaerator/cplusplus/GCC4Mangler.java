@@ -29,6 +29,7 @@ import com.ochafik.lang.jnaerator.parser.Element;
 import com.ochafik.lang.jnaerator.parser.Function;
 import com.ochafik.lang.jnaerator.parser.Identifier;
 import com.ochafik.lang.jnaerator.parser.Modifier;
+import com.ochafik.lang.jnaerator.parser.ModifierType;
 import com.ochafik.lang.jnaerator.parser.Struct;
 import com.ochafik.lang.jnaerator.parser.TypeRef;
 import com.ochafik.lang.jnaerator.parser.Declarator.PointerStyle;
@@ -43,7 +44,7 @@ public class GCC4Mangler implements CPlusPlusMangler {
 		if (tr == null)
 			tr = new TypeRef.SimpleTypeRef("void");
 		
-		if (Modifier.Const.isContainedBy(tr.getModifiers()))
+		if (tr.hasModifier(ModifierType.Const))
 			b.append("K");
 		if (tr instanceof TypeRef.TargettedTypeRef) {
 			if (tr instanceof TypeRef.Pointer && ((TypeRef.Pointer)tr).getPointerStyle() == PointerStyle.Reference)

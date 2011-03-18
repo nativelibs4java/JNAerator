@@ -76,6 +76,7 @@ import com.ochafik.lang.jnaerator.parser.Function;
 import com.ochafik.lang.jnaerator.parser.Identifier;
 import com.ochafik.lang.jnaerator.parser.ModifiableElement;
 import com.ochafik.lang.jnaerator.parser.Modifier;
+import com.ochafik.lang.jnaerator.parser.ModifierType;
 import com.ochafik.lang.jnaerator.parser.ObjCppParser;
 import com.ochafik.lang.jnaerator.parser.Scanner;
 import com.ochafik.lang.jnaerator.parser.SourceFile;
@@ -131,9 +132,9 @@ public class JNAerator {
 
     private void privatize(Declaration d) {
         List<Modifier> modifiers = new ArrayList<Modifier>(d.getModifiers());
-        modifiers.remove(Modifier.Public);
-        modifiers.remove(Modifier.Protected);
-        modifiers.add(0, Modifier.Private);
+        modifiers.remove(ModifierType.Public);
+        modifiers.remove(ModifierType.Protected);
+        modifiers.add(0, ModifierType.Private);
         d.setModifiers(modifiers);
     }
 
@@ -350,6 +351,9 @@ public class JNAerator {
                     case SkipLibInstance:
                     	config.skipLibraryInstanceDeclarations = true;
                     	break;
+                    case COM:
+                        config.microsoftCOM = true;
+                        break;
 					case NoStringReturns:
 						config.stringifyConstCStringReturnValues = false;
 						break;
@@ -900,8 +904,8 @@ public class JNAerator {
 						
 						//for (Declaration decl : decls) {
 							if (decl instanceof VariablesDeclaration && decl.getValueType() != null)
-								decl.getValueType().addModifiers(Modifier.Extern);
-							decl.addModifiers(Modifier.parseModifier(pub));
+								decl.getValueType().addModifiers(ModifierType.Extern);
+							decl.addModifiers(ModifierType.parseModifier(pub));
 							if (decl instanceof Function) {
 								Function f = (Function)decl;
 								List<SimpleIdentifier> si = new ArrayList<SimpleIdentifier>(f.getName().resolveSimpleIdentifiers());
@@ -920,9 +924,9 @@ public class JNAerator {
 									ci = new QualifiedIdentifier(QualificationSeparator.Colons, si);
 								}
 								if (dem.contains("__thiscall"))
-									f.addModifiers(Modifier.__thiscall);
+									f.addModifiers(ModifierType.__thiscall);
 								if (dem.contains("__fastcall"))
-									f.addModifiers(Modifier.__fastcall);
+									f.addModifiers(ModifierType.__fastcall);
 								
 								Struct s = cppClasses.get(ci.toString());
 								if (s == null) {
@@ -1167,7 +1171,7 @@ public class JNAerator {
 			interf.addToCommentBefore("Wrapper for library <b>" + library + "</b>",
 					result.declarationsConverter.getFileCommentContent(result.config.libraryProjectSources.get(library), null)
 			);
-			interf.addModifiers(Modifier.Public);
+			interf.addModifiers(ModifierType.Public);
 			interf.setTag(simpleLibraryClassName);
             interf.addParent(ident(config.runtime.libraryClass, expr(typeRef(simpleLibraryClassName))));
             interf.addDeclaration(new Function(Function.Type.StaticInit, null, null).setBody(block(
@@ -1176,16 +1180,16 @@ public class JNAerator {
 					MemberRefStyle.Dot,
 					"register"
 				))
-			)).addModifiers(Modifier.Static));
+			)).addModifiers(ModifierType.Static));
 
 //            String libFileOrDirArgName = "libraryFileOrDirectory";
 //            Function constr = new Function(Function.Type.JavaMethod, fullLibraryClassName.resolveLastSimpleIdentifier().clone(), null, new Arg(libFileOrDirArgName, typeRef(File.class)));
-//            constr.addModifiers(Modifier.Public);
+//            constr.addModifiers(ModifierType.Public);
 //            constr.setBody(block(stat(methodCall("super", varRef(libFileOrDirArgName)))));
 //            interf.addDeclaration(constr);
 //
 //            constr = new Function(Function.Type.JavaMethod, fullLibraryClassName.resolveLastSimpleIdentifier().clone(), null);
-//            constr.addModifiers(Modifier.Public);
+//            constr.addModifiers(ModifierType.Public);
 //            constr.addThrown(typeRef(FileNotFoundException.class));
 //            constr.setBody(block(stat(methodCall("super", classLiteral(typeRef(fullLibraryClassName.clone()))))));
 //            interf.addDeclaration(constr);
@@ -1201,7 +1205,7 @@ public class JNAerator {
 			librariesHub = new Struct();
 			librariesHub.addToCommentBefore("JNA Wrappers instances");
 			librariesHub.setType(Type.JavaClass);
-			librariesHub.addModifiers(Modifier.Public, Modifier.Abstract);
+			librariesHub.addModifiers(ModifierType.Public, ModifierType.Abstract);
 			Identifier hubName = result.getHubFullClassName();
 			librariesHub.setTag(hubName.resolveLastSimpleIdentifier());
 			hubOut = result.classOutputter.getClassSourceWriter(hubName.toString());
@@ -1230,7 +1234,7 @@ public class JNAerator {
 			if (hubOut != null)
 				interf.addToCommentBefore("@see " + result.config.entryName + "." + library);
 			
-			interf.addModifiers(Modifier.Public);
+			interf.addModifiers(ModifierType.Public);
 			interf.setTag(simpleLibraryClassName);
 			
 			Expression nativeLibFieldExpr = null;
@@ -1252,7 +1256,7 @@ public class JNAerator {
 				interf.addDeclaration(new VariablesDeclaration(typeRef(String.class), new Declarator.DirectDeclarator(
 					libNameStringFieldName,
 					libraryPathGetterExpr
-				)).addModifiers(Modifier.Public, Modifier.Static, Modifier.Final));
+				)).addModifiers(ModifierType.Public, ModifierType.Static, ModifierType.Final));
 				
 				Expression libraryNameFieldExpr = memberRef(expr(libTypeRef.clone()), MemberRefStyle.Dot, ident(libNameStringFieldName));
 				Expression optionsMapExpr = memberRef(expr(typeRef(MangledFunctionMapper.class)), MemberRefStyle.Dot, "DEFAULT_OPTIONS");
@@ -1265,7 +1269,7 @@ public class JNAerator {
 						libraryNameFieldExpr.clone(),
 						optionsMapExpr.clone()
 					)
-				)).addModifiers(Modifier.Public, Modifier.Static, Modifier.Final));
+				)).addModifiers(ModifierType.Public, ModifierType.Static, ModifierType.Final));
 				nativeLibFieldExpr = memberRef(expr(libTypeRef.clone()), MemberRefStyle.Dot, ident(nativeLibFieldName));
 					
 				if (result.config.useJNADirectCalls) {
@@ -1276,7 +1280,7 @@ public class JNAerator {
 							"register",
 							libraryNameFieldExpr.clone()
 						))
-					)).addModifiers(Modifier.Static));
+					)).addModifiers(ModifierType.Static));
 				} else {
 					VariablesDeclaration instanceDecl = new VariablesDeclaration(libTypeRef, new Declarator.DirectDeclarator(
 						librariesHub == null ? "INSTANCE" : library,
@@ -1291,7 +1295,7 @@ public class JNAerator {
 								optionsMapExpr.clone()
 							)
 						)
-					)).addModifiers(Modifier.Public, Modifier.Static, Modifier.Final);
+					)).addModifiers(ModifierType.Public, ModifierType.Static, ModifierType.Final);
 					if (librariesHub != null) {
 						librariesHub.addDeclaration(instanceDecl);
 						librariesHub.addProtocol(fullLibraryClassName.clone());
@@ -1304,7 +1308,7 @@ public class JNAerator {
             List<Function> functions = result.functionsByLibrary.get(library);
             if (functions != null)
                 for (Function function : functions)
-                    if (Modifier.__stdcall.isContainedBy(function.getModifiers())) {
+                    if (function.hasModifier(ModifierType.__stdcall)) {
                         stdcall = true;
                         break;
                     }
@@ -1359,11 +1363,11 @@ public class JNAerator {
                 String pointerVarName = "address";
                 ptClass.addDeclaration(new Function(Function.Type.JavaMethod, fakePointer, null,
                     new Arg(pointerVarName, typeRef(Pointer.class))
-                ).addModifiers(Modifier.Public).setBody(
+                ).addModifiers(ModifierType.Public).setBody(
                     block(stat(methodCall("super", varRef(pointerVarName)))))
                 );
                 ptClass.addDeclaration(new Function(Function.Type.JavaMethod, fakePointer, null)
-                .addModifiers(Modifier.Public)
+                .addModifiers(ModifierType.Public)
                 .setBody(
                     block(stat(methodCall("super")))
                 ));
@@ -1374,12 +1378,12 @@ public class JNAerator {
                 String addressVarName = "address";
                 ptClass.addDeclaration(new Function(Function.Type.JavaMethod, fakePointer, null,
                     new Arg(addressVarName, typeRef(long.class))
-                ).addModifiers(Modifier.Public).setBody(
+                ).addModifiers(ModifierType.Public).setBody(
                     block(stat(methodCall("super", varRef(addressVarName)))))
                 );
                 ptClass.addDeclaration(new Function(Function.Type.JavaMethod, fakePointer, null,
                     new Arg(addressVarName, typeRef(org.bridj.Pointer.class))
-                ).addModifiers(Modifier.Public).setBody(
+                ).addModifiers(ModifierType.Public).setBody(
                     block(stat(methodCall("super", varRef(addressVarName)))))
                 );
                 interf.addDeclaration(decl(ptClass));
@@ -1440,9 +1444,9 @@ public class JNAerator {
                     Function f = original.clone();
                     List<Arg> args = new ArrayList<Arg>(f.getArgs());
                     f.setModifiers(Collections.EMPTY_LIST);
-                    f.addModifiers(Modifier.Public);
+                    f.addModifiers(ModifierType.Public);
                     if (thisLocation < 0)
-                        f.addModifiers(Modifier.Static);
+                        f.addModifiers(ModifierType.Static);
                     String functionName = f.getName().toString();
                     f.setName(ident(reifyFunctionName(result, fakePointerName, functionName)));
                     Identifier id = p.getFirst();

@@ -40,6 +40,7 @@ import com.ochafik.lang.jnaerator.cplusplus.GCC4Mangler;
 import com.ochafik.lang.jnaerator.cplusplus.VC9Mangler;
 import com.ochafik.lang.jnaerator.parser.Function;
 import com.ochafik.lang.jnaerator.parser.Modifier;
+import com.ochafik.lang.jnaerator.parser.ModifierType;
 import com.ochafik.util.SystemUtils;
 import com.ochafik.util.listenable.Adapter;
 import com.ochafik.util.string.RegexUtils;
@@ -279,7 +280,7 @@ public class JNAeratorConfigUtils {
 			config.preprocessorConfig.macros.put("_WCHAR_T_DEFINED", null);
 			config.preprocessorConfig.macros.put("_NATIVE_WCHAR_T_DEFINED", null);
 			
-			config.preprocessorConfig.macros.put("_MSC_VER", "800");
+			config.preprocessorConfig.macros.put("_MSC_VER", "1100");
 			config.preprocessorConfig.macros.put("WINAPI", "__stdcall");
 			
 			config.functionsAccepter = new Adapter<Function, Boolean>() {
@@ -289,12 +290,14 @@ public class JNAeratorConfigUtils {
 					/*
 					Set<Modifier> mods = value.getModifiers();
 	
-					return mods.contains(Modifier.DllExport) ||
-						mods.contains(Modifier.DllImport) ||
-						mods.contains(Modifier.Extern);*/
+					return mods.contains(ModifierType.DllExport) ||
+						mods.contains(ModifierType.DllImport) ||
+						mods.contains(ModifierType.Extern);*/
 				}
 				
 			};
+
+            //config.preprocessorConfig.macros.put("")
 			//_CPPRTTI
 			//_DLL
 			//_M_IX86
@@ -317,8 +320,7 @@ public class JNAeratorConfigUtils {
 			config.functionsAccepter = new Adapter<Function, Boolean>() {
 	
 				public Boolean adapt(Function value) {
-					List<Modifier> mods = value.getModifiers();
-					return !mods.contains(Modifier.Inline) && !mods.contains(Modifier.__inline__);
+					return !value.hasModifier(ModifierType.Inline);
 				}
 			};
 		}

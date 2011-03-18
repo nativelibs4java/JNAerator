@@ -24,7 +24,7 @@ public abstract class TypeMutator {
 	public static TypeMutator 
 		CONST_STAR = new TypeMutator() { @Override public TypeRef mutateType(TypeRef type) {
 			type = new TypeRef.Pointer(type, PointerStyle.Pointer);
-			type.addModifiers(Modifier.Const);
+			type.addModifiers(ModifierType.Const);
 			return type;
 		}},
 		STAR = new TypeMutator() { @Override public TypeRef mutateType(TypeRef type) {
@@ -37,7 +37,7 @@ public abstract class TypeMutator {
 			return new TypeRef.Pointer(type, PointerStyle.Reference);
 		}},
 		CONST = new TypeMutator() { @Override public TypeRef mutateType(TypeRef type) {
-			type.addModifiers(Modifier.Const);
+			type.addModifiers(ModifierType.Const);
 			return type;
 		}},
 		BRACKETS = new TypeMutator() { @Override public TypeRef mutateType(TypeRef type) {

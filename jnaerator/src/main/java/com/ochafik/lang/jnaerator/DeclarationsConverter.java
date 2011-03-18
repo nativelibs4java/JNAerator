@@ -95,10 +95,10 @@ public class DeclarationsConverter {
 		Struct callbackStruct = new Struct();
 		if (result.config.runtime == JNAeratorConfig.Runtime.BridJ) {
 			callbackStruct.setType(Struct.Type.JavaClass);
-			callbackStruct.addModifiers(Modifier.Public, Modifier.Static, Modifier.Abstract);
+			callbackStruct.addModifiers(ModifierType.Public, ModifierType.Static, ModifierType.Abstract);
 		} else {
 			callbackStruct.setType(Struct.Type.JavaInterface);
-			callbackStruct.addModifiers(Modifier.Public);
+			callbackStruct.addModifiers(ModifierType.Public);
 		}
 		callbackStruct.setParents(Arrays.asList(
 			FunctionSignature.Type.ObjCBlock.equals(functionSignature.getType()) ?
@@ -245,8 +245,8 @@ public class DeclarationsConverter {
 					
 					TypeRef mutatedType = (TypeRef) decl.mutateType(v.getValueType());
 					if (mutatedType == null || 
-							!mutatedType.getModifiers().contains(Modifier.Const) ||
-							mutatedType.getModifiers().contains(Modifier.Extern) ||
+							!mutatedType.getModifiers().contains(ModifierType.Const) ||
+							mutatedType.getModifiers().contains(ModifierType.Extern) ||
 							decl.getDefaultValue() == null)
 						continue;
 					
@@ -284,7 +284,7 @@ public class DeclarationsConverter {
 						}
 
                         if (result.config.runtime == JNAeratorConfig.Runtime.BridJ)
-                            vd.addModifiers(Modifier.Public, Modifier.Static, Modifier.Final);
+                            vd.addModifiers(ModifierType.Public, ModifierType.Static, ModifierType.Final);
 						
 						out.addDeclaration(vd);
 					} catch (UnsupportedConversionException e) {
@@ -326,7 +326,7 @@ public class DeclarationsConverter {
 				vd.addToCommentBefore(e.getCommentBefore());
 				vd.addToCommentBefore(e.getCommentAfter());
 			}
-		vd.addModifiers(Modifier.Public);
+		vd.addModifiers(ModifierType.Public);
 		out.addDeclaration(vd);
 	}
 	static Map<Class<?>, Pair<List<Pair<Function, String>>, Set<String>>> cachedForcedMethodsAndTheirSignatures;
@@ -408,7 +408,7 @@ public class DeclarationsConverter {
                     Enum en = new Enum();
 	                en.setType(Enum.Type.Java);
 	            	en.setTag(enumName.clone());
-	                en.addModifiers(Modifier.Public);
+	                en.addModifiers(ModifierType.Public);
 	                out.addDeclaration(new TaggedTypeRefDeclaration(en));
 	                Struct body = new Struct();
 	                en.setBody(body);
@@ -431,10 +431,10 @@ public class DeclarationsConverter {
 	                body.addDeclaration(new Function(Type.JavaMethod, enumName.clone(), null, new Arg(valueArgName, typeRef(Long.TYPE))).setBody(block(
 	                    stat(expr(memberRef(thisRef(), MemberRefStyle.Dot, valueArgName), AssignmentOperator.Equal, varRef(valueArgName)))
 	                )));
-	                body.addDeclaration(new VariablesDeclaration(typeRef(Long.TYPE), new DirectDeclarator(valueArgName)).addModifiers(Modifier.Public, Modifier.Final));
+	                body.addDeclaration(new VariablesDeclaration(typeRef(Long.TYPE), new DirectDeclarator(valueArgName)).addModifiers(ModifierType.Public, ModifierType.Final));
 	                body.addDeclaration(new Function(Type.JavaMethod, ident(valueArgName), typeRef(Long.TYPE)).setBody(block(
 	                    new Statement.Return(memberRef(thisRef(), MemberRefStyle.Dot, valueArgName))
-	                )).addModifiers(Modifier.Public));
+	                )).addModifiers(ModifierType.Public));
 	
 	                
 	                body.addDeclaration(new Function(Type.JavaMethod, ident("iterator"), typeRef(ident(Iterator.class, expr(typeRef(enumName.clone()))))).setBody(block(
@@ -450,7 +450,7 @@ public class DeclarationsConverter {
 	                            "iterator"
 	                        )
 	                    )
-					)).addModifiers(Modifier.Public));
+					)).addModifiers(ModifierType.Public));
 	
 	                body.addDeclaration(new Function(Type.JavaMethod, ident("fromValue"), typeRef(ident(ValuedEnum.class, expr(typeRef(enumName.clone())))), new Arg(valueArgName, typeRef(Long.TYPE))).setBody(block(
 	                    new Statement.Return(
@@ -464,7 +464,7 @@ public class DeclarationsConverter {
 	                            )
 	                        )
 	                    )
-	                )).addModifiers(Modifier.Public, Modifier.Static));
+	                )).addModifiers(ModifierType.Public, ModifierType.Static));
 	                
                 } else {
                 	outputEnumItemsAsConstants(results, out, signatures, libraryClassName, hasEnumClass);
@@ -545,7 +545,7 @@ public class DeclarationsConverter {
 
 					//TypeRef tr = new TypeRef.SimpleTypeRef(result.typeConverter.typeToJNA(type, vs, TypeConversion.TypeConversionMode.FieldType, callerLibraryClass));
 					Declaration declaration = new VariablesDeclaration(converted.getValue(), new DirectDeclarator(name, converted.getFirst()));
-					declaration.addModifiers(Modifier.Public, Modifier.Static, Modifier.Final);
+					declaration.addModifiers(ModifierType.Public, ModifierType.Static, ModifierType.Final);
 					declaration.importDetails(element, false);
 					declaration.moveAllCommentsBefore();
 					if (!result.config.noComments)
@@ -708,7 +708,7 @@ public class DeclarationsConverter {
 			case ObjCProtocol:
 				break;
 			case CPPClass:
-				if (!result.config.genCPlusPlus && !Modifier.Static.isContainedBy(function.getModifiers()))
+				if (!result.config.genCPlusPlus && !function.hasModifier(ModifierType.Static))
 					return;
 				ns.add(((Struct)parent).getTag().toString());
 				break;
@@ -728,9 +728,9 @@ public class DeclarationsConverter {
 
 		natFunc.setType(Function.Type.JavaMethod);
 		if (result.config.synchronizedMethods && !isCallback && (result.config.useJNADirectCalls || result.config.runtime == JNAeratorConfig.Runtime.BridJ))
-			natFunc.addModifiers(Modifier.Synchronized);
+			natFunc.addModifiers(ModifierType.Synchronized);
 		if (result.config.useJNADirectCalls && !isCallback && !isObjectiveC) {
-			natFunc.addModifiers(Modifier.Public, Modifier.Static, Modifier.Native);
+			natFunc.addModifiers(ModifierType.Public, ModifierType.Static, ModifierType.Native);
 		}
 
 		try {
@@ -774,15 +774,15 @@ public class DeclarationsConverter {
             }
 
 			boolean needsThis = false, needsThisAnnotation = false;
-			if (Modifier.__fastcall.isContainedBy(function.getModifiers())) {
+			if (function.hasModifier(ModifierType.__fastcall)) {
 				natFunc.addAnnotation(new Annotation(result.config.runtime.typeRef(JNAeratorConfig.Runtime.Ann.FastCall)));
 				needsThis = true;
 			}
-			if (Modifier.__thiscall.isContainedBy(function.getModifiers())) {
+			if (function.hasModifier(ModifierType.__thiscall)) {
 				natFunc.addAnnotation(new Annotation(result.config.runtime.typeRef(JNAeratorConfig.Runtime.Ann.ThisCall)));
 				needsThis = true;
 			}
-			if (function.getType() == Type.CppMethod && !function.getModifiers().contains(Modifier.Static)) {
+			if (function.getType() == Type.CppMethod && !function.getModifiers().contains(ModifierType.Static)) {
 				needsThisAnnotation = true;
 				needsThis = true;
 			}
@@ -916,27 +916,26 @@ public class DeclarationsConverter {
 
     private void convertBridJFunction(Function function, Signatures signatures, boolean isCallback, DeclarationsHolder out, Identifier libraryClassName, String sig, Identifier functionName, String library) throws UnsupportedConversionException {
 		Element parent = function.getParentElement();
-    	List<Modifier> modifiers = function.getModifiers();
     	MemberVisibility visibility = function.getVisibility();
-    	boolean isPublic = visibility == MemberVisibility.Public || Modifier.Public.isContainedBy(modifiers);
-    	boolean isPrivate = visibility == MemberVisibility.Private || Modifier.Private.isContainedBy(modifiers);
-    	boolean isProtected = visibility == MemberVisibility.Protected || Modifier.Protected.isContainedBy(modifiers);
+    	boolean isPublic = visibility == MemberVisibility.Public || function.hasModifier(ModifierType.Public);
+    	boolean isPrivate = visibility == MemberVisibility.Private || function.hasModifier(ModifierType.Private);
+    	boolean isProtected = visibility == MemberVisibility.Protected || function.hasModifier(ModifierType.Protected);
 		boolean isInStruct = parent instanceof Struct;
     	if (isInStruct && result.config.skipPrivateMembers && (isPrivate || !isPublic && !isProtected))
         	return;
-        boolean isStatic = Modifier.Static.isContainedBy(modifiers);
+        boolean isStatic = function.hasModifier(ModifierType.Static);
 		
 //        Function typedMethod = new Function(Type.JavaMethod, ident(functionName), null);
-//        typedMethod.addModifiers(Modifier.Public, isStatic ? Modifier.Static : null);
+//        typedMethod.addModifiers(ModifierType.Public, isStatic ? ModifierType.Static : null);
         
         Function nativeMethod = new Function(Type.JavaMethod, ident(functionName), null);
         
         nativeMethod.addModifiers(
-            isProtected ? Modifier.Protected : Modifier.Public, 
-            isStatic || !isCallback && !isInStruct ? Modifier.Static : null
+            isProtected ? ModifierType.Protected : ModifierType.Public, 
+            isStatic || !isCallback && !isInStruct ? ModifierType.Static : null
         );
         if (result.config.synchronizedMethods && !isCallback)
-			nativeMethod.addModifiers(Modifier.Synchronized);
+			nativeMethod.addModifiers(ModifierType.Synchronized);
 		
         if (function.getName() != null && !functionName.toString().equals(function.getName().toString()) && !isCallback) {
         	TypeRef mgc = result.config.runtime.typeRef(JNAeratorConfig.Runtime.Ann.Name);
@@ -991,7 +990,7 @@ public class DeclarationsConverter {
         }
         
         if (convertedBody == null)
-            nativeMethod.addModifiers(isCallback ? Modifier.Abstract : Modifier.Native);
+            nativeMethod.addModifiers(isCallback ? ModifierType.Abstract : ModifierType.Native);
         else
             nativeMethod.setBody(convertedBody);
         
@@ -1230,7 +1229,7 @@ public class DeclarationsConverter {
 //			String vptrName = DEFAULT_VPTR_NAME;
 //			VariablesDeclaration vptr = new VariablesDeclaration(typeRef(VirtualTablePointer.class), new Declarator.DirectDeclarator(vptrName));
 //            //VariablesDeclaration vptr = new VariablesDeclaration(typeRef(result.config.runtime.pointerClass), new Declarator.DirectDeclarator(vptrName));
-//			vptr.addModifiers(Modifier.Public);
+//			vptr.addModifiers(ModifierType.Public);
 //			structJavaClass.addDeclaration(vptr);
 //			childSignatures.variablesSignatures.add(vptrName);
 //			// TODO add vptr grabber to constructor !
@@ -1272,7 +1271,7 @@ public class DeclarationsConverter {
 						method.setName(methodName);
 						List<Expression> args = new ArrayList<Expression>();
 						
-						boolean isStatic = Modifier.Static.isContainedBy(f.getModifiers());
+						boolean isStatic = f.hasModifier(ModifierType.Static);
 						int iArg = 0;
 						for (Arg arg : new ArrayList<Arg>(method.getArgs())) {
 							if (iArg == 0 && !isStatic) {
@@ -1288,7 +1287,7 @@ public class DeclarationsConverter {
 								stat(implCall) : 
 								new Statement.Return(implCall)
 						));
-						method.addModifiers(Modifier.Public, isStatic ? Modifier.Static : null);
+						method.addModifiers(ModifierType.Public, isStatic ? ModifierType.Static : null);
 						structJavaClass.addDeclaration(method);
 					}
 				}
@@ -1394,6 +1393,11 @@ public class DeclarationsConverter {
 			}
 		}
 		Struct structJavaClass = publicStaticClass(structName, baseClass, Struct.Type.JavaClass, struct);
+        //if (result.config.microsoftCOM) {
+        String uuid = (String)struct.getModifierValue(ModifierType.UUID);
+        if (uuid != null) {
+            structJavaClass.addAnnotation(new Annotation(result.config.runtime.typeRef(JNAeratorConfig.Runtime.Ann.IID), uuid));
+        }
 		structJavaClass.addToCommentBefore(preComments);
 		//System.out.println("parentFieldsCount(structName = " + structName + ") = " + parentFieldsCount);
 		final int iChild[] = new int[] { parentFieldsCount };
@@ -1404,7 +1408,7 @@ public class DeclarationsConverter {
 		/*if (isVirtual(struct) && !onlyFields) {
 			String vptrName = DEFAULT_VPTR_NAME;
 			VariablesDeclaration vptr = new VariablesDeclaration(typeRef(VirtualTablePointer.class), new Declarator.DirectDeclarator(vptrName));
-			vptr.addModifiers(Modifier.Public);
+			vptr.addModifiers(ModifierType.Public);
 			structJavaClass.addDeclaration(vptr);
 			childSignatures.variablesSignatures.add(vptrName);
 			// TODO add vptr grabber to constructor !
@@ -1412,9 +1416,9 @@ public class DeclarationsConverter {
 
         //    private static StructIO<MyStruct> io = StructIO.getInstance(MyStruct.class);
         
-		structJavaClass.addDeclaration(new Function(Type.JavaMethod, ident(structName), null).setBody(block(stat(methodCall("super")))).addModifiers(Modifier.Public));
+		structJavaClass.addDeclaration(new Function(Type.JavaMethod, ident(structName), null).setBody(block(stat(methodCall("super")))).addModifiers(ModifierType.Public));
 		String ptrName = "pointer";
-		structJavaClass.addDeclaration(new Function(Type.JavaMethod, ident(structName), null, new Arg(ptrName, typeRef(result.config.runtime.pointerClass))).setBody(block(stat(methodCall("super", varRef(ptrName))))).addModifiers(Modifier.Public));
+		structJavaClass.addDeclaration(new Function(Type.JavaMethod, ident(structName), null, new Arg(ptrName, typeRef(result.config.runtime.pointerClass))).setBody(block(stat(methodCall("super", varRef(ptrName))))).addModifiers(ModifierType.Public));
 
         if (isUnion)
             structJavaClass.addAnnotation(new Annotation(result.config.runtime.typeRef(JNAeratorConfig.Runtime.Ann.Union)));
@@ -1445,9 +1449,8 @@ public class DeclarationsConverter {
 					}
 				} else if ((result.config.runtime == JNAeratorConfig.Runtime.BridJ || result.config.genCPlusPlus) && d instanceof Function) {
 					Function f = (Function) d;
-					List<Modifier> modifiers = f.getModifiers();
-//					boolean isStatic = Modifier.Static.isContainedBy(modifiers);
-					boolean isVirtual = Modifier.Virtual.isContainedBy(modifiers);
+//					boolean isStatic = ModifierType.Static.isContainedBy(modifiers);
+					boolean isVirtual = f.hasModifier(ModifierType.Virtual);
                     String library = result.getLibrary(struct);
 					if (library == null)
 						continue;
@@ -1457,7 +1460,7 @@ public class DeclarationsConverter {
 						if (!(md instanceof Function))
 							continue;
 						Function method = (Function) md;
-						//method.addModifiers(Modifier.Public, isStatic ? Modifier.Static : null, Modifier.Native);
+						//method.addModifiers(ModifierType.Public, isStatic ? ModifierType.Static : null, ModifierType.Native);
 						if (isVirtual)
 							method.addAnnotation(new Annotation(result.config.runtime.typeRef(JNAeratorConfig.Runtime.Ann.Virtual), expr(iVirtual)));
 						structJavaClass.addDeclaration(method);
@@ -1481,7 +1484,7 @@ public class DeclarationsConverter {
 			
 			if (result.config.runtime == JNAeratorConfig.Runtime.BridJ)
 				structJavaClass.addAnnotation(new Annotation(org.bridj.ann.Library.class, expr(library)));
-			structJavaClass.removeModifiers(Modifier.Static);
+			structJavaClass.removeModifiers(ModifierType.Static);
 			structJavaClass = result.notifyBeforeWritingClass(fullClassName, structJavaClass, signatures, library);
 			if (structJavaClass != null) {
 				PrintWriter pout = result.classOutputter.getClassSourceWriter(fullClassName.toString());
@@ -1512,7 +1515,7 @@ public class DeclarationsConverter {
 			}
 
 			for (Declaration mb : struct.getDeclarations()) {
-				if (Modifier.Virtual.isContainedBy(mb.getModifiers())) {
+				if (mb.hasModifier(ModifierType.Virtual)) {
 					hasVirtualMembers = true;
 					break;
 				}
@@ -1529,7 +1532,7 @@ public class DeclarationsConverter {
 		Function f = new Function(Function.Type.JavaMethod, ident(name), tr);
 		String varName = "s";
 
-		f.addModifiers(Modifier.Protected);
+		f.addModifiers(ModifierType.Protected);
 		if (result.config.runtime != JNAeratorConfig.Runtime.JNA) {
 			f.setBody(block(
 				//new Statement.Return(methodCall("setupClone", new Expression.New(tr.clone(), methodCall(null))))
@@ -1555,7 +1558,7 @@ public class DeclarationsConverter {
 		String varName = "arrayLength";
 		Function f = new Function(Function.Type.JavaMethod, ident("newArray"), ar, new Arg(varName, typeRef(Integer.TYPE)));
 		
-		f.addModifiers(Modifier.Public, Modifier.Static);
+		f.addModifiers(ModifierType.Public, ModifierType.Static);
 		f.setBody(block(
 			new Statement.Return(
 				methodCall(
@@ -1594,7 +1597,7 @@ public class DeclarationsConverter {
 		mutatedType = result.typeConverter.resolveTypeDef(mutatedType, callerLibraryName, true, false);
 		
 		VariablesDeclaration convDecl = new VariablesDeclaration();
-		convDecl.addModifiers(Modifier.Public);
+		convDecl.addModifiers(ModifierType.Public);
 		
 		if (javaType instanceof ArrayRef && mutatedType instanceof ArrayRef) {
 			ArrayRef mr = (ArrayRef)mutatedType;
@@ -1668,7 +1671,7 @@ public class DeclarationsConverter {
         Function convDecl = new Function();
         conv.annotateTypedType(convDecl);
         convDecl.setType(Type.JavaMethod);
-		convDecl.addModifiers(Modifier.Public);
+		convDecl.addModifiers(ModifierType.Public);
 
 		if (conv.arrayLengths != null)
             convDecl.addAnnotation(new Annotation(result.config.runtime.typeRef(JNAeratorConfig.Runtime.Ann.Length), "({" + StringUtils.implode(conv.arrayLengths, ", ") + "})"));
@@ -1709,7 +1712,7 @@ public class DeclarationsConverter {
             Function setter = convDecl.clone();
             setter.setValueType(typeRef(holderName.clone()));//Void.TYPE));
             setter.addArg(new Arg(name, javaType));
-            //setter.addModifiers(Modifier.Native);
+            //setter.addModifiers(ModifierType.Native);
             setter.setBody(block(
                 stat(conv.setExpr),
                 new Statement.Return(thisRef())
@@ -1722,7 +1725,7 @@ public class DeclarationsConverter {
                 setter.setName(ident(name + "_$eq"));
                 setter.setValueType(javaType.clone());
                 setter.addArg(new Arg(name, javaType.clone()));
-                setter.addModifiers(Modifier.Public, Modifier.Final);
+                setter.addModifiers(ModifierType.Public, ModifierType.Final);
                 setter.setBody(block(
                     stat(methodCall(name, varRef(name))),
                     new Statement.Return(varRef(name))
@@ -1840,10 +1843,10 @@ public class DeclarationsConverter {
 				if (result.config.beanStructs) {
 					out.addDeclaration(new Function(Function.Type.JavaMethod, ident("get" + StringUtils.capitalize(name)), vd.getValueType().clone()).setBody(block(
 						new Statement.Return(varRef(name))
-					)).addModifiers(Modifier.Public));
+					)).addModifiers(ModifierType.Public));
 					out.addDeclaration(new Function(Function.Type.JavaMethod, ident("set" + StringUtils.capitalize(name)), typeRef(Void.TYPE), new Arg(name, vd.getValueType().clone())).setBody(block(
 						stat(expr(memberRef(thisRef(), MemberRefStyle.Dot, ident(name)), AssignmentOperator.Equal, varRef(name)))
-					)).addModifiers(Modifier.Public));
+					)).addModifiers(ModifierType.Public));
 				}
 				iChild[0]++;
 			}
@@ -1874,7 +1877,7 @@ public class DeclarationsConverter {
 				cl.moveAllCommentsBefore();
 				cl.addToCommentBefore(getFileCommentContent(toCloneCommentsFrom));
 			}
-		cl.addModifiers(Modifier.Public, Modifier.Static);
+		cl.addModifiers(ModifierType.Public, ModifierType.Static);
 		return cl;
 	}
 	public Pair<List<VariablesDeclaration>, List<VariablesDeclaration>> getParentAndOwnDeclarations(Struct structJavaClass, Struct nativeStruct) throws IOException {
@@ -1918,7 +1921,7 @@ public class DeclarationsConverter {
 		List<Declaration> initialMembers = new ArrayList<Declaration>(structJavaClass.getDeclarations());
 		Set<String> signatures = new TreeSet<String>();
 		
-		Function emptyConstructor = new Function(Function.Type.JavaMethod, structName.clone(), null).addModifiers(Modifier.Public);
+		Function emptyConstructor = new Function(Function.Type.JavaMethod, structName.clone(), null).addModifiers(ModifierType.Public);
 		emptyConstructor.setBody(block(stat(methodCall("super"))));
 		addConstructor(structJavaClass, emptyConstructor);
 		
@@ -1959,7 +1962,7 @@ public class DeclarationsConverter {
 					if (!commentBits.isEmpty())
 						unionValConstr.addToCommentBefore("@param " + name + " " + StringUtils.implode(commentBits, ", or "));
 				
-				unionValConstr.addModifiers(Modifier.Public);
+				unionValConstr.addModifiers(ModifierType.Public);
 				
 				Expression assignmentExpr = varRef(name);
 				for (Pair<String, String> p : pair.getValue())
@@ -1980,7 +1983,7 @@ public class DeclarationsConverter {
 			}
 		} else {
 			Function fieldsConstr = new Function(Function.Type.JavaMethod, structName.clone(), null);
-			fieldsConstr.setBody(new Block()).addModifiers(Modifier.Public);
+			fieldsConstr.setBody(new Block()).addModifiers(ModifierType.Public);
 			
 			Pair<List<VariablesDeclaration>, List<VariablesDeclaration>> decls = getParentAndOwnDeclarations(structJavaClass, nativeStruct);
 			Map<Integer, String> namesById = new TreeMap<Integer, String>();
@@ -2027,7 +2030,7 @@ public class DeclarationsConverter {
 					stat(
 						methodCall("setFieldOrder", new Expression.NewArray(typeRef(String.class), new Expression[0], orderedFieldNames.toArray(new Expression[orderedFieldNames.size()])))
 					)
-				)).addModifiers(Modifier.Protected);
+				)).addModifiers(ModifierType.Protected);
                 if (signatures.add(initOrder.computeSignature(false))) {
                 		structJavaClass.addDeclaration(initOrder);
 	                 Statement callInitOrder = stat(methodCall(initOrderName));
@@ -2050,7 +2053,7 @@ public class DeclarationsConverter {
 //		Function pointerConstructor = new Function(Function.Type.JavaMethod, structName.clone(), null, 
 //			new Arg("pointer", new TypeRef.SimpleTypeRef(Pointer.class.getName())),
 //			new Arg("offset", new TypeRef.Primitive("int"))
-//		).addModifiers(Modifier.Public).setBody(block(
+//		).addModifiers(ModifierType.Public).setBody(block(
 //			stat(methodCall("super", varRef("pointer"), varRef("offset")))
 //		).setCompact(true));
 //		pointerConstructor.setCommentBefore("Cast data at given memory location (pointer + offset) as an existing " + structName + " struct");
@@ -2068,7 +2071,7 @@ public class DeclarationsConverter {
 //		String copyArgName = isUnion ? "otherUnion" : "otherStruct";
 //		Function shareMemConstructor = new Function(Function.Type.JavaMethod, structName.clone(), null, 
 //			new Arg(copyArgName, new TypeRef.SimpleTypeRef(structName.clone()))
-//		).addModifiers(Modifier.Public);
+//		).addModifiers(ModifierType.Public);
 		
 //		Block useCopyMem = //addedPointerConstructor ? 
 //			//null : 
@@ -2102,7 +2105,7 @@ public class DeclarationsConverter {
 	}
 	private boolean isField(VariablesDeclaration vd) {
 		List<Modifier> mods = vd.getModifiers();
-		if (Modifier.Final.isContainedBy(mods))
+		if (vd.hasModifier(ModifierType.Final))
 			return false;
 		if (vd.getValueType() == null || vd.getValueType().toString().equals(VirtualTablePointer.class.getName()))
 			return false;

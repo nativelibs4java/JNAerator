@@ -36,6 +36,7 @@ import com.ochafik.lang.jnaerator.parser.Arg;
 import com.ochafik.lang.jnaerator.parser.Declarator;
 import com.ochafik.lang.jnaerator.parser.Function;
 import com.ochafik.lang.jnaerator.parser.Modifier;
+import com.ochafik.lang.jnaerator.parser.ModifierType;
 import com.ochafik.lang.jnaerator.parser.ObjCDemanglingLexer;
 import com.ochafik.lang.jnaerator.parser.ObjCDemanglingParser;
 import com.ochafik.lang.jnaerator.parser.ObjCppParser;
@@ -133,9 +134,9 @@ public class BridgeSupportParser {
 					try {
 						int i = value.matches(".*?\\.0+$") ? value.lastIndexOf('.') : -1;
 						String v = i > 0 ? value.substring(0, i) : value; 
-						sf.addDeclaration(new VariablesDeclaration(typeRef("int").addModifiers(Modifier.Const), new DirectDeclarator(name, expr(Integer.parseInt(v)))));
+						sf.addDeclaration(new VariablesDeclaration(typeRef("int").addModifiers(ModifierType.Const), new DirectDeclarator(name, expr(Integer.parseInt(v)))));
 					} catch (NumberFormatException fex) {
-						sf.addDeclaration(new VariablesDeclaration(typeRef("double").addModifiers(Modifier.Const), new DirectDeclarator(name, expr(Double.parseDouble(value)))));
+						sf.addDeclaration(new VariablesDeclaration(typeRef("double").addModifiers(ModifierType.Const), new DirectDeclarator(name, expr(Double.parseDouble(value)))));
 					}
 					
 				} catch (Exception ex) {
@@ -153,7 +154,7 @@ public class BridgeSupportParser {
 				if (tr == null)
 					continue;
 			
-				sf.addDeclaration(new VariablesDeclaration(tr.addModifiers(Modifier.Extern, Modifier.Const), 
+				sf.addDeclaration(new VariablesDeclaration(tr.addModifiers(ModifierType.Extern, ModifierType.Const), 
 						new DirectDeclarator(name)));
 			} catch (Exception ex) {
 				System.err.println("Parsing of constant " + name + " failed : " + ex);
@@ -284,7 +285,7 @@ public class BridgeSupportParser {
 
 		String class_method = XMLUtils.getAttribute(function, "class_method");
 		if ("true".equals(class_method))
-			f.addModifiers(Modifier.Static);
+			f.addModifiers(ModifierType.Static);
 		
 //		f.setElementFile(sf);
 		int iArg = 0;

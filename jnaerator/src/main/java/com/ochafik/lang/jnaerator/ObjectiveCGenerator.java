@@ -47,6 +47,7 @@ import com.ochafik.lang.jnaerator.parser.Expression;
 import com.ochafik.lang.jnaerator.parser.Function;
 import com.ochafik.lang.jnaerator.parser.Identifier;
 import com.ochafik.lang.jnaerator.parser.Modifier;
+import com.ochafik.lang.jnaerator.parser.ModifierType;
 import com.ochafik.lang.jnaerator.parser.Statement;
 import com.ochafik.lang.jnaerator.parser.StoredDeclarations;
 import com.ochafik.lang.jnaerator.parser.Struct;
@@ -217,7 +218,7 @@ public class ObjectiveCGenerator {
 	public Struct generateObjectiveCClass(Struct in, Signatures signatures) throws IOException {
 		boolean isProtocol = in.getType() == Type.ObjCProtocol, isCategory = in.getCategoryName() != null;
 		
-		Struct instanceStruct = new Struct().addModifiers(Modifier.Public);
+		Struct instanceStruct = new Struct().addModifiers(ModifierType.Public);
 		
 		instanceStruct.setCommentBefore(in.getCommentBefore());
 		instanceStruct.addToCommentBefore(in.getCommentAfter());
@@ -225,12 +226,12 @@ public class ObjectiveCGenerator {
 		if (isProtocol || isCategory)
 			instanceStruct.setType(Type.JavaInterface);
 		else
-			instanceStruct.addModifiers(Modifier.Abstract).setType(Type.JavaClass);
+			instanceStruct.addModifiers(ModifierType.Abstract).setType(Type.JavaClass);
 		
 		Struct classStruct = new Struct();
 		classStruct.setTag(ident(classClassName));
 		classStruct.setType(Struct.Type.JavaClass);
-		classStruct.addModifiers(Modifier.Public, Modifier.Static, Modifier.Abstract);
+		classStruct.addModifiers(ModifierType.Public, ModifierType.Static, ModifierType.Abstract);
 		
 		List<SimpleTypeRef>
 			interfacesForInstance = new ArrayList<SimpleTypeRef>();
@@ -329,7 +330,7 @@ public class ObjectiveCGenerator {
 		
 		StoredDeclarations classHolder = new VariablesDeclaration();
 		if (!(isProtocol || isCategory))
-			classHolder.addModifiers(Modifier.Private, Modifier.Static);
+			classHolder.addModifiers(ModifierType.Private, ModifierType.Static);
 		
 		classHolder.setValueType(typeRef(classClassName));
 
@@ -345,7 +346,7 @@ public class ObjectiveCGenerator {
 			classHolder.addDeclarator(new Declarator.DirectDeclarator(classInstanceName));
 			
 			classGetter = new Function(Function.Type.JavaMethod, ident(classInstanceGetterName), typeRef(classClassName));
-			classGetter.addModifiers(Modifier.Public, Modifier.Static);
+			classGetter.addModifiers(ModifierType.Public, ModifierType.Static);
 			classGetter.setBody(new Block(
 				new Statement.If(
 					expr(
@@ -392,13 +393,13 @@ public class ObjectiveCGenerator {
 					if (!(d instanceof Function))
 						continue;
 					Function f = (Function)d;
-					if (!Modifier.Static.isContainedBy(f.getModifiers()))
+					if (!f.hasModifier(ModifierType.Static))
 						continue;
 
 					List<Declaration> decls = new ArrayList<Declaration>();
 					result.declarationsConverter.convertFunction(f, null, false, new DeclarationsHolder.ListWrapper(decls), fullClassName);
 
-					if (f.getModifiers().contains(Modifier.Static)) {
+					if (f.getModifiers().contains(ModifierType.Static)) {
 						for (Declaration decl : decls) {
 							if (!(decl instanceof Function))
 								continue;
@@ -428,7 +429,7 @@ public class ObjectiveCGenerator {
 	Function createCastMethod(Identifier name, Identifier classId, boolean isStatic) {
 		Function m = new Function();
 		m.setType(Function.Type.JavaMethod);
-		m.addModifiers(Modifier.Public);
+		m.addModifiers(ModifierType.Public);
 		m.setName(ident("as" + (isStatic ? "Static_" : "_") + name));
 		m.setValueType(typeRef(classId.clone()));
 		m.setBody(block(
@@ -460,7 +461,7 @@ public class ObjectiveCGenerator {
 			}
 		}
 		if (!hasAlloc)
-			in.addDeclaration(new Function(Function.Type.ObjCMethod, ident(allocName), typeRef(in.getTag())).addModifiers(Modifier.Static));
+			in.addDeclaration(new Function(Function.Type.ObjCMethod, ident(allocName), typeRef(in.getTag())).addModifiers(ModifierType.Static));
 		
 	}
 	
@@ -479,7 +480,7 @@ public class ObjectiveCGenerator {
 				List<Declaration> decls = new ArrayList<Declaration>();
 				result.declarationsConverter.convertFunction(f, null, false, new DeclarationsHolder.ListWrapper(decls), fullClassName);
 				
-				if (Modifier.Static.isContainedBy(f.getModifiers())) {
+				if (f.hasModifier(ModifierType.Static)) {
 					for (Declaration decl : decls) {
 						if (!add(classStruct, decl, signatures, objSigs, clasSigs))
 							continue;
@@ -490,7 +491,7 @@ public class ObjectiveCGenerator {
 						}
 
 						if (classStruct.getType() == Type.JavaClass) {
-							decl.addModifiers(Modifier.Public, Modifier.Abstract);
+							decl.addModifiers(ModifierType.Public, ModifierType.Abstract);
 							decl.reorganizeModifiers();
 						}
 					}
@@ -506,7 +507,7 @@ public class ObjectiveCGenerator {
 							instanceStruct.addDeclaration(addedF);
 							
 							if (instanceStruct.getType() == Type.JavaClass) {
-								decl.addModifiers(Modifier.Public, Modifier.Abstract);
+								decl.addModifiers(ModifierType.Public, ModifierType.Abstract);
 								decl.reorganizeModifiers();
 							}
 						}
@@ -565,7 +566,7 @@ public class ObjectiveCGenerator {
 		createCopy.setCommentBefore("Factory method");
 		createCopy.addToCommentBefore("@see #" + meth.computeSignature(false));
 		createCopy.setName(ident("create" + name.substring("init".length())));
-		createCopy.addModifiers(Modifier.Public, Modifier.Static);
+		createCopy.addModifiers(ModifierType.Public, ModifierType.Static);
 		createCopy.reorganizeModifiers();
 		
 		Expression[] args = new Expression[meth.getArgs().size()];
@@ -601,7 +602,7 @@ public class ObjectiveCGenerator {
 			return null;
 		
 		Function proxyCopy = meth.clone();
-		proxyCopy.addModifiers(Modifier.Public, Modifier.Static);
+		proxyCopy.addModifiers(ModifierType.Public, ModifierType.Static);
 		proxyCopy.reorganizeModifiers();
 		
 		Expression[] args = new Expression[meth.getArgs().size()];

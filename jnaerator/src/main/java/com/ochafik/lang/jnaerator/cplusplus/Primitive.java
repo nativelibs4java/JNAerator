@@ -3,6 +3,7 @@ package com.ochafik.lang.jnaerator.cplusplus;
 import java.util.List;
 
 import com.ochafik.lang.jnaerator.parser.Modifier;
+import com.ochafik.lang.jnaerator.parser.ModifierType;
 import com.ochafik.lang.jnaerator.parser.TypeRef.SimpleTypeRef;
 import com.ochafik.util.string.StringUtils;
 
@@ -42,8 +43,8 @@ public enum Primitive {
 		String name = tr.getName() == null ? null : tr.getName().toString();
 		String basis = StringUtils.capitalize(name);
 		List<Modifier> mods = tr.getModifiers();
-		int longCount = Modifier.Long.countIn(mods);
-		if (longCount > 1) {//Modifier.Long.isContainedBy(mods))
+		int longCount = ModifierType.Long.countIn(mods);
+		if (longCount > 1) {//ModifierType.Long.isContainedBy(mods))
 			name = basis = "LongLong";
 		} else if (longCount == 1) {
 			if (name == null || name.equals("int"))
@@ -51,9 +52,9 @@ public enum Primitive {
 			else
 				basis = "Long" + basis;
 		}
-		if (Modifier.Unsigned.isContainedBy(tr.getModifiers()))
+		if (tr.hasModifier(ModifierType.Unsigned))
 			name = "U" + basis;
-		if (Modifier.Signed.isContainedBy(tr.getModifiers()))
+		if (tr.hasModifier(ModifierType.Signed))
 			name = "S" + basis;
 		try {
 			return Primitive.valueOf(name);

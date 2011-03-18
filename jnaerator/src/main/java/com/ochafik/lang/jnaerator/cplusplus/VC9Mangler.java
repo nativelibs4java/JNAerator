@@ -30,6 +30,7 @@ import com.ochafik.lang.jnaerator.parser.Function;
 import com.ochafik.lang.jnaerator.parser.Identifier;
 import com.ochafik.lang.jnaerator.parser.ModifiableElement;
 import com.ochafik.lang.jnaerator.parser.Modifier;
+import com.ochafik.lang.jnaerator.parser.ModifierType;
 import com.ochafik.lang.jnaerator.parser.Struct;
 import com.ochafik.lang.jnaerator.parser.TypeRef;
 import com.ochafik.lang.jnaerator.parser.Declarator.PointerStyle;
@@ -57,7 +58,7 @@ public class VC9Mangler implements CPlusPlusMangler {
 				b.append("A");
 			else if (tr instanceof TypeRef.ArrayRef)
 				b.append("Q");
-			else if (Modifier.__const.isContainedBy(tr.getModifiers()))
+			else if (tr.hasModifier(ModifierType.__const))
 				b.append("Q");
 			else
 				b.append("P");
@@ -153,7 +154,7 @@ public class VC9Mangler implements CPlusPlusMangler {
 			for (int i = ns.size(); i-- != 0;)
 				b.append(ns.get(i) + "@");
 //			b.append("@Q");
-			if (Modifier.Static.isContainedBy(function.getModifiers()))
+			if (function.hasModifier(ModifierType.Static))
 				b.append("@S");
 			else if (function.getParentElement() instanceof Struct)
 				b.append("@Q");
@@ -172,21 +173,20 @@ public class VC9Mangler implements CPlusPlusMangler {
 	private void mangleStorageMod(ModifiableElement e, StringBuilder b,
 			Result result) {
 		
-		List<Modifier> modifiers = e.getModifiers();
 		if (e instanceof Function) {
 			Function f = (Function) e;
 			
 			/// @see http://www.kegel.com/mangle.html#calling
-			if (Modifier.__fastcall.isContainedBy(modifiers))
+			if (f.hasModifier(ModifierType.__fastcall))
 				b.append("I");
-			else if (Modifier.__stdcall.isContainedBy(modifiers))
+			else if (f.hasModifier(ModifierType.__stdcall))
 				b.append("G");
-			else //if (Modifier.__cdecl.isContainedBy(modifiers))
+			else //if (f.hasModifier(ModifierType.__cdecl)
 				b.append("A");
-			if (f.getParentElement() instanceof Struct && !Modifier.Static.isContainedBy(modifiers))
+			if (f.getParentElement() instanceof Struct && !f.hasModifier(ModifierType.Static))
 				b.append("E");
 		} else if (e instanceof TypeRef) {
-			if (Modifier.__const.isContainedBy(modifiers))
+			if (e.hasModifier(ModifierType.__const))
 				b.append("B");
 			else
 				b.append("A");

@@ -248,7 +248,7 @@ public class Printer implements Visitor {
                 append(" ", e.getBody());
             break;
 		case ObjCMethod:
-			append(modifiers.contains(Modifier.Static) ? "+" : "-");
+			append(modifiers.contains(ModifierType.Static) ? "+" : "-");
 			space();
             if (valueType != null)
                 append("(", valueType, ")");

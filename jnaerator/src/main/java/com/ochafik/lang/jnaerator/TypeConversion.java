@@ -76,6 +76,7 @@ import com.ochafik.lang.jnaerator.parser.Function;
 import com.ochafik.lang.jnaerator.parser.Identifier;
 import com.ochafik.lang.jnaerator.parser.ModifiableElement;
 import com.ochafik.lang.jnaerator.parser.Modifier;
+import com.ochafik.lang.jnaerator.parser.ModifierType;
 import com.ochafik.lang.jnaerator.parser.ObjCppParser;
 import com.ochafik.lang.jnaerator.parser.Scanner;
 import com.ochafik.lang.jnaerator.parser.Struct;
@@ -283,6 +284,23 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
         prim("long int", JavaPrim.Int);
         prim("LONGLONG", JavaPrim.Long);
         prim("ULONGLONG", JavaPrim.Long);
+        prim("INT", JavaPrim.Int);
+        prim("UINT", JavaPrim.Int);
+        prim("SHORT", JavaPrim.Short);
+        prim("USHORT", JavaPrim.Short);
+        prim("BYTE", JavaPrim.Byte);
+        prim("UBYTE", JavaPrim.Byte);
+        prim("DOUBLE", JavaPrim.Double);
+        prim("FLOAT", JavaPrim.Float);
+        prim("WORD", JavaPrim.Short);
+        prim("DWORD", JavaPrim.Int);
+        
+        if (result.config.runtime == JNAeratorConfig.Runtime.BridJ)
+            prim("BOOL", JavaPrim.Int);
+        else
+            prim("BOOL", JavaPrim.Boolean);
+
+
         prim("DWORD64", JavaPrim.Long);
         prim("LONG64", JavaPrim.Long);
         prim("UInt64", JavaPrim.Long);
@@ -308,7 +326,6 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
         prim("GLsizei", JavaPrim.Int);
         prim("__darwin_size_t", JavaPrim.Int);
 
-        prim("DWORD", JavaPrim.Int);
         prim("__int32", JavaPrim.Int);
 
         prim("NSInteger", JavaPrim.NSInteger);
@@ -318,6 +335,7 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
         JavaPrim longPrim = result.config.gccLong ? JavaPrim.NativeSize : JavaPrim.NativeLong;
         prim("long", longPrim);
         prim("LONG", longPrim);
+        prim("ULONG", longPrim);
 
         JavaPrim sizePrim = result.config.sizeAsLong ? longPrim : JavaPrim.NativeSize;
         prim("size_t", sizePrim);
@@ -336,7 +354,6 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
         prim("WCHAR", JavaPrim.Short);
         prim("wchar_t", result.config.wcharAsShort ? JavaPrim.Short : JavaPrim.Char);
 
-        prim("WORD", JavaPrim.Short);
         prim("__int16", JavaPrim.Short);
 
 
@@ -354,7 +371,6 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
         prim("__signed char", JavaPrim.Byte);
         prim("SignedByte", JavaPrim.Byte);
 
-        prim("BYTE", JavaPrim.Byte);
         prim("__int8", JavaPrim.Byte);
 
         prim("float", JavaPrim.Float);
@@ -366,11 +382,6 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
         prim("NSDouble", JavaPrim.Double);
         prim("CGDouble", JavaPrim.Double);
 
-        if (result.config.runtime == JNAeratorConfig.Runtime.BridJ)
-        		prim("BOOL", JavaPrim.Int);
-        	else
-        		prim("BOOL", JavaPrim.Boolean);
-        	
         prim("bool", JavaPrim.Boolean);
         prim("Boolean", JavaPrim.Boolean);
         prim("boolean_t", JavaPrim.Boolean);
@@ -673,7 +684,7 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
         }
         Identifier name = null;
         List<Modifier> mods = valueType.getModifiers();
-        int longCount = Modifier.Long.countIn(mods);
+        int longCount = ModifierType.Long.countIn(mods);
         if (valueType instanceof JavaPrimitive) {
             return ((JavaPrimitive) valueType).getJavaPrim();
         }
@@ -684,7 +695,7 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
                     name = ident("long");
                 } else if (longCount > 1) {
                     name = ident("long long");
-                } else if (Modifier.Short.isContainedBy(mods)) {
+                } else if (valueType.hasModifier(ModifierType.Short)) {
                     name = ident("short");
                 } else {
                     name = ident("int");
@@ -1359,7 +1370,7 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
     pointedTypeRef = typeRef(CLong.class);
     else {
     String s = targetConv.getRawType().toString();
-    if (s.equals(Byte.TYPE.getName()) && (result.config.charPtrAsString || Modifier.__const.isContainedBy(valueType.getModifiers())))
+    if (s.equals(Byte.TYPE.getName()) && (result.config.charPtrAsString || valueType.hasModifier(ModifierType.__const)))
     return new NL4JTypeConversion(
     typeRef(ident(result.config.runtime.pointerClass, expr(typeRef(String.class)))),
     null,
@@ -1774,8 +1785,8 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
                 case StaticallySizedArrayField:
                     return new ArrayRef(convArgType);
                 case PrimitiveOrBufferParameter:
-                    if (!result.config.noPrimitiveArrays && (target.getModifiers().contains(Modifier.Const)
-                            || valueType.getModifiers().contains(Modifier.Const))) {
+                    if (!result.config.noPrimitiveArrays && (target.getModifiers().contains(ModifierType.Const)
+                            || valueType.getModifiers().contains(ModifierType.Const))) {
                         return new ArrayRef(convArgType);
                     }
                     Class<? extends Buffer> bc = primToBuffer.get(prim);

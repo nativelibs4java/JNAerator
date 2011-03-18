@@ -231,7 +231,7 @@ public class BridJer {
                     }
                     String fieldName = "strConstant" + (++nConstants);
                     VariablesDeclaration staticConstField = new VariablesDeclaration(typeRef(ident(ptrClass(), expr(typeRef(charClass)))), new DirectDeclarator(fieldName, staticPtrMethod(ptrMethodName, c.clone())));
-                    staticConstField.addModifiers(Modifier.Static, Modifier.Private, Modifier.Final);
+                    staticConstField.addModifiers(ModifierType.Static, ModifierType.Private, ModifierType.Final);
                     //s.addDeclaration(staticConstField);
                     extraDeclarationsOut.add(staticConstField);
                     c.replaceBy(varRef(fieldName));

@@ -10,6 +10,7 @@ import java.util.Map;
 import com.ochafik.lang.jnaerator.parser.Declarator;
 import com.ochafik.lang.jnaerator.parser.Element;
 import com.ochafik.lang.jnaerator.parser.Modifier;
+import com.ochafik.lang.jnaerator.parser.ModifierType;
 import com.ochafik.lang.jnaerator.parser.Scanner;
 import com.ochafik.lang.jnaerator.parser.TypeRef;
 import com.ochafik.lang.jnaerator.parser.TypeRef.SimpleTypeRef;
@@ -107,16 +108,16 @@ public class UniversalReconciliator {
 		defRecon("int", "signed long long", typeRef("NSInteger"));
 		defRecon("long", "unsigned long long", typeRef("NSInteger"));
 		defRecon("long", "signed long long", typeRef("NSInteger"));
-		defRecon("unsigned long", "unsigned long long", typeRef("long").addModifiers(Modifier.Unsigned));
-		defRecon("unsigned int", "unsigned long long", typeRef("NSUInteger"));//int").addModifiers(Modifier.Unsigned));
+		defRecon("unsigned long", "unsigned long long", typeRef("long").addModifiers(ModifierType.Unsigned));
+		defRecon("unsigned int", "unsigned long long", typeRef("NSUInteger"));//int").addModifiers(ModifierType.Unsigned));
 		
-		defRecon("unsigned long", "unsigned int", typeRef("int").addModifiers(Modifier.Unsigned));
-		defRecon("signed long", "signed int", typeRef("int").addModifiers(Modifier.Signed));
+		defRecon("unsigned long", "unsigned int", typeRef("int").addModifiers(ModifierType.Unsigned));
+		defRecon("signed long", "signed int", typeRef("int").addModifiers(ModifierType.Signed));
 		defRecon("long", "int", typeRef("int"));
 		defRecon("int", "unsigned int", typeRef("int"));
 
-		defRecon("signed long", "signed long long", typeRef("long").addModifiers(Modifier.Signed));
-		defRecon("signed int", "signed long long", typeRef("NSInteger"));//int").addModifiers(Modifier.Signed));
+		defRecon("signed long", "signed long long", typeRef("long").addModifiers(ModifierType.Signed));
+		defRecon("signed int", "signed long long", typeRef("NSInteger"));//int").addModifiers(ModifierType.Signed));
 	}
 	static void defRecon(String s32, String s64, TypeRef sRecon) {
 		predefined32_64Reconciliations.put(new Pair<String, String>(s32, s64), sRecon);
@@ -124,8 +125,8 @@ public class UniversalReconciliator {
 	/*static TypeRef cleanClone(TypeRef t) {
 		t = t.clone();
 		List<Modifier> mods = new ArrayList<Modifier>(t.getModifiers());
-		mods.remove(Modifier.Signed);
-		mods.remove(Modifier.Unsigned);
+		mods.remove(ModifierType.Signed);
+		mods.remove(ModifierType.Unsigned);
 		t.setModifiers(mods);
 		return t;
 	}*/

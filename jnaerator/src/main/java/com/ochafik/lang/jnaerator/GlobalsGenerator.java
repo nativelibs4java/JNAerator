@@ -31,6 +31,7 @@ import com.ochafik.lang.jnaerator.parser.Expression;
 import com.ochafik.lang.jnaerator.parser.Function;
 import com.ochafik.lang.jnaerator.parser.Identifier;
 import com.ochafik.lang.jnaerator.parser.Modifier;
+import com.ochafik.lang.jnaerator.parser.ModifierType;
 import com.ochafik.lang.jnaerator.parser.Statement;
 import com.ochafik.lang.jnaerator.parser.Struct;
 import com.ochafik.lang.jnaerator.parser.TypeRef;
@@ -83,7 +84,7 @@ public class GlobalsGenerator {
 				type.setModifiers(Collections.EMPTY_LIST);
 				
 				if (	!isCallback && 
-						!(Modifier.Extern.isContainedBy(modifiers) || Modifier.Dllexport.isContainedBy(modifiers) || Modifier.Dllimport.isContainedBy(modifiers))
+						!(ModifierType.Extern.isContainedBy(modifiers) || ModifierType.Dllexport.isContainedBy(modifiers) || ModifierType.Dllimport.isContainedBy(modifiers))
 						//|| Modifier.Const.isContainedBy(modifiers) && d.getDefaultValue() != null
 						) {
 					//result.declarationsConverter.convertCon
@@ -147,7 +148,7 @@ public class GlobalsGenerator {
 								)
 							);
 	
-							vd.addModifiers(Modifier.Public, Modifier.Static, Modifier.Final);
+							vd.addModifiers(ModifierType.Public, ModifierType.Static, ModifierType.Final);
 							vd.importDetails(globals, false);
 							vd.moveAllCommentsBefore();
 							
@@ -163,7 +164,7 @@ public class GlobalsGenerator {
 				
 				/// We get a pointer to the global, not the global itself
 				Struct struct = result.declarationsConverter.publicStaticClass(name, null, Struct.Type.JavaClass, null);
-				struct.addModifiers(Modifier.Final);
+				struct.addModifiers(ModifierType.Final);
 				struct.importDetails(globals, false);
 				struct.moveAllCommentsBefore();
 				
@@ -187,7 +188,7 @@ public class GlobalsGenerator {
 				} else {
 					Identifier instTypeName = ident(name + "_holder");
 					Struct holderStruct = result.declarationsConverter.publicStaticClass(instTypeName, ident(result.config.runtime.structClass), Struct.Type.JavaClass, null);
-					holderStruct.addModifiers(Modifier.Final);
+					holderStruct.addModifiers(ModifierType.Final);
 					VariablesDeclaration vd = result.declarationsConverter.convertVariablesDeclarationToJNA("value", type, new int[1], callerLibraryName);
 					if (vd.getValueType().toString().equals(result.config.runtime.pointerClass.getName())) {
 						isByRef = true;
@@ -206,13 +207,13 @@ public class GlobalsGenerator {
 						));
 						holderStruct.addDeclaration(pointerConstructor);
 						
-						//holderStruct.addDeclaration(new VariablesDeclaration(convType, new Declarator.DirectDeclarator("value")).addModifiers(Modifier.Public));
+						//holderStruct.addDeclaration(new VariablesDeclaration(convType, new Declarator.DirectDeclarator("value")).addModifiers(ModifierType.Public));
 						instType = new TypeRef.SimpleTypeRef(instTypeName);
 						struct.addDeclaration(decl(holderStruct));
 					}
 				}
 				Identifier instName = name;//"_";
-				struct.addDeclaration(new VariablesDeclaration(instType, new Declarator.DirectDeclarator(instName.toString())).addModifiers(Modifier.Private, Modifier.Static));
+				struct.addDeclaration(new VariablesDeclaration(instType, new Declarator.DirectDeclarator(instName.toString())).addModifiers(ModifierType.Private, ModifierType.Static));
 				VariableRef instRef = new VariableRef(instName);
 				Expression ptrExpr = methodCall(
 					nativeLibFieldExpr.clone(),
@@ -240,7 +241,7 @@ public class GlobalsGenerator {
 						null
 					),
 					new Statement.Return(instRef.clone())
-				)).addModifiers(Modifier.Public, Modifier.Static, Modifier.Synchronized));
+				)).addModifiers(ModifierType.Public, ModifierType.Static, ModifierType.Synchronized));
 				out.addDeclaration(decl(struct));
 			} catch (Throwable t) {
 				out.addDeclaration(result.declarationsConverter.skipDeclaration(d, t.toString()));

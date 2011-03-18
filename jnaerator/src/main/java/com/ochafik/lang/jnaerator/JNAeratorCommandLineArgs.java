@@ -136,6 +136,7 @@ public class JNAeratorCommandLineArgs {
 		NoStringReturns(	"-noStringReturns",		"Prevent const char* and const wchar_t* return types from being converted to String and WString."),
 		Project(			"-project",				"Read Visual Studio 2008 project or solution file and use the configuration specified (e.g. \"Release|Win32\").", new ArgDef(Type.ExistingFile, "solutionFile"), new ArgDef(Type.String, "\"Config|Platform\"")),
 		NoAuto(				"-noAuto",		 		"No auto-configuration of preprocessor symbols and paths"),
+		COM(                "-com", 				"Generate Microsoft COM (C++) bindings."),
 		GCCLong(			"-gccLong",				"Use GCC convention for size of 'long' (4 bytes on 32 bits platforms, 8 bytes on 64 bits platforms)."),
 		SizeAsLong(			"-sizeAsLong",			"Treat size_t and ptrdiff_t values as 'long' values. ONLY HERE FOR COMPATIBILITY WITH PREVIOUS VERSIONS, WILL EVENTUALLY BE REMOVED."),
 		Direct(				"-direct",		 		"JNAerate libraries that use JNA's faster direct call convention"),

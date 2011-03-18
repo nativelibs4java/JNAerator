@@ -81,6 +81,23 @@ public abstract class ModifiableElement extends Element {
 	public ModifiableElement addModifiers(Modifier... mds) {
 		return addModifiers(Arrays.asList(mds));
 	}
+    public Object getModifierValue(ModifierType t) {
+        Modifier rt = t.resolveAlias();
+        if (!t.isAnyOf(ModifierKind.HasArguments, ModifierKind.VCAnnotation1Arg))
+            throw new RuntimeException("Modifier type " + t + " does not hold any value.");
+        for (Modifier m : getModifiers()) {
+            if (m instanceof ValuedModifier) {
+                ValuedModifier vm = (ValuedModifier)m;
+                Modifier mm = vm.getModifier();
+                if (mm == null)
+                    continue;
+                mm = mm.resolveAlias();
+                if (rt.equals(mm))
+                    return vm.getValue();
+            }
+        }
+        return null;
+    }
 	public ModifiableElement reorganizeModifiers() {
 		setModifiers(new ArrayList<Modifier>(new LinkedHashSet<Modifier>(getModifiers())));
 		return this;
@@ -89,6 +106,13 @@ public abstract class ModifiableElement extends Element {
 	public List<Modifier> getModifiers() {
 		return Collections.unmodifiableList(modifiers);
 	}
+    public boolean hasModifier(Modifier m) {
+        m = m.resolveAlias();
+        for (Modifier mm : modifiers)
+            if (m.equals(mm.resolveAlias()))
+                return true;
+        return false;
+    }
 	public void removeModifiers(Modifier...modifiers) {
 		for (Modifier m : modifiers)
 			this.modifiers.remove(m);

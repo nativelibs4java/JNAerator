@@ -210,7 +210,7 @@ public class Function extends Declaration implements Declarator.MutableByDeclara
 		StringBuilder b = new StringBuilder();
 		
 		if (type == Type.ObjCMethod) {
-			b.append(modifiers.contains(Modifier.Static) ? "+" : "-");
+			b.append(modifiers.contains(ModifierType.Static) ? "+" : "-");
 			b.append("(");
 			TypeRef t = getValueType();
 			if (t == null)
@@ -281,22 +281,22 @@ public class Function extends Declaration implements Declarator.MutableByDeclara
 		}
 		int modifiers = m.getModifiers();
 		if (java.lang.reflect.Modifier.isPrivate(modifiers))
-			f.addModifiers(Modifier.Private);
+			f.addModifiers(ModifierType.Private);
 		if (java.lang.reflect.Modifier.isProtected(modifiers))
-			f.addModifiers(Modifier.Protected);
+			f.addModifiers(ModifierType.Protected);
 		if (java.lang.reflect.Modifier.isPublic(modifiers))
-			f.addModifiers(Modifier.Public);
+			f.addModifiers(ModifierType.Public);
 		if (java.lang.reflect.Modifier.isStatic(modifiers))
-			f.addModifiers(Modifier.Static);
+			f.addModifiers(ModifierType.Static);
 		
 		if (java.lang.reflect.Modifier.isAbstract(modifiers))
-			f.addModifiers(Modifier.Abstract);
+			f.addModifiers(ModifierType.Abstract);
 		if (java.lang.reflect.Modifier.isFinal(modifiers))
-			f.addModifiers(Modifier.Final);
+			f.addModifiers(ModifierType.Final);
 		if (java.lang.reflect.Modifier.isNative(modifiers))
-			f.addModifiers(Modifier.Native);
+			f.addModifiers(ModifierType.Native);
 		if (java.lang.reflect.Modifier.isSynchronized(modifiers))
-			f.addModifiers(Modifier.Synchronized);
+			f.addModifiers(ModifierType.Synchronized);
 		
 		/*TODO org.rococoa.ReturnType returnType = m.getAnnotation(ReturnType.class);
 		if (returnType != null && returnType.value() != null) {
