@@ -14,4 +14,4 @@ import com.ochafik.lang.jnaerator.runtime.*;
 INSTANCE.test_cb1((TestLibrary.foo_cb_t)null);
 INSTANCE.test_cb2((TestLibrary.foo_cb_t)null);
 INSTANCE.test_cb3((TestLibrary.test_cb3_arg1_func_callback)null);
-INSTANCE.test_cb4((TestLibrary.test_cb4 _arg1_func_callback)null);
+INSTANCE.test_cb4((TestLibrary.test_cb4_arg1_func_callback)null);
