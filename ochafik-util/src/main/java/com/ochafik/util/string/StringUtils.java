@@ -207,7 +207,7 @@ public class StringUtils {
 					b.append("\\r");
 					break;
 				case '"':
-					b.append("\"");
+					b.append("\\\"");
 					break;
 				case '\\':
 					b.append("\\\\");
