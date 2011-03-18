@@ -54,7 +54,7 @@ public class ObjectiveCToJavaPreScanner extends Scanner {
 	@Override
 	public void visitEnum(Enum e) {
 		Element parent = e.getParentElement();
-		if (e.getTag() == null || !(parent instanceof TypeDef)) {
+		if (e.getTag() == null && !(parent instanceof TypeDef)) {
 			// Hack to infer the enum name from the next typedef NSUInteger NSSomethingThatLooksLikeTheEnumsIdentifiers
 			Element base = parent instanceof Declaration ? e.getParentElement() : e;
 			Element next = base.getNextSibling();
