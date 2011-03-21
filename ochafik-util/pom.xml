@@ -6,13 +6,13 @@
   <artifactId>ochafik-util</artifactId>
   <name>OChafik's General Utilities</name>
   <url>http://ochafik.free.fr/blog/</url>
-  <version>0.9.7-SNAPSHOT</version>
+  <version>0.9.7</version>
   <packaging>jar</packaging>
   
   <parent>
 	  <groupId>com.jnaerator</groupId>
 	  <artifactId>jnaerator-parent</artifactId>
-	  <version>0.9.7-SNAPSHOT</version>
+	  <version>0.9.7</version>
 	  <relativePath>../parent</relativePath>
   </parent>
   	

@@ -3,14 +3,14 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.jnaerator</groupId>
 	<artifactId>jnaerator-parent</artifactId>
-	<version>0.9.7-SNAPSHOT</version>
+	<version>0.9.7</version>
 	<packaging>pom</packaging>
 	<name>JNAerator Abstract Parent Project</name>
 
 	<parent>
 		<groupId>com.nativelibs4java</groupId>
 		<artifactId>nativelibs4java-parent</artifactId>
-		<version>1.2-SNAPSHOT</version>
+		<version>1.2</version>
 		<relativePath>../../Parent</relativePath>
 	</parent>
 	
