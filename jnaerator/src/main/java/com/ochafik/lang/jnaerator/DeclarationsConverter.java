@@ -1693,8 +1693,9 @@ public class DeclarationsConverter {
         convDecl.moveAllCommentsBefore();
 
         convDecl.setName(ident(name));
-        
-        convDecl.addAnnotation(new Annotation(result.config.runtime.typeRef(JNAeratorConfig.Runtime.Ann.Field), expr(fieldIndex)));
+
+        if (!isGlobal)
+            convDecl.addAnnotation(new Annotation(result.config.runtime.typeRef(JNAeratorConfig.Runtime.Ann.Field), expr(fieldIndex)));
         convDecl.setValueType(conv.typeRef);
 
         TypeRef javaType = convDecl.getValueType();
