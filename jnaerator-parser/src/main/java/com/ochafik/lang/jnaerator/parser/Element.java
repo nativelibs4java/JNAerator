@@ -245,7 +245,7 @@ public abstract class Element {
 		try {
 			Element clone = getClass().newInstance();
             Map<String, GetterAndSetterInfo> infos = getGettersAndSetters().gettersAndSetters;
-            System.out.println("Infos for " + getClass().getName() + " = " + infos.keySet());
+            //System.out.println("Infos for " + getClass().getName() + " = " + infos.keySet());
 			for (Map.Entry<String, GetterAndSetterInfo> e : infos.entrySet()) {
 				fieldName = e.getKey();
 				if (fieldName.equals("parentElement"))

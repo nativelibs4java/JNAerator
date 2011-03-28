@@ -413,6 +413,7 @@ public class DeclarationsConverter {
 	                out.addDeclaration(new TaggedTypeRefDeclaration(en));
 	                Struct body = new Struct();
 	                en.setBody(body);
+                    boolean hasValidItem = false;
 	                for (EnumItemResult er : results) {
 	                    if (er.errorElement != null) {
 	                        out.addDeclaration(er.errorElement);
@@ -420,6 +421,7 @@ public class DeclarationsConverter {
 	                    }
 	                    Enum.EnumItem item = new Enum.EnumItem(er.originalItem.getName(), er.value);
 	                    en.addItem(item);
+                        hasValidItem = true;
 	                    if (!result.config.noComments)
 	                        if (item != null && hasEnumClass) {
 	                            String c = item.getCommentBefore();
@@ -427,46 +429,47 @@ public class DeclarationsConverter {
 	                            item.addToCommentBefore(c);
 	                        }
 	                }
-	                en.addInterface(ident(IntValuedEnum.class, expr(typeRef(enumName.clone()))));
-	                String valueArgName = "value";
-	                body.addDeclaration(new Function(Type.JavaMethod, enumName.clone(), null, new Arg(valueArgName, typeRef(Long.TYPE))).setBody(block(
-	                    stat(expr(memberRef(thisRef(), MemberRefStyle.Dot, valueArgName), AssignmentOperator.Equal, varRef(valueArgName)))
-	                )));
-	                body.addDeclaration(new VariablesDeclaration(typeRef(Long.TYPE), new DirectDeclarator(valueArgName)).addModifiers(ModifierType.Public, ModifierType.Final));
-	                body.addDeclaration(new Function(Type.JavaMethod, ident(valueArgName), typeRef(Long.TYPE)).setBody(block(
-	                    new Statement.Return(memberRef(thisRef(), MemberRefStyle.Dot, valueArgName))
-	                )).addModifiers(ModifierType.Public));
-	
-	                
-	                body.addDeclaration(new Function(Type.JavaMethod, ident("iterator"), typeRef(ident(Iterator.class, expr(typeRef(enumName.clone()))))).setBody(block(
-	                    new Statement.Return(
-	                        methodCall(
-	                            methodCall(
-	                                expr(typeRef(Collections.class)),
-	                                MemberRefStyle.Dot,
-	                                "singleton",
-	                                thisRef()
-	                            ),
-	                            MemberRefStyle.Dot,
-	                            "iterator"
-	                        )
-	                    )
-					)).addModifiers(ModifierType.Public));
-	
-	                body.addDeclaration(new Function(Type.JavaMethod, ident("fromValue"), typeRef(ident(ValuedEnum.class, expr(typeRef(enumName.clone())))), new Arg(valueArgName, typeRef(Long.TYPE))).setBody(block(
-	                    new Statement.Return(
-	                        methodCall(
-	                            expr(typeRef(FlagSet.class)),
-	                            MemberRefStyle.Dot,
-	                            "fromValue",
-	                            varRef(valueArgName),
-	                            methodCall(
-	                                "values"
-	                            )
-	                        )
-	                    )
-	                )).addModifiers(ModifierType.Public, ModifierType.Static));
-	                
+                    if (hasValidItem) {
+                        en.addInterface(ident(IntValuedEnum.class, expr(typeRef(enumName.clone()))));
+                        String valueArgName = "value";
+                        body.addDeclaration(new Function(Type.JavaMethod, enumName.clone(), null, new Arg(valueArgName, typeRef(Long.TYPE))).setBody(block(
+                            stat(expr(memberRef(thisRef(), MemberRefStyle.Dot, valueArgName), AssignmentOperator.Equal, varRef(valueArgName)))
+                        )));
+                        body.addDeclaration(new VariablesDeclaration(typeRef(Long.TYPE), new DirectDeclarator(valueArgName)).addModifiers(ModifierType.Public, ModifierType.Final));
+                        body.addDeclaration(new Function(Type.JavaMethod, ident(valueArgName), typeRef(Long.TYPE)).setBody(block(
+                            new Statement.Return(memberRef(thisRef(), MemberRefStyle.Dot, valueArgName))
+                        )).addModifiers(ModifierType.Public));
+
+
+                        body.addDeclaration(new Function(Type.JavaMethod, ident("iterator"), typeRef(ident(Iterator.class, expr(typeRef(enumName.clone()))))).setBody(block(
+                            new Statement.Return(
+                                methodCall(
+                                    methodCall(
+                                        expr(typeRef(Collections.class)),
+                                        MemberRefStyle.Dot,
+                                        "singleton",
+                                        thisRef()
+                                    ),
+                                    MemberRefStyle.Dot,
+                                    "iterator"
+                                )
+                            )
+                        )).addModifiers(ModifierType.Public));
+
+                        body.addDeclaration(new Function(Type.JavaMethod, ident("fromValue"), typeRef(ident(ValuedEnum.class, expr(typeRef(enumName.clone())))), new Arg(valueArgName, typeRef(Long.TYPE))).setBody(block(
+                            new Statement.Return(
+                                methodCall(
+                                    expr(typeRef(FlagSet.class)),
+                                    MemberRefStyle.Dot,
+                                    "fromValue",
+                                    varRef(valueArgName),
+                                    methodCall(
+                                        "values"
+                                    )
+                                )
+                            )
+                        )).addModifiers(ModifierType.Public, ModifierType.Static));
+                    }
                 } else {
                 	outputEnumItemsAsConstants(results, out, signatures, libraryClassName, hasEnumClass);
                 }

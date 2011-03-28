@@ -518,7 +518,7 @@ public class ObjectiveCGenerator {
 			} else if (d instanceof TaggedTypeRefDeclaration) {
 				TaggedTypeRef tr = ((TaggedTypeRefDeclaration) d).getTaggedTypeRef();
 				if (tr instanceof Struct) {
-					result.declarationsConverter.outputConvertedStruct((Struct)tr, signatures, instanceStruct, fullClassName, false);
+					result.declarationsConverter.outputConvertedStruct((Struct)tr, signatures, instanceStruct, fullClassName, null, false);
 				} else if (tr instanceof Enum) {
 					result.declarationsConverter.convertEnum((Enum)tr, signatures, instanceStruct, fullClassName);
 				}
@@ -526,7 +526,7 @@ public class ObjectiveCGenerator {
 				TypeDef td = (TypeDef)d;
 				TypeRef tr = td.getValueType();
 				if (tr instanceof Struct) {
-					result.declarationsConverter.outputConvertedStruct((Struct)tr, signatures, instanceStruct, fullClassName, false);
+					result.declarationsConverter.outputConvertedStruct((Struct)tr, signatures, instanceStruct, fullClassName, null, false);
 				} else if (tr instanceof FunctionSignature) {
 					result.declarationsConverter.convertCallback((FunctionSignature)tr, signatures, instanceStruct, fullClassName);
 				}

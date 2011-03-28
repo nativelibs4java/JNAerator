@@ -90,7 +90,7 @@ public class CToJavaPreScanner extends Scanner {
                 FunctionDeclarator fd = (FunctionDeclarator)declarator;
                 FunctionSignature fs = new FunctionSignature(new Function(Function.Type.CFunction, null, d.getValueType(), fd.getArgs()));
                 d.setValueType(fs);
-                d.setDeclarators(new DirectDeclarator(fd.resolveName(), fd.getDefaultValue()));
+                d.setDeclarators(Arrays.asList((Declarator)new DirectDeclarator(fd.resolveName(), fd.getDefaultValue())));
             }
         }
     }
