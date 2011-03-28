@@ -500,6 +500,9 @@ public class JNAerator {
 					case StructsInLibrary:
 						config.putTopStructsInSeparateFiles = false;
 						break;
+                    case ParseInOneChunk:
+                        config.parseInOneChunk = true;
+                        break;
 					case Studio:
 						try {
 							JNAeratorStudio.main(new String[0]);

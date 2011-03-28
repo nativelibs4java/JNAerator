@@ -1340,7 +1340,7 @@ public class DeclarationsConverter {
 		if (structName == null)
 			return null;
 
-		//if (structName.toString().contains("MonoSymbolFile"))
+		//if (structName.toString().contains("MonoObject"))
 		//	structName.toString();
 
 		if (struct.isForwardDeclaration())// && !result.structsByName.get(structName).isForwardDeclaration())
@@ -1812,7 +1812,9 @@ public class DeclarationsConverter {
 				//}
 				iChild[0]++;
 			}
-		} catch (UnsupportedConversionException e) {
+		} catch (Throwable e) {
+            if (!(e instanceof UnsupportedConversionException))
+                e.printStackTrace();
 			if (!result.config.limitComments)
 				out.addDeclaration(new EmptyDeclaration(e.toString()));
 		}

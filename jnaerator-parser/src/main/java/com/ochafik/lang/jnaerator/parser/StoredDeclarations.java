@@ -57,9 +57,6 @@ public abstract class StoredDeclarations extends Declaration {
 	public void setDeclarators(List<Declarator> declarators) {
 		changeValue(this, this.declarators, declarators);
 	}
-    public void setDeclarators(Declarator... declarators) {
-		setDeclarators(Arrays.asList(declarators));
-    }
 	public void addDeclarators(List<Declarator> declarators) {
 		for (Declarator d : declarators)
 			addDeclarator(d);

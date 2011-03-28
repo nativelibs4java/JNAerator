@@ -31,6 +31,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -243,7 +244,9 @@ public abstract class Element {
 		String fieldName = null;
 		try {
 			Element clone = getClass().newInstance();
-			for (Map.Entry<String, GetterAndSetterInfo> e : getGettersAndSetters().gettersAndSetters.entrySet()) {
+            Map<String, GetterAndSetterInfo> infos = getGettersAndSetters().gettersAndSetters;
+            System.out.println("Infos for " + getClass().getName() + " = " + infos.keySet());
+			for (Map.Entry<String, GetterAndSetterInfo> e : infos.entrySet()) {
 				fieldName = e.getKey();
 				if (fieldName.equals("parentElement"))
 					continue;

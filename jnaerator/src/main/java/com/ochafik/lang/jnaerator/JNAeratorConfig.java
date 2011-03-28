@@ -284,7 +284,8 @@ public class JNAeratorConfig {
 //			features.remove(GenFeatures.TypedPointersForForwardDeclarations);
 	}
 	public boolean verbose;
-	public File outputDir;
+    boolean parseInOneChunk;
+    public File outputDir;
 	public List<String> rootDirectoriesPrefixesForSourceComments = new ArrayList<String>();
 	public Adapter<Function, Boolean> functionsAccepter;
 	public String packageName = null, rootPackageName = null;

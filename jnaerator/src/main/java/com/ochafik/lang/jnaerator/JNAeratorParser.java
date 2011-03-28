@@ -196,7 +196,7 @@ public class JNAeratorParser {
 		System.setOut(pout);
 		System.setErr(pout);
 		try {
-			if (EASILY_DEBUGGABLE_BUT_FRAGILE_PARSING_MODE) {
+			if (config.parseInOneChunk) {
 				// easier to debug but any error might ruin all the rest of the parsing
 				try {
 					ObjCppParser parser = newObjCppParser(typeConverter, sourceContent, config.verbose);
