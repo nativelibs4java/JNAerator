@@ -6,7 +6,7 @@
   <artifactId>jnaerator-runtime</artifactId>
   <name>JNAerator Runtime</name>
   <url>http://code.google.com/p/jnaerator/</url>
-  <version>0.9.8-SNAPSHOT</version>
+  <version>0.9.7</version>
   <packaging>jar</packaging>
   
   <dependencies>
@@ -29,7 +29,7 @@
   <parent>
 	  <groupId>com.jnaerator</groupId>
 	  <artifactId>jnaerator-parent</artifactId>
-	  <version>0.9.8-SNAPSHOT</version>
+	  <version>0.9.7</version>
 	  <relativePath>../parent</relativePath>
   </parent>
   
