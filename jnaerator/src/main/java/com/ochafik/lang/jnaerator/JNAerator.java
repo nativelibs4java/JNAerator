@@ -1337,7 +1337,7 @@ public class JNAerator {
         result.typeConverter.allowFakePointers = true;
         result.declarationsConverter.convertEnums(result.enumsByLibrary.get(library), signatures, interf, fullLibraryClassName);
         result.declarationsConverter.convertConstants(library, result.definesByLibrary.get(library), sourceFiles, signatures, interf, fullLibraryClassName);
-        result.declarationsConverter.convertStructs(result.structsByLibrary.get(library), signatures, interf, fullLibraryClassName);
+        result.declarationsConverter.convertStructs(result.structsByLibrary.get(library), signatures, interf, fullLibraryClassName, library);
         result.declarationsConverter.convertCallbacks(result.callbacksByLibrary.get(library), signatures, interf, fullLibraryClassName);
         result.declarationsConverter.convertFunctions(result.functionsByLibrary.get(library), signatures, interf, fullLibraryClassName);
 
@@ -1345,6 +1345,21 @@ public class JNAerator {
             result.globalsGenerator.convertGlobals(result.globalsByLibrary.get(library), signatures, interf, nativeLibFieldExpr, fullLibraryClassName, library);
 
         result.typeConverter.allowFakePointers = false;
+
+        Set<String> undefinedTypes = result.undefinedTypesByLibrary.get(fullLibraryClassName);
+        if (undefinedTypes != null)
+            for (String undefinedTypeName : undefinedTypes) {
+                if (undefinedTypeName.contains("::"))
+                    continue;
+
+                Identifier fakePointer = ident(undefinedTypeName);
+                if (!signatures.classSignatures.add(fakePointer))
+                    continue;
+
+                Struct ptClass = result.declarationsConverter.publicStaticClass(fakePointer, null, Struct.Type.JavaInterface, null);
+                ptClass.addToCommentBefore("Undefined type");
+                interf.addDeclaration(decl(ptClass));
+            }
 
         Set<String> fakePointers = result.fakePointersByLibrary.get(fullLibraryClassName);
         if (fakePointers != null)

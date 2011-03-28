@@ -18,6 +18,7 @@
 */
 package com.ochafik.lang.jnaerator;
 
+import org.bridj.BridJ;
 import org.bridj.FlagSet;
 import org.bridj.IntValuedEnum;
 import org.bridj.StructObject;
@@ -1167,13 +1168,13 @@ public class DeclarationsConverter {
 			structName = tag;
 		return structName == null ? null : structName.clone();
 	}
-	public Struct convertStruct(Struct struct, Signatures signatures, Identifier callerLibraryClass, boolean onlyFields) throws IOException {
+	public Struct convertStruct(Struct struct, Signatures signatures, Identifier callerLibraryClass, String callerLibrary, boolean onlyFields) throws IOException {
         if (result.config.runtime == JNAeratorConfig.Runtime.BridJ)
-            return convertStructToBridJ(struct, signatures, callerLibraryClass, onlyFields);
+            return convertStructToBridJ(struct, signatures, callerLibraryClass, callerLibrary, onlyFields);
         else
-            return convertStructToJNA(struct, signatures, callerLibraryClass, onlyFields);
+            return convertStructToJNA(struct, signatures, callerLibraryClass, callerLibrary, onlyFields);
     }
-	public Struct convertStructToJNA(Struct struct, Signatures signatures, Identifier callerLibraryClass, boolean onlyFields) throws IOException {
+	public Struct convertStructToJNA(Struct struct, Signatures signatures, Identifier callerLibraryClass, String callerLibrary, boolean onlyFields) throws IOException {
 		Identifier structName = getActualTaggedTypeName(struct);
 		if (structName == null)
 			return null;
@@ -1238,12 +1239,12 @@ public class DeclarationsConverter {
 		//List<Declaration> children = new ArrayList<Declaration>();
 		for (Declaration d : struct.getDeclarations()) {
 			if (d instanceof VariablesDeclaration) {
-				convertVariablesDeclaration((VariablesDeclaration)d, structJavaClass, iChild, structName, callerLibraryClass);
+				convertVariablesDeclaration((VariablesDeclaration)d, structJavaClass, iChild, structName, callerLibraryClass, callerLibrary);
 			} else if (!onlyFields) {
 				if (d instanceof TaggedTypeRefDeclaration) {
 					TaggedTypeRef tr = ((TaggedTypeRefDeclaration) d).getTaggedTypeRef();
 					if (tr instanceof Struct) {
-						outputConvertedStruct((Struct)tr, childSignatures, structJavaClass, callerLibraryClass, false);
+						outputConvertedStruct((Struct)tr, childSignatures, structJavaClass, callerLibraryClass, callerLibrary, false);
 					} else if (tr instanceof Enum) {
 						convertEnum((Enum)tr, childSignatures, structJavaClass, callerLibraryClass);
 					}
@@ -1251,7 +1252,7 @@ public class DeclarationsConverter {
 					TypeDef td = (TypeDef)d;
 					TypeRef tr = td.getValueType();
 					if (tr instanceof Struct) {
-						outputConvertedStruct((Struct)tr, childSignatures, structJavaClass, callerLibraryClass, false);
+						outputConvertedStruct((Struct)tr, childSignatures, structJavaClass, callerLibraryClass, callerLibrary, false);
 					} else if (tr instanceof FunctionSignature) {
 						convertCallback((FunctionSignature)tr, childSignatures, structJavaClass, callerLibraryClass);
 					}
@@ -1334,7 +1335,7 @@ public class DeclarationsConverter {
 		return count;
 	}
 
-    public Struct convertStructToBridJ(Struct struct, Signatures signatures, Identifier callerLibraryClass, boolean onlyFields) throws IOException {
+    public Struct convertStructToBridJ(Struct struct, Signatures signatures, Identifier callerLibraryClass, String callerLibrary, boolean onlyFields) throws IOException {
 		Identifier structName = getActualTaggedTypeName(struct);
 		if (structName == null)
 			return null;
@@ -1430,12 +1431,12 @@ public class DeclarationsConverter {
             //    iChild[0] = 0;
 
 			if (d instanceof VariablesDeclaration) {
-				convertVariablesDeclaration((VariablesDeclaration)d, structJavaClass, iChild, structName, callerLibraryClass);
+				convertVariablesDeclaration((VariablesDeclaration)d, structJavaClass, iChild, structName, callerLibraryClass, callerLibrary);
 			} else if (!onlyFields) {
 				if (d instanceof TaggedTypeRefDeclaration) {
 					TaggedTypeRef tr = ((TaggedTypeRefDeclaration) d).getTaggedTypeRef();
 					if (tr instanceof Struct) {
-						outputConvertedStruct((Struct)tr, childSignatures, structJavaClass, callerLibraryClass, false);
+						outputConvertedStruct((Struct)tr, childSignatures, structJavaClass, callerLibraryClass, callerLibrary, false);
 					} else if (tr instanceof Enum) {
 						convertEnum((Enum)tr, childSignatures, structJavaClass, callerLibraryClass);
 					}
@@ -1443,7 +1444,7 @@ public class DeclarationsConverter {
 					TypeDef td = (TypeDef)d;
 					TypeRef tr = td.getValueType();
 					if (tr instanceof Struct) {
-						outputConvertedStruct((Struct)tr, childSignatures, structJavaClass, callerLibraryClass, false);
+						outputConvertedStruct((Struct)tr, childSignatures, structJavaClass, callerLibraryClass, callerLibrary, false);
 					} else if (tr instanceof FunctionSignature) {
 						convertCallback((FunctionSignature)tr, childSignatures, structJavaClass, callerLibraryClass);
 					}
@@ -1472,8 +1473,8 @@ public class DeclarationsConverter {
 		}
 		return structJavaClass;
 	}
-	void outputConvertedStruct(Struct struct, Signatures signatures, DeclarationsHolder out, Identifier callerLibraryClass, boolean onlyFields) throws IOException {
-		Struct structJavaClass = convertStruct(struct, signatures, callerLibraryClass, onlyFields);
+	void outputConvertedStruct(Struct struct, Signatures signatures, DeclarationsHolder out, Identifier callerLibraryClass, String callerLibrary, boolean onlyFields) throws IOException {
+		Struct structJavaClass = convertStruct(struct, signatures, callerLibraryClass, callerLibrary, onlyFields);
 		if (structJavaClass == null)
 			return;
 		
@@ -1573,13 +1574,13 @@ public class DeclarationsConverter {
 		return f;
 	}
 
-	public void convertStructs(List<Struct> structs, Signatures signatures, DeclarationsHolder out, Identifier libraryClassName) throws IOException {
+	public void convertStructs(List<Struct> structs, Signatures signatures, DeclarationsHolder out, Identifier libraryClassName, String library) throws IOException {
 		if (structs != null) {
 			for (Struct struct : structs) {
 				if (struct.findParentOfType(Struct.class) != null)
 					continue;
 					
-				outputConvertedStruct(struct, signatures, out, libraryClassName, false);
+				outputConvertedStruct(struct, signatures, out, libraryClassName, library, false);
 			}
 		}
 	}
@@ -1644,7 +1645,7 @@ public class DeclarationsConverter {
 		}
 	}
     protected String ioVarName = "io", ioStaticVarName = "IO";
-	public List<Declaration> convertVariablesDeclarationToBridJ(String name, TypeRef mutatedType, int[] iChild, int bits, Identifier holderName, Identifier callerLibraryName, Element... toImportDetailsFrom) throws UnsupportedConversionException {
+	public List<Declaration> convertVariablesDeclarationToBridJ(String name, TypeRef mutatedType, int[] iChild, int bits, boolean isGlobal, Identifier holderName, Identifier callerLibraryName, String callerLibrary, Element... toImportDetailsFrom) throws UnsupportedConversionException {
 		name = result.typeConverter.getValidJavaArgumentName(ident(name)).toString();
 		//convertVariablesDeclaration(name, mutatedType, out, iChild, callerLibraryName);
 
@@ -1698,13 +1699,23 @@ public class DeclarationsConverter {
 
         TypeRef javaType = convDecl.getValueType();
         String pointerGetSetMethodSuffix = StringUtils.capitalize(javaType.toString());
-        
+
+        Expression getGlobalPointerExpr = null;
+        if (isGlobal) {
+            getGlobalPointerExpr = methodCall(methodCall(methodCall(expr(typeRef(BridJ.class)), "getNativeLibrary", expr(callerLibrary)), "getSymbolPointer", expr(name)), "as", result.typeConverter.typeLiteral(javaType.clone()));
+        }
         List<Declaration> out = new ArrayList<Declaration>();
         if (conv.getExpr != null) {
 	        Function getter = convDecl.clone();
-	        getter.setBody(block(
-	            new Statement.Return(conv.getExpr)
-	        ));
+            if (isGlobal) {
+                getter.setBody(block(
+                    tryRethrow(new Statement.Return(cast(javaType.clone(), methodCall(getGlobalPointerExpr, "get"))))
+                ));
+            } else {
+                getter.setBody(block(
+                    new Statement.Return(conv.getExpr)
+                ));
+            }
 	        out.add(getter);
         }
         
@@ -1713,10 +1724,19 @@ public class DeclarationsConverter {
             setter.setValueType(typeRef(holderName.clone()));//Void.TYPE));
             setter.addArg(new Arg(name, javaType));
             //setter.addModifiers(ModifierType.Native);
-            setter.setBody(block(
-                stat(conv.setExpr),
-                new Statement.Return(thisRef())
-            ));
+            if (isGlobal) {
+                setter.setBody(block(
+                    tryRethrow(block(
+                        stat(methodCall(getGlobalPointerExpr, "set", varRef(name))),
+                        new Statement.Return(thisRef())
+                    ))
+                ));
+            } else {
+                setter.setBody(block(
+                    stat(conv.setExpr),
+                    new Statement.Return(thisRef())
+                ));
+            }
             out.add(setter);
             
             if (result.config.scalaStructSetters) {
@@ -1735,13 +1755,13 @@ public class DeclarationsConverter {
         }
         return out;
     }
-	public void convertVariablesDeclaration(VariablesDeclaration v, DeclarationsHolder out, int[] iChild, Identifier holderName, Identifier callerLibraryClass) {
+	public void convertVariablesDeclaration(VariablesDeclaration v, DeclarationsHolder out, int[] iChild, Identifier holderName, Identifier callerLibraryClass, String callerLibrary) {
 		if (result.config.runtime == JNAeratorConfig.Runtime.BridJ)
-	        convertVariablesDeclarationToBridJ(v, out, iChild, holderName, callerLibraryClass);
+	        convertVariablesDeclarationToBridJ(v, out, iChild, false, holderName, callerLibraryClass, callerLibrary);
         else
             convertVariablesDeclarationToJNA(v, out, iChild, callerLibraryClass);
     }
-	public void convertVariablesDeclarationToBridJ(VariablesDeclaration v, DeclarationsHolder out, int[] iChild, Identifier holderName, Identifier callerLibraryClass) {
+	public void convertVariablesDeclarationToBridJ(VariablesDeclaration v, DeclarationsHolder out, int[] iChild, boolean isGlobal, Identifier holderName, Identifier callerLibraryClass, String callerLibrary) {
         try { 
 			TypeRef valueType = v.getValueType();
 			for (Declarator vs : v.getDeclarators()) {
@@ -1757,7 +1777,7 @@ public class DeclarationsConverter {
 					vs = new DirectDeclarator(vs.resolveName());
 				}
 				Declarator d = v.getDeclarators().get(0);
-                List<Declaration> vds = convertVariablesDeclarationToBridJ(name, mutatedType, iChild, d.getBits(), holderName, callerLibraryClass, v, vs);
+                List<Declaration> vds = convertVariablesDeclarationToBridJ(name, mutatedType, iChild, d.getBits(), isGlobal, holderName, callerLibraryClass, callerLibrary, v, vs);
                 if (d.getBits() > 0)
 					for (Declaration vd : vds)
                         vd.addAnnotation(new Annotation(result.config.runtime.typeRef(JNAeratorConfig.Runtime.Ann.Bits), expr(d.getBits())));
@@ -1894,7 +1914,7 @@ public class DeclarationsConverter {
 					// TODO report error
 					continue;
 				}
-				Struct parentJavaClass = convertStruct(parent, new Signatures(), null, true);
+				Struct parentJavaClass = convertStruct(parent, new Signatures(), null, null, true);
 				Pair<List<VariablesDeclaration>, List<VariablesDeclaration>> parentDecls = getParentAndOwnDeclarations(parentJavaClass, parent);
 				ret.getFirst().addAll(parentDecls.getFirst());
 				ret.getFirst().addAll(parentDecls.getSecond());

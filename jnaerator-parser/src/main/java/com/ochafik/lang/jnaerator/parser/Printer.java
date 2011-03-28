@@ -548,7 +548,9 @@ public class Printer implements Visitor {
 
         modifiersStringPrefix(e);
         valueTypeAndStorageSuffix(e);
-        append(";");
+        if (!(e.getParentElement() instanceof Catch))
+            append(";");
+        
         if (e.getCommentAfter() != null)
             space().append(e.getCommentAfter());
     }

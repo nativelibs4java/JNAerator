@@ -18,6 +18,7 @@
 */
 package com.ochafik.lang.jnaerator;
 
+import com.ochafik.lang.jnaerator.parser.TypeRef.SimpleTypeRef;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -134,6 +135,7 @@ public class Result extends Scanner {
 	public Map<String, Define> defines = new LinkedHashMap<String, Define>();
 	public Map<String, List<Define>> definesByLibrary = new HashMap<String, List<Define>>();
 	public Map<String, Set<String>> fakePointersByLibrary = new HashMap<String, Set<String>>();
+    public Map<String, Set<String>> undefinedTypesByLibrary = new HashMap<String, Set<String>>();
 	
 	public Map<String, List<Function>> functionsByLibrary = new HashMap<String, List<Function>>();
 	//Map<String, Expression> defines = new LinkedHashMap<String, Expression>();
@@ -165,11 +167,30 @@ public class Result extends Scanner {
 		}
 		return null;
 	}
+    public Identifier findUndefinedType(Identifier name) {
+		name = getUndefinedTypeName(name);
+		if (name == null)
+			return null;
+		String s = name.toString();
+		for (Map.Entry<String, Set<String>> e : undefinedTypesByLibrary.entrySet()) {
+			if (e.getValue().contains(s))
+				return ident(ident(e.getKey()), name);
+		}
+		return null;
+	}
     public boolean isFakePointer(Identifier id) {
         return resolvedFakePointers.contains(id);
     }
+    public boolean isUndefinedType(Identifier id) {
+        return resolvedUndefinedTypes.contains(id);
+    }
+    public boolean isUndefinedType(TypeRef tpe) {
+        return tpe instanceof SimpleTypeRef && isUndefinedType(((SimpleTypeRef)tpe).getName());
+    }
+
     Map<Identifier, List<Pair<Identifier, Function>>> functionsReifiableInFakePointers = new HashMap<Identifier, List<Pair<Identifier, Function>>>();
     Set<Identifier> resolvedFakePointers = new HashSet<Identifier>();
+    Set<Identifier> resolvedUndefinedTypes = new HashSet<Identifier>();
 	public Identifier getFakePointer(Identifier libraryToUseIfNotDefinedYet, Identifier name) {
 		Identifier lib = findFakePointer(name);
 		if (lib != null)
@@ -183,6 +204,19 @@ public class Result extends Scanner {
         resolvedFakePointers.add(id);
         return id;
 	}
+	public Identifier getUndefinedType(Identifier libraryToUseIfNotDefinedYet, Identifier name) {
+		Identifier lib = findUndefinedType(name);
+		if (lib != null)
+			return lib;
+		name = getUndefinedTypeName(name);
+		Set<String> set = undefinedTypesByLibrary.get(libraryToUseIfNotDefinedYet);
+		if (set == null)
+			undefinedTypesByLibrary.put(libraryToUseIfNotDefinedYet.toString(), set = new HashSet<String>());
+		set.add(name.toString());
+		Identifier id = ident(libraryToUseIfNotDefinedYet, name);
+        resolvedUndefinedTypes.add(id);
+        return id;
+	}
 	private Identifier getFakePointerName(Identifier name) {
 
 		String nameStr = name == null ? null : name.toString();
@@ -192,7 +226,23 @@ public class Result extends Scanner {
 			Pair<TypeDef, Declarator> pair = typeDefs.get(nicerName);
 			if (pair != null) {
 				String target = pair.getFirst().getValueType().toString();
-				if (target.equals(nameStr) || target.equals(nameStr+"*"))
+				if (//target.equals(nameStr) ||
+                        target.equals(nameStr+"*"))
+					name = ident(nameStr = nicerName);
+			}
+		}
+		return name;
+	}
+	private Identifier getUndefinedTypeName(Identifier name) {
+
+		String nameStr = name == null ? null : name.toString();
+		String trimmed = StringUtils.trimUnderscores(nameStr);
+		if (trimmed != null && !nameStr.equals(trimmed)) {
+			String nicerName = trimmed;
+			Pair<TypeDef, Declarator> pair = typeDefs.get(nicerName);
+			if (pair != null) {
+				String target = pair.getFirst().getValueType().toString();
+				if (target.equals(nameStr))// || target.equals(nameStr+"*"))
 					name = ident(nameStr = nicerName);
 			}
 		}
@@ -308,21 +358,16 @@ public class Result extends Scanner {
 	}
 	
 	String getLibrary(Element decl) {
-		String library = null;
-		SourceFile f = decl.findParentOfType(SourceFile.class);
-		if (f != null) {
-			library = f.guessFramework();
-			if (library == null)
-				library = f.getLibrary();
-		}
-		if (library == null) {
-			Element e = decl;
-			String file = resolveFile(e);
-			if (decl instanceof Define) {
-				e = decl;
-			}
-			library = config.getLibrary(file);
-		}
+		String file = resolveFile(decl);
+        String library = config.getLibrary(file);
+        if (library == null) {
+            SourceFile f = decl.findParentOfType(SourceFile.class);
+            if (f != null) {
+                library = f.guessFramework();
+                if (library == null)
+                    library = f.getLibrary();
+            }
+        }
 		return library;
 	}
 	
@@ -543,7 +588,8 @@ public class Result extends Scanner {
 	public List<Pair<Identifier, Function>> getFunctionsReifiableInFakePointer(Identifier resolvedFakePointer) {
         return functionsReifiableInFakePointers.get(resolvedFakePointer);
     }
-	public interface ClassWritingNotifiable {
+
+    public interface ClassWritingNotifiable {
 		Struct writingClass(Identifier fullClassName, Struct interf, Signatures signatures, String currentLibrary);
 	}
 	public Struct notifyBeforeWritingClass(Identifier fullClassName, Struct interf, Signatures signatures, String currentLibrary) {

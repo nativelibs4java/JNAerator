@@ -17,6 +17,7 @@
 */
 package com.ochafik.lang.jnaerator;
 
+import com.ochafik.lang.jnaerator.parser.Declaration;
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -70,6 +71,12 @@ public class GlobalsGenerator {
 	
 	@SuppressWarnings("unchecked")
 	public void convertGlobals(VariablesDeclaration globals, Signatures signatures, DeclarationsHolder out, Expression nativeLibFieldExpr, Identifier callerLibraryName, String callerLibrary) throws UnsupportedConversionException {
+        if (result.config.runtime.hasJNA)
+            convertGlobalsJNA(globals, signatures, out, nativeLibFieldExpr, callerLibraryName, callerLibrary);
+        else
+            convertGlobalsBridJ(globals, signatures, out, nativeLibFieldExpr, callerLibraryName, callerLibrary);
+    }
+    public void convertGlobalsJNA(VariablesDeclaration globals, Signatures signatures, DeclarationsHolder out, Expression nativeLibFieldExpr, Identifier callerLibraryName, String callerLibrary) throws UnsupportedConversionException {
 		for (Declarator d : globals.getDeclarators()) {
 			try {
 				Identifier name = result.typeConverter.getValidJavaArgumentName(ident(d.resolveName()));
@@ -262,4 +269,9 @@ public class GlobalsGenerator {
 			}
 		}
 	}
+
+    private void convertGlobalsBridJ(VariablesDeclaration globals, Signatures signatures, DeclarationsHolder out, Expression nativeLibFieldExpr, Identifier callerLibraryName, String callerLibrary) {
+        int[] iChild = new int[1];
+        result.declarationsConverter.convertVariablesDeclarationToBridJ(globals, out, iChild, true, callerLibraryName, callerLibraryName, callerLibrary);//globals, out, null, true, null, null, callerLibraryName, callerLibrary);
+    }
 }

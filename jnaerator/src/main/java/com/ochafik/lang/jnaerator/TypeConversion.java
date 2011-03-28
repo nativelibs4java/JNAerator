@@ -1000,7 +1000,7 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
         public List<Expression> arrayLengths;
         public Expression bits;
         public Expression getExpr, setExpr;
-        public boolean wideString, readOnly, isPtr, byValue, nativeSize, cLong;
+        public boolean wideString, readOnly, isPtr, byValue, nativeSize, cLong, isUndefined;
         public Charset charset;
         public final List<Annotation> annotations = new ArrayList<Annotation>();
         //public String structIOFieldGetterNameRadix;
@@ -1106,6 +1106,8 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
 
     public NL4JConversion convertTypeToNL4J(TypeRef valueType, Identifier libraryClassName, Expression structIOExpr, Expression valueExpr, int fieldIndex, int bits) throws UnsupportedConversionException {
         TypeRef original = valueType;
+        //if (valueType != null && valueType.toString().contains("MonoDomain"))
+        //    valueType = (TypeRef)valueType;
         valueType = resolveTypeDef(valueType, libraryClassName, true, true);
 
         //Expression offsetExpr = structIOExpr == null ? null : methodCall(structIOExpr, "getFieldOffset", expr(fieldIndex));
@@ -1143,6 +1145,16 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
 
             try {
                 NL4JConversion targetConv = convertTypeToNL4J(targetRef, libraryClassName, null, null, -1, -1);
+                //if (result.isFakePointer(libraryClassName))
+                if (targetConv.isUndefined && allowFakePointers && original instanceof SimpleTypeRef) {
+                    conv.typeRef = typeRef(result.getFakePointer(libraryClassName, ((SimpleTypeRef)original).getName().clone()));
+					if (structIOExpr != null) {
+						if (conv.arrayLengths == null)
+							conv.setExpr = methodCall(structIOExpr.clone(), "setPointerField", thisRef(), expr(fieldIndex), valueExpr);
+						conv.getExpr = methodCall(structIOExpr.clone(), "getTypedPointerField", thisRef(), expr(fieldIndex));
+					}
+					return conv;
+                }
 				TypeRef pointedTypeRef = targetConv.getIndirectTypeRef();
 				if (targetConv.type != ConvType.Void) {
 					if (targetConv.type == ConvType.NativeSize)
@@ -1160,7 +1172,10 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
 					return conv;
 				}
 	        } catch (UnsupportedConversionException ex) {
-				if (valueType instanceof TypeRef.Pointer && targetRef instanceof SimpleTypeRef && allowFakePointers) {
+                conv.typeRef = typeRef(result.config.runtime.pointerClass);
+                return conv;
+
+				/*if (valueType instanceof TypeRef.Pointer && targetRef instanceof SimpleTypeRef && allowFakePointers) {
 					conv.typeRef = typeRef(result.getFakePointer(libraryClassName, ((SimpleTypeRef)targetRef).getName().clone()));
 					if (structIOExpr != null) {
 						if (conv.arrayLengths == null)
@@ -1168,7 +1183,16 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
 						conv.getExpr = methodCall(structIOExpr.clone(), "getTypedPointerField", thisRef(), expr(fieldIndex));
 					}
 					return conv;
-				}
+				}//*/
+                /*if (valueType instanceof TypeRef.Pointer && targetRef instanceof SimpleTypeRef && allowFakePointers) {
+					conv.typeRef = typeRef(ident(result.config.runtime.pointerClass, expr(typeRef(result.getUndefinedType(libraryClassName, ((SimpleTypeRef)targetRef).getName().clone())))));
+					if (structIOExpr != null) {
+						if (conv.arrayLengths == null)
+							conv.setExpr = methodCall(structIOExpr.clone(), "setPointerField", thisRef(), expr(fieldIndex), valueExpr);
+						conv.getExpr = methodCall(structIOExpr.clone(), "getTypedPointerField", thisRef(), expr(fieldIndex));
+					}
+					return conv;
+				}*/
 	        }
         } else {//if (valueType instanceof SimpleTypeRef || valueType instanceof TaggedTypeRef || valueType) {
             JavaPrim prim = getPrimitive(valueType, libraryClassName);
@@ -1251,6 +1275,12 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
                     
                 }
             }
+        }
+
+        if (valueType instanceof SimpleTypeRef && allowFakePointers) {
+            conv.typeRef = typeRef(result.getUndefinedType(libraryClassName, ((SimpleTypeRef)valueType).getName().clone()));
+            conv.isUndefined = true;
+            return conv;
         }
         throw new UnsupportedConversionException(original, "Unsupported type");
     }
@@ -1742,6 +1772,13 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
 						} else {
 							try {
 								convArgType = convertTypeToJNA(target, conversionMode, libraryClassName);
+                                if (result.isUndefinedType(convArgType)) {
+                                    if (allowFakePointers && original instanceof SimpleTypeRef)
+                                        return typeRef(result.getFakePointer(libraryClassName, ((SimpleTypeRef)original).getName().clone()));
+                                    else
+                                        convArgType = typeRef(result.config.runtime.pointerClass);
+                                }
+
 								if (convArgType != null && result.callbacksFullNames.contains(ident(convArgType.toString())) && !(valueType instanceof ArrayRef)) {
 									TypeRef tr = typeRef(result.config.runtime.pointerClass);
 									if (!result.config.noComments)
@@ -1876,6 +1913,9 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
             return primRef(prim);
         }
 
+        if (valueType instanceof SimpleTypeRef && allowFakePointers) {
+            return typeRef(result.getUndefinedType(libraryClassName, ((SimpleTypeRef)valueType).getName().clone()));
+        }
         unknownTypes.add(String.valueOf(valueType));
         throw new UnsupportedConversionException(valueType, null);
     }

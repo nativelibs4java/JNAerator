@@ -197,6 +197,10 @@ public class ElementsHelper {
     public static Statement stat(Declaration d) {
         return d;//new Statement.DeclarationStatement(d);
     }
+    public static Statement tryRethrow(Statement st) {
+        String exName = "$ex$";
+        return new Try(st, null, new Catch(new VariablesDeclaration(typeRef(Throwable.class), new Declarator.DirectDeclarator(exName)), new Throw(new New(typeRef(RuntimeException.class), varRef(exName)))));
+    }
 	public static Statement stat(Expression x) {
 		return new ExpressionStatement(x);
 	}
