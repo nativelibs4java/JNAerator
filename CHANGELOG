@@ -1,4 +1,18 @@
-Current development version (0.9.6-SNAPSHOT)
+Current development version (0.9.8-SNAPSHOT)
+
+- 
+
+Version 0.9.7 (r1817, 20110329)
+
+- Fixed generation of typed pointers (+ introduced undefined types for BridJ runtime)
+- Added generation of globals for BridJ
+- Added -parseInOneChunk option to control parsing more finely (forces regular, non isolated-mode parsing, which is more correct but also more fragile)
+- Fixed enum renaming (issue 82: http://code.google.com/p/jnaerator/issues/detail?id=82)
+- Fixed unescaped quotes in string defines (issue 79: http://code.google.com/p/jnaerator/issues/detail?id=79)
+- Fixed some exotic function pointer syntax (issue 84: http://code.google.com/p/jnaerator/issues/detail?id=84)
+- Fixed binding of Windows' BOOL type for BridJ: it's int, not boolean !!!
+
+Version 0.9.6 (r1638, 20110204)
 
 - Added explicit call to setFieldOrder in JNAerated JNA structures (no need for BridJ, which has its @Field annotations to guarantee proper order)
 - Enhanced parsing and AST generation of C/C++ expressions
