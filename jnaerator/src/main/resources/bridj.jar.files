@@ -16,7 +16,6 @@ org/bridj/BitFields$PrimHandler.class
 org/bridj/BitFields$StringHandler.class
 org/bridj/BitFields.class
 org/bridj/BridJ$1.class
-org/bridj/BridJ$2.class
 org/bridj/BridJ.class
 org/bridj/BridJRuntime$TypeInfo.class
 org/bridj/BridJRuntime.class
@@ -121,6 +120,8 @@ org/bridj/cpp/CPPRuntime$3.class
 org/bridj/cpp/CPPRuntime$4.class
 org/bridj/cpp/CPPRuntime$5.class
 org/bridj/cpp/CPPRuntime$CPPDestructor.class
+org/bridj/cpp/CPPRuntime$VTable.class
+org/bridj/cpp/CPPRuntime$VirtMeth.class
 org/bridj/cpp/CPPRuntime.class
 org/bridj/cpp/CPPType.class
 org/bridj/cpp/com/CLSID.class
@@ -267,9 +268,11 @@ org/bridj/demangling/Demangler$TypeRef.class
 org/bridj/demangling/Demangler.class
 org/bridj/demangling/GCC4Demangler$StdString.class
 org/bridj/demangling/GCC4Demangler.class
+org/bridj/demangling/VC9Demangler$1.class
 org/bridj/demangling/VC9Demangler$AccessLevelAndStorageClass.class
 org/bridj/demangling/VC9Demangler$AnonymousTemplateArg.class
 org/bridj/demangling/VC9Demangler$CVClassModifier.class
+org/bridj/demangling/VC9Demangler$DemanglingOp.class
 org/bridj/demangling/VC9Demangler.class
 org/bridj/demos/TaskbarListDemo.class
 org/bridj/demos/TestCPP$1.class
