@@ -10,7 +10,7 @@
 	<parent>
 		<groupId>com.nativelibs4java</groupId>
 		<artifactId>nativelibs4java-parent</artifactId>
-		<version>1.4-SNAPSHOT</version>
+		<version>1.5-SNAPSHOT</version>
 		<relativePath>../../Parent</relativePath>
 	</parent>
 	
