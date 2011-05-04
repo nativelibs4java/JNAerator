@@ -70,7 +70,7 @@ Users who are looking for ready-to-use libraries should check the NativeLibs4Jav
   	<dependency>
   		<groupId>com.nativelibs4java</groupId>
   		<artifactId>bridj</artifactId>
-  		<version>${nl4j-runtime.version}</version>
+  		<version>${bridj.version}</version>
   		<type>jar</type>
   		<scope>compile</scope>
   		<optional>false</optional>
