@@ -18,11 +18,13 @@
 */
 package com.ochafik.lang.jnaerator.parser;
 
+import com.ochafik.lang.jnaerator.parser.Expression.Constant;
+
 public class ValuedModifier implements Modifier {
     Modifier modifier;
-    Object value;
+    Constant value;
     public ValuedModifier() {}
-    public ValuedModifier(Modifier modifier, Object value) {
+    public ValuedModifier(Modifier modifier, Constant value) {
         this.modifier = modifier;
         this.value = value;
     }
@@ -35,11 +37,11 @@ public class ValuedModifier implements Modifier {
         this.modifier = modifier;
     }
 
-    public Object getValue() {
+    public Constant getValue() {
         return value;
     }
 
-    public void setValue(Object value) {
+    public void setValue(Constant value) {
         this.value = value;
     }
     

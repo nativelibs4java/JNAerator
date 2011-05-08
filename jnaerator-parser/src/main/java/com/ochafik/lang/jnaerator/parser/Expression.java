@@ -603,11 +603,17 @@ public abstract class Expression extends Element {
 		SquareBrackets("[]"),
 		Comma(","),
 		Plus("+"), Minus("-"), Divide("/"), Multiply("*"), Modulo("%"), LeftShift("<<"), RightShift(">>"), SignedRightShift(">>>"), XOR("^"), 
-		LessEqual("<="), GreaterEqual(">="), Less("<"), Greater(">"), IsEqual("=="), IsDifferent("!="), BitOr("|"), Or("||"), BitAnd("&"), And("&&");
+		LessEqual("<=", true), GreaterEqual(">=", true), Less("<", true), Greater(">", true), IsEqual("==", true), IsDifferent("!=", true),
+        BitOr("|"), Or("||", true), BitAnd("&"), And("&&", true);
 		
-		String s;
-		BinaryOperator(String s) {
+		final String s;
+        public final boolean givesBool;
+        BinaryOperator(String s) {
+            this(s, false);
+        }
+		BinaryOperator(String s, boolean givesBool) {
 			this.s = s;
+            this.givesBool = givesBool;
 		}
 		@Override
 		public String toString() {

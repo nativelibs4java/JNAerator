@@ -749,13 +749,16 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
                 return null;
             }
             s = (Struct) td;
+        }
+        return result.getTaggedTypeIdentifierInJava(s);
+        /*
             name = result.declarationsConverter.getActualTaggedTypeName((TaggedTypeRef) pair.getFirst().getValueType());
 
             return findRef(name, s, libraryClassName, !result.config.putTopStructsInSeparateFiles);
         } else {
             return result.getTaggedTypeIdentifierInJava(s);
             //name = result.declarationsConverter.getActualTaggedTypeName(s);
-        }
+        }*/
     }
 
     public Identifier findStructRef(Struct s, Identifier libraryClassName) {
@@ -2002,33 +2005,37 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
 
                 String s1 = String.valueOf(t1), s2 = String.valueOf(t2);
                 TypeRef tr = null;
-                if (s1.equals(s2)) {
-                    tr = t1;
-                } else {
-                    JavaPrim p1 = getPrimitive(t1, null), p2 = getPrimitive(t2, null);
-                    if (p1 != null && p2 != null) {
-                        switch (bop.getOperator()) {
-                            case LeftShift:
-                            case RightShift:
-                            case SignedRightShift:
-                                tr = t1;
-                                break;
-                            default:
-                                for (JavaPrim p : new JavaPrim[]{
-                                            JavaPrim.Double, JavaPrim.Float,
-                                            JavaPrim.Long, JavaPrim.NativeSize, JavaPrim.NativeLong, JavaPrim.Int,
-                                            JavaPrim.Short, JavaPrim.Byte
-                                        }) {
-                                    if (p1 == p || p2 == p) {
-                                        if (promoteNativeLongToLong && (p == JavaPrim.NativeLong || p == JavaPrim.NativeSize)) {
-                                            p = JavaPrim.Long;
+                if (bop.getOperator().givesBool)
+                    tr = typeRef(boolean.class);
+                else {
+                    if (s1.equals(s2)) {
+                        tr = t1;
+                    } else {
+                        JavaPrim p1 = getPrimitive(t1, null), p2 = getPrimitive(t2, null);
+                        if (p1 != null && p2 != null) {
+                            switch (bop.getOperator()) {
+                                case LeftShift:
+                                case RightShift:
+                                case SignedRightShift:
+                                    tr = t1;
+                                    break;
+                                default:
+                                    for (JavaPrim p : new JavaPrim[]{
+                                                JavaPrim.Double, JavaPrim.Float,
+                                                JavaPrim.Long, JavaPrim.NativeSize, JavaPrim.NativeLong, JavaPrim.Int,
+                                                JavaPrim.Short, JavaPrim.Byte
+                                            }) {
+                                        if (p1 == p || p2 == p) {
+                                            if (promoteNativeLongToLong && (p == JavaPrim.NativeLong || p == JavaPrim.NativeSize)) {
+                                                p = JavaPrim.Long;
+                                            }
+                                            tr = primRef(p);
+                                            break;
                                         }
-                                        tr = primRef(p);
-                                        break;
                                     }
-                                }
-                        }
+                            }
 
+                        }
                     }
                 }
                 res = typed(expr(x1, ((BinaryOp) x).getOperator(), x2), tr);

@@ -147,7 +147,7 @@ public enum ModifierType implements Modifier {
 	
 	SelectAny(of(Declspec, StorageClassSpecifier, COMSpecific)),
 	Thread(of(Declspec)),
-	UUID(of(Declspec, HasArguments, StorageClassSpecifier, COMSpecific, VCAnnotation1Arg)),
+	UUID(of(Declspec, Extended, HasArguments, StorageClassSpecifier, COMSpecific, VCAnnotation1Arg)),
 	
 	Alias(of(Attribute)),
 	Always_inline(of(Attribute)),

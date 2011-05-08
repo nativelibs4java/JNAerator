@@ -546,9 +546,11 @@ public class DeclarationsConverter {
 					if (t.contains("sizeof")) {
 						converted = alreadyConverted ? x : result.typeConverter.convertExpressionToJava(x.getFirst(), libraryClassName, false);
 					}
+                    //TypeRef tr = new TypeRef.SimpleTypeRef(result.typeConverter.typeToJNA(type, vs, TypeConversion.TypeConversionMode.FieldType, callerLibraryClass));
+                    TypeRef tr = converted.getValue();
+                    Expression value = new Cast(tr, converted.getFirst());
 
-					//TypeRef tr = new TypeRef.SimpleTypeRef(result.typeConverter.typeToJNA(type, vs, TypeConversion.TypeConversionMode.FieldType, callerLibraryClass));
-					Declaration declaration = new VariablesDeclaration(converted.getValue(), new DirectDeclarator(name, converted.getFirst()));
+					Declaration declaration = new VariablesDeclaration(tr, new DirectDeclarator(name, value));
 					declaration.addModifiers(ModifierType.Public, ModifierType.Static, ModifierType.Final);
 					declaration.importDetails(element, false);
 					declaration.moveAllCommentsBefore();

@@ -308,17 +308,24 @@ public class Result extends Scanner {
 				}
 			}
 		}
-		
-		if (e.getTag() != null) {
-			enumsByName.put(e.getTag(), e);
-		}
-		
-		getList(enumsByLibrary, getLibrary(e)).add(e);
-		
-		Identifier identifier = getTaggedTypeIdentifierInJava(e);
-		if (identifier != null) {
-			enumsFullNames.add(identifier);
-		}
+
+        Identifier name = e.getTag();
+        Enum oldEnum = enumsByName.get(name);
+
+        if (oldEnum  == null || oldEnum.isForwardDeclaration() || (!(oldEnum.getParentElement() instanceof TypeDef) && oldEnum.getParentElement() instanceof TypeDef)) {
+            enumsByName.put(name, oldEnum);
+
+            //if (e.getTag() != null) {
+            //	enumsByName.put(e.getTag(), e);
+            //}
+            String lib = getLibrary(e);
+            getList(enumsByLibrary, lib).add(e);
+
+            Identifier identifier = getTaggedTypeIdentifierInJava(e);
+            if (identifier != null) {
+                enumsFullNames.add(identifier);
+            }
+        }
 	}
 	
 	@Override
@@ -422,11 +429,23 @@ public class Result extends Scanner {
 	
 	public Identifier getTaggedTypeIdentifierInJava(TaggedTypeRef s) {
 		
-		Identifier name = declarationsConverter.getActualTaggedTypeName(s);
+		Identifier tag = s.getTag();
+        if (tag != null) {
+            TaggedTypeRef rep = null;
+            if (s instanceof Struct) {
+                rep = structsByName.get(tag);
+            } else if (s instanceof Enum) {
+                rep = enumsByName.get(tag);
+            }
+            if (rep != null)
+                s = rep;
+        }
+
+        Identifier name = declarationsConverter.getActualTaggedTypeName(s);
 		if (name == null)
 			return null;
-		
-		String library = getLibrary(s);
+
+        String library = getLibrary(s);
 		if (library == null)
 			return null;
 		
@@ -434,7 +453,7 @@ public class Result extends Scanner {
 		Struct parentStruct = s.findParentOfType(Struct.class);
 		if (parentStruct != null && parentStruct != s)
 			return ident(getTaggedTypeIdentifierInJava(parentStruct), name);
-		else if ((s instanceof Struct) && config.putTopStructsInSeparateFiles)
+		else if ((s instanceof Struct) && (config.putTopStructsInSeparateFiles || config.runtime == JNAeratorConfig.Runtime.BridJ))
 			return ident(getLibraryPackage(library), name);
 		else
 			return typeConverter.libMember(getLibraryClassFullName(library), null, name);
@@ -464,16 +483,17 @@ public class Result extends Scanner {
 				}
 				Struct oldStruct = structsByName.get(name);
 				
-				if (oldStruct == null || oldStruct.isForwardDeclaration() || (!(oldStruct.getParentElement() instanceof TypeDef) && struct.getParentElement() instanceof TypeDef))
+				if (oldStruct == null || oldStruct.isForwardDeclaration() || (!(oldStruct.getParentElement() instanceof TypeDef) && struct.getParentElement() instanceof TypeDef)) {
 					structsByName.put(name, struct);
 				
-				getList(structsByLibrary, getLibrary(struct)).add(struct);
-				Identifier identifier = getTaggedTypeIdentifierInJava(struct);
-				if (identifier != null) {
-					if (struct.getType() == Type.CUnion)
-						unionsFullNames.add(identifier);
-					structsFullNames.add(identifier);
-				}
+                    getList(structsByLibrary, getLibrary(struct)).add(struct);
+                    Identifier identifier = getTaggedTypeIdentifierInJava(struct);
+                    if (identifier != null) {
+                        if (struct.getType() == Type.CUnion)
+                            unionsFullNames.add(identifier);
+                        structsFullNames.add(identifier);
+                    }
+                }
 				
 				break;
 			case ObjCClass:
