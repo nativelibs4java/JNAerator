@@ -928,8 +928,8 @@ modifier returns [List<Modifier> modifiers, String asmName]
 		
 		// TODO handle it properly @see http://blogs.msdn.com/staticdrivertools/archive/2008/11/06/annotating-for-success.aspx
 		{ next(ModifierKind.VCAnnotation1Arg, ModifierKind.VCAnnotation2Args) }?=>
-		m=IDENTIFIER '(' x=expression ')' {
-			$modifiers.add(new ValuedModifier(ModifierType.parseModifier($m.text), $x.expr));
+		m=IDENTIFIER '(' x=constant ')' {
+			$modifiers.add(new ValuedModifier(ModifierType.parseModifier($m.text), $x.constant));
 		} |
 		{ next("__declspec", "__attribute__", "__asm") }?=>
 		IDENTIFIER
@@ -953,15 +953,14 @@ scope ModContext;
 }
 	:	{ $modifiers = new ArrayList<Modifier>(); }
 		(
-			{ next(ModifierKind.Extended) }? m=IDENTIFIER
+			{ next(ModifierKind.Extended) }? m=IDENTIFIER 
 			(
+				'(' arg=constant ')' {
+					$modifiers.add(new ValuedModifier(ModifierType.parseModifier($m.text), $arg.constant));
+				} |
 				{
 					$modifiers.add(ModifierType.parseModifier($m.text));
-				}/* |
-				{ $IDENTIFIER.text.equals("align") }? DECIMAL_NUMBER |
-				{ $IDENTIFIER.text.equals("allocate") }?  '(' STRING ')' |
-//				{ $IDENTIFIER.text.equals("property") }?  '(' getSet=IDENTIFIER { $getSet.text.equals("get") || $getSet.text.equals("set") }? '=' func_name=IDENTIFIER ')' |
-				{ $IDENTIFIER.text.equals("uuid") }?  '(' ComObjectGUID=STRING ')'*/
+				}
 			)
 		)*
 	;
