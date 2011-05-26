@@ -1150,6 +1150,8 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
                 NL4JConversion targetConv = convertTypeToNL4J(targetRef, libraryClassName, null, null, -1, -1);
                 //if (result.isFakePointer(libraryClassName))
                 if (targetConv.isUndefined && allowFakePointers && original instanceof SimpleTypeRef) {
+                    conv.isPtr = true;
+                    conv.type = ConvType.Pointer;
                     conv.typeRef = typeRef(result.getFakePointer(libraryClassName, ((SimpleTypeRef)original).getName().clone()));
 					if (structIOExpr != null) {
 						if (conv.arrayLengths == null)
@@ -1166,7 +1168,9 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
 						pointedTypeRef = typeRef(CLong.class);
 				}
 				if (pointedTypeRef != null) {
-					conv.typeRef = typeRef(ident(result.config.runtime.pointerClass, expr(pointedTypeRef.clone())));
+					conv.isPtr = true;
+                    conv.type = ConvType.Pointer;
+                    conv.typeRef = typeRef(ident(result.config.runtime.pointerClass, expr(pointedTypeRef.clone())));
 					if (structIOExpr != null) {
 						if (conv.arrayLengths == null)
 							conv.setExpr = methodCall(structIOExpr.clone(), "setPointerField", thisRef(), expr(fieldIndex), valueExpr);
@@ -1175,6 +1179,8 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
 					return conv;
 				}
 	        } catch (UnsupportedConversionException ex) {
+                conv.isPtr = true;
+                conv.type = ConvType.Pointer;
                 conv.typeRef = typeRef(result.config.runtime.pointerClass);
                 return conv;
 
@@ -2049,18 +2055,28 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
 
             res = typed(expr(op, conv.getFirst()), conv.getSecond());
         } else if (x instanceof Cast) {
-            TypeRef tr = convertTypeToJNA(((Cast) x).getType(), TypeConversionMode.ExpressionType, libraryClassName);
-            JavaPrim prim = getPrimitive(tr, libraryClassName);
-            if (promoteNativeLongToLong && (prim == JavaPrim.NativeLong || prim == JavaPrim.NativeSize)) {
-                prim = JavaPrim.Long;
-                tr = typeRef(Long.TYPE);
-            }
+            TypeRef tpe = ((Cast) x).getType();
             Pair<Expression, TypeRef> casted = convertExpressionToJava(((Cast) x).getTarget(), libraryClassName, promoteNativeLongToLong);
-            res = typed(casted.getFirst(), tr);
-            if (prim == JavaPrim.NativeLong) {
-                res.setFirst((Expression) new New(typeRef(com.sun.jna.NativeLong.class), casted.getFirst()));
-            } else if (prim == JavaPrim.NativeSize) {
-                res.setFirst((Expression) new New(typeRef(NativeSize.class), casted.getFirst()));
+            if (result.config.runtime.hasJNA) {
+                TypeRef tr = convertTypeToJNA(tpe, TypeConversionMode.ExpressionType, libraryClassName);
+                JavaPrim prim = getPrimitive(tr, libraryClassName);
+                if (promoteNativeLongToLong && (prim == JavaPrim.NativeLong || prim == JavaPrim.NativeSize)) {
+                    prim = JavaPrim.Long;
+                    tr = typeRef(Long.TYPE);
+                }
+                res = typed(casted.getFirst(), tr);
+                if (prim == JavaPrim.NativeLong) {
+                    res.setFirst((Expression) new New(typeRef(com.sun.jna.NativeLong.class), casted.getFirst()));
+                } else if (prim == JavaPrim.NativeSize) {
+                    res.setFirst((Expression) new New(typeRef(NativeSize.class), casted.getFirst()));
+                }
+            } else {
+                NL4JConversion conv = convertTypeToNL4J(tpe, libraryClassName, null, null, -1, -1);
+                TypeRef tr = conv.typeRef;
+                res = typed(casted.getFirst(), tr);
+                if (conv.isPtr) {
+                    res.setFirst(methodCall(expr(typeRef(result.config.runtime.pointerClass)), "pointerToAddress", casted.getFirst()));
+                }
             }
 
         } else if (x instanceof Constant) {
