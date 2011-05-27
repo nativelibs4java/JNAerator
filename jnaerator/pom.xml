@@ -70,7 +70,7 @@ Users who are looking for ready-to-use libraries should check the NativeLibs4Jav
   	<dependency>
   		<groupId>com.nativelibs4java</groupId>
   		<artifactId>bridj</artifactId>
-  		<version>0.4.2</version>
+  		<version>0.5-SNAPSHOT</version>
   		<type>jar</type>
   		<scope>compile</scope>
   		<optional>false</optional>
@@ -121,30 +121,6 @@ Users who are looking for ready-to-use libraries should check the NativeLibs4Jav
 			  </configuration>
 		  </plugin>
 		  
-		  <plugin>
-			<groupId>org.codehaus.mojo</groupId>
-			<artifactId>cobertura-maven-plugin</artifactId>
-			<configuration>
-			  <instrumentation>
-				<!--<ignores>
-				  <ignore>antlr.*</ignore>
-				</ignores>-->
-				<excludes>
-				  <exclude>antlr/**/*.class</exclude>
-				  <exclude>org/**/*.class</exclude>
-				  <exclude>net/**/*.class</exclude>
-				  <exclude>com/sun/**/*.class</exclude>
-				</excludes>
-			  </instrumentation>
-			</configuration>
-			<executions>
-			  <execution>
-				<goals>
-				  <goal>clean</goal>
-				</goals>
-			  </execution>
-			</executions>
-		  </plugin>
 		 <plugin>
 		  <groupId>org.apache.maven.plugins</groupId>
 		  <artifactId>maven-compiler-plugin</artifactId>
