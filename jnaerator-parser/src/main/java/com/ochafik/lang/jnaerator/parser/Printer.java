@@ -76,6 +76,7 @@ import com.ochafik.util.string.StringUtils;
 public class Printer implements Visitor {
 
     StringBuilder out = new StringBuilder();
+    int currentLine = 0;
     Stack<String> indentStack = new Stack<String>();
     volatile String indent = "";
     protected static boolean beginEachCommentLineWithStar = true;
@@ -823,10 +824,18 @@ public class Printer implements Visitor {
     }
     public Printer append(Object... os) {
         for (Object e : os) {
-            if (e instanceof Element)
-                ((Element)e).accept(this);
-            else if (e != null)
-                out.append(e);
+            if (e instanceof Element) {
+                Element ee = (Element)e;
+                ee.accept(this);
+                ee.setElementLine(currentLine);
+            }
+            else if (e != null) {
+                String s = String.valueOf(e);
+                out.append(s);
+                int i = -1;
+                while ((i = s.indexOf("\n", i + 1)) >= 0)
+                    currentLine++;
+            }
         }
         return this;
     }
