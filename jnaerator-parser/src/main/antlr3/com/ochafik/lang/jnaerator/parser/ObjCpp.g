@@ -400,17 +400,19 @@ externDeclarations returns [ExternDeclarations declaration]
 			$declaration = mark(new ExternDeclarations(), getLine($STRING));
 			$declaration.setLanguage($STRING.text);
 		}
-		'{' 
-			(
-				ed=declaration { 
-					$declaration.addDeclaration($ed.declaration); 
-				} |
-				lineDirective
-			)* 
-		'}' |
-		dd=declaration { 
-			$declaration.addDeclaration($dd.declaration); 
-		}
+		(
+			'{' 
+				(
+					ed=declaration { 
+						$declaration.addDeclaration($ed.declaration); 
+					} |
+					lineDirective
+				)* 
+			'}' |
+			dd=declaration { 
+				$declaration.addDeclaration($dd.declaration); 
+			}
+		)
 	;
 
 declaration returns [Declaration declaration, List<Modifier> modifiers, String preComment, int startTokenIndex]
