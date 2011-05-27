@@ -30,6 +30,7 @@ options {
 //	k = 2;
 }
 
+
 scope Symbols {
 	Set<String> typeIdentifiers;
 }
@@ -406,7 +407,10 @@ externDeclarations returns [ExternDeclarations declaration]
 				} |
 				lineDirective
 			)* 
-		'}'
+		'}' |
+		dd=declaration { 
+			$declaration.addDeclaration($dd.declaration); 
+		}
 	;
 
 declaration returns [Declaration declaration, List<Modifier> modifiers, String preComment, int startTokenIndex]
