@@ -781,6 +781,7 @@ scope Symbols;
 		if (d instanceof Function)
 			((Function)d).setType(forcedType);
 	}
+	$struct.addModifiers(modifiers);
 }
 	:	
 		//{ next("struct", "class", "union") }?=> typeToken=IDENTIFIER
@@ -923,14 +924,6 @@ modifier returns [List<Modifier> modifiers, String asmName]
 		{ parseModifier(next()) != null }? m=IDENTIFIER {
 			$modifiers.add(ModifierType.parseModifier($m.text));
 		} |
-		{ next("__success") }?=>
-		IDENTIFIER '(' 'return' binaryOp expression  ')' |
-		
-		// TODO handle it properly @see http://blogs.msdn.com/staticdrivertools/archive/2008/11/06/annotating-for-success.aspx
-		{ next(ModifierKind.VCAnnotation1Arg, ModifierKind.VCAnnotation2Args) }?=>
-		m=IDENTIFIER '(' x=constant ')' {
-			$modifiers.add(new ValuedModifier(ModifierType.parseModifier($m.text), $x.constant));
-		} |
 		{ next("__declspec", "__attribute__", "__asm") }?=>
 		IDENTIFIER
 		'(' (
@@ -941,8 +934,16 @@ modifier returns [List<Modifier> modifiers, String asmName]
 				else 
 					$asmName += s; 
 			} )* |
-			( extendedModifiers { $modifiers.addAll($extendedModifiers.modifiers); } )?
-		) ')'
+			extendedModifiers { $modifiers.addAll($extendedModifiers.modifiers); }
+		) ')' |
+		{ next("__success") }?=>
+		IDENTIFIER '(' 'return' binaryOp expression  ')' |
+		
+		// TODO handle it properly @see http://blogs.msdn.com/staticdrivertools/archive/2008/11/06/annotating-for-success.aspx
+		{ next(ModifierKind.VCAnnotation1Arg, ModifierKind.VCAnnotation2Args) }?=>
+		m=IDENTIFIER '(' x=constant ')' {
+			$modifiers.add(new ValuedModifier(ModifierType.parseModifier($m.text), $x.constant));
+		}
 	;
 
 //http://msdn.microsoft.com/en-us/library/dabb5z75.aspx

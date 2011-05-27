@@ -1240,10 +1240,15 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
             } else {
             	
             	Identifier valueName = valueType instanceof SimpleTypeRef ? ((SimpleTypeRef)valueType).getName() : null;
-                if ((conv.typeRef = 
-                		result.structsFullNames.contains(valueName) ? 
-                			valueType : 
-                    		typeRef(valueType instanceof Struct ? findStructRef((Struct)valueType, libraryClassName) : findStructRef(valueName, libraryClassName))) != null) 
+                
+                // Structs
+                if (valueType instanceof Struct)
+                    conv.typeRef = typeRef(findStructRef((Struct)valueType, libraryClassName));
+                else if (result.structsFullNames.contains(valueName))
+                    conv.typeRef = valueType;
+                else
+                    conv.typeRef = typeRef(findStructRef(valueName, libraryClassName));
+                if (conv.typeRef != null) 
                 {
             		//conv.setExpr = methodCall(structPeerExpr.clone(), "set" + radix, offsetExpr.clone(), valueExpr);
                 	if (structIOExpr != null) {
@@ -1253,12 +1258,16 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
                 	}
                 	conv.type = ConvType.Struct;
                 	return conv;
-                } else if ((conv.typeRef =
-            		result.enumsFullNames.contains(valueName) ? 
-        				valueType : 
-            		valueType instanceof Enum ? 
-        				findEnumRef((Enum)valueType, libraryClassName) : 
-    					findEnum(valueName, libraryClassName)) != null) 
+                }
+                
+                // Enums
+                if (valueType instanceof Enum)
+                    conv.typeRef = findEnumRef((Enum)valueType, libraryClassName);
+                else if (result.enumsFullNames.contains(valueName))
+                    conv.typeRef = valueType;
+                else 
+                    conv.typeRef = findEnum(valueName, libraryClassName);
+                if (conv.typeRef != null) 
                 {
                 	if (structIOExpr != null) {
                 		conv.setExpr = methodCall(structIOExpr, "setEnumField", thisRef(), expr(fieldIndex), valueExpr);
@@ -1267,12 +1276,15 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
                 	conv.type = ConvType.Enum;
                 	conv.typeRef = typeRef(ident(ValuedEnum.class, expr(conv.typeRef)));
                 	return conv;
-                } else if ((conv.typeRef = 
-            		result.callbacksFullNames.contains(valueName) ? 
-        				valueType : 
+                }
+                
+                // Callbacks
+                conv.typeRef = conv.typeRef = 
+            		result.callbacksFullNames.contains(valueName) ? valueType : 
         			valueType instanceof FunctionSignature ? 
     					findCallbackRef((FunctionSignature)valueType, libraryClassName) : 
-        				findCallbackRef(valueName, libraryClassName)) != null) 
+        				findCallbackRef(valueName, libraryClassName);
+                if (conv.typeRef != null) 
                 {
                 	if (structIOExpr != null) {
 	                	conv.setExpr = methodCall(structIOExpr.clone(), "setPointerField", thisRef(), expr(fieldIndex), valueExpr);

@@ -171,6 +171,7 @@ public class JNAerator {
 	}
 
 	public static void main(String[] argsArray) {
+        //argsArray = new String[] { "/Users/ochafik/nativelibs4java/FFMpeg/src/main/jnaerator/config.jnaerator" };
 		main(new JNAerator(new JNAeratorConfig()), argsArray);
     }
 

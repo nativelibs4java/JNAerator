@@ -275,7 +275,7 @@ public enum ModifierType implements Modifier {
 	public static Modifier parseModifier(String name, ModifierKind... kinds) {
 		try {
 			//Modifier modifier = Modifier.valueOf(name);
-			Modifier modifier = mods.get(name);
+			Modifier modifier = mods.get(name.toLowerCase());
 			if (kinds.length == 0 || modifier == null)
 				return modifier;
 			for (ModifierKind kind : kinds)
@@ -334,12 +334,12 @@ public enum ModifierType implements Modifier {
 	}
 	public String toString(ModifierType.Compiler compiler) {
 		String low = super.toString().toLowerCase();
-		if (kinds.contains(Declspec) && (compiler == null || compiler == Compiler.MSVC))
+        /*if (kinds.contains(Declspec) && (compiler == null || compiler == Compiler.MSVC))
 			return "__declspec(" + low + ")";
 		
 		if (kinds.contains(Attribute) && (compiler == null || compiler == Compiler.GCC))
 			return "__attribute__((" + low + "))";
-		
+		*/
 		return low;
 	}
 }

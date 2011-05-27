@@ -313,7 +313,7 @@ public class Result extends Scanner {
         Enum oldEnum = enumsByName.get(name);
 
         if (oldEnum  == null || oldEnum.isForwardDeclaration() || (!(oldEnum.getParentElement() instanceof TypeDef) && oldEnum.getParentElement() instanceof TypeDef)) {
-            enumsByName.put(name, oldEnum);
+            enumsByName.put(name, e);
 
             //if (e.getTag() != null) {
             //	enumsByName.put(e.getTag(), e);

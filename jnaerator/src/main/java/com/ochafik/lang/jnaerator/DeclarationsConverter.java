@@ -1400,7 +1400,7 @@ public class DeclarationsConverter {
 		}
 		Struct structJavaClass = publicStaticClass(structName, baseClass, Struct.Type.JavaClass, struct);
         //if (result.config.microsoftCOM) {
-        String uuid = (String)struct.getModifierValue(ModifierType.UUID);
+        Constant uuid = (Constant)struct.getModifierValue(ModifierType.UUID);
         if (uuid != null) {
             structJavaClass.addAnnotation(new Annotation(result.config.runtime.typeRef(JNAeratorConfig.Runtime.Ann.IID), uuid));
         }
