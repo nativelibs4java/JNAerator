@@ -239,6 +239,10 @@ public class JNAeratorConfigUtils {
 //		config.macros.put("__GNUC_GNU_INLINE__", "1");
 	}
 
+	static void defaultMacro(JNAeratorConfig config, String name, String value) {
+		if (!config.preprocessorConfig.macros.containsKey(name))
+			config.preprocessorConfig.macros.put(name, value);
+	}
 	/**
 	 * TODO move this to a .h resource file
 	 */
@@ -253,11 +257,11 @@ public class JNAeratorConfigUtils {
 			addCPlusPlus(config.preprocessorConfig);
 		
 		if (ByteOrder.nativeOrder() == ByteOrder.BIG_ENDIAN) {
-			config.preprocessorConfig.macros.put("__BIG_ENDIAN__", "1");
-			config.preprocessorConfig.macros.put("G_BYTE_ORDER", "4321"); //glibc: #define G_BIG_ENDIAN    4321
+			defaultMacro(config, "__BIG_ENDIAN__", "1");
+			defaultMacro(config, "G_BYTE_ORDER", "4321"); //glibc: #define G_BIG_ENDIAN    4321
 		} else {
-			config.preprocessorConfig.macros.put("__LITTLE_ENDIAN__", "1");
-			config.preprocessorConfig.macros.put("G_BYTE_ORDER", "1234"); //glibc: #define G_LITTLE_ENDIAN 1234
+			defaultMacro(config, "__LITTLE_ENDIAN__", "1");
+			defaultMacro(config, "G_BYTE_ORDER", "1234"); //glibc: #define G_LITTLE_ENDIAN 1234
 		}
 		//prevent a jcpp bug to happen when expanding assert(...) :
 		config.preprocessorConfig.macros.put("NDEBUG", null);
@@ -269,7 +273,7 @@ public class JNAeratorConfigUtils {
 		if (SystemUtils.isWindows()) {
 			//http://msdn.microsoft.com/en-us/library/b0084kay(VS.80).aspx
 			
-			config.preprocessorConfig.includeStrings.add("#define __declspec(x)\n");
+			//config.preprocessorConfig.includeStrings.add("#define __declspec(x)\n");
 			
 			//http://support.microsoft.com/kb/65472
 			config.preprocessorConfig.macros.put("_CHAR_UNSIGNED", null);
@@ -280,8 +284,8 @@ public class JNAeratorConfigUtils {
 			config.preprocessorConfig.macros.put("_WCHAR_T_DEFINED", null);
 			config.preprocessorConfig.macros.put("_NATIVE_WCHAR_T_DEFINED", null);
 			
-			config.preprocessorConfig.macros.put("_MSC_VER", "1100");
-			config.preprocessorConfig.macros.put("WINAPI", "__stdcall");
+			defaultMacro(config, "_MSC_VER", "1100");
+			defaultMacro(config, "WINAPI", "__stdcall");
 			
 			config.functionsAccepter = new Adapter<Function, Boolean>() {
 	
