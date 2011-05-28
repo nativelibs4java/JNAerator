@@ -24,6 +24,7 @@ import org.bridj.IntValuedEnum;
 import org.bridj.StructObject;
 import org.bridj.ValuedEnum;
 import org.bridj.cpp.CPPObject;
+import org.bridj.cpp.com.IUnknown;
 
 import static com.ochafik.lang.SyntaxUtils.as;
 //import org.bridj.structs.StructIO;
@@ -1383,7 +1384,8 @@ public class DeclarationsConverter {
 				break;
 			}
 		}
-		if (baseClass == null) {
+		Constant uuid = (Constant)struct.getModifierValue(ModifierType.UUID);
+        if (baseClass == null) {
 			switch (struct.getType()) {
 			case CStruct:
 			case CUnion:
@@ -1392,7 +1394,7 @@ public class DeclarationsConverter {
 					break;
 				}
 			case CPPClass:
-				baseClass = ident(CPPObject.class);
+				baseClass = ident(uuid == null ? CPPObject.class : IUnknown.class);
 				break;
 			default:
 				throw new UnsupportedOperationException();
@@ -1400,7 +1402,6 @@ public class DeclarationsConverter {
 		}
 		Struct structJavaClass = publicStaticClass(structName, baseClass, Struct.Type.JavaClass, struct);
         //if (result.config.microsoftCOM) {
-        Constant uuid = (Constant)struct.getModifierValue(ModifierType.UUID);
         if (uuid != null) {
             structJavaClass.addAnnotation(new Annotation(result.config.runtime.typeRef(JNAeratorConfig.Runtime.Ann.IID), uuid));
         }
