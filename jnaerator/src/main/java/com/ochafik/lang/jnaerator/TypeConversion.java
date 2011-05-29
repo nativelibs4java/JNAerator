@@ -750,6 +750,19 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
             }
             s = (Struct) td;
         }
+        if (s == null && result.config.runtime == JNAeratorConfig.Runtime.BridJ) {
+        	String ns = name.toString();
+        	Class<?> cl = null;
+        	if (ns.equals("IUnknown"))
+        		cl = org.bridj.cpp.com.IUnknown.class;
+        	else if (ns.equals("GUID"))
+        		cl = org.bridj.cpp.com.GUID.class;
+        	else if (ns.equals("RECT"))
+        		cl = org.bridj.cpp.com.RECT.class;
+        	
+        	if (cl != null)
+        		return ident(cl);
+        }
         return result.getTaggedTypeIdentifierInJava(s);
         /*
             name = result.declarationsConverter.getActualTaggedTypeName((TaggedTypeRef) pair.getFirst().getValueType());

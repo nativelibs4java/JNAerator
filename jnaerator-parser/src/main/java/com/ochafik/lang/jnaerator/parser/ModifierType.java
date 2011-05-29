@@ -111,6 +111,7 @@ public enum ModifierType implements Modifier {
 	Final(of(Publicity)),
 	Private(of(Publicity)), 
 	Protected(of(Publicity)),
+	Explicit(of(Publicity)), 
 	
 	Inline(of(C, StorageClassSpecifier)),
 	__inline(Inline),
