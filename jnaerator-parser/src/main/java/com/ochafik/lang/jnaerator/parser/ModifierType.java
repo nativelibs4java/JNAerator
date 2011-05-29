@@ -111,12 +111,13 @@ public enum ModifierType implements Modifier {
 	Final(of(Publicity)),
 	Private(of(Publicity)), 
 	Protected(of(Publicity)),
-	Explicit(of(Publicity)), 
+	Explicit(of(Publicity, StorageClassSpecifier)), 
 	
 	Inline(of(C, StorageClassSpecifier)),
 	__inline(Inline),
 	__inline__(Inline),
-
+    __forceinline(of(C, StorageClassSpecifier)),
+	
 	In(of(ObjectiveC, OnlyInArgDef)),
 	Out(of(ObjectiveC, OnlyInArgDef)),
 	InOut(of(ObjectiveC, OnlyInArgDef)),
