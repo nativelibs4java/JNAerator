@@ -389,7 +389,9 @@ scope Symbols;
 			lineDirective {
 				if ($sourceFile.getElementFile() == null)
 					$sourceFile.setElementFile(getFile());
-			}
+			} |
+			{ next("extern") }?=> IDENTIFIER STRING '{' |
+			'}'
 		)* 
 	 	EOF
 	 ;
