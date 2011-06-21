@@ -1,4 +1,8 @@
 #define X 10
+#define Y (X + 1)
+#define Z (Y * 2)
+#define ZZ (Y - 2)
+
 const int Expression = X + (1 + 2) * 4;
 const int unsignedValue = (UInt32)4294967288L;
 --
@@ -6,6 +10,6 @@ const int unsignedValue = (UInt32)4294967288L;
 import test.*;
 import static test.TestLibrary.*;
 
-int v = X / 2;
+int v = X / 2 + Y + Z + ZZ;
 int x = Expression;
 int u = unsignedValue;

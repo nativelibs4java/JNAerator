@@ -2206,7 +2206,9 @@ public class DeclarationsConverter {
 			}	
 		}
 		
-		for (int i = 3; i-- != 0 && !pending.isEmpty();) {
+        boolean progressed;
+        do {
+            progressed = false;
 			for (Iterator<Map.Entry<String, Pair<Define, Set<Identifier>>>> it = pending.entrySet().iterator(); it.hasNext();) {
 				Map.Entry<String, Pair<Define, Set<Identifier>>> e = it.next(); 
 				Set<Identifier> dependencies = e.getValue().getSecond();
@@ -2228,8 +2230,10 @@ public class DeclarationsConverter {
 				
 				it.remove();
 				reordered.add(e.getValue().getFirst());
+                added.add(ident(name));
+                progressed = true;
 			}
-		}
+		} while (!pending.isEmpty() && progressed);
 		
 		return reordered;
 	}
