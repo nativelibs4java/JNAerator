@@ -1,7 +1,6 @@
-darwin_universal/libbridj.dylib
-linux_x64/bridj.so
-linux_x86/bridj.so
 org/bridj/AbstractBridJRuntime.class
+org/bridj/AndroidClassDefiner.class
+org/bridj/AndroidSupport.class
 org/bridj/BitFields$1.class
 org/bridj/BitFields$2.class
 org/bridj/BitFields$3.class
@@ -33,6 +32,7 @@ org/bridj/CallIO.class
 org/bridj/Callback.class
 org/bridj/CallbackNativeImplementer$1.class
 org/bridj/CallbackNativeImplementer.class
+org/bridj/ClassDefiner.class
 org/bridj/CommonPointerIOs$1.class
 org/bridj/CommonPointerIOs$10.class
 org/bridj/CommonPointerIOs$2.class
@@ -51,6 +51,7 @@ org/bridj/CommonPointerIOs$StructPointerIO.class
 org/bridj/CommonPointerIOs$TypedPointerPointerIO.class
 org/bridj/CommonPointerIOs.class
 org/bridj/DefaultPointer.class
+org/bridj/DynamicCallback.class
 org/bridj/DynamicFunction.class
 org/bridj/DynamicFunctionFactory.class
 org/bridj/Dyncall$CallbackType.class
@@ -75,6 +76,7 @@ org/bridj/NativeLibrary.class
 org/bridj/NativeObject.class
 org/bridj/Platform$FunInt.class
 org/bridj/Platform.class
+org/bridj/PlatformSupport.class
 org/bridj/Pointer$1.class
 org/bridj/Pointer$2$1.class
 org/bridj/Pointer$2.class
@@ -130,6 +132,7 @@ org/bridj/cpp/CPPRuntime$7.class
 org/bridj/cpp/CPPRuntime$CPPDestructor.class
 org/bridj/cpp/CPPRuntime$CPPTypeInfo.class
 org/bridj/cpp/CPPRuntime$ClassTypeVariableExtractor.class
+org/bridj/cpp/CPPRuntime$MemoryOperators.class
 org/bridj/cpp/CPPRuntime$MethodTypeVariableExtractor.class
 org/bridj/cpp/CPPRuntime$VTable.class
 org/bridj/cpp/CPPRuntime$VirtMeth.class
@@ -173,6 +176,7 @@ org/bridj/cpp/com/OLEAutomationLibrary$SYSKIND.class
 org/bridj/cpp/com/OLEAutomationLibrary$SYSTEMTIME.class
 org/bridj/cpp/com/OLEAutomationLibrary$UDATE.class
 org/bridj/cpp/com/OLEAutomationLibrary.class
+org/bridj/cpp/com/RECT.class
 org/bridj/cpp/com/SAFEARRAY.class
 org/bridj/cpp/com/SAFEARRAYBOUND.class
 org/bridj/cpp/com/VARENUM.class
@@ -263,6 +267,13 @@ org/bridj/jawt/JAWT_DrawingSurfaceInfo.class
 org/bridj/jawt/JAWT_Rectangle.class
 org/bridj/jawt/JawtLibrary$JNIEnv.class
 org/bridj/jawt/JawtLibrary.class
+org/bridj/lib/darwin_universal/libbridj.dylib
+org/bridj/lib/iphoneos_arm32_arm/libbridj.dylib
+org/bridj/lib/linux_x64/bridj.so
+org/bridj/lib/linux_x86/bridj.so
+org/bridj/lib/sunos_x86/bridj.so
+org/bridj/lib/win32/bridj.dll
+org/bridj/lib/win64/bridj.dll
 org/bridj/objc/NSAutoreleasePool.class
 org/bridj/objc/NSCalendar.class
 org/bridj/objc/NSNumber.class
@@ -303,6 +314,3 @@ org/objectweb/asm/signature/SignatureReader.class
 org/objectweb/asm/signature/SignatureVisitor.class
 org/objectweb/asm/signature/SignatureWriter.class
 org/ochafik/util/string/StringUtils.class
-sunos_x86/bridj.so
-win32/bridj.dll
-win64/bridj.dll
