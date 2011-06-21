@@ -1,6 +1,16 @@
-Current development version (0.9.8-SNAPSHOT)
+Current development version (0.9.9-SNAPSHOT)
 
-- 
+Version 0.9.8 (r2128, 20110621)
+
+- Better COM JNAeration for BridJ (now supports and converts __declspec(uuid("xxx")) attributes !)
+- Accept some ill-formed constructs (mismatched extern "C" { ... }) for better cross-files parsing
+- Fixed JNAeration of nested dependent constants defines
+- Fixed automatic macro definitions : don't override already defined macros
+- Fixed parsing of singleton extern "C" definitions (without curly braces)
+- Fixed issue 86 (http://code.google.com/p/jnaerator/issues/detail?id=86) : generate proper array creation code for empty structs with the JNA runtime.
+- Fixed issue 85 (http://code.google.com/p/jnaerator/issues/detail?id=85) : generate proper constant pointer casting code for BridJ : `#define PTR ((void*)-1)` generates `Pointer<?> PTR = Pointer.pointerToAddress(-1);`
+- Fixed generation of enums
+- Fixed typing of (constant) boolean expressions
 
 Version 0.9.7 (r1817, 20110329)
 

@@ -6,13 +6,13 @@
   <artifactId>jnaerator</artifactId>
   <name>JNAerator CLI and Studio Tools</name>
   <url>http://code.google.com/p/jnaerator/</url>
-  <version>0.9.8-SNAPSHOT</version>
+  <version>0.9.8</version>
   <packaging>jar</packaging>
   
   <parent>
 	  <groupId>com.jnaerator</groupId>
 	  <artifactId>jnaerator-parent</artifactId>
-	  <version>0.9.8-SNAPSHOT</version>
+	  <version>0.9.8</version>
 	  <relativePath>../parent</relativePath>
   </parent>
   
@@ -70,7 +70,7 @@ Users who are looking for ready-to-use libraries should check the NativeLibs4Jav
   	<dependency>
   		<groupId>com.nativelibs4java</groupId>
   		<artifactId>bridj</artifactId>
-  		<version>0.5-SNAPSHOT</version>
+  		<version>0.5</version>
   		<type>jar</type>
   		<scope>compile</scope>
   		<optional>false</optional>
