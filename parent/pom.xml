@@ -29,7 +29,7 @@
 					  <goal>shade</goal>
 					</goals>
 					<configuration>
-						<shadedArtifactAttached>true</shadedArtifactAttached>
+						<!--shadedArtifactAttached>true</shadedArtifactAttached-->
 						<artifactSet>
 							<excludes>
 							  <exclude>org.scala-lang:scala-library</exclude>
