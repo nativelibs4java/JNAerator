@@ -1268,8 +1268,8 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
                 {
             		//conv.setExpr = methodCall(structPeerExpr.clone(), "set" + radix, offsetExpr.clone(), valueExpr);
                 	if (structIOExpr != null) {
-                    	conv.getExpr = methodCall(structIOExpr, "getNativeObjectField", thisRef(), expr(fieldIndex));
-                		
+                    	conv.setExpr = methodCall(structIOExpr, "setNativeObjectField", thisRef(), expr(fieldIndex), valueExpr);
+                		conv.getExpr = methodCall(structIOExpr, "getNativeObjectField", thisRef(), expr(fieldIndex));
                 		//conv.getExpr = new Expression.New(conv.typeRef, (Expression)methodCall(structIOExpr.clone(), "offset", offsetExpr.clone()));
                 	}
                 	conv.type = ConvType.Struct;
