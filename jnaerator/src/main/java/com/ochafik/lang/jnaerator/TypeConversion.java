@@ -1268,8 +1268,8 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
                 {
             		//conv.setExpr = methodCall(structPeerExpr.clone(), "set" + radix, offsetExpr.clone(), valueExpr);
                 	if (structIOExpr != null) {
-                    	conv.setExpr = methodCall(structIOExpr, "setNativeObjectField", thisRef(), expr(fieldIndex), valueExpr);
-                		conv.getExpr = methodCall(structIOExpr, "getNativeObjectField", thisRef(), expr(fieldIndex));
+                    	conv.setExpr = methodCall(structIOExpr.clone(), "setNativeObjectField", thisRef(), expr(fieldIndex), valueExpr);
+                		conv.getExpr = methodCall(structIOExpr.clone(), "getNativeObjectField", thisRef(), expr(fieldIndex));
                 		//conv.getExpr = new Expression.New(conv.typeRef, (Expression)methodCall(structIOExpr.clone(), "offset", offsetExpr.clone()));
                 	}
                 	conv.type = ConvType.Struct;
@@ -1286,8 +1286,8 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
                 if (conv.typeRef != null) 
                 {
                 	if (structIOExpr != null) {
-                		conv.setExpr = methodCall(structIOExpr, "setEnumField", thisRef(), expr(fieldIndex), valueExpr);
-	                	conv.getExpr = methodCall(structIOExpr, "getEnumField", thisRef(), expr(fieldIndex));//expr(typeRef(FlagSet.class)), "fromValue", methodCall(structPeerExpr.clone(), "getInt", expr(fieldIndex)), classLiteral(conv.typeRef.clone()));
+                		conv.setExpr = methodCall(structIOExpr.clone(), "setEnumField", thisRef(), expr(fieldIndex), valueExpr);
+	                	conv.getExpr = methodCall(structIOExpr.clone(), "getEnumField", thisRef(), expr(fieldIndex));//expr(typeRef(FlagSet.class)), "fromValue", methodCall(structPeerExpr.clone(), "getInt", expr(fieldIndex)), classLiteral(conv.typeRef.clone()));
                 	}
                 	conv.type = ConvType.Enum;
                 	conv.typeRef = typeRef(ident(ValuedEnum.class, expr(conv.typeRef)));
