@@ -1,0 +1,15 @@
+void varargAndReserved(int transient, ...);
+--
+#runtime(JNAerator)
+import test.*;
+import static test.TestLibrary.*;
+
+INSTANCE.varargAndReserved(1);
+INSTANCE.varargAndReserved(1,(Pointer)null);
+--
+#runtime(BridJ)
+import test.*;
+import static test.TestLibrary.*;
+
+varargAndReserved(1);
+varargAndReserved(1,(Pointer)null);
