@@ -2,9 +2,23 @@
 #define Y (X + 1)
 #define Z (Y * 2)
 #define ZZ (Y - 2)
+#define A (200)
+#define B (-(A + 6))
 
 const int Expression = X + (1 + 2) * 4;
 const int unsignedValue = (UInt32)4294967288L;
+
+#if Z == 22
+#define DEF1 1
+#endif
+
+#if ZZ == 9
+#define DEF2 1
+#endif
+
+#if B == -206
+#define DEF3 1
+#endif
 --
 #runtime(JNAerator)
 import test.*;
@@ -13,3 +27,4 @@ import static test.TestLibrary.*;
 int v = X / 2 + Y + Z + ZZ;
 int x = Expression;
 int u = unsignedValue;
+int s = A + B + DEF1 + DEF2 + DEF3;
