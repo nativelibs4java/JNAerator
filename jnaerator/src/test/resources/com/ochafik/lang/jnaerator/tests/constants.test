@@ -27,4 +27,4 @@ import static test.TestLibrary.*;
 int v = X / 2 + Y + Z + ZZ;
 int x = Expression;
 int u = unsignedValue;
-int s = A + B + DEF1 + DEF2 + DEF3;
+int s = A + B + DEF1 + DEF2 + DEF3; // are they all defined? (they should be)
