@@ -965,20 +965,17 @@ public class DeclarationsConverter {
 
         for (Arg arg : function.getArgs()) {
 
-            if (arg.isVarArg() && arg.getValueType() == null) {
-                // TODO choose vaname dynamically ! (<- this todo is copied from the one for JNI (same file)) [remi]
+            if (arg.isVarArg()) {
+            		assert arg.getValueType() == null;
+                // TODO choose vaname dynamically !
                 Identifier vaType = ident(isObjectiveC ? NSObject.class : Object.class);
                 String argName = chooseJavaArgName("varargs", iArg, argNames);
                 nativeMethod.addArg(new Arg(argName, typeRef(vaType.clone()))).setVarArg(true);
-                // TODO is there an equivalent of "alternativeOutputs" with BridJ?     if (alternativeOutputs) { [remi]
             } else {
-                // TODO should we use also chooseJavaArgName in this case? I guess so, so I put it [remi]
                 String argName = chooseJavaArgName(arg.getName(), iArg, argNames);
                 NL4JConversion argType = result.typeConverter.convertTypeToNL4J(arg.getValueType(), libraryClassName, null, null, -1, -1);
                 argTypes.put(argName, argType);
-//              typedMethod.addArg(new Arg(argName, argType.getTypedTypeRef()));
                 nativeMethod.addArg(argType.annotateTypedType(new Arg(argName, argType.typeRef)));//.getTypedTypeRef())));
-//              nativeMethod.addArg(argType.annotateRawType(new Arg(argName, argType.getRawType())));
             }
             iArg++;
         }
