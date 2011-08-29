@@ -50,6 +50,8 @@ org/bridj/CommonPointerIOs$PointerPointerIO.class
 org/bridj/CommonPointerIOs$StructPointerIO.class
 org/bridj/CommonPointerIOs$TypedPointerPointerIO.class
 org/bridj/CommonPointerIOs.class
+org/bridj/DefaultNativeList$1.class
+org/bridj/DefaultNativeList.class
 org/bridj/DefaultPointer.class
 org/bridj/DynamicCallback.class
 org/bridj/DynamicFunction.class
@@ -65,7 +67,9 @@ org/bridj/FlagSet.class
 org/bridj/GenericCallback.class
 org/bridj/HeadersReconstructor.class
 org/bridj/IntValuedEnum.class
+org/bridj/JNI$1.class
 org/bridj/JNI.class
+org/bridj/LastError.class
 org/bridj/MethodCallInfo$1.class
 org/bridj/MethodCallInfo.class
 org/bridj/NativeEntities$Builder.class
@@ -73,6 +77,7 @@ org/bridj/NativeEntities$CBInfo.class
 org/bridj/NativeEntities.class
 org/bridj/NativeLibrary$SymbolAccepter.class
 org/bridj/NativeLibrary.class
+org/bridj/NativeList.class
 org/bridj/NativeObject.class
 org/bridj/Platform$FunInt.class
 org/bridj/Platform.class
@@ -85,6 +90,7 @@ org/bridj/Pointer$4.class
 org/bridj/Pointer$5.class
 org/bridj/Pointer$6.class
 org/bridj/Pointer$FreeReleaser.class
+org/bridj/Pointer$ListType.class
 org/bridj/Pointer$Releaser.class
 org/bridj/Pointer$StringType.class
 org/bridj/Pointer.class
@@ -92,14 +98,16 @@ org/bridj/PointerIO.class
 org/bridj/SizeT.class
 org/bridj/StringList.class
 org/bridj/StructIO$1.class
-org/bridj/StructIO$2.class
 org/bridj/StructIO$Customizer.class
+org/bridj/StructIO$DefaultCustomizer.class
 org/bridj/StructIO$FieldDecl.class
 org/bridj/StructIO$FieldDesc.class
 org/bridj/StructIO$SolidRanges$Builder.class
 org/bridj/StructIO$SolidRanges.class
 org/bridj/StructIO.class
 org/bridj/StructObject.class
+org/bridj/TimeT$timeval.class
+org/bridj/TimeT.class
 org/bridj/TypedPointer.class
 org/bridj/ValuedEnum.class
 org/bridj/ann/Alignment.class
@@ -257,6 +265,8 @@ org/bridj/jawt/JAWT$GetDrawingSurface_callback.class
 org/bridj/jawt/JAWT$Lock_callback.class
 org/bridj/jawt/JAWT$Unlock_callback.class
 org/bridj/jawt/JAWT.class
+org/bridj/jawt/JAWTUtils$1.class
+org/bridj/jawt/JAWTUtils$LockedComponentRunnable.class
 org/bridj/jawt/JAWTUtils.class
 org/bridj/jawt/JAWT_DrawingSurface$FreeDrawingSurfaceInfo_callback.class
 org/bridj/jawt/JAWT_DrawingSurface$GetDrawingSurfaceInfo_callback.class
