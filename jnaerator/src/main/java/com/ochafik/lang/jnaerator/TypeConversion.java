@@ -2092,19 +2092,28 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
                     prim = JavaPrim.Long;
                     tr = typeRef(Long.TYPE);
                 }
-                res = typed(casted.getFirst(), tr);
-                if (prim == JavaPrim.NativeLong) {
-                    res.setFirst((Expression) new New(typeRef(com.sun.jna.NativeLong.class), casted.getFirst()));
-                } else if (prim == JavaPrim.NativeSize) {
-                    res.setFirst((Expression) new New(typeRef(NativeSize.class), casted.getFirst()));
-                }
+                Expression val = casted.getFirst();
+                if (isString(val)) {
+                		val = methodCall(new New(typeRef(com.ochafik.lang.jnaerator.runtime.StringPointer.class), val), "getPointer");
+                } else {
+					if (prim == JavaPrim.NativeLong) {
+						val = (Expression) new New(typeRef(com.sun.jna.NativeLong.class), val);
+					} else if (prim == JavaPrim.NativeSize) {
+						val = (Expression) new New(typeRef(NativeSize.class), val);
+					}
+				}
+				res = typed(val, tr);
             } else {
                 NL4JConversion conv = convertTypeToNL4J(tpe, libraryClassName, null, null, -1, -1);
                 TypeRef tr = conv.typeRef;
-                res = typed(casted.getFirst(), tr);
+                Expression val = casted.getFirst();
                 if (conv.isPtr) {
-                    res.setFirst(methodCall(expr(typeRef(result.config.runtime.pointerClass)), "pointerToAddress", casted.getFirst()));
+                		if (isString(val))
+                			val = methodCall(expr(typeRef(result.config.runtime.pointerClass)), "pointerToCString", val);
+                		else
+                			val = methodCall(expr(typeRef(result.config.runtime.pointerClass)), "pointerToAddress", val);
                 }
+                res = typed(val, tr);
             }
 
         } else if (x instanceof Constant) {
@@ -2224,6 +2233,9 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
         }
         res.getFirst().setParenthesis(x.getParenthesis());
         return (Pair<Expression, TypeRef>) res;
+    }
+    public boolean isString(Expression val) {
+    		return val instanceof Constant && ((Constant)val).getType() == Constant.Type.String; // TODO use typer + type annotations !
     }
 
     public TypeRef convertToJavaType(Constant.Type type) {
