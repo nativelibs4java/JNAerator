@@ -1247,14 +1247,20 @@ public class JNAerator {
 				TypeRef libTypeRef = typeRef(fullLibraryClassName);
 				Expression libClassLiteral = result.typeConverter.typeLiteral(libTypeRef);
 				
-				Expression libraryPathGetterExpr = methodCall(
-					expr(typeRef(LibraryExtractor.class)),
-					MemberRefStyle.Dot,
-					"getLibraryPath",
-					libNameExpr,
-					expr(true),
-					libClassLiteral
-				);
+				boolean isJNAerator = result.config.runtime == JNAeratorConfig.Runtime.JNAerator;
+				
+				Expression libraryPathGetterExpr;
+				if (isJNAerator)
+					libraryPathGetterExpr = methodCall(
+						expr(typeRef(LibraryExtractor.class)),
+						MemberRefStyle.Dot,
+						"getLibraryPath",
+						libNameExpr,
+						expr(true),
+						libClassLiteral
+					);
+				else
+					libraryPathGetterExpr = libNameExpr;
 				
 				String libNameStringFieldName = "JNA_LIBRARY_NAME", nativeLibFieldName = "JNA_NATIVE_LIB";
 				interf.addDeclaration(new VariablesDeclaration(typeRef(String.class), new Declarator.DirectDeclarator(
@@ -1264,14 +1270,17 @@ public class JNAerator {
 				
 				Expression libraryNameFieldExpr = memberRef(expr(libTypeRef.clone()), MemberRefStyle.Dot, ident(libNameStringFieldName));
 				Expression optionsMapExpr = memberRef(expr(typeRef(MangledFunctionMapper.class)), MemberRefStyle.Dot, "DEFAULT_OPTIONS");
+				Expression[] getInstArgs = isJNAerator ?
+					new Expression[] { libraryNameFieldExpr.clone(), optionsMapExpr.clone() } :
+					new Expression[] { libraryNameFieldExpr.clone() }
+				;
 				interf.addDeclaration(new VariablesDeclaration(typeRef(NativeLibrary.class), new Declarator.DirectDeclarator(
 					nativeLibFieldName,
 					methodCall(
 						expr(typeRef(NativeLibrary.class)),
 						MemberRefStyle.Dot,
 						"getInstance",
-						libraryNameFieldExpr.clone(),
-						optionsMapExpr.clone()
+						getInstArgs
 					)
 				)).addModifiers(ModifierType.Public, ModifierType.Static, ModifierType.Final));
 				nativeLibFieldExpr = memberRef(expr(libTypeRef.clone()), MemberRefStyle.Dot, ident(nativeLibFieldName));
@@ -1286,6 +1295,10 @@ public class JNAerator {
 						))
 					)).addModifiers(ModifierType.Static));
 				} else {
+					Expression[] loadLibArgs = isJNAerator ?
+						new Expression[] { libraryNameFieldExpr.clone(), libClassLiteral, optionsMapExpr.clone() } :
+						new Expression[] { libraryNameFieldExpr.clone(), libClassLiteral }
+					;
 					VariablesDeclaration instanceDecl = new VariablesDeclaration(libTypeRef, new Declarator.DirectDeclarator(
 						librariesHub == null ? "INSTANCE" : library,
 						cast(
@@ -1294,9 +1307,7 @@ public class JNAerator {
 								expr(typeRef(Native.class)),
 								MemberRefStyle.Dot,
 								"loadLibrary",
-								libraryNameFieldExpr.clone(),
-								libClassLiteral,
-								optionsMapExpr.clone()
+								loadLibArgs
 							)
 						)
 					)).addModifiers(ModifierType.Public, ModifierType.Static, ModifierType.Final);
