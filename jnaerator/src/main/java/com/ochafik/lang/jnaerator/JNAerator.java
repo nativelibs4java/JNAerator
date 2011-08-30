@@ -998,32 +998,22 @@ public class JNAerator {
 		}
 		return additionalFiles;
 	}
-	protected void addRuntimeClasses(Result result, MemoryFileManager mfm) throws IOException {
-		
+	protected static Map<String, URL> getRuntimeFiles(JNAeratorConfig.Runtime runtime, boolean needsObjCRuntime) throws IOException {
 		ClassLoader classLoader = JNAerator.class.getClassLoader();
-		String listingFile = result.config.runtime.runtimeFilesListFileName;
+		Map<String, URL> ret = new HashMap<String, URL>();
+		
+		String listingFile = runtime.runtimeFilesListFileName;
         if (listingFile == null)
-            return;
+            return ret;
 
 		List<String> files = new ArrayList<String>();
         for (String s : listingFile.split(","))
             files.addAll(ReadText.readLines(classLoader.getResourceAsStream(s.trim())));
 		
-		try {
-			if (files == null)
-				files = ReadText.readLines("/Users/ochafik/Prog/Java/bin/jnaerator-runtime.jar.files");
-		} catch (Exception ex) {}
-//		if (files == null)
-//			throw new FileNotFoundException(listingFile);
-		
 		if (files == null) {
 			throw new FileNotFoundException("Warning: Could not find JNAerator listing file '" + listingFile + "' : JNAerated files will need JNAerator in the path to execute.");
-//			ex.printStackTrace();
-//			ex.printStackTrace(new PrintStream(new FileOutputStream(FileDescriptor.err)));
-//			return;
 		}
 		
-		boolean needsObjCRuntime = result.hasObjectiveC();
 		for (String file : files) {
             if (file.startsWith("Archive: "))
                 continue;
@@ -1048,27 +1038,24 @@ public class JNAerator {
 				}
 				throw new FileNotFoundException(file);
 			}
+			ret.put(file, url);
+		}
+		return ret;
+	}
+	protected void addRuntimeClasses(Result result, MemoryFileManager mfm) throws IOException {
+		
+		Map<String, URL> files = getRuntimeFiles(result.config.runtime, result.hasObjectiveC());
+		
+		boolean needsObjCRuntime = result.hasObjectiveC();
+		for (Map.Entry<String, URL> e : files.entrySet()) {
+            String file = e.getKey();
+            URL url = e.getValue();
 			
 			file = "file:///" + file;
 			if (!mfm.outputs.containsKey(file)) {
 				mfm.outputs.put(file, new URLFileObject(url));
 			}
 		}
-		/*
-		for (URL sourceJar : new URL[] {
-				ClassUtils.getClassPath(NativeLibrary.class),
-				ClassUtils.getClassPath(Rococoa.class)
-		})
-			for (URL resURL : URLUtils.listFiles(sourceJar, null)) {
-				String s = resURL.getFile();
-				if (s.startsWith("META-INF"))
-					continue;
-				
-				if (!mfm.outputs.containsKey(s)) {
-					mfm.outputs.put(s, new URLFileObject(resURL));
-				}
-			}
-		*/
 	}
 	public static File getDir(String name) {
 		File dir = new File(getDir(), name);
