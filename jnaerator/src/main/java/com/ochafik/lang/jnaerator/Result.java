@@ -310,22 +310,26 @@ public class Result extends Scanner {
 		}
 
         Identifier name = e.getTag();
-        Enum oldEnum = enumsByName.get(name);
-
-        if (oldEnum  == null || oldEnum.isForwardDeclaration() || (!(oldEnum.getParentElement() instanceof TypeDef) && oldEnum.getParentElement() instanceof TypeDef)) {
-            enumsByName.put(name, e);
-
-            //if (e.getTag() != null) {
-            //	enumsByName.put(e.getTag(), e);
-            //}
-            String lib = getLibrary(e);
-            getList(enumsByLibrary, lib).add(e);
-
-            Identifier identifier = getTaggedTypeIdentifierInJava(e);
-            if (identifier != null) {
-                enumsFullNames.add(identifier);
-            }
-        }
+        String lib = getLibrary(e);
+		if (name == null)
+        		getList(enumsByLibrary, lib).add(e);
+        	else {
+			Enum oldEnum = enumsByName.get(name);
+	
+			if (oldEnum  == null || oldEnum.isForwardDeclaration() || (!(oldEnum.getParentElement() instanceof TypeDef) && oldEnum.getParentElement() instanceof TypeDef)) {
+				enumsByName.put(name, e);
+	
+				//if (e.getTag() != null) {
+				//	enumsByName.put(e.getTag(), e);
+				//}
+				getList(enumsByLibrary, lib).add(e);
+	
+				Identifier identifier = getTaggedTypeIdentifierInJava(e);
+				if (identifier != null) {
+					enumsFullNames.add(identifier);
+				}
+			}
+		}
 	}
 	
 	@Override

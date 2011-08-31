@@ -2181,7 +2181,7 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
                     } else {
                         EnumItem enumItem = result.enumItems.get(name);
                         if (enumItem != null) {
-                            res = typed(findEnumItem(enumItem), typeRef(Integer.TYPE));
+                            res = typed(getEnumItemValue(enumItem), typeRef(Long.TYPE));
                         } else {
                             VariablesDeclaration constant = result.globalVariablesByName.get(name);
                             if (constant != null) {
@@ -2237,7 +2237,21 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
     public boolean isString(Expression val) {
     		return val instanceof Constant && ((Constant)val).getType() == Constant.Type.String; // TODO use typer + type annotations !
     }
+    
+    public Constant.Type getConstantType(Expression expr) {
+    		if (!(expr instanceof Constant))
+    			return null;
+    		return ((Constant)expr).getType();
+    }
 
+    public Expression getEnumItemValue(EnumItem enumItem) { 
+    		Expression enumValue = findEnumItem(enumItem);
+		if (((Enum)enumItem.getParentElement()).getTag() != null)
+			enumValue = methodCall(enumValue, "value");
+		//if (getConstantType(enumValue) == Constant.Type.Int)
+		//	return enumValue;
+		return cast(typeRef(int.class), enumValue);
+    }
     public TypeRef convertToJavaType(Constant.Type type) {
         switch (type) {
             case Bool:

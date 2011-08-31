@@ -1,10 +1,6 @@
-enum {
-   /*
-    * These bits are reserved by Apple and will result in a invalid
-    * value error if attemped to set. Obsolete constants:
-    */
-   kATSLineAppleReserved         = (UInt32)0xFCE00000
-};
+
+enum { A, B = A * 2, C };
+enum { A2, B2, C2 = (UInt32)0xFCE00000 };
 
 enum E {
 	Item1,
@@ -15,5 +11,28 @@ enum E {
 import test.*;
 import static test.TestLibrary.*;
 
-int i = kATSLineAppleReserved;
+int i;
+i = A;
+i = B;
+i = C;
+i = A2;
+i = B2;
+i = C2;
+i = E.Item1;
 i = E.Item2;
+
+--
+#runtime(BridJ)
+import test.*;
+import static test.TestLibrary.*;
+
+int i;
+i = A;
+i = B;
+i = C;
+i = A2;
+i = B2;
+i = C2;
+E e;
+e = E.Item1;
+e = E.Item2;

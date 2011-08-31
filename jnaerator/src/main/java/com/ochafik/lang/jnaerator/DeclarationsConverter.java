@@ -196,6 +196,9 @@ public class DeclarationsConverter {
 						} catch (Exception ex) {}
 					}
 				}
+				
+				Expression convertedValue = result.typeConverter.convertExpressionToJava(res.value, libraryClassName, true).getFirst();
+				res.value = convertedValue;
 			} catch (Exception ex) {
                 failedOnceForThisEnum = true;
                 res.exceptionMessage = ex.toString();

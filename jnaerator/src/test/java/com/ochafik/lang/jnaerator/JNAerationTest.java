@@ -193,7 +193,7 @@ public class JNAerationTest {
 			}
 		});
 	}
-	static Pattern runtimePattern = Pattern.compile("(?m)#runtime\\((BridJ|JNAerator|JNA)\\).*");
+	static Pattern runtimePattern = Pattern.compile("(?m)#runtime\\(((?:\\w+)(?:,\\w+)*)\\).*");
 	@Parameters
 	public static List<Object[]> readParameters() throws IOException {
 		//List<String> lines = ReadText.readLines(ObjCppParsingTests.class.getClassLoader().getResource(TEST_FILE));
@@ -217,20 +217,27 @@ public class JNAerationTest {
 			String n = new File(URLDecoder.decode(testURL.toString(), "utf-8")).getName();
 			for (int i = 1; i < tt.length; i++) {
 				String rawSource = tt[i];
-				JNAeratorConfig.Runtime runtime = JNAeratorConfig.Runtime.JNAerator;
+				String runtimeString = JNAeratorConfig.Runtime.JNAerator.toString();
 				Matcher m = runtimePattern.matcher(rawSource);
 				if (m.find()) {
-					runtime = Enum.valueOf(JNAeratorConfig.Runtime.class, m.group(1).trim());	
+					runtimeString = m.group(1);	
 				}
-				String javaSource = rawSource.replaceAll("^#", "//#");
-				String testName = n + " / " + runtime.name();
-				data.add(new Object[] { 
-						testName, 
-						new TestDesc(cSource, runtime).addMainContentSource(
-							"Test" + runtime.name(),
-							"// " + testName + "\n" + javaSource
-						) 
-				});
+				for (String runtimeStr : runtimeString.split(",")) {
+					String rs = runtimeStr.trim();
+					if (rs.isEmpty())
+						continue;
+					JNAeratorConfig.Runtime runtime = Enum.valueOf(JNAeratorConfig.Runtime.class, rs);
+				
+					String javaSource = rawSource.replaceAll("^#", "//#");
+					String testName = n + " / " + runtime.name();
+					data.add(new Object[] { 
+							testName, 
+							new TestDesc(cSource, runtime).addMainContentSource(
+								"Test" + runtime.name(),
+								"// " + testName + "\n" + javaSource
+							) 
+					});
+				}
 			}
 		}
 		return data;
