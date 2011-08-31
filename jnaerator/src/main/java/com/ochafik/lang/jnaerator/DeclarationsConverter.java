@@ -307,6 +307,7 @@ public class DeclarationsConverter {
 					continue;
 				
 				try {
+					//System.out.println("Define " + define.getName() + " = " + define.getValue());
 					out.addDeclaration(outputConstant(define.getName(), define.getValue(), signatures, define.getValue(), "define", libraryClassName, true, false, false));
 				} catch (UnsupportedConversionException ex) {
 					out.addDeclaration(skipDeclaration(define, ex.toString()));

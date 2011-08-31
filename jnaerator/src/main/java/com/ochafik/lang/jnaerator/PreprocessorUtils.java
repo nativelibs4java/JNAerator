@@ -22,6 +22,9 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
@@ -50,18 +53,26 @@ public class PreprocessorUtils {
         void macroUsed(String path, String macroName);
     }
 	public static String preprocessSources(JNAeratorConfig config, List<Define> defines, boolean verbose, TypeConversion typeConverter, MacroUseCallback macrosDependenciesOut) throws IOException, LexerException {
+		return preprocessSources(config, config.preprocessorConfig.includeStrings, config.getFiles(), defines, verbose, typeConverter, macrosDependenciesOut, null);
+	}
 
+	public static String preprocessSources(JNAeratorConfig config, Collection<String> includeStrings, Collection<File> files, List<Define> defines, boolean verbose, TypeConversion typeConverter, MacroUseCallback macrosDependenciesOut, Map<String, Macro> macros) throws IOException, LexerException {
 		Preprocessor preProcessor = PreprocessorUtils.createPreProcessor(config.preprocessorConfig, macrosDependenciesOut);
-		for (String content : config.preprocessorConfig.includeStrings)
+		for (String content : includeStrings)
 			preProcessor.addInput(new StringLexerSource(content, true));
 		
-		for (File file : config.getFiles())
+		for (File file : files)
 			preProcessor.addInput(file);
+		
+		if (macros != null)
+			for (Macro macro : macros.values())
+				preProcessor.addMacro(macro);
 		
 		String sourceContent = ReadText.readText(new CppReader(preProcessor));
 		preProcessor.close();
 		
-		Map<String, Macro> macros = preProcessor.getMacros();
+		//Map<String, Macro> 
+		macros = preProcessor.getMacros();
 		
 		if (config.preprocessingOutFile != null) {
 			if (config.verbose)
@@ -78,7 +89,8 @@ public class PreprocessorUtils {
 		for (String k : config.preprocessorConfig.macros.keySet())
 			macros.remove(k);
 		
-		PreprocessorUtils.addDefines(macros, defines, verbose, typeConverter);
+		if (defines != null)
+			PreprocessorUtils.addDefines(config, macros, defines, verbose, typeConverter);
 		
 		return sourceContent;
 	}
@@ -218,7 +230,7 @@ public class PreprocessorUtils {
 
 	//static void addDefines(Preprocessor preProcessor, List<Define> defines) {
 	//	for (Map.Entry<String, Macro> e : preProcessor.getMacros().entrySet()) {
-	static void addDefines(Map<String, Macro> macros, List<Define> defines, boolean verbose, TypeConversion typeConverter) {
+	static void addDefines(JNAeratorConfig config, Map<String, Macro> macros, List<Define> defines, boolean verbose, TypeConversion typeConverter) {
 		for (Map.Entry<String, Macro> e : macros.entrySet()) {
 			Macro macro = e.getValue();
 			if (macro.getText() == null)
@@ -231,7 +243,8 @@ public class PreprocessorUtils {
 			//	continue;
 			
 			try {
-				Expression expression = JNAeratorParser.newObjCppParser(typeConverter, macro.getText(), verbose).expression();//.expr;
+				String preprocessedMacro = preprocessSources(config, Collections.singletonList(macro.getText()), Collections.EMPTY_LIST, null, verbose, typeConverter, null, macros);
+				Expression expression = JNAeratorParser.newObjCppParser(typeConverter, preprocessedMacro, verbose).expression();//.expr;
 				if (expression == null)
 					continue;
 			
