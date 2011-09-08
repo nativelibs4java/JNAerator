@@ -1343,7 +1343,10 @@ public abstract class Expression extends Element {
 					len2--;
 				}*/
 				try {
-					val = Long.parseLong(string, radix);
+					if (string.length() == 16) // only for large longs (otherwise would need to prepend "0" to avoid sign issues)
+						val = new java.math.BigInteger(string, radix).longValue();
+					else
+						val = Long.parseLong(string, radix);
 				} catch (NumberFormatException ex) {
 					unsigned = true;
 					val = Long.parseLong(string.substring(0, string.length() - 1), radix);
