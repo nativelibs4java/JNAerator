@@ -225,9 +225,9 @@ public class Result extends Scanner {
 			String nicerName = trimmed;
 			Pair<TypeDef, Declarator> pair = typeDefs.get(nicerName);
 			if (pair != null) {
-				String target = pair.getFirst().getValueType().toString();
-				if (//target.equals(nameStr) ||
-                        target.equals(nameStr+"*"))
+				TypeRef targetType = pair.getFirst().getValueType();
+				String target = targetType.toString();
+				if (target.equals(nameStr+"*") || target.equals(nameStr))
 					name = ident(nameStr = nicerName);
 			}
 		}

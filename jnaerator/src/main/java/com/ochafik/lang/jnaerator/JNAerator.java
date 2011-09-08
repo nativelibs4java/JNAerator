@@ -1348,21 +1348,6 @@ public class JNAerator {
 
         result.typeConverter.allowFakePointers = false;
 
-        Set<String> undefinedTypes = result.undefinedTypesByLibrary.get(fullLibraryClassName);
-        if (undefinedTypes != null)
-            for (String undefinedTypeName : undefinedTypes) {
-                if (undefinedTypeName.contains("::"))
-                    continue;
-
-                Identifier fakePointer = ident(undefinedTypeName);
-                if (!signatures.classSignatures.add(fakePointer))
-                    continue;
-
-                Struct ptClass = result.declarationsConverter.publicStaticClass(fakePointer, null, Struct.Type.JavaInterface, null);
-                ptClass.addToCommentBefore("Undefined type");
-                interf.addDeclaration(decl(ptClass));
-            }
-
         Set<String> fakePointers = result.fakePointersByLibrary.get(fullLibraryClassName);
         if (fakePointers != null)
         for (String fakePointerName : fakePointers) {
@@ -1505,6 +1490,21 @@ public class JNAerator {
 
 
         }
+
+        Set<String> undefinedTypes = result.undefinedTypesByLibrary.get(fullLibraryClassName);
+        if (undefinedTypes != null)
+            for (String undefinedTypeName : undefinedTypes) {
+                if (undefinedTypeName.contains("::"))
+                    continue;
+
+                Identifier fakePointer = ident(undefinedTypeName);
+                if (!signatures.classSignatures.add(fakePointer))
+                    continue;
+
+                Struct ptClass = result.declarationsConverter.publicStaticClass(fakePointer, null, Struct.Type.JavaInterface, null);
+                ptClass.addToCommentBefore("Undefined type");
+                interf.addDeclaration(decl(ptClass));
+            }
 
         if (result.config.runtime == JNAeratorConfig.Runtime.BridJ) {
 	        interf.addAnnotation(new Annotation(org.bridj.ann.Library.class, expr(library)));

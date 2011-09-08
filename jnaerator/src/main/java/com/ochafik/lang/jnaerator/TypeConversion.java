@@ -1809,12 +1809,12 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
 						} else {
 							try {
 								convArgType = convertTypeToJNA(target, conversionMode, libraryClassName);
-                                if (result.isUndefinedType(convArgType)) {
+                                /*if (result.isUndefinedType(convArgType)) {
                                     if (allowFakePointers && original instanceof SimpleTypeRef)
                                         return typeRef(result.getFakePointer(libraryClassName, ((SimpleTypeRef)original).getName().clone()));
                                     else
                                         convArgType = typeRef(result.config.runtime.pointerClass);
-                                }
+                                }*/
 
 								if (convArgType != null && result.callbacksFullNames.contains(ident(convArgType.toString())) && !(valueType instanceof ArrayRef)) {
 									TypeRef tr = typeRef(result.config.runtime.pointerClass);
@@ -1951,7 +1951,8 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
         }
 
         if (valueType instanceof SimpleTypeRef && allowFakePointers) {
-            return typeRef(result.getUndefinedType(libraryClassName, ((SimpleTypeRef)valueType).getName().clone()));
+            //return typeRef(result.getUndefinedType(libraryClassName, ((SimpleTypeRef)valueType).getName().clone()));
+            return typeRef(result.getFakePointer(libraryClassName, ((SimpleTypeRef)valueType).getName().clone()));
         }
         unknownTypes.add(String.valueOf(valueType));
         throw new UnsupportedConversionException(valueType, null);
