@@ -1,4 +1,5 @@
 org/bridj/AbstractBridJRuntime.class
+org/bridj/AbstractIntegral.class
 org/bridj/AndroidClassDefiner.class
 org/bridj/AndroidSupport.class
 org/bridj/BitFields$1.class
@@ -35,6 +36,7 @@ org/bridj/CallbackNativeImplementer.class
 org/bridj/ClassDefiner.class
 org/bridj/CommonPointerIOs$1.class
 org/bridj/CommonPointerIOs$10.class
+org/bridj/CommonPointerIOs$11.class
 org/bridj/CommonPointerIOs$2.class
 org/bridj/CommonPointerIOs$3.class
 org/bridj/CommonPointerIOs$4.class
@@ -79,7 +81,6 @@ org/bridj/NativeLibrary$SymbolAccepter.class
 org/bridj/NativeLibrary.class
 org/bridj/NativeList.class
 org/bridj/NativeObject.class
-org/bridj/Platform$FunInt.class
 org/bridj/Platform.class
 org/bridj/PlatformSupport.class
 org/bridj/Pointer$1.class
@@ -95,9 +96,13 @@ org/bridj/Pointer$Releaser.class
 org/bridj/Pointer$StringType.class
 org/bridj/Pointer.class
 org/bridj/PointerIO.class
+org/bridj/ProxyGen$ProxiedMethod.class
+org/bridj/ProxyGen$Toto.class
+org/bridj/ProxyGen.class
 org/bridj/SizeT.class
 org/bridj/StringList.class
 org/bridj/StructIO$1.class
+org/bridj/StructIO$AggregatedFieldDesc.class
 org/bridj/StructIO$Customizer.class
 org/bridj/StructIO$DefaultCustomizer.class
 org/bridj/StructIO$FieldDecl.class
@@ -107,6 +112,7 @@ org/bridj/StructIO$SolidRanges.class
 org/bridj/StructIO.class
 org/bridj/StructObject.class
 org/bridj/TimeT$timeval.class
+org/bridj/TimeT$timeval_customizer.class
 org/bridj/TimeT.class
 org/bridj/TypedPointer.class
 org/bridj/ValuedEnum.class
@@ -295,6 +301,20 @@ org/bridj/objc/ObjectiveCRuntime$1.class
 org/bridj/objc/ObjectiveCRuntime$Id.class
 org/bridj/objc/ObjectiveCRuntime.class
 org/bridj/objc/Selector.class
+org/bridj/platform/PlatformUtils.class
+org/bridj/platform/mac/CoreGraphics.class
+org/bridj/platform/mac/MacPlatformUtils.class
+org/bridj/platform/win/Kernel32.class
+org/bridj/platform/win/User32$LASTINPUTINFO.class
+org/bridj/platform/win/User32.class
+org/bridj/platform/win/WinPlatformUtils.class
+org/bridj/platform/x11/Display.class
+org/bridj/platform/x11/Drawable.class
+org/bridj/platform/x11/Window.class
+org/bridj/platform/x11/X11.class
+org/bridj/platform/x11/X11PlatformUtils.class
+org/bridj/platform/x11/Xss$XScreenSaverInfo.class
+org/bridj/platform/x11/Xss.class
 org/bridj/util/AutoHashMap.class
 org/bridj/util/DefaultParameterizedType.class
 org/bridj/util/Pair.class
