@@ -31,6 +31,7 @@ import static com.ochafik.lang.jnaerator.parser.ElementsHelper.thisField;
 import static com.ochafik.lang.jnaerator.parser.ElementsHelper.typeRef;
 import static com.ochafik.lang.jnaerator.parser.ElementsHelper.varRef;
 
+import java.lang.reflect.Method;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
@@ -1090,8 +1091,11 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
     static Map<String, Pair<Integer, Class<?>>> buffersAndArityByType = new HashMap<String, Pair<Integer, Class<?>>>();
     static Map<String, Pair<Integer, Class<?>>> arraysAndArityByType = new HashMap<String, Pair<Integer, Class<?>>>();
     static Map<String, String> pointerFieldGetterNameRadixByType = new HashMap<String, String>();
-
+    static Set<String> objectMethodNames = new HashSet<String>();
     static {
+    		for (Method method : Object.class.getDeclaredMethods())
+    			objectMethodNames.add(method.getName());
+    		
         Object[] data = new Object[]{
             "char", Byte.TYPE, byte[].class, ByteBuffer.class, "Char",
             "long", Long.TYPE, long[].class, LongBuffer.class, "Long",
@@ -2447,9 +2451,12 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
             if (suffix != null) {
                 newName = "operator" + StringUtils.capitalize(suffix);
             }
-        }/* else if (nameStr.startsWith("~")) {
+        } else if (objectMethodNames.contains(nameStr)) {
+        		newName = name + "$";
+        	}/* else if (nameStr.startsWith("~")) {
         newName = getValidJavaIdentifierString(ident(nameStr.substring(1))) + "Destructor";
         }*/
+        
         if (newName == null) {
             newName = getValidJavaIdentifierString(name);
         } else if (result.config.beautifyNames) {
