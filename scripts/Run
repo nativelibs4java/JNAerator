@@ -1,0 +1,19 @@
+
+MVN_ARGS=-o
+
+if [[ -z "$PREQUISITES" ]] ; then
+	PREQUISITES="jnaerator-parser" ;
+fi
+
+for P in $PREQUISITES ; do
+	echo "#
+# Building $P
+#"
+	cd $P
+	mvn install $MVN_ARGS || exit 1
+	cd .. ;
+done
+
+cd jnaerator
+mvn compile $MVN_ARGS exec:java -Dexec.mainClass=com.ochafik.lang.jnaerator.JNAerator
+cd ..
