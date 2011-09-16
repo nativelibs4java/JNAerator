@@ -83,7 +83,7 @@ public class CompilerUtils {
 		if (resource != null) {
 			String resstr = resource.toString();
 //			if (resstr.contains("Prog/"))
-//				resstr = "jar:http://ochafik.free.fr/Java/jnaerator.jar!/...";
+//				resstr = "jar:http://ochafik.com/Java/jnaerator.jar!/...";
 			
 			if (resstr.matches("jar:.*!.*"))
 				resstr = resstr.substring("jar:".length(), resstr.indexOf("!"));
@@ -178,7 +178,7 @@ public class CompilerUtils {
 			"-source", sourceCompatibility,
 			"-bootclasspath", bootclasspath, //"/System/Library/Frameworks/JavaVM.framework/Versions/1.6.0/Classes/classes.jar",//bootclasspath,
 			"-classpath", bootclasspath //"/Users/ochafik/Prog/Java/bin/jnaerator.jar"//
-				//"http://ochafik.free.fr/Java/jnaerator.jar"//bootclasspath
+				//"http://ochafik.com/Java/jnaerator.jar"//bootclasspath
 		);  
 //		DebugUtils.println(fileManager.inputs.values());
 		compiler.getTask(null, fileManager, diagnostics, options, null, fileObjects).call();
