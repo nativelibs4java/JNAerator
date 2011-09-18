@@ -126,7 +126,7 @@ public class JNAeratorConfig {
 //            null
 //        );
 
-        public static final Runtime DEFAULT = JNAerator;
+        public static final Runtime DEFAULT = BridJ;//JNAerator;
         public enum Ann {
             Bits, FastCall, Mangling, ObjCBlock, This, ThisCall, Length, ByValue, Field, Virtual, Symbol, Name, Union,
             IID
