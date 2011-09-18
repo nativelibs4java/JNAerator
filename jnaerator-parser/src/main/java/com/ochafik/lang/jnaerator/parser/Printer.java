@@ -18,7 +18,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
 import java.util.TreeSet;
-
+import static com.ochafik.lang.jnaerator.parser.ElementsHelper.*;
 import com.ochafik.lang.jnaerator.parser.Declarator.ArrayDeclarator;
 import com.ochafik.lang.jnaerator.parser.Declarator.DirectDeclarator;
 import com.ochafik.lang.jnaerator.parser.Declarator.FunctionDeclarator;
@@ -957,6 +957,8 @@ public class Printer implements Visitor {
         final String outputPackage = packageName.toString();
         final String outputClassPrefix = className + ".";
 
+        final String fullClassNameStr = ident(packageName, className).toString();
+        
         rootElement.accept(new Scanner() {
 
             @SuppressWarnings("unchecked")
@@ -987,6 +989,8 @@ public class Printer implements Visitor {
         final Map<Identifier, String> resolvedIds = new HashMap<Identifier, String>();
         final Set<String> importedClassesStrings = new HashSet<String>(50);
         importedClassesStrings.add(className.toString());
+        
+        String packagePrefix = packageName + ".";
         
         Set<String> importStatements = new TreeSet<String>();
         for (Map.Entry<String, Set<Identifier>> kv : identifiersBySimpleName.entrySet()) {
@@ -1022,10 +1026,10 @@ public class Printer implements Visitor {
 			@Override
             public void visitQualifiedIdentifier(QualifiedIdentifier e) {
 
-
-                if (e.getParentElement() instanceof TypeRef) {
+            		if (e.getParentElement() instanceof TypeRef) {
                     QualifiedIdentifier c = e.clone();
                     SimpleIdentifier si = c.resolveLastSimpleIdentifier();
+					
                     List<Expression> targs = new ArrayList<Expression>(si.getTemplateArguments());
                     si.setTemplateArguments(Collections.EMPTY_LIST);
 
@@ -1038,7 +1042,7 @@ public class Printer implements Visitor {
                             pt.append(sis.get(i));
 
                             String str = pt.toString();//, s;
-                            if (importedClassesStrings.contains(str)) {
+                            if (importedClassesStrings.contains(str) || str.equals(fullClassNameStr)) {
                             //if ((s = resolvedIds.get(str)) != null) {
                                 for (int j = i; j-- != 0;)
                                     sis.remove(j);
