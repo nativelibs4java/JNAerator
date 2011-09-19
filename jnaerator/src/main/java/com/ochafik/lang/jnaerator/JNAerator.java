@@ -18,6 +18,7 @@
 */
 package com.ochafik.lang.jnaerator;
 
+import org.bridj.CRuntime;
 import com.ochafik.lang.jnaerator.parser.TypeRef.SimpleTypeRef;
 import org.bridj.ann.Ptr;
 import com.ochafik.lang.jnaerator.parser.DeclarationsHolder;
@@ -1508,7 +1509,7 @@ public class JNAerator {
 
         if (result.config.runtime == JNAeratorConfig.Runtime.BridJ) {
 	        interf.addAnnotation(new Annotation(org.bridj.ann.Library.class, expr(library)));
-	        interf.addAnnotation(new Annotation(org.bridj.ann.Runtime.class, classLiteral(CPPRuntime.class)));
+	        interf.addAnnotation(new Annotation(org.bridj.ann.Runtime.class, classLiteral(result.hasCPlusPlus ? CPPRuntime.class : CRuntime.class)));
         }
 		
         interf = result.notifyBeforeWritingClass(fullLibraryClassName, interf, signatures, library);

@@ -77,6 +77,7 @@ public class Result extends Scanner {
 	public UniversalReconciliator universalReconciliator;
     public BridJer bridjer;
     public Symbols symbols;
+    public boolean hasCPlusPlus;
 	
 	public final Set<Identifier> 
 		structsFullNames = new HashSet<Identifier>(),

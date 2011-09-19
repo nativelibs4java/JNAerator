@@ -1411,6 +1411,7 @@ public class DeclarationsConverter {
 				}
 			case CPPClass:
 				baseClass = ident(uuid == null ? CPPObject.class : IUnknown.class);
+				result.hasCPlusPlus = true;
 				break;
 			default:
 				throw new UnsupportedOperationException();
