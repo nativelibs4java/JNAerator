@@ -106,6 +106,13 @@ public abstract class ModifiableElement extends Element {
 	public List<Modifier> getModifiers() {
 		return Collections.unmodifiableList(modifiers);
 	}
+	
+	public List<Modifier> harvestModifiers() {
+		List<Modifier> mods = new ArrayList<Modifier>();
+		mods.addAll(getModifiers());
+		return mods;
+	}
+	
     public boolean hasModifier(Modifier m) {
         m = m.resolveAlias();
         for (Modifier mm : modifiers)

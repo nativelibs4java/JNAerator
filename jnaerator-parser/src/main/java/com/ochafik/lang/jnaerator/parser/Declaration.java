@@ -19,6 +19,7 @@
 package com.ochafik.lang.jnaerator.parser;
 
 import com.ochafik.lang.jnaerator.parser.Struct.MemberVisibility;
+import java.util.List;
 
 public abstract class Declaration extends Statement {//ModifiableElement {
     
@@ -45,6 +46,14 @@ public abstract class Declaration extends Statement {//ModifiableElement {
 		if (valueType == null)
 			valueType = null;
 		this.valueType = changeValue(this, this.valueType, valueType);
+	}
+	
+	@Override
+	public List<Modifier> harvestModifiers() {
+		List<Modifier> mods = super.harvestModifiers();
+		if (getValueType() != null)
+			mods.addAll(getValueType().harvestModifiers());
+		return mods;
 	}
 	
 	@Override

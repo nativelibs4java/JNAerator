@@ -284,8 +284,14 @@ public abstract class TypeRef extends ModifiableElement implements Declarator.Mu
 			}
 			return super.replaceChild(child, by);
 		}
-
 			
+		@Override
+		public List<Modifier> harvestModifiers() {
+			List<Modifier> mods = super.harvestModifiers();
+			if (getTarget() != null)
+				mods.addAll(getTarget().harvestModifiers());
+			return mods;
+		}
 	}
 	public static class ArrayRef extends TargettedTypeRef {
 		final List<Expression> dimensions = new ArrayList<Expression>();
