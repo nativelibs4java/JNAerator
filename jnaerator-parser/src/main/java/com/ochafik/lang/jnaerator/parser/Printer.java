@@ -498,13 +498,14 @@ public class Printer implements Visitor {
             if (e.getFunction() != null)
                 append(e.getFunction());
             append("(");
-            append(StringUtils.implode(ListenableCollections.adapt(e.getArguments(), new Adapter<Pair<String, Expression>, Expression>() {
+            implode(ListenableCollections.adapt(e.getArguments(), new Adapter<Pair<String, Expression>, Expression>() {
 
                 public Expression adapt(Pair<String, Expression> value) {
                     return value.getValue();
                 }
 
-            }), ", "), ")");
+            }), ", ");
+            append(")");
         }
         expressionPost(e);
     }
@@ -957,8 +958,6 @@ public class Printer implements Visitor {
         final String outputPackage = packageName.toString();
         final String outputClassPrefix = className + ".";
 
-        final String fullClassNameStr = ident(packageName, className).toString();
-        
         rootElement.accept(new Scanner() {
 
             @SuppressWarnings("unchecked")
@@ -1021,12 +1020,12 @@ public class Printer implements Visitor {
             out.println(imp);
 
         out.println(new Printer() {
-
+            
             @SuppressWarnings("unchecked")
 			@Override
             public void visitQualifiedIdentifier(QualifiedIdentifier e) {
 
-            		if (e.getParentElement() instanceof TypeRef) {
+                if (e.getParentElement() instanceof TypeRef) {
                     QualifiedIdentifier c = e.clone();
                     SimpleIdentifier si = c.resolveLastSimpleIdentifier();
 					
@@ -1041,9 +1040,8 @@ public class Printer implements Visitor {
                                 pt.append(".");
                             pt.append(sis.get(i));
 
-                            String str = pt.toString();//, s;
-                            if (importedClassesStrings.contains(str) || str.equals(fullClassNameStr)) {
-                            //if ((s = resolvedIds.get(str)) != null) {
+                            String str = pt.toString();
+                            if (importedClassesStrings.contains(str)) {
                                 for (int j = i; j-- != 0;)
                                     sis.remove(j);
 
