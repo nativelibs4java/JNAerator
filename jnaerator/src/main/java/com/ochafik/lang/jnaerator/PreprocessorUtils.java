@@ -64,7 +64,9 @@ public class PreprocessorUtils {
 		for (File file : files)
 			preProcessor.addInput(file);
 		
-		if (macros != null)
+		boolean isTopLevel = macros == null;
+		
+		if (!isTopLevel)
 			for (Macro macro : macros.values())
 				preProcessor.addMacro(macro);
 		
@@ -74,16 +76,18 @@ public class PreprocessorUtils {
 		//Map<String, Macro> 
 		macros = preProcessor.getMacros();
 		
-		if (config.preprocessingOutFile != null) {
-			if (config.verbose)
-				System.out.println("Writing preprocessor output to '" + config.preprocessingOutFile + "'");
-			WriteText.writeText(sourceContent, config.preprocessingOutFile);
-		}
-		
-		if (config.macrosOutFile != null) {
-			if (config.verbose)
-				System.out.println("Writing preprocessor macros to '" + config.macrosOutFile + "'");
-			WriteText.writeText(StringUtils.implode(macros.entrySet(), "\n"), config.macrosOutFile);
+		if (isTopLevel) {
+			if (config.preprocessingOutFile != null) {
+				if (config.verbose)
+					System.out.println("Writing preprocessor output to '" + config.preprocessingOutFile + "'");
+				WriteText.writeText(sourceContent, config.preprocessingOutFile);
+			}
+			
+			if (config.macrosOutFile != null) {
+				if (config.verbose)
+					System.out.println("Writing preprocessor macros to '" + config.macrosOutFile + "'");
+				WriteText.writeText(StringUtils.implode(macros.entrySet(), "\n"), config.macrosOutFile);
+			}
 		}
 		
 		for (String k : config.preprocessorConfig.macros.keySet())
