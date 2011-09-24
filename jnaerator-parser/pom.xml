@@ -21,7 +21,7 @@
 	<dependency>
 		<groupId>org.antlr</groupId>
 		<artifactId>antlr-runtime</artifactId>
-		<version>3.2</version>
+		<version>3.4</version>
 		<scope>compile</scope>
 	</dependency>
 	
@@ -48,7 +48,7 @@
 		  <plugin>
 		    <groupId>org.antlr</groupId>
 		    <artifactId>antlr3-maven-plugin</artifactId>
-		    <version>3.2</version>
+		    <version>3.4 </version>
 		    <executions>
 			<execution>
 			    <goals>

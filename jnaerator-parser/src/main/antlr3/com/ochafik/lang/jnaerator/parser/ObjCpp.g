@@ -27,7 +27,7 @@ options {
 	backtrack = true;
 	//output = AST;
 	memoize = true;
-//	k = 2;
+	k = 2;
 }
 
 
