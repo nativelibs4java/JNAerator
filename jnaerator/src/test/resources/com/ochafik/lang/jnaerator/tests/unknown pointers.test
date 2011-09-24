@@ -14,7 +14,7 @@ new UnknownPtr() {};
 //pt = new OpaqueStruct((Pointer)null);
 //pt = new UnknownPtr((Pointer)null);
 
-Pointer s = INSTANCE.GetInterestingMessage(null);
+OpaqueStruct s = INSTANCE.GetInterestingMessage(null);
 --
 #runtime(BridJ)
 

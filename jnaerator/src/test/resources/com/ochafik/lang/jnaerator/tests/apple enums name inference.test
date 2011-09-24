@@ -8,9 +8,9 @@ enum _E2
 {
     E2A, E2B
 };
-typedef uint32_t E2
+typedef uint32_t E2;
 
-typedef uint32_t E3
+typedef uint32_t E3;
 enum
 {
     E3A, E3B

@@ -19,7 +19,7 @@ import test.*;
 S s = new S();
 (s.p = (test.TestLibrary.lfptr)null).apply();
 (s.p2 = (test.S.fp2)null).apply();
-TestLibrary.INSTANCE.f((S.ByValue)null, (TestLibrary.f_arg1_fptr_callback)null, (Pointer)null, (test.TestLibrary.lfptr)null);
+TestLibrary.INSTANCE.f((S.ByValue)null, (TestLibrary.f_arg1_fptr_callback)null, (TestLibrary.T)null, (test.TestLibrary.lfptr)null);
 
 
 --

@@ -2251,8 +2251,10 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
 
     public Expression getEnumItemValue(EnumItem enumItem) { 
     		Expression enumValue = findEnumItem(enumItem);
-		if (((Enum)enumItem.getParentElement()).getTag() != null)
-			enumValue = methodCall(enumValue, "value");
+    		if (result.config.runtime == JNAeratorConfig.Runtime.BridJ) {
+			if (((Enum)enumItem.getParentElement()).getTag() != null)
+				enumValue = methodCall(enumValue, "value");
+		}
 		//if (getConstantType(enumValue) == Constant.Type.Int)
 		//	return enumValue;
 		return cast(typeRef(int.class), enumValue);
