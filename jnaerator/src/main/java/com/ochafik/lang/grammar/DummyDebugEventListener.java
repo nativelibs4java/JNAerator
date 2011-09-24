@@ -188,5 +188,9 @@ public class DummyDebugEventListener implements DebugEventListener {
 		// TODO Auto-generated method stub
 		
 	}
+	
+	public void enterDecision(int a, boolean b) {
+		/// whatever
+	}
 
 }
