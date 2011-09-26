@@ -19,7 +19,7 @@
 			<packageset dir="${global.dir.build.java}" />
 
 			<link
-					href="http://java.sun.com/j2se/1.5.0/docs/api/"
+					href="http://download.oracle.com/javase/6/docs/api/"
 					offline="${system.javadoc.offline}" />
 			<link
 					href="http://java.sun.com/j2ee/1.4/docs/api/"
