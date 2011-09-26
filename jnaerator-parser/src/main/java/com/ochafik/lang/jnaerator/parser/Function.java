@@ -27,6 +27,8 @@ import java.util.Arrays;
 import java.util.List;
 
 import com.ochafik.lang.jnaerator.parser.Expression.FunctionCall;
+import com.ochafik.lang.jnaerator.parser.Identifier.SimpleIdentifier;
+import java.util.Collections;
 
 public class Function extends Declaration implements Declarator.MutableByDeclarator {
 	//private Struct owner;
@@ -206,6 +208,20 @@ public class Function extends Declaration implements Declarator.MutableByDeclara
 		return body;
 	}
 
+    Scanner eraser = new Scanner() {
+
+        @Override
+        public void visitSimpleIdentifier(SimpleIdentifier e) {
+            super.visitSimpleIdentifier(e);
+            e.setTemplateArguments(Collections.EMPTY_LIST);
+        }
+
+    };
+    public <E extends Element> E erase(E e) {
+        eraser.visit(e);
+        return e;
+    }
+    
 	public String computeSignature(boolean addReturnType) {
 		StringBuilder b = new StringBuilder();
 		
@@ -217,6 +233,7 @@ public class Function extends Declaration implements Declarator.MutableByDeclara
 				b.append("id");
 			else {
 				t = t.clone();
+                erase(t);
 				t.setCommentAfter(null);
 				t.setCommentBefore(null);
 				b.append(t);
@@ -235,6 +252,7 @@ public class Function extends Declaration implements Declarator.MutableByDeclara
 					b.append(":(");
 					t = arg.createMutatedType();
 					if (t != null) {
+                        erase(t);
 						t.setCommentAfter(null);
 						t.setCommentBefore(null);
 						b.append(t);
@@ -247,6 +265,7 @@ public class Function extends Declaration implements Declarator.MutableByDeclara
 		} else {
 			if (addReturnType && getValueType() != null) {
 				TypeRef t = getValueType().clone();
+                erase(t);
 				t.stripDetails();
 				b.append(t);
 				b.append(' ');
@@ -260,8 +279,10 @@ public class Function extends Declaration implements Declarator.MutableByDeclara
 				} else 
 					b.append(", ");
 				TypeRef t = arg.createMutatedType();
-				if (t != null)
+				if (t != null) {
+                    erase(t);
 					t.stripDetails();
+                }
 				b.append(t);
 			}
 			b.append(')');

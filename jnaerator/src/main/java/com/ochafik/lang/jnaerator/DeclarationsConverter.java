@@ -18,6 +18,7 @@
 */
 package com.ochafik.lang.jnaerator;
 
+import org.bridj.ann.Name;
 import org.bridj.BridJ;
 import org.bridj.FlagSet;
 import org.bridj.IntValuedEnum;
@@ -819,6 +820,9 @@ public class DeclarationsConverter {
 			//if (isCallback || !modifiedMethodName.equals(functionName))
 			//	natFunc.addAnnotation(new Annotation(Name.class, "(value=\"" + functionName + "\"" + (ns.isEmpty() ? "" : ", namespace=" + namespaceArrayStr)  + (isMethod ? ", classMember=true" : "") + ")"));
 
+            if (!isCallback && !modifiedMethodName.equals(functionName))
+				natFunc.addAnnotation(new Annotation(Name.class, expr(functionName.toString())));
+
 			//if (modifiedMethodName.toString().equals("NSStringFromSelector"))
 			//	modifiedMethodName = ident("NSStringFromSelector");
 
@@ -995,8 +999,15 @@ public class DeclarationsConverter {
 //            }
 //        }
 
-        if (!signatures.methodsSignatures.add(natSig))
-            return;
+        Identifier javaMethodName = signatures.findNextMethodName(natSig, functionName);
+        if (!javaMethodName.equals(functionName)) {
+            nativeMethod.setName(javaMethodName);
+        }
+        if (!isCallback && !javaMethodName.equals(functionName))
+            nativeMethod.addAnnotation(new Annotation(Name.class, expr(functionName.toString())));
+
+        //if (!signatures.methodsSignatures.add(natSig))
+        //    return;
 
         Block convertedBody = null;
         if (result.config.convertBodies && function.getBody() != null)

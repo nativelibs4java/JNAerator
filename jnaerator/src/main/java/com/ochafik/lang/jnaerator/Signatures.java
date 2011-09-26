@@ -22,6 +22,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.ochafik.lang.jnaerator.parser.Identifier;
+import static com.ochafik.lang.jnaerator.parser.ElementsHelper.*;
 
 public class Signatures {
 	public Set<Identifier> 
@@ -30,5 +31,21 @@ public class Signatures {
 	public Set<String> 
 		variablesSignatures = new HashSet<String>(),
 		methodsSignatures = new HashSet<String>();
-	
+
+	/**
+	 * TODO: CLEAN THIS UGLY HACK
+	 * Rewrites function name until its signature doesn't collide anymore with existing signatures
+	 */
+    public Identifier findNextMethodName(String originalSignature, Identifier originalName) {
+        String signature = originalSignature;
+        Identifier name = originalName;
+        int n = 1;
+        while (!methodsSignatures.add(signature)) {
+            String suffix = "$" + (++n);
+            name = ident(originalName + suffix);
+            int i = originalSignature.indexOf("(");
+            signature = originalSignature.substring(0, i) + suffix + originalSignature.substring(i);
+        }
+        return name;
+    }
 }
