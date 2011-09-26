@@ -1,0 +1,20 @@
+void f(int*);
+void f(double*);
+
+class Foo {
+public:
+	void f(int*);
+	void f(double*);
+};
+--
+#runtime(BridJ)
+import test.*;
+import static test.TestLibrary.*;
+
+f(pointerToInts(10));
+f$2(pointerToDoubles(10));
+
+Foo o = new Foo();
+o.f(pointerToInts(10));
+o.f$2(pointerToDoubles(10));
+
