@@ -673,7 +673,7 @@ public class Result extends Scanner {
         if (config.noAutoImports)
             out.println(javaClass);
         else
-            Printer.printJava(javaPackage, ident(javaPackage.clone(), javaClass.getTag().clone()), javaClass, out);
+            Printer.printJava(javaPackage, ident(javaPackage == null ? null : javaPackage.clone(), javaClass.getTag().clone()), javaClass, out);
 //		out.println("@SuppressWarnings(\"unused\")");
 	}
 	public boolean hasObjectiveC() {
