@@ -1,2 +1,0 @@
-grep -r TODO sources/com/ochafik/ | sort | sed 's/:.*$//' | grep -v '~' | grep -v '/.svn/' | uniq
-

@@ -1,1 +1,0 @@
-javadoc -d doc -classpath libraries/rococoa.jar:sources:libraries/junit-4.4.jar:libraries/jna.jar  `find sources/com/ochafik/lang/jnaerator/runtime -type f | grep -v '\.svn' ` -link https://jna.dev.java.net/javadoc

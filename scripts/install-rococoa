@@ -1,9 +1,0 @@
-mvn install:install-file  \
-	-Dfile=../libraries/rococoa.jar \
-	-DgroupId=net.java.dev.rococoa \
-	-DartifactId=rococoa-jnaerator \
-	"-Dversion=1.0-SNAPSHOT" \
-	-Dpackaging=jar \
-	-DgeneratePom=true \
-	-DgeneratePom.description="JNAerator's version of Rococoa" \
-	-DuniqueVersion=true

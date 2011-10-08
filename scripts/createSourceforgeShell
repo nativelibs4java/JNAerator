@@ -1,1 +1,0 @@
-ssh -t opentator,nativelibs4java@shell.sourceforge.net create
