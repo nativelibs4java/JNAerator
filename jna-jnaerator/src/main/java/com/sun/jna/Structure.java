@@ -96,6 +96,7 @@ public abstract class Structure {
 
     static final boolean isPPC;
     static final boolean isSPARC;
+    static final boolean isARM;
 
     static {
         // Check for predictable field order; IBM and JRockit store fields in
@@ -114,6 +115,7 @@ public abstract class Structure {
         String arch = System.getProperty("os.arch").toLowerCase();
         isPPC = "ppc".equals(arch) || "powerpc".equals(arch);
         isSPARC = "sparc".equals(arch);
+	isARM = "arm".equals(arch);
     }
 
     /** Use the platform default alignment. */
@@ -132,7 +134,9 @@ public abstract class Structure {
     /** Align to an 8-byte boundary. */
     //public static final int ALIGN_8 = 6;
 
-    private static final int MAX_GNUC_ALIGNMENT = isSPARC ? 8 : Native.LONG_SIZE;
+    static final int MAX_GNUC_ALIGNMENT =
+        isSPARC || ((isPPC || isARM) && Platform.isLinux())
+        ? 8 : Native.LONG_SIZE;
     protected static final int CALCULATE_SIZE = -1;
 
     // This field is accessed by native code
@@ -268,6 +272,9 @@ public abstract class Structure {
         if (memory == null) {
             allocateMemory();
         }
+        else if (size == CALCULATE_SIZE) {
+            size = calculateSize(true);
+        }
     }
 
     /** Attempt to allocate memory if sufficient information is available.
@@ -391,9 +398,13 @@ public abstract class Structure {
                 }
                 return false;
             }
+            /** Simple implementation so that toString() doesn't break.
+                Provides an iterator over a snapshot of this Set.
+            */
             public Iterator iterator() {
-                // never actually used
-                return null;
+                Structure[] e = new Structure[count];
+                System.arraycopy(elements, 0, e, 0, count);
+                return Arrays.asList(e).iterator();
             }
         }
         protected synchronized Object initialValue() {
@@ -411,10 +422,12 @@ public abstract class Structure {
      * Reads the fields of the struct from native memory
      */
     public void read() {
-        // convenience: allocate memory if it hasn't been already; this
-        // allows structures to do field-based initialization of arrays and not
-        // have to explicitly call allocateMemory in a ctor
+        // convenience: allocate memory and/or calculate size if it hasn't
+        // been already; this allows structures to do field-based
+        // initialization of arrays and not have to explicitly call
+        // allocateMemory in a ctor 
         ensureAllocated();
+
         // Avoid redundant reads
         if (busy().contains(this)) {
             return;
@@ -434,6 +447,15 @@ public abstract class Structure {
                 reading().remove(getPointer());
             }
         }
+    }
+
+    /** Returns the calculated offset of the given field. */
+    protected int fieldOffset(String name) {
+	ensureAllocated();
+	StructField f = (StructField)structFields.get(name);
+        if (f == null)
+            throw new IllegalArgumentException("No such field: " + name);
+	return f.offset;
     }
 
     /** Force a read of the given field from native memory.  The Java field
@@ -750,10 +772,7 @@ public abstract class Structure {
             Field field = (Field)i.next();
             int modifiers = field.getModifiers();
 
-			if (Modifier.isTransient(modifiers))
-                continue;
-			
-            Class type = field.getType();
+			Class type = field.getType();
             StructField structField = new StructField();
             structField.isVolatile = Modifier.isVolatile(modifiers);
             structField.isReadOnly = Modifier.isFinal(modifiers);
@@ -999,7 +1018,11 @@ public abstract class Structure {
     }
 
     public String toString() {
-        return toString(0, true);
+        return toString(Boolean.getBoolean("jna.dump_memory"));
+    }
+
+    public String toString(boolean debug) {
+        return toString(0, true, true);
     }
 
     private String format(Class type) {
@@ -1008,7 +1031,7 @@ public abstract class Structure {
         return s.substring(dot + 1);
     }
 
-    private String toString(int indent, boolean showContents) {
+    private String toString(int indent, boolean showContents, boolean dumpMemory) {
         String LS = System.getProperty("line.separator");
         String name = format(getClass()) + "(" + getPointer() + ")";
         if (!(getPointer() instanceof Memory)) {
@@ -1035,7 +1058,7 @@ public abstract class Structure {
             contents += "  " + type + " "
                 + sf.name + index + "@" + Integer.toHexString(sf.offset);
             if (value instanceof Structure) {
-                value = ((Structure)value).toString(indent + 1, !(value instanceof Structure.ByReference));
+                value = ((Structure)value).toString(indent + 1, !(value instanceof Structure.ByReference), dumpMemory);
             }
             contents += "=";
             if (value instanceof Long) {
@@ -1057,10 +1080,10 @@ public abstract class Structure {
             if (!i.hasNext())
                 contents += prefix + "}";
         }
-        if (indent == 0 && Boolean.getBoolean("jna.dump_memory")) {
-            byte[] buf = getPointer().getByteArray(0, size());
+        if (indent == 0 && dumpMemory) {
             final int BYTES_PER_ROW = 4;
             contents += LS + "memory dump" + LS;
+            byte[] buf = getPointer().getByteArray(0, size());
             for (int i=0;i < buf.length;i++) {
                 if ((i % BYTES_PER_ROW) == 0) contents += "[";
                 if (buf[i] >=0 && buf[i] < 16)
@@ -1160,6 +1183,11 @@ public abstract class Structure {
 
     protected void cacheTypeInfo(Pointer p) {
         typeInfo = p.peer;
+    }
+
+    /** Override to supply native type information for the given field. */
+    protected Pointer getFieldTypeInfo(StructField f) {
+        return FFIType.get(getField(f), f.type);
     }
 
     /** Obtain native type information for this structure. */
@@ -1330,7 +1358,7 @@ public abstract class Structure {
                 int idx = 0;
                 for (Iterator i=ref.fields().values().iterator();i.hasNext();) {
                     StructField sf = (StructField)i.next();
-                    els[idx++] = get(ref.getField(sf), sf.type);
+                    els[idx++] = ref.getFieldTypeInfo(sf);
                 }
             }
             init(els);
@@ -1393,7 +1421,7 @@ public abstract class Structure {
                     typeInfoMap.put(obj, type);
                     return type.getPointer();
                 }
-                throw new IllegalArgumentException("Unsupported type " + cls);
+                throw new IllegalArgumentException("Unsupported Structure field type " + cls);
             }
         }
     }
@@ -1463,4 +1491,9 @@ public abstract class Structure {
             }
         }
     }
+
+    protected int getNativeSize(Class nativeType, Object value) {
+        return Native.getNativeSize(nativeType, value);
+    }
+
 }
