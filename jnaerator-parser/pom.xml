@@ -28,7 +28,7 @@
 	<dependency>
 		<groupId>org.anarres.cpp</groupId>
 		<artifactId>anarres-cpp-jnaerator</artifactId>
-		<version>1.2.5-JNAerator.3</version>
+		<version>1.2.6-JNAerator.1</version>
 		<scope>compile</scope>
 	</dependency>
 	
