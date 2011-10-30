@@ -5,6 +5,7 @@
 
 package com.ochafik.lang.jnaerator.parser;
 
+import com.ochafik.lang.jnaerator.parser.TypeRef.PrecisionTypeRef;
 import static com.ochafik.util.string.StringUtils.LINE_SEPARATOR;
 
 import java.io.PrintWriter;
@@ -1108,4 +1109,11 @@ public class Printer implements Visitor {
         deindent();
         append("\n", indent, "}");
     }
+
+    public void visitPrecisionTypeRef(PrecisionTypeRef tr) {
+        append(tr.getTarget());
+        append("(", tr.getPrecision(), ")");
+    }
+    
+    
 }

@@ -55,6 +55,7 @@ import com.ochafik.lang.jnaerator.parser.StoredDeclarations.TypeDef;
 import com.ochafik.lang.jnaerator.parser.TypeRef.ArrayRef;
 import com.ochafik.lang.jnaerator.parser.TypeRef.FunctionSignature;
 import com.ochafik.lang.jnaerator.parser.TypeRef.Pointer;
+import com.ochafik.lang.jnaerator.parser.TypeRef.PrecisionTypeRef;
 import com.ochafik.lang.jnaerator.parser.TypeRef.Primitive;
 import com.ochafik.lang.jnaerator.parser.TypeRef.SimpleTypeRef;
 import com.ochafik.lang.jnaerator.parser.TypeRef.TaggedTypeRef;
@@ -183,5 +184,7 @@ public interface Visitor {
     public void visitNamespace(Namespace aThis);
 
     public void visitDeclarations(Declarations aThis);
+
+    public void visitPrecisionTypeRef(PrecisionTypeRef aThis);
 	
 }

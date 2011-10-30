@@ -21,6 +21,7 @@ package com.ochafik.lang.jnaerator.parser;
 import com.ochafik.lang.jnaerator.parser.Statement.Catch;
 import com.ochafik.lang.jnaerator.parser.Statement.Try;
 import com.ochafik.lang.jnaerator.parser.Statement.While;
+import com.ochafik.lang.jnaerator.parser.TypeRef.PrecisionTypeRef;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -539,4 +540,11 @@ public class Scanner implements Visitor {
         visit(ns.getName());
         visitDeclarations(ns);
     }
+
+    public void visitPrecisionTypeRef(PrecisionTypeRef tr) {
+        visitTargettedTypeRef(tr);
+        visit(tr.getPrecision());
+    }
+    
+    
 }

@@ -292,7 +292,41 @@ public abstract class TypeRef extends ModifiableElement implements Declarator.Mu
 				mods.addAll(getTarget().harvestModifiers());
 			return mods;
 		}
-	}
+    }
+	
+	public static class PrecisionTypeRef extends TargettedTypeRef {
+        Expression precision;
+        public PrecisionTypeRef() {}
+		public PrecisionTypeRef(TypeRef target, Expression precision) {
+			setTarget(target);
+            setPrecision(precision);
+		}
+
+        public Expression getPrecision() {
+            return precision;
+        }
+
+        public void setPrecision(Expression precision) {
+            this.precision = changeValue(this, this.precision, precision);
+        }
+        
+		@Override
+		public boolean replaceChild(Element child, Element by) {
+            if (child == getPrecision()) {
+				setPrecision((Expression)by);
+				return true;
+			}
+			
+			return super.replaceChild(child, by);
+		}
+
+        @Override
+        public void accept(Visitor visitor) {
+            visitor.visitPrecisionTypeRef(this);
+        }
+        
+    }
+    
 	public static class ArrayRef extends TargettedTypeRef {
 		final List<Expression> dimensions = new ArrayList<Expression>();
 		
@@ -347,9 +381,6 @@ public abstract class TypeRef extends ModifiableElement implements Declarator.Mu
 		
 		@Override
 		public boolean replaceChild(Element child, Element by) {
-			if (super.replaceChild(child, by))
-				return true;
-			
 			if (replaceChild(dimensions, Expression.class, this, child, by))
 				return true;
 			
