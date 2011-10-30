@@ -27,7 +27,7 @@ import java.util.*;
 /**
  * Launch JNAerator to wrap native libraries in Java for use with JNA.
  * @goal generate
- * @execute generate-sources
+ * @phase generate-sources
  * @description Launches JNAerator with the command-line arguments contained in src/main/jnaerator/config.jnaerator. To launch from command line, use "mvn jnaerator:generate"
  */
 public class JNAeratorMojo
