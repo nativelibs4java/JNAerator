@@ -18,6 +18,7 @@ package com.jnaerator;
 
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.project.MavenProject;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -62,7 +63,15 @@ public class JNAeratorMojo
      */
     private File scalaOutputDirectory;
 
-    static File canonizeDir(File f) throws IOException {
+    /**
+     * @parameter expression="${project}"
+     * @required
+     * @readonly
+     * @since 1.0
+     */
+    private MavenProject project;
+
+	static File canonizeDir(File f) throws IOException {
         if (!f.exists())
             f.mkdirs();
         return f.getCanonicalFile();
@@ -76,7 +85,11 @@ public class JNAeratorMojo
 
             args.add("-noComp");
             args.add("-o");
-            args.add(canonizeDir(javaOutputDirectory).toString());
+            
+            File javaDir = canonizeDir(javaOutputDirectory);
+            args.add(javaDir.toString());
+            
+            project.addCompileSourceRoot(javaDir.toString());
 
             if (generateScala) {
                 args.add("-scalaOut");
