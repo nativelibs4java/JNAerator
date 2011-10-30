@@ -9,6 +9,9 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -16,7 +19,18 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;	
 
 public class JNAeratorCommandLineArgs {
-	static abstract class ArgsParser {
+	
+	public static abstract class ArgsParser {
+		Map<PathType, List<File>> paths = new HashMap<PathType, List<File>>();
+		
+		public List<File> getPath(PathType type) {
+			if (type == null)
+				return null;
+			List<File> path = paths.get(type);
+			if (path == null)
+				paths.put(type, path = new ArrayList<File>());
+			return path;
+		}
 		public static class ParsedArg {
 			public OptionDef def;
 			public Object[] params;
@@ -58,42 +72,48 @@ public class JNAeratorCommandLineArgs {
 							defaultOpt = opt;
 							continue;
 						}
-						Matcher m = opt.switchPattern.matcher(arg);
-						if (m.matches()) {
-							ParsedArg pa = new ParsedArg();
-							pa.def = opt;
-							pa.params = new Object[opt.args.length];
-							int iArg = 0;
-							for (int iGroup = 0; iGroup < m.groupCount(); iGroup++) {
-								String gp = m.group(iGroup + 1);
-								if (gp == null)
-									continue;
-								pa.params[iArg] = opt.args[iArg].convertArg(gp);
-								iArg++;
-							}
-							for (; iArg < opt.args.length; iArg++)
-								pa.params[iArg] = opt.args[iArg].convertArg(args.get(++i));
-							
-							List<String> parsed = parsed(pa);
-							if (parsed == null)
-								return;
-							args.addAll(i + 1, parsed);
-							defaultOpt = null;
-							break;
-						}
+                        
+                        Matcher m;
+                        boolean matches;
+                        try {
+                            m = opt.switchPattern.matcher(arg);
+                            matches = m.matches();
+                        } catch (Throwable ex) {
+                            throw new RuntimeException("Error while matching arg " + arg + " with option " + opt + " (pattern = " + opt.switchPattern + ") : " + ex, ex);
+                        }
+                        if (matches) {
+                            ParsedArg pa = new ParsedArg();
+                            pa.def = opt;
+                            pa.params = new Object[opt.args.length];
+                            int iArg = 0;
+                            for (int iGroup = 0; iGroup < m.groupCount(); iGroup++) {
+                                String gp = m.group(iGroup + 1);
+                                if (gp == null)
+                                    continue;
+                                pa.params[iArg] = opt.args[iArg].convertArg(gp, this);
+                                iArg++;
+                            }
+                            for (; iArg < opt.args.length; iArg++)
+                                pa.params[iArg] = opt.args[iArg].convertArg(args.get(++i), this);
+
+                            List<String> parsed = parsed(pa);
+                            if (parsed == null)
+                                return;
+                            args.addAll(i + 1, parsed);
+                            defaultOpt = null;
+                            break;
+                        }
 					}
 					if (defaultOpt != null) {
 						ParsedArg pa = new ParsedArg();
 						pa.def = defaultOpt;
-						pa.params = new Object[] { defaultOpt.args[0].convertArg(arg) };
+						pa.params = new Object[] { defaultOpt.args[0].convertArg(arg, this) };
 						args.addAll(i + 1, parsed(pa));
 					}
 				}
-			} catch (Exception ex) {
-				System.err.println("Error parsing arguments :\n" + StringUtils.implode(args, " "));
-				
+			} catch (Throwable ex) {
 				JNAeratorCommandLineArgs.displayHelp(false);
-				throw ex;
+				throw new RuntimeException("Error parsing arguments :\n" + StringUtils.implode(args, " ") + " : " + ex, ex);
 			}
 			finished();
 		}
@@ -103,6 +123,10 @@ public class JNAeratorCommandLineArgs {
 		abstract void finished() throws IOException;
 	}
 	
+	public enum PathType {
+		SourcePath,
+		LibraryPath
+	}
 	public enum OptionDef {
 	
 		IncludeArgs(		"@(.+)?",				"Read command-line arguments from a file. File may contain multiple lines (those beginning with \"//\" will be skipped), file wildcards will be resolved within the file content, as well as variables substitutions : $(someEnvOrJavaVarName), with $(DIR) being the parent directory of the current arguments file.", new ArgDef(Type.ExistingFile, "argumentsFile.jnaerator")),
@@ -166,13 +190,15 @@ public class JNAeratorCommandLineArgs {
 		ChoicesOut(			"-choicesOut",			"Write the function alternative choices made (automatically set when ${Verbose} is used).", new ArgDef(Type.OutputFile, "outFile")),
 		ChoicesIn(			"-choices",				"Read the function alternative choices from a file in the format used by -choicesOut.", new ArgDef(Type.ExistingFile, "choicesFile")),
 		PreprocessingOut(	"-preprocessingOut", 	"Write the preprocessor output in a file (automatically set when ${Verbose} is used).", new ArgDef(Type.OutputFile, "outFile")),
+		EmptyStructsAsForwardDecls(		
+                            "-emptyStructsAsForwardDecls", 		"Treat empty structs as forward declarations"),
 		ExtractionOut(		"-extractionOut", 		"Write the symbols extracted from libraries in a file (automatically set when ${Verbose} is used).", new ArgDef(Type.OutputFile, "outFile")),
 		BridgeSupportOutFile("-bridgeSupportOut", 	"Write the definitions extracted from bridgesupport files in a file (automatically set when ${Verbose} is used).", new ArgDef(Type.OutputFile, "outFile")),
 		WikiDoc(			"-wikiHelp",		 	"Output a wiki-friendly help"),
 		Arch(				"-arch",		 		"Define the current architecture for libraries (state variable)", new ArgDef(Type.String, "archName")),
 		MacrosOut(			"-macrosOut", 			"Write the preprocessor macros in a file (automatically set when ${Verbose} is used).", new ArgDef(Type.OutputFile, "outFile")),
 		NoPrimitiveArrays(	"-noPrimitiveArrays",	"Never output primitive arrays for function arguments (use NIO buffers instead)"),
-		File(				null,		 			"Any header (or directory containing headers at any level of hierarchy), shared library, *.bridgesupport file or *.jnaerator file", new ArgDef(Type.OptionalFile, "file")), 
+		File(				null,		 			"Any header (or directory containing headers at any level of hierarchy), shared library, *.bridgesupport file or *.jnaerator file", new ArgDef(Type.OptionalFile, "file", PathType.SourcePath)), 
 		NoPreprocessing(	"-fpreprocessed",		"Consider source files as being already preprocessed (preprocessor won't be run)"),
 		NoCompile(			"(?i)-noComp",				"Do not compile JNAerated headers"),
 		NoJAR(				"(?i)-noJar",			"Do not create an output JAR"),
@@ -208,20 +234,42 @@ public class JNAeratorCommandLineArgs {
 			public final String name;
 			public int position;
             public final Class<?> additionalClass;
-			public ArgDef(Type type, String name, Class<?> additionalClass) {
+            public final PathType pathType;
+			public ArgDef(Type type, String name, Class<?> additionalClass, PathType pathType) {
 				this.type = type;
 				this.name = name;
                 this.additionalClass = additionalClass;
+                this.pathType = pathType;
 			}
             public ArgDef(Type type, String name) {
-				this(type, name, null);
+				this(type, name, null, null);
+			}
+            public ArgDef(Type type, String name, Class<?> additionalClass) {
+				this(type, name, additionalClass, null);
+			}
+            public ArgDef(Type type, String name, PathType pathType) {
+				this(type, name, null, pathType);
 			}
 
-            Object convertArg(String arg) throws FileNotFoundException {
+			File findFile(String arg, ArgsParser parser) {
+				File f = new File(arg);
+				if (!f.exists()) {
+					List<File> path = parser.getPath(pathType);
+					if (path != null)
+						for (File dir : path) {
+							File ff = new File(dir, arg);
+							if (ff.exists())
+								return ff;
+						}
+				}
+				return f;
+			}
+            Object convertArg(String arg, ArgsParser parser) throws FileNotFoundException {
                 switch (type) {
                 case OptionalFile:
                     boolean opt = arg.endsWith("?");
-                    File f = new File(opt ? arg.substring(0, arg.length() - 1 ) : arg);
+                    String fileName = opt ? arg.substring(0, arg.length() - 1 ) : arg;
+                    File f = findFile(fileName, parser);
                     if (!f.exists()) {
                         if (opt)
                             return null;
@@ -229,7 +277,7 @@ public class JNAeratorCommandLineArgs {
                     }
                     return f;
                 case File:
-                    return new File(arg);
+                    return findFile(arg, parser);
                 case Int:
                     return Integer.parseInt(arg);
                 case MessageFormat:
@@ -237,30 +285,30 @@ public class JNAeratorCommandLineArgs {
                 case String:
                     return arg;
                 case ExistingDir:
-                    f = new File(arg);
+                    f = findFile(arg, parser);
                     if (!f.isDirectory())
                         throw new FileNotFoundException(f.toString());
                     return f;
                 case ExistingFile:
-                    f = new File(arg);
+                    f = findFile(arg, parser);
                     if (!f.isFile())
                         throw new FileNotFoundException(f.toString());
                     return f;
                 case ExistingFileOrDir:
-                    f = new File(arg);
+                    f = findFile(arg, parser);
                     if (!f.exists())
                         throw new FileNotFoundException(f.toString());
                     return f;
                 case Enum:
                     return Enum.valueOf((Class<? extends Enum>)additionalClass, arg);
                 case OutputDir:
-                    f = new File(arg);
+                    f = findFile(arg, parser);
                     if (f.isFile())
                         throw new FileNotFoundException("Expected directory, found file : " + f.toString());
                     f.getAbsoluteFile().getParentFile().mkdirs();
                     return f;
                 case OutputFile:
-                    f = new File(arg);
+                    f = findFile(arg, parser);
                     if (f.isDirectory())
                         throw new FileNotFoundException("Expected file, found directory : " + f.toString());
                     f.getAbsoluteFile().getParentFile().mkdirs();

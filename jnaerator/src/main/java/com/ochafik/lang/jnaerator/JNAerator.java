@@ -18,6 +18,7 @@
 */
 package com.ochafik.lang.jnaerator;
 
+import com.ochafik.lang.jnaerator.JNAeratorCommandLineArgs.PathType;
 import org.bridj.CRuntime;
 import com.ochafik.lang.jnaerator.parser.TypeRef.SimpleTypeRef;
 import org.bridj.ann.Ptr;
@@ -173,6 +174,7 @@ public class JNAerator {
 
 	public static void main(String[] argsArray) {
         //argsArray = new String[] { "/Users/ochafik/nativelibs4java/FFMpeg/src/main/jnaerator/config.jnaerator" };
+        //argsArray = new String[] { "/Users/ochafik/nativelibs4java/Posix/src/main/jnaerator/config.jnaerator" };
 		main(new JNAerator(new JNAeratorConfig()), argsArray);
     }
 
@@ -310,6 +312,8 @@ public class JNAerator {
 							parsedActualFile(includedFile, false);
 						else
 							config.preprocessorConfig.includes.add(includedFile.toString());
+                        
+                        getPath(PathType.SourcePath).add(includedFile);
 						break;
 					case CallbackInvokeName:
 						config.callbackInvokeMethodName = a.getStringParam(0);
@@ -502,6 +506,9 @@ public class JNAerator {
 					case StructsInLibrary:
 						config.putTopStructsInSeparateFiles = false;
 						break;
+                    case EmptyStructsAsForwardDecls:
+                        config.treatEmptyStructsAsForwardDecls = true;
+                        break;
                     case ParseInOneChunk:
                         config.parseInOneChunk = true;
                         break;

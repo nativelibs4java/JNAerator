@@ -30,9 +30,6 @@ public class SourceFile extends Element implements DeclarationsHolder {
 	String framework, library;
 //	String pathInFramework;
 	
-	private static Pattern frameworkPathPattern = Pattern.compile(".*/(\\w+)\\.framework/(?:.*/)?Headers/(?:.*/)?([^/]+)\\.[^/.]+$");
-	private static Pattern bridgesupportFrameworkPattern = Pattern.compile("(?:^|/)(\\w+?)(?:Full)?\\.bridgesupport$");
-	
 //	public URL getFile() {
 //		return file;
 //	}
@@ -75,17 +72,6 @@ public class SourceFile extends Element implements DeclarationsHolder {
 	public void setElementFile(String file) {
 		super.setElementFile(file);
 		framework = null;
-	}
-	public String guessFramework() {
-		if (framework == null) {
-			if (getElementFile() != null) {
-				Matcher matcher = frameworkPathPattern.matcher(getElementFile());
-				if (matcher.find() || (matcher = bridgesupportFrameworkPattern.matcher(getElementFile())).find()) {
-					framework = matcher.group(1);
-				}
-			}
-		}
-		return framework;
 	}
 //	public void setFramework(String framework) {
 //		this.framework = framework;

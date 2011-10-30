@@ -18,6 +18,8 @@
 */
 package com.ochafik.lang.jnaerator;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import com.ochafik.lang.jnaerator.parser.TypeRef.SimpleTypeRef;
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -369,15 +371,28 @@ public class Result extends Scanner {
 			typeDefs.put(vs.resolveName(), new Pair<TypeDef, Declarator>(typeDef, vs));
 	}
 	
+    private static Pattern frameworkPathPattern = Pattern.compile(".*/(\\w+)\\.framework/(?:.*/)?Headers/(?:.*/)?([^/]+)\\.[^/.]+$");
+	private static Pattern bridgesupportFrameworkPattern = Pattern.compile("(?:^|/)(\\w+?)(?:Full)?\\.bridgesupport$");
+	
+    String guessFramework(String file) {
+        Matcher matcher = frameworkPathPattern.matcher(file);
+        if (matcher.find() || (matcher = bridgesupportFrameworkPattern.matcher(file)).find()) {
+            return matcher.group(1);
+        }
+        return null;
+    }
 	String getLibrary(Element decl) {
 		String file = resolveFile(decl);
         String library = config.getLibrary(file);
         if (library == null) {
             SourceFile f = decl.findParentOfType(SourceFile.class);
             if (f != null) {
-                library = f.guessFramework();
-                if (library == null)
-                    library = f.getLibrary();
+                //library = config.getLibrary(f.getElementFile());
+                //if (library == null) {
+                    library = guessFramework(file);
+                    if (library == null)
+                        library = f.getLibrary();
+                //}
             }
         }
 		return library;
@@ -476,7 +491,16 @@ public class Result extends Scanner {
 					break;
 			case CStruct:
 			case CUnion:
-				if (struct.isForwardDeclaration())
+                
+                boolean isFwd = struct.isForwardDeclaration();
+                if (!isFwd && struct.getDeclarations().isEmpty() && config.treatEmptyStructsAsForwardDecls) {
+                    List<SimpleTypeRef> parents = struct.getParents();
+                    Struct p;
+                    if (parents.isEmpty() || parents.size() == 1 && ((p = structsByName.get(parents.get(0))) == null || p.isForwardDeclaration()))
+                        isFwd = true;
+                }
+                
+				if (isFwd)
 					break;
 				
 				if (config.skipIncludedFrameworks) {

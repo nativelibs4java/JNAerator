@@ -224,6 +224,7 @@ public class JNAeratorConfig {
 	public boolean putTopStructsInSeparateFiles = true;
 	public boolean bundleRuntime = true;
 	public boolean beautifyNames;
+    public boolean treatEmptyStructsAsForwardDecls;
     public String[] libraryNamingPrefixes;
 	public boolean extractLibSymbols;
     //public boolean fastStructs;
