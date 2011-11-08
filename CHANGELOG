@@ -1,8 +1,8 @@
-Current development version (0.9.9-SNAPSHOT)
+Current development version (0.9.10-SNAPSHOT)
 
 ...
 
-Version 0.9.9 (???, 20111107)
+Version 0.9.9 (20111107, 1cad7b05da2e89ce53246f30b181159ef8fce0c3)
 
 - Default runtime target is now BridJ: use -runtime JNAerator to retain old behaviour 
 - Added option -emptyStructsAsForwardDecls to force generation of opaque pointers for empty structs (even if they inherit from other empty structs)
