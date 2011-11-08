@@ -1,5 +1,29 @@
 Current development version (0.9.9-SNAPSHOT)
 
+...
+
+Version 0.9.9 (???, 20111107)
+
+- Default runtime target is now BridJ: use -runtime JNAerator to retain old behaviour 
+- Added option -emptyStructsAsForwardDecls to force generation of opaque pointers for empty structs (even if they inherit from other empty structs)
+- Fixed Maven plugin : 
+	- add generated files to compilation sources
+	- now use "generate" goal (issue #152)
+- Fixed handling of the empty package
+- Fixed verbose mode (logs used to self-overwrite between different parsed files)
+- Fixed rare package/className clash in pretty-printer (issue #182)
+- Fixed C++ / Object.class method name clashes
+- Fixed regression on fake pointers with JNA-based runtimes
+- Fixed parsing of large unsigned longs
+- Fixed generation of multiple anonymous enums (issue #96)
+- Fixed BridJ enum items that refer to other items
+- Fixed generation of string constant expressions cast as Pointers (only for JNAerator and BridJ runtimes)
+- Fixed -runtime JNA target bug that used JNAerator target for generated library loading code (issue #95 @ jnaerator)
+- Fixed varargs & param name generation for BridJ (thanks to Eric Emonet for the fix : https://github.com/ochafik/nativelibs4java/commit/74b59d5152333bf2d7f9d9613662f5fc3c1ecaf2)
+- Enhanced BridJ runtime : only use CRuntime when there's no C++ contents
+- Updated to ANTLR 3.4
+- Updated runtime to JNA 3.3.0
+
 Version 0.9.8 (r2128, 20110621)
 
 - Better COM JNAeration for BridJ (now supports and converts __declspec(uuid("xxx")) attributes !)

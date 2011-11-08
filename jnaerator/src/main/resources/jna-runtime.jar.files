@@ -93,7 +93,6 @@ com/sun/jna/freebsd-amd64/libjnidispatch.so
 com/sun/jna/freebsd-i386/libjnidispatch.so
 com/sun/jna/linux-amd64/libjnidispatch.so
 com/sun/jna/linux-i386/libjnidispatch.so
-com/sun/jna/linux-ia64/libjnidispatch.so
 com/sun/jna/ptr/ByReference.class
 com/sun/jna/ptr/ByteByReference.class
 com/sun/jna/ptr/DoubleByReference.class
