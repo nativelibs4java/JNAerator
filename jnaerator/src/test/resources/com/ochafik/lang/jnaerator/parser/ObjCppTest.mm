@@ -18,6 +18,11 @@
 #	
 #pragma reversible
 --
+void f() {
+	delete[] ptr;
+	delete ptr;
+}
+--
 void f(void (*g)());
 --
 void (*fptr)();

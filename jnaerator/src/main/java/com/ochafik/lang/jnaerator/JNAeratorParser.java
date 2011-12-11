@@ -239,7 +239,7 @@ public class JNAeratorParser {
 					super.reportError(arg0);
 			}
 		};
-		parser.setupSymbolsStack();
+		parser.setupScopes();
 		parser.objCParserHelper = typeConverter;
 		
 		return parser;

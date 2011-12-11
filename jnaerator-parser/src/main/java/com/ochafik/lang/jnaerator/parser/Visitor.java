@@ -25,6 +25,7 @@ import com.ochafik.lang.jnaerator.parser.Expression.BinaryOp;
 import com.ochafik.lang.jnaerator.parser.Statement.Block;
 import com.ochafik.lang.jnaerator.parser.Statement.Catch;
 //import com.ochafik.lang.jnaerator.parser.Statement.DeclarationStatement;
+import com.ochafik.lang.jnaerator.parser.Statement.Delete;
 import com.ochafik.lang.jnaerator.parser.Statement.DoWhile;
 import com.ochafik.lang.jnaerator.parser.Statement.If;
 import com.ochafik.lang.jnaerator.parser.Statement.For;
@@ -186,5 +187,7 @@ public interface Visitor {
     public void visitDeclarations(Declarations aThis);
 
     public void visitPrecisionTypeRef(PrecisionTypeRef aThis);
+
+    public void visitDelete(Delete aThis);
 	
 }

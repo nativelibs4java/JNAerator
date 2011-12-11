@@ -18,6 +18,7 @@
 */
 package com.ochafik.lang.jnaerator.parser;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.EnumSet;
 import static java.util.EnumSet.of;
@@ -48,6 +49,7 @@ public enum ModifierType implements Modifier {
 	/// VC++ annotations 
 	/// @see http://msdn.microsoft.com/en-us/library/cc264104.aspx
 	
+    
 	__pre(of(VCAnnotationNoArg)),
 	__valid(of(VCAnnotationNoArg)),
 	__reserved(of(VCAnnotationNoArg)),
@@ -124,7 +126,7 @@ public enum ModifierType implements Modifier {
 	OneWay(of(ObjectiveC, OnlyInArgDef)),
 	ByCopy(of(ObjectiveC, OnlyInArgDef)),
 	ByRef(of(ObjectiveC, OnlyInArgDef)),
-
+    
 	Package(of(ObjectiveC)),
 	Optional(of(ObjectiveC)),
 	Required(of(ObjectiveC)),
@@ -344,4 +346,8 @@ public enum ModifierType implements Modifier {
 		*/
 		return low;
 	}
+    
+    public Collection<ModifierKind> getKinds() {
+        return kinds;
+    }
 }

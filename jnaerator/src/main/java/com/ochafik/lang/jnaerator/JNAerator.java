@@ -173,6 +173,7 @@ public class JNAerator {
 	}
 
 	public static void main(String[] argsArray) {
+        //argsArray = new String[] { "simple.h" };
         //argsArray = new String[] { "/Users/ochafik/nativelibs4java/FFMpeg/src/main/jnaerator/config.jnaerator" };
         //argsArray = new String[] { "/Users/ochafik/nativelibs4java/Posix/src/main/jnaerator/config.jnaerator" };
 		main(new JNAerator(new JNAeratorConfig()), argsArray);
@@ -909,7 +910,7 @@ public class JNAerator {
 						String text = "// @mangling " + dllExport.mangling + "\n" + 
 							dem + ";";
 						ObjCppParser parser = JNAeratorParser.newObjCppParser(result.typeConverter, text, false);//config.verbose);
-						parser.setupSymbolsStack();
+						parser.setupScopes();
 						Declaration decl = parser.declarationEOF();
 						if (decl == null)
 							continue;

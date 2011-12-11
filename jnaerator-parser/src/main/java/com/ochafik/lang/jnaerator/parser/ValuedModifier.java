@@ -19,6 +19,7 @@
 package com.ochafik.lang.jnaerator.parser;
 
 import com.ochafik.lang.jnaerator.parser.Expression.Constant;
+import java.util.Collection;
 
 public class ValuedModifier implements Modifier {
     Modifier modifier;
@@ -28,6 +29,12 @@ public class ValuedModifier implements Modifier {
         this.modifier = modifier;
         this.value = value;
     }
+
+    public Collection<ModifierKind> getKinds() {
+        return modifier.getKinds();
+    }
+    
+    
 
     public Modifier getModifier() {
         return modifier;

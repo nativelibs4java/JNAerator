@@ -36,6 +36,7 @@ scope Symbols {
 }
 scope ModifierKinds {
 	EnumSet<ModifierKind> allowedKinds;
+	EnumSet<ModifierKind> forbiddenKinds;
 }
 scope IsTypeDef {
 	boolean isTypeDef;
@@ -102,16 +103,51 @@ import static com.ochafik.lang.jnaerator.parser.StoredDeclarations.*;
 	public EnumSet<ModifierKind> newKinds(ModifierKind first, ModifierKind... rest) {
 		return EnumSet.of(first, rest);
 	}
-	public void setupSymbolsStack() {
+	public void setupScopes() {
     		Symbols_scope ss = new Symbols_scope();
     		ss.typeIdentifiers = new HashSet();
     		Symbols_stack.push(ss);
+    		
+    		ModifierKinds_scope mk = new ModifierKinds_scope();
+    		mk.allowedKinds = EnumSet.allOf(ModifierKind.class);
+    		mk.forbiddenKinds = EnumSet.noneOf(ModifierKind.class);
+    		//mk.forbiddenKinds.add(ModifierKind.ObjectiveCRemoting);
+    		ModifierKinds_stack.push(mk);
 	}
-	public boolean isAllowed(ModifierKind kind) {
+	ModifierKinds_scope getModifierKinds() {
 		if (ModifierKinds_stack.isEmpty())
-			return false;
-		ModifierKinds_scope scope = (ModifierKinds_scope)ModifierKinds_stack.get(ModifierKinds_stack.size() - 1);
-		return scope.allowedKinds.contains(kind);
+			return null;
+		return (ModifierKinds_scope)ModifierKinds_stack.get(ModifierKinds_stack.size() - 1);
+	}
+	public void forbidKinds(ModifierKind... kinds) {
+		ModifierKinds_scope scope = getModifierKinds();
+		if (scope == null)
+			return;
+		if (scope.forbiddenKinds == null)
+			scope.forbiddenKinds = EnumSet.copyOf(Arrays.asList(kinds));
+		else
+			scope.forbiddenKinds.addAll(Arrays.asList(kinds));
+	}
+	public boolean isAllowed(Modifier mod) {
+		int nScopes = ModifierKinds_stack.size();
+		for (int i = nScopes; i-- != 0;) {
+			ModifierKinds_scope scope = (ModifierKinds_scope)ModifierKinds_stack.get(i);
+			boolean allowed = false;
+			for (ModifierKind kind : mod.getKinds()) {
+				if (scope.forbiddenKinds != null && scope.forbiddenKinds.contains(kind))
+					return false;
+				if (scope.allowedKinds != null && scope.allowedKinds.contains(kind))
+					allowed = true;
+			}
+			if (allowed)
+				return true;
+		}
+		return true;
+		//if (true) return true;
+		/*ModifierKinds_scope scope = getModifierKinds();
+		if (scope == null)
+			return true;
+		return scope.allowedKinds.containsAll(mod.getKinds());*/
 	}
 	public void addTypeIdent(String ident) {
 		try {
@@ -279,6 +315,10 @@ import static com.ochafik.lang.jnaerator.parser.StoredDeclarations.*;
 			
 		if (mod.isAnyOf(ModifierKind.Declspec, ModifierKind.Attribute) && !isInExtMod())
 			return null;
+			
+		if (!isAllowed(mod))
+			return null;
+			
 		return mod;
 	}
 	protected boolean next(ModifierKind... anyModKind) {
@@ -413,7 +453,7 @@ externDeclarations returns [ExternDeclarations declaration]
 			'}' |
 			dd=declaration { 
 				$declaration.addDeclaration($dd.declaration); 
-			}
+				}
 		)
 	;
 
@@ -767,7 +807,8 @@ scope ModContext;
 	;
 
 structCore returns [Struct struct]
-scope Symbols; 
+scope Symbols;
+scope ModContext;
 @init {
 	$Symbols::typeIdentifiers = new HashSet<String>();
 	List<Modifier> modifiers = new ArrayList<Modifier>();
@@ -1327,6 +1368,7 @@ argList returns [List<Arg> args, boolean isObjC]
 	;
 
 nonMutableTypeRef returns [TypeRef type]
+scope ModifierKinds;
 @init {
 	List<Modifier> modifiers = new ArrayList<Modifier>();
 	//TypeRef ref = null;
@@ -1342,7 +1384,16 @@ nonMutableTypeRef returns [TypeRef type]
 	}
 }
 	:
-		( preMods=modifiers { modifiers.addAll($preMods.modifiers); } )?
+		( preMods=modifiers { 
+			modifiers.addAll($preMods.modifiers);
+			try {
+				if (!ModifierType.UUID.isContainedBy(modifiers))
+					forbidKinds(ModifierKind.VCAnnotationNoArg, ModifierKind.VCAnnotation1Arg, ModifierKind.VCAnnotation2Args);
+			} catch (Throwable th) {
+				th.printStackTrace();
+			}
+			
+		} )?
 		(
 			'typename' pn=typeName { $type = $pn.type; } |
 			{ 
@@ -1797,6 +1848,14 @@ statement returns [Statement stat]
 		{ next("foreach") }?=> IDENTIFIER '(' varDecl { next("in") }? IDENTIFIER expression ')' statement { 
 			// TODO
 		} |
+		{ next("delete") }?=> IDENTIFIER  (
+			'[' ']' delArr=expression { 
+				$stat = new Delete($delArr.expr, true); 
+			} |
+			del=expression { 
+				$stat = new Delete($del.expr, false); 
+			}
+		) ';' |
 		pe=postfixExpr ';' {
 			// Hack to make sure that f(x); is not parsed as a declaration !
 			// Must stay before declaration.

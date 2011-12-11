@@ -91,11 +91,11 @@ public abstract class Statement extends ModifiableElement { // HACK : statement 
 			return false;
 		}
 	}*/
-	public static class Return extends Statement {
+	public static abstract class SingleValueStatement extends Statement {
 		Expression value;
 		
-		public Return() {}
-		public Return(Expression value) {
+		public SingleValueStatement() {}
+		public SingleValueStatement(Expression value) {
 			setValue(value);
 		}
 
@@ -104,10 +104,6 @@ public abstract class Statement extends ModifiableElement { // HACK : statement 
 		}
 		public Expression getValue() {
 			return value;
-		}
-		@Override
-		public void accept(Visitor visitor) {
-			visitor.visitReturn(this);
 		}
 
 		@Override
@@ -138,6 +134,37 @@ public abstract class Statement extends ModifiableElement { // HACK : statement 
 		}
 
 	}
+    public static class Return extends SingleValueStatement {
+		public Return() {}
+		public Return(Expression value) {
+			super(value);
+		}
+		@Override
+		public void accept(Visitor visitor) {
+			visitor.visitReturn(this);
+		}
+    }
+	public static class Delete extends SingleValueStatement {
+        boolean array;
+		public Delete() {}
+		public Delete(Expression value, boolean isArray) {
+			super(value);
+            setArray(isArray);
+		}
+
+        public boolean isArray() {
+            return array;
+        }
+
+        public void setArray(boolean isArray) {
+            this.array = isArray;
+        }
+        
+		@Override
+		public void accept(Visitor visitor) {
+			visitor.visitDelete(this);
+		}
+    }
 	public static class If extends Statement {
 		public If() {}
 		public If(Expression condition, Statement thenBranch, Statement elseBranch) {

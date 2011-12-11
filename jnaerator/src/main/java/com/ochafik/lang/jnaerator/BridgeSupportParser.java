@@ -243,7 +243,7 @@ public class BridgeSupportParser {
 			String dt = XMLUtils.getAttribute(node, "declared_type");
 			if (dt != null) {
 				ObjCppParser parser = JNAeratorParser.newObjCppParser(result.typeConverter, dt, false);
-				parser.setupSymbolsStack();
+				parser.setupScopes();
 				declaredType = parser.mutableTypeRef();
 			}
 		} catch (Exception ex) {

@@ -18,11 +18,14 @@
 */
 package com.ochafik.lang.jnaerator.parser;
 
+import java.util.Collection;
+
 public interface Modifier {
     Modifier resolveAlias();
     
     boolean isA(ModifierKind kind);
 	boolean isAnyOf(ModifierKind...kinds);
 	boolean isAllOf(ModifierKind...kinds);
+    Collection<ModifierKind> getKinds();
 
 }

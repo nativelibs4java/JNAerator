@@ -19,6 +19,7 @@
 package com.ochafik.lang.jnaerator.parser;
 
 import com.ochafik.lang.jnaerator.parser.Statement.Catch;
+import com.ochafik.lang.jnaerator.parser.Statement.Delete;
 import com.ochafik.lang.jnaerator.parser.Statement.Try;
 import com.ochafik.lang.jnaerator.parser.Statement.While;
 import com.ochafik.lang.jnaerator.parser.TypeRef.PrecisionTypeRef;
@@ -393,8 +394,7 @@ public class Scanner implements Visitor {
 	}
 
 	public void visitReturn(Return return1) {
-		visitStatement(return1);
-		visit(return1.getValue());
+		visitSingleValueStatement(return1);
 	}
 
 	public void visitOpaqueExpression(OpaqueExpression opaqueExpression) {
@@ -544,6 +544,15 @@ public class Scanner implements Visitor {
     public void visitPrecisionTypeRef(PrecisionTypeRef tr) {
         visitTargettedTypeRef(tr);
         visit(tr.getPrecision());
+    }
+
+    public void visitDelete(Delete aThis) {
+        visitSingleValueStatement(aThis);
+    }
+
+    private void visitSingleValueStatement(Statement.SingleValueStatement s) {
+        visitStatement(s);
+		visit(s.getValue());
     }
     
     
