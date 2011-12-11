@@ -29,6 +29,7 @@ org/bridj/CRuntime.class
 org/bridj/CallIO$GenericPointerHandler.class
 org/bridj/CallIO$NativeObjectHandler.class
 org/bridj/CallIO$TypedPointerIO.class
+org/bridj/CallIO$Utils$1.class
 org/bridj/CallIO$Utils.class
 org/bridj/CallIO.class
 org/bridj/Callback.class
@@ -83,6 +84,9 @@ org/bridj/NativeLibrary.class
 org/bridj/NativeList.class
 org/bridj/NativeObject.class
 org/bridj/NativeObjectInterface.class
+org/bridj/Platform$1.class
+org/bridj/Platform$2.class
+org/bridj/Platform$DeleteFiles.class
 org/bridj/Platform.class
 org/bridj/PlatformSupport.class
 org/bridj/Pointer$1.class
@@ -128,6 +132,7 @@ org/bridj/ann/Convention$Style.class
 org/bridj/ann/Convention.class
 org/bridj/ann/DisableDirect.class
 org/bridj/ann/Field.class
+org/bridj/ann/Forwardable.class
 org/bridj/ann/JNIBound.class
 org/bridj/ann/Library.class
 org/bridj/ann/Name.class
@@ -291,7 +296,6 @@ org/bridj/jawt/JAWT_Rectangle.class
 org/bridj/jawt/JawtLibrary$JNIEnv.class
 org/bridj/jawt/JawtLibrary.class
 org/bridj/lib/darwin_universal/libbridj.dylib
-org/bridj/lib/iphoneos_arm32_arm/libbridj.dylib
 org/bridj/lib/linux_x64/bridj.so
 org/bridj/lib/linux_x86/bridj.so
 org/bridj/lib/sunos_x86/bridj.so
@@ -319,14 +323,16 @@ org/bridj/objc/ObjectiveCRuntime$2.class
 org/bridj/objc/ObjectiveCRuntime.class
 org/bridj/objc/SEL.class
 org/bridj/objc/Selector.class
-org/bridj/util/AutoHashMap.class
+org/bridj/util/AnnotationUtils.class
 org/bridj/util/BytecodeAnalyzer$1.class
 org/bridj/util/BytecodeAnalyzer$EmptyVisitor.class
 org/bridj/util/BytecodeAnalyzer$Features.class
 org/bridj/util/BytecodeAnalyzer.class
+org/bridj/util/ConcurrentCache.class
 org/bridj/util/DefaultParameterizedType.class
 org/bridj/util/JNIUtils.class
 org/bridj/util/Pair.class
+org/bridj/util/ProcessUtils.class
 org/bridj/util/Tuple.class
 org/bridj/util/Utils.class
 org/objectweb/asm/AnnotationVisitor.class
