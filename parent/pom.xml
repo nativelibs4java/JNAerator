@@ -17,6 +17,7 @@
 	
 	<properties>
 		<jnaerator.version>0.9.10-SNAPSHOT</jnaerator.version>
+		<bridj.version>0.7-SNAPSHOT</bridj.version>
 	</properties>
 	<build>
 		<plugins>
