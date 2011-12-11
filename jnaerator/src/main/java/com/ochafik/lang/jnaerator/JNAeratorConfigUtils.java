@@ -123,7 +123,8 @@ public class JNAeratorConfigUtils {
 			}
 			if (!versions.isEmpty()) {
 				File d = new File(cppi, versions.last());
-					DEFAULT_INCLUDE_PATH.add(d.toString());
+                DEFAULT_INCLUDE_PATH.add(d.toString());
+                DEFAULT_INCLUDE_PATH.add(new File(d, "tr1").toString());
 			}
 		} 
 		DEFAULT_INCLUDE_PATH = Collections.unmodifiableList(DEFAULT_INCLUDE_PATH);
