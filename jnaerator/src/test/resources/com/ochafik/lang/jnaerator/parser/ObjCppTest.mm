@@ -23,6 +23,8 @@ void f() {
 	delete ptr;
 }
 --
+void f(int __in);
+--
 void f(void (*g)());
 --
 void (*fptr)();

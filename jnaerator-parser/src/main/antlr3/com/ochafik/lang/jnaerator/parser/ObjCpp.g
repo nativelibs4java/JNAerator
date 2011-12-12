@@ -109,16 +109,24 @@ import static com.ochafik.lang.jnaerator.parser.StoredDeclarations.*;
     		Symbols_stack.push(ss);
     		
     		ModifierKinds_scope mk = new ModifierKinds_scope();
-    		mk.allowedKinds = EnumSet.allOf(ModifierKind.class);
+    		
+    		//mk.allowedKinds = EnumSet.allOf(ModifierKind.class);
+    		
     		mk.forbiddenKinds = EnumSet.noneOf(ModifierKind.class);
+    		mk.forbiddenKinds.addAll(Arrays.asList(COMKinds));
     		//mk.forbiddenKinds.add(ModifierKind.ObjectiveCRemoting);
+    		
     		ModifierKinds_stack.push(mk);
 	}
 	ModifierKinds_scope getModifierKinds() {
 		if (ModifierKinds_stack.isEmpty())
-			return null;
+			setupScopes();
+//			return null;
 		return (ModifierKinds_scope)ModifierKinds_stack.get(ModifierKinds_stack.size() - 1);
 	}
+	ModifierKind[] COMKinds = new ModifierKind[] {
+		ModifierKind.VCAnnotationNoArg, ModifierKind.VCAnnotation1Arg, ModifierKind.VCAnnotation2Args
+	};
 	public void forbidKinds(ModifierKind... kinds) {
 		ModifierKinds_scope scope = getModifierKinds();
 		if (scope == null)
@@ -128,7 +136,19 @@ import static com.ochafik.lang.jnaerator.parser.StoredDeclarations.*;
 		else
 			scope.forbiddenKinds.addAll(Arrays.asList(kinds));
 	}
+	public void allowKinds(ModifierKind... kinds) {
+		ModifierKinds_scope scope = getModifierKinds();
+		if (scope == null)
+			return;
+		if (scope.allowedKinds == null)
+			scope.allowedKinds = EnumSet.copyOf(Arrays.asList(kinds));
+		else
+			scope.allowedKinds.addAll(Arrays.asList(kinds));
+	}
 	public boolean isAllowed(Modifier mod) {
+		if (ModifierKinds_stack.isEmpty())
+			setupScopes();
+			
 		int nScopes = ModifierKinds_stack.size();
 		for (int i = nScopes; i-- != 0;) {
 			ModifierKinds_scope scope = (ModifierKinds_scope)ModifierKinds_stack.get(i);
@@ -1033,6 +1053,9 @@ argDef	returns [Arg arg]
 				}
 			}
 		)?
+		modifiers {
+			$arg.addModifiers($modifiers.modifiers);
+		}
 		( '=' dv=topLevelExpr {
 			if ($arg != null)
 				$arg.setDefaultValue($dv.expr);
@@ -1387,8 +1410,8 @@ scope ModifierKinds;
 		( preMods=modifiers { 
 			modifiers.addAll($preMods.modifiers);
 			try {
-				if (!ModifierType.UUID.isContainedBy(modifiers))
-					forbidKinds(ModifierKind.VCAnnotationNoArg, ModifierKind.VCAnnotation1Arg, ModifierKind.VCAnnotation2Args);
+				if (ModifierType.UUID.isContainedBy(modifiers))
+					allowKinds(COMKinds);
 			} catch (Throwable th) {
 				th.printStackTrace();
 			}

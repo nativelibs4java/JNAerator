@@ -139,6 +139,7 @@ public enum ModifierType implements Modifier {
 	DllImport(of(Declspec, StorageClassSpecifier)),
 	JITIntrinsic(of(Declspec)),
 	Naked(of(Declspec, StorageClassSpecifier, Attribute)),
+    __unused__(of(Attribute)),
 	NoAlias(of(Declspec, StorageClassSpecifier)),
 	NoInline(of(Declspec)),
 	NoReturn(of(Declspec)),
