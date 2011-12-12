@@ -42,6 +42,7 @@ import com.ochafik.lang.reflect.GettersAndSettersHelper;
 import com.ochafik.lang.reflect.GettersAndSettersHelper.GetterAndSetterInfo;
 import com.ochafik.util.listenable.Pair;
 import com.ochafik.util.string.StringUtils;
+import java.util.Collections;
 
 public abstract class Element {
 	//List<Element> parentElements = new ArrayList<Element>(); 
@@ -53,6 +54,26 @@ public abstract class Element {
 	static int nextId = 1;
 	private final int id = nextId++;
 	protected EnumSet<Language> possibleLanguages;
+    
+    protected Map<Object, Object> attributes;
+
+    public Map<Object, Object> getAttributes() {
+        return attributes == null ? Collections.EMPTY_MAP : Collections.unmodifiableMap(attributes);
+    }
+    
+    public Object getAttribute(Object key) {
+        return attributes == null ? null : attributes.get(key);
+    }
+    public void setAttribute(Object key, Object value) {
+        if (attributes == null)
+            attributes = new HashMap<Object, Object>();
+        
+        attributes.put(key, value);
+    }
+    public void setAttributes(Map<Object, Object> attributes) {
+        this.attributes = attributes == null ? null : new HashMap<Object, Object>(attributes);
+    }
+    
 	
 	public EnumSet<Language> getPossibleLanguages() {
 		return possibleLanguages;
@@ -258,7 +279,11 @@ public abstract class Element {
 					continue;
 				
 				Object value = p.getter.invoke(this);
-				Object clonedValue = cloneObject(value);
+				Object clonedValue;
+                if (fieldName.equals("attributes"))
+                    clonedValue = value;
+                else
+                    clonedValue = cloneObject(value);
 				p.setter.invoke(clone, clonedValue);
 			}
 			return clone;

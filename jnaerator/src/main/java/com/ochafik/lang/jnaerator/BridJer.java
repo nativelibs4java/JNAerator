@@ -18,6 +18,7 @@
 */
 package com.ochafik.lang.jnaerator;
 
+import java.util.Iterator;
 import java.util.Collections;
 import java.util.Collection;
 import java.io.PrintStream;
@@ -70,6 +71,7 @@ import java.net.URLConnection;
 import java.text.MessageFormat;
 import static com.ochafik.lang.jnaerator.parser.ElementsHelper.*;
 import static com.ochafik.lang.jnaerator.TypeConversion.*;
+import static com.ochafik.lang.jnaerator.MatchingUtils.*;
 
 /*
 mvn -o compile exec:java -Dexec.mainClass=com.ochafik.lang.jnaerator.JNAerator
@@ -240,10 +242,36 @@ public class BridJer {
                 
                 super.visitConstant(c);
             }
-            
-            
+//            
+//            static Map<String, String> primToCapNames = new HashMap<String, String>();
+//            static {
+//                primToCapNames.put("int", "Int");
+//                primToCapNames.put("long", "Long");
+//                primToCapNames.put("short", "Short");
+//                primToCapNames.put("byte", "Byte");
+//                primToCapNames.put("double", "Double");
+//                primToCapNames.put("float", "Float");
+//                primToCapNames.put("char", "Char");
+//                primToCapNames.put("boolean", "Boolean");
+//            }
             void replaceMalloc(TypeRef pointedType, Element toReplace, Expression sizeExpression) {
                 // TODO handle casts and sizeof expressions !
+                Pair<TypeRef, Expression> typeAndSize = recognizeSizeOfMult(sizeExpression);
+                if (typeAndSize != null && (pointedType == null || pointedType.equals(typeAndSize.getFirst()))) {
+                    String tStr = String.valueOf(typeAndSize.getFirst());
+                    try {
+                        JavaPrim prim = JavaPrim.getJavaPrim(tStr);
+                        if (prim != null && prim.isPrimitive) {
+                            String cap = StringUtils.capitalize(tStr);
+                            toReplace.replaceBy(staticPtrMethod("allocate" + cap + "s", typeAndSize.getValue()));
+                            return;
+                        }
+                    } catch (Throwable th) {
+                        // Do nothing
+                    }
+                    
+                }
+                
                 toReplace.replaceBy(staticPtrMethod("allocateBytes", sizeExpression));
             }
             
@@ -265,6 +293,11 @@ public class BridJer {
             			ret.add(p.getValue());
             		
             		return ret;
+            }
+            
+            @Override
+            public void visitDelete(Delete d) {
+            		d.replaceBy(stat(methodCall(d.getValue(), "release")));
             }
             
             @Override
@@ -382,7 +415,7 @@ public class BridJer {
             public void visitCast(Cast cast) {
                 super.visitCast(cast);
                 if (cast.getType() instanceof TargettedTypeRef) {
-                    cast.replaceBy(methodCall(cast.getTarget(), "asPointerTo", result.typeConverter.typeLiteral(cast.getType())));
+                    cast.replaceBy(methodCall(cast.getTarget(), "asPointerTo", result.typeConverter.typeLiteral(((TargettedTypeRef)cast.getType()).getTarget())));
                 }
             }
 
