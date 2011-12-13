@@ -1053,9 +1053,9 @@ argDef	returns [Arg arg]
 				}
 			}
 		)?
-		modifiers {
+		/*modifiers {
 			$arg.addModifiers($modifiers.modifiers);
-		}
+		}*/
 		( '=' dv=topLevelExpr {
 			if ($arg != null)
 				$arg.setDefaultValue($dv.expr);
