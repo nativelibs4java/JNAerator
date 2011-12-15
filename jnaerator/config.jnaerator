@@ -1,0 +1,5 @@
+-noJar -noComp
+"-DsomeMacro(x)=x+1"
+
+test.h
+-convertBodies

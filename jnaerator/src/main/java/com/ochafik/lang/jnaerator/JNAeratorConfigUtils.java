@@ -310,6 +310,7 @@ public class JNAeratorConfigUtils {
 			//_CPPUNWIND
 			
 		} else {
+            config.preprocessorConfig.includeStrings.add("#define __attribute__(x)\n");
 			config.preprocessorConfig.macros.put("__GNUC__", null);
 			
 			if (SystemUtils.isMacOSX()) {
