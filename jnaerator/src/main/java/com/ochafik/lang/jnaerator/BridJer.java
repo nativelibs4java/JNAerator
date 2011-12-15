@@ -352,12 +352,12 @@ public class BridJer {
                                 } else if ("memcpy".equals(name)) {
                                     visit(arguments);
                                     Expression dest = arg1, source = arg2, num = arg3;
-                                    fc.replaceBy(methodCall(source, "copyBytesTo", expr(0), dest, expr(0), num));
+                                    fc.replaceBy(methodCall(source, "copyBytesAtOffsetTo", expr(0), dest, expr(0), num));
                                     return;
                                 } else if ("memmov".equals(name)) {
                                     visit(arguments);
                                     Expression dest = arg1, source = arg2, num = arg3;
-                                    fc.replaceBy(methodCall(source, "moveBytesTo", expr(0), dest, expr(0), num));
+                                    fc.replaceBy(methodCall(source, "moveBytesAtOffsetTo", expr(0), dest, expr(0), num));
                                     return;
                                 } else if ("memcmp".equals(name)) {
                                     visit(arguments);
@@ -415,7 +415,7 @@ public class BridJer {
             public void visitCast(Cast cast) {
                 super.visitCast(cast);
                 if (cast.getType() instanceof TargettedTypeRef) {
-                    cast.replaceBy(methodCall(cast.getTarget(), "asPointerTo", result.typeConverter.typeLiteral(((TargettedTypeRef)cast.getType()).getTarget())));
+                    cast.replaceBy(methodCall(cast.getTarget(), "as", result.typeConverter.typeLiteral(((TargettedTypeRef)cast.getType()).getTarget())));
                 }
             }
 
