@@ -46,6 +46,7 @@ import com.ochafik.lang.jnaerator.parser.Expression.TypeRefExpression;
 import com.ochafik.lang.jnaerator.parser.Expression.UnaryOp;
 import com.ochafik.lang.jnaerator.parser.Expression.VariableRef;
 import com.ochafik.lang.jnaerator.parser.Expression.Constant.IntForm;
+import com.ochafik.lang.jnaerator.parser.Expression.ExpressionsBlock;
 import com.ochafik.lang.jnaerator.parser.Identifier.QualifiedIdentifier;
 import com.ochafik.lang.jnaerator.parser.Identifier.SimpleIdentifier;
 import com.ochafik.lang.jnaerator.parser.Statement.Block;
@@ -114,56 +115,61 @@ public class Printer implements Visitor {
     }
     public void visitConstant(Constant e) {
         expressionPre(e);
-        Object value = e.getValue();
-        if (e.getIntForm() == IntForm.Hex)
-            append("0x", Long.toHexString(value instanceof Long ? ((Long)value).longValue() : ((Integer)value).longValue()).toUpperCase());
-        else if (e.getIntForm() == IntForm.Octal)
-            append(Long.toOctalString(value instanceof Long ? ((Long)value).longValue() : ((Integer)value).longValue()).toUpperCase());
-        else if (e.getType() == null)
-            append("");
-        else {
-            switch (e.getType()) {
-            case Null:
-                append("null");
-                break;
-            case Byte:
-            case Double:
-            case Int:
-            case Short:
-            case UInt:
-                append(value);
-                break;
-            case Float:
-                append(value, 'F');
-                break;
-            case ULong:
-            case Long:
-                append(value, 'L');
-                break;
-            case String:
-                append('"', StringUtils.javaEscape((String)value), '"');
-                break;
-            case Char:
-                append('\'', StringUtils.javaEscape(((Character)value).toString()), '\'');
-                break;
-            case IntegerString:
-                int intVal = ((Integer)value).intValue();
-                append('\'', Constant.intStr(intVal), '\'');
-                break;
-            case LongString:
-                long longVal = ((Long)value).intValue();
-                append(
-                    '\'',
-                    Constant.intStr((int)(longVal & 0xffffffffL)),
-                    Constant.intStr((int)((longVal >>> 32) & 0xffffffffL)),
-                    '\''
-                );
-                break;
-            case Bool:
-                append(((Boolean)value).toString());
-                break;
-            default:
-                throw new UnsupportedOperationException("visitConstant not implemented for constqnt type " + e.getType());
+        String txt = e.getOriginalTextualRepresentation();
+        if (txt != null) {
+            append(txt);
+        } else {
+            Object value = e.getValue();
+            if (e.getIntForm() == IntForm.Hex)
+                append("0x", Long.toHexString(value instanceof Long ? ((Long)value).longValue() : ((Integer)value).longValue()).toUpperCase());
+            else if (e.getIntForm() == IntForm.Octal)
+                append(Long.toOctalString(value instanceof Long ? ((Long)value).longValue() : ((Integer)value).longValue()).toUpperCase());
+            else if (e.getType() == null)
+                append("");
+            else {
+                switch (e.getType()) {
+                case Null:
+                    append("null");
+                    break;
+                case Byte:
+                case Double:
+                case Int:
+                case Short:
+                case UInt:
+                    append(value);
+                    break;
+                case Float:
+                    append(value, 'F');
+                    break;
+                case ULong:
+                case Long:
+                    append(value, 'L');
+                    break;
+                case String:
+                    append('"', StringUtils.javaEscape((String)value), '"');
+                    break;
+                case Char:
+                    append('\'', StringUtils.javaEscape(((Character)value).toString()), '\'');
+                    break;
+                case IntegerString:
+                    int intVal = ((Integer)value).intValue();
+                    append('\'', Constant.intStr(intVal), '\'');
+                    break;
+                case LongString:
+                    long longVal = ((Long)value).intValue();
+                    append(
+                        '\'',
+                        Constant.intStr((int)(longVal & 0xffffffffL)),
+                        Constant.intStr((int)((longVal >>> 32) & 0xffffffffL)),
+                        '\''
+                    );
+                    break;
+                case Bool:
+                    append(((Boolean)value).toString());
+                    break;
+                default:
+                    throw new UnsupportedOperationException("visitConstant not implemented for constqnt type " + e.getType());
+                }
             }
         }
         expressionPost(e);
@@ -753,7 +759,15 @@ public class Printer implements Visitor {
 
     public void visitExpressionSequence(ExpressionSequence e) {
         expressionPre(e);
-        implode(e.getSequence(), ", ");
+        implode(e.getExpressions(), ", ");
+        expressionPost(e);
+    }
+
+    public void visitExpressionsBlock(ExpressionsBlock e) {
+        expressionPre(e);
+        append("{ ");
+        implode(e.getExpressions(), ", ");
+        append(" }");
         expressionPost(e);
     }
 

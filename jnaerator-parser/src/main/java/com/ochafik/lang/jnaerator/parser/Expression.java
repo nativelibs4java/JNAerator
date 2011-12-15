@@ -30,19 +30,37 @@ import com.ochafik.util.listenable.Pair;
 public abstract class Expression extends Element {
 	private static final long MAX_UINT_VALUE = 2L * Integer.MAX_VALUE;
 	
+    public static class ExpressionsBlock extends ExpressionSequence {
+
+        @Override
+        public void accept(Visitor visitor) {
+            visitor.visitExpressionsBlock(this);
+        }
+        
+    }
 	public static class ExpressionSequence extends Expression {
-		final List<Expression> sequence = new ArrayList<Expression>();
-		public List<Expression> getSequence() {
-			return sequence;
-		}
+		final List<Expression> expressions = new ArrayList<Expression>();
 		public ExpressionSequence() {
 			
 		}
-		public ExpressionSequence(List<Expression> sequence) {
-			setSequence(sequence);
+		public ExpressionSequence(Expression... expressions) {
+			this(Arrays.asList(expressions));
 		}
-		public void setSequence(List<Expression> sequence) {
-			changeValue(this, this.sequence, sequence);
+        public ExpressionSequence(List<Expression> expressions) {
+			setExpressions(expressions);
+		}
+        public void addExpression(Expression e) {
+            if (e != null) {
+                expressions.add(e);
+                e.setParentElement(this);
+            }
+		
+        }
+        public List<Expression> getExpressions() {
+            return expressions;
+        }
+		public void setExpressions(List<Expression> sequence) {
+			changeValue(this, this.expressions, sequence);
 		}
 		@Override
 		public void accept(Visitor visitor) {
@@ -50,15 +68,15 @@ public abstract class Expression extends Element {
 		}
 		@Override
 		public Element getNextChild(Element child) {
-			return getNextSibling(getSequence(), child);
+			return getNextSibling(getExpressions(), child);
 		}
 		@Override
 		public Element getPreviousChild(Element child) {
-			return getPreviousSibling(getSequence(), child);
+			return getPreviousSibling(getExpressions(), child);
 		}
 		@Override
 		public boolean replaceChild(Element child, Element by) {
-			return replaceChild(getSequence(), Expression.class, this, child, by);
+			return replaceChild(getExpressions(), Expression.class, this, child, by);
 		}
 	}
 	public static class OpaqueExpression extends Expression {
@@ -1053,17 +1071,28 @@ public abstract class Expression extends Element {
 		Type type;
 		IntForm intForm;
 		Object value;
+        String originalTextualRepresentation;
 
 		
-		public Constant(Type type, IntForm intForm, Object value) {
+		public Constant(Type type, IntForm intForm, Object value, String originalTextualRepresentation) {
 			if (value == null)
 				throw new NullPointerException();
 			setType(type);
 			setIntForm(intForm);
 			setValue(value);
+            setOriginalTextualRepresentation(originalTextualRepresentation);
 			
 			checkType();
 		}
+
+        public void setOriginalTextualRepresentation(String originalTextualRepresentation) {
+            this.originalTextualRepresentation = originalTextualRepresentation;
+        }
+
+        public String getOriginalTextualRepresentation() {
+            return originalTextualRepresentation;
+        }
+        
 		void checkType() {
 			if (type == null)
 				return;
@@ -1096,10 +1125,13 @@ public abstract class Expression extends Element {
 				value = (Boolean)value;
 			}
 		}
-		
-		public Constant(Type type, Object value) {
+		public static Constant newNull() {
+            return new Constant(Constant.Type.Null, null, null);
+        }
+		public Constant(Type type, Object value, String originalTextualRepresentation) {
 			setType(type);
 			setValue(value);
+            setOriginalTextualRepresentation(originalTextualRepresentation);
 			
 			checkType();
 		}
@@ -1188,7 +1220,8 @@ public abstract class Expression extends Element {
 		}
 
 
-		public static Constant parseCharOrStringInteger(String string) {
+		public static Constant parseCharOrStringInteger(final String orig) {
+            String string = orig;
 			int len = string.length();
 			if (len <= 2 || string.charAt(0) != '\'' || string.charAt(len - 1) != '\'')
 				throw new IllegalArgumentException("Expecting char or integer string, got " + string);
@@ -1209,22 +1242,23 @@ public abstract class Expression extends Element {
 						result = result << 8 | (int)string.charAt(i);
 					}
 					if (len == 4)
-						return new Constant(Type.IntegerString, IntForm.String, (int)result);
+						return new Constant(Type.IntegerString, IntForm.String, (int)result, orig);
 					else
-						return new Constant(Type.LongString, IntForm.String, result);
+						return new Constant(Type.LongString, IntForm.String, result, orig);
 				}
 			}
-			return new Constant(Type.Char, parseNakedString(string).charAt(0));
+			return new Constant(Type.Char, parseNakedString(string).charAt(0), orig);
 			
 		}
 		
-		public static Constant parseChar(String string) {
+		public static Constant parseChar(final String orig) {
+            String string = orig;
 			int len = string.length();
 			if (len <= 2 || string.charAt(0) != '\'' || string.charAt(len - 1) != '\'')
 				throw new IllegalArgumentException("Expecting char, got " + string);
 			
 			string = string.substring(1, len - 1);
-			return new Constant(Type.Char, parseNakedString(string).charAt(0));
+			return new Constant(Type.Char, parseNakedString(string).charAt(0), orig);
 		}
 
 		private static String parseNakedString(String string) {
@@ -1236,7 +1270,7 @@ public abstract class Expression extends Element {
 				if (c == '\\') {
 					c = string.charAt(i++);
 					switch (c) {
-					case 't':
+                    case 't':
 						b.append('\t');
 						break;
 					case 'n':
@@ -1266,6 +1300,9 @@ public abstract class Expression extends Element {
 							i += 4;
 						}
 						break;
+					case '0':
+                        b.append('\0');
+                        break;
 					default:
 						if (Character.isDigit(c)) {
 							int start = i - 1;
@@ -1284,7 +1321,8 @@ public abstract class Expression extends Element {
 			return b.toString();
 		}
 
-		public static Constant parseStringInteger(String string) {
+		public static Constant parseStringInteger(final String orig) {
+            String string = orig;
 			int len = string.length();
 			if (len <= 2 || string.charAt(0) != '\'' || string.charAt(len - 1) != '\'' || ((len -= 2) != 4 && len != 8))
 				throw new IllegalArgumentException("Expecting 'xxxx' or 'xxxxxxxx', got " + string);
@@ -1295,34 +1333,38 @@ public abstract class Expression extends Element {
 				result = result << 8 | (int)string.charAt(i);
 			}
 			if (len == 4)
-				return new Constant(Type.Int, IntForm.String, (int)result);
+				return new Constant(Type.Int, IntForm.String, (int)result, orig);
 			else
-				return new Constant(Type.Long, IntForm.String, result);
+				return new Constant(Type.Long, IntForm.String, result, orig);
 		}
 		
-		public static Constant parseString(String string) {
+		public static Constant parseString(final String orig) {
+            String string = orig;
 			int len = string.length();
 			if (len <= 2 || string.charAt(0) != '"' || string.charAt(len - 1) != '"')
 				throw new IllegalArgumentException("Expecting string, got " + string);
 
 			string = string.substring(1, len - 1);
-			return new Constant(Type.String, parseNakedString(string));
+			return new Constant(Type.String, parseNakedString(string), orig);
 		}
 
 		public static Constant parseDecimal(String string) {
 			return parseDecimal(string, 10, IntForm.Decimal, false);
 		}
 		
-		public static Constant parseDecimal(String string, int radix, IntForm form, boolean negate) {
-			string = string.trim().toLowerCase();
+        public static Constant parseDecimal(final String string, int radix, IntForm form, boolean negate) {
+            return parseDecimal(string, radix, form, negate, string);
+        }
+		public static Constant parseDecimal(String string, int radix, IntForm form, boolean negate, final String orig) {
+            string = string.trim().toLowerCase();
 			int len = string.length();
 			boolean unsigned = false;
 			if (string.endsWith("ll") || string.endsWith("li"))
-				return new Constant(Type.Long, Long.parseLong(string.substring(0, len - 2), radix));
+				return new Constant(Type.Long, Long.parseLong(string.substring(0, len - 2), radix), orig);
 			else if (string.endsWith("l"))
 				string = string.substring(0, len - 1);
 			else if (string.endsWith("s"))
-				return new Constant(Type.Short, Long.parseLong(string.substring(0, len - 1), radix));
+				return new Constant(Type.Short, Long.parseLong(string.substring(0, len - 1), radix), orig);
 			//else if (string.endsWith("b"))
 			//	return new Constant(Type.Byte, Long.parseLong(string.substring(0, len - 1), radix));
 			else if (string.endsWith("u")) {
@@ -1361,21 +1403,22 @@ public abstract class Expression extends Element {
 			
 			//TODO handle unsigned properly !
 			if ((form == IntForm.Hex && len <= 8) || val > Integer.MIN_VALUE && val < Integer.MAX_VALUE)
-				return new Constant(unsigned ? Type.UInt : Type.Int, form, (int)val);
+				return new Constant(unsigned ? Type.UInt : Type.Int, form, (int)val, orig);
 			else if (val >= 0 && val < MAX_UINT_VALUE)
-				return new Constant(Type.UInt, form, (int)val);
+				return new Constant(Type.UInt, form, (int)val, orig);
 			else
-				return new Constant(unsigned ? Type.ULong : Type.Long, form, val);
+				return new Constant(unsigned ? Type.ULong : Type.Long, form, val, orig);
 			
 		}
 
-		public static Constant parseHex(String string, boolean negate) {
+		public static Constant parseHex(final String orig, boolean negate) {
+            String string = orig;
 			string = string.trim().toLowerCase();
 			if (!string.startsWith("0x"))
 				throw new IllegalArgumentException("Expected hex literal, got " + string);
 			
 			try {
-				return parseDecimal(string.substring(2), 16, IntForm.Hex, negate);
+				return parseDecimal(string.substring(2), 16, IntForm.Hex, negate, orig);
 			} catch (NumberFormatException ex) {
 				throw new NumberFormatException("Parsing hex : \"" + string +"\"");
 			}
@@ -1389,7 +1432,8 @@ public abstract class Expression extends Element {
 			return parseDecimal(string.substring(1), 8, IntForm.Octal, negate);
 		}
 
-		public static Constant parseFloat(String string) {
+		public static Constant parseFloat(final String orig) {
+            String string = orig;
 			string = string.trim().toLowerCase();
 			if (string.length() > 0) {
 				int lm1 = string.length() - 1;
@@ -1397,14 +1441,42 @@ public abstract class Expression extends Element {
 				if (Character.isLetter(c)) {
 					String beg = string.substring(0, lm1);
 					if (c == 'f')
-						return new Constant(Type.Float, Float.parseFloat(beg));
+						return new Constant(Type.Float, Float.parseFloat(beg), orig);
 					
 				}
 			}
-			return new Constant(Type.Double, Double.parseDouble(string));
+			return new Constant(Type.Double, Double.parseDouble(string), orig);
 		}
+        static final String[] trailingTypeInfos = new String[] { "ll", "li", "l", "s", "u" };
+        static String trimTrailingTypeInfo(String s) {
+            if (s == null)
+                return null;
+            
+            String low = s.toLowerCase();
+            for (String end : trailingTypeInfos) {
+                if (low.endsWith(end))
+                    return s.substring(0, s.length() - end.length());
+            }
+            return s;
+        }
 		public Constant asJava() {
 			Type type = getType();
+            String txt = originalTextualRepresentation;
+            switch (type) {
+                case Byte:
+                case Int:
+                case IntegerString:
+                case Long:
+                case LongString:
+                case Short:
+                    txt = trimTrailingTypeInfo(txt);
+                    break;
+                case UInt:
+                case ULong:
+                    txt = null;
+                    break;
+            }
+            
 			switch (type) {
 			case ULong:
 			case LongString:
@@ -1415,7 +1487,8 @@ public abstract class Expression extends Element {
 				type = Type.Int;
 				break;
 			}
-			return new Constant(type, getValue());
+            
+            return new Constant(type, getValue(), txt);
 		}
 
 		

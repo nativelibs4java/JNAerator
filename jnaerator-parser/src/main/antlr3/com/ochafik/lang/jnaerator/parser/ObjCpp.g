@@ -1582,6 +1582,25 @@ simpleCppFunctionName returns [SimpleIdentifier identifier]
 		}
 	;
 	
+expressionsBlock returns [ExpressionsBlock expr]
+	:
+		'{' { 
+			$expr = new ExpressionsBlock();
+		}
+		(
+			e1=expression {
+				$expr.addExpression($e1.expr);
+			}
+			(
+				ex=expression {
+					$expr.addExpression($ex.expr);
+				}
+			)*
+		)?
+		'}'
+	;
+				
+				
 baseExpression returns [Expression expr]
 	:
 		i=simpleIdentifier { $expr = new VariableRef($i.identifier); }  |
@@ -1592,7 +1611,7 @@ baseExpression returns [Expression expr]
 				$expr.setParenthesis(true);
 		} |
 		objCMethodCall { $expr = $objCMethodCall.expr; } |
-        '{' ( expression ( ',' expression ) * ) ? '}' |
+		expressionsBlock { $expr = $expressionsBlock.expr; } |
 		selectorExpr |
 		protocolExpr |
 		encodingExpr//|

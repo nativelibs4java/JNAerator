@@ -45,6 +45,8 @@ long long l = 0x8000000000000000;
 --
 void f(struct s i);
 --
+const char WINDOWS_ENDL_CH_CONST[3] = { 0x0d, 0x0a, '\0' };
+--
 extern long long int i;
 --
 extern long int llrint(double);

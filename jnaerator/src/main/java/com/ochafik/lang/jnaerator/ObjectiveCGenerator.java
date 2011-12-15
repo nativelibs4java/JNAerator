@@ -352,7 +352,7 @@ public class ObjectiveCGenerator {
 					expr(
 						varRef(classInstanceName), 
 						BinaryOperator.IsEqual, 
-						new Constant(Constant.Type.Null, null)
+						Constant.newNull()
 					),
 					new Statement.ExpressionStatement(
 						new AssignmentOp(

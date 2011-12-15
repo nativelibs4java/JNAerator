@@ -252,7 +252,7 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
 
     public Expression typeLiteral(TypeRef c) {
         if (c != null && c.toString().equals("?"))
-            return new Constant(Constant.Type.Null, null);
+            return Constant.newNull();
         
         if (c instanceof SimpleTypeRef && result.config.runtime == JNAeratorConfig.Runtime.BridJ) {
             Identifier id = ((SimpleTypeRef) c).getName();

@@ -148,7 +148,7 @@ public class ElementsHelper {
 		return expr(Constant.Type.String, c);
 	}
 	public static Expression expr(Constant.Type type, Object value) {
-		return new Constant(type, value);
+		return new Constant(type, value, null);
 	}
 	public static Expression expr(UnaryOperator op, Expression b) {
 		return new UnaryOp(b, op);

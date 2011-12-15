@@ -40,6 +40,7 @@ import com.ochafik.lang.jnaerator.parser.Expression.ConditionalExpression;
 import com.ochafik.lang.jnaerator.parser.Expression.Constant;
 import com.ochafik.lang.jnaerator.parser.Expression.EmptyArraySize;
 import com.ochafik.lang.jnaerator.parser.Expression.ExpressionSequence;
+import com.ochafik.lang.jnaerator.parser.Expression.ExpressionsBlock;
 import com.ochafik.lang.jnaerator.parser.Expression.FunctionCall;
 import com.ochafik.lang.jnaerator.parser.Expression.MemberRef;
 import com.ochafik.lang.jnaerator.parser.Expression.New;
@@ -427,7 +428,12 @@ public class Scanner implements Visitor {
 	
 	public void visitExpressionSequence(ExpressionSequence expressionSequence) {
 		visitExpression(expressionSequence);
-		visit(expressionSequence.getSequence());
+		visit(expressionSequence.getExpressions());
+	}
+	
+	public void visitExpressionsBlock(ExpressionsBlock expressionSequence) {
+		visitExpression(expressionSequence);
+		visit(expressionSequence.getExpressions());
 	}
 
 	
