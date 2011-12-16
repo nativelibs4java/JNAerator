@@ -263,7 +263,7 @@ org/bridj/demangling/Demangler$Symbol.class
 org/bridj/demangling/Demangler$TemplateArg.class
 org/bridj/demangling/Demangler$TypeRef.class
 org/bridj/demangling/Demangler.class
-org/bridj/demangling/GCC4Demangler$StdString.class
+org/bridj/demangling/GCC4Demangler$1.class
 org/bridj/demangling/GCC4Demangler.class
 org/bridj/demangling/VC9Demangler$1.class
 org/bridj/demangling/VC9Demangler$AccessLevelAndStorageClass.class
@@ -332,6 +332,8 @@ org/bridj/util/ConcurrentCache.class
 org/bridj/util/DefaultParameterizedType.class
 org/bridj/util/JNIUtils.class
 org/bridj/util/Pair.class
+org/bridj/util/ProcessUtils$Kernel32.class
+org/bridj/util/ProcessUtils$LibC.class
 org/bridj/util/ProcessUtils.class
 org/bridj/util/Tuple.class
 org/bridj/util/Utils.class
