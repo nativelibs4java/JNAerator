@@ -35,6 +35,9 @@ options {
 scope Symbols {
 	Set<String> typeIdentifiers;
 }
+scope CurrentClass {
+	String name;
+}
 scope ModifierKinds {
 	EnumSet<ModifierKind> allowedKinds;
 	EnumSet<ModifierKind> forbiddenKinds;
@@ -525,6 +528,7 @@ scope ModContext;
 				forwardClassDecl {
 					$declaration = new Declarations($forwardClassDecl.declarations); 
 				} |
+				//nonMutableTypeRef ';' | // TODO
 				namespaceDecl {
 					$declaration = $namespaceDecl.namespace;
 				}// | 
@@ -1126,7 +1130,6 @@ scope IsTypeDef;
 				}	
 			}
 		}
-		//(structCore ';' | functionDeclaration)
 	;
 	
 templateArgDecl returns [Arg arg]
@@ -1610,6 +1613,7 @@ expressionsBlock returns [ExpressionsBlock expr]
 				$expr.addExpression($e1.expr);
 			}
 			(
+				','
 				ex=expression {
 					$expr.addExpression($ex.expr);
 				}

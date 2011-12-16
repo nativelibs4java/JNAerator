@@ -142,6 +142,10 @@ struct ParamBlockRec {
 	int ok; // comment after ok
 };
 --
+class C {
+	C() : a(1), b() {}
+};
+--
 static inline int isascii(int _c) {
 	return (_c & ~0x7F) == 0;
 }
