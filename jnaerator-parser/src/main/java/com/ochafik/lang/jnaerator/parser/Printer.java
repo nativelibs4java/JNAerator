@@ -178,9 +178,11 @@ public class Printer implements Visitor {
     public void visitArg(Arg e) {
         implode(e.getAnnotations(), "\n");
         if (e.getValueType() != null) {
-            if (e.getName() != null)
+            if (e.getName() != null) {
                 variableDeclarationToString(e.getValueType(), e.getName(), e.isVarArg());
-            else
+                if (e.getDefaultValue() != null)
+                    append(" = ").append(e.getDefaultValue());
+            } else
                 append(e.getValueType()).append(e.isVarArg() ? "..." : null);
 		} else
 			append("...");
@@ -1077,7 +1079,7 @@ public class Printer implements Visitor {
     }
 
 	public void visitTemplate(Template template) {
-		append("template <").implode(template.getArgs(), ", ").append(">\n");
+		append("template <").implode(template.getArgs(), ", ").append(" >\n");
 		append(template.getDeclaration());        
 	}
 

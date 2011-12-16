@@ -133,6 +133,10 @@ typedef struct _NSSize {
 --
 void f() {}
 --
+template <typename _CharT, typename _Traits = char_traits<_CharT >, typename _Alloc = allocator<_CharT > >
+class basic_string;
+template < > struct char_traits<char >;
+--
 /// Struct comment
 struct ParamBlockRec {
 	int ok; // comment after ok

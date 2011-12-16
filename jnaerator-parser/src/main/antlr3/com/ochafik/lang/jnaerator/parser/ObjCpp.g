@@ -22,6 +22,7 @@
 	It is able to parse preprocessed C & Objective-C files and can tolerate some amount of C++. 
 */
 
+
 grammar ObjCpp;
 options {
 	backtrack = true;
@@ -503,7 +504,7 @@ scope ModContext;
 		(
 			(
 				{ next("__pragma") }?=> pragmaContent |
-				templateDef {
+				{ next("template") }?=> templateDef {
 					$declaration = $templateDef.template;
 				} |
 				functionDeclaration {
@@ -1099,7 +1100,10 @@ scope IsTypeDef;
 	$Symbols::typeIdentifiers = new HashSet<String>();
 	$template = new Template();
 }
-	:	'template' '<' (
+	:	
+		{ next("template") }? IDENTIFIER 
+		'<' 
+		(
 			t1=templateArgDecl {
 				$template.addArg($t1.arg);
 			}
@@ -1108,7 +1112,8 @@ scope IsTypeDef;
 					$template.addArg($tx.arg);
 				}
 			)* 
-		)? '>'
+		)? 
+		'>'
 		declaration {
 			if ($declaration.declaration != null) {
 				Declaration decl = $declaration.declaration;
@@ -1128,10 +1133,20 @@ templateArgDecl returns [Arg arg]
 	:	t=('class' | 'typename') n=IDENTIFIER {
 			$arg = new Arg($n.text, new SimpleTypeRef($t.text));
 			addTypeIdent($t.text);
-		} |
-		argDef ('=' expression)? {
+		} 
+		( 
+			'=' tr=mutableTypeRef {
+				$arg.setDefaultValue(expr($tr.type));
+			}
+		)? |
+		argDef {
 			$arg = $argDef.arg;
 		} //mutableTypeRef ('=' constant)?
+		( 
+			'=' v=expression  {
+				$arg.setDefaultValue($v.expr);
+			}
+		)? 
 	;	
 	
 functionSignatureSuffix returns [FunctionSignature signature]

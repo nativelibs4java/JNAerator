@@ -30,8 +30,8 @@ public class Template extends Declaration {
 	}
 	
 	@Override
-	public Function clone() {
-		return (Function) super.clone();
+	public Template clone() {
+		return (Template) super.clone();
 	}
 	
 	@Override
