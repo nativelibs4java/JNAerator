@@ -253,6 +253,9 @@ public class Printer implements Visitor {
             if (!e.getThrown().isEmpty())
                 append(" throws ").implode(e.getThrown(), ", ");
 
+            if (!e.getInitializers().isEmpty())
+                append(" : ").implode(e.getInitializers(), ", ");
+
             if (e.getBody() == null)
                 append(";");
             else
@@ -286,9 +289,6 @@ public class Printer implements Visitor {
 
         if (e.getAsmName() != null)
             append("__asm(\"", e.getAsmName(), "\") ");
-
-        if (!e.getInitializers().isEmpty())
-            append(" : ").implode(e.getInitializers(), ", ");
 
         if (e.getCommentAfter() != null)
             append(" ", e.getCommentAfter());

@@ -36,7 +36,7 @@ scope Symbols {
 	Set<String> typeIdentifiers;
 }
 scope CurrentClass {
-	String name;
+	Identifier name;
 }
 scope ModifierKinds {
 	EnumSet<ModifierKind> allowedKinds;
@@ -121,6 +121,15 @@ import static com.ochafik.lang.jnaerator.parser.StoredDeclarations.*;
     		//mk.forbiddenKinds.add(ModifierKind.ObjectiveCRemoting);
     		
     		ModifierKinds_stack.push(mk);
+	}
+	void setCurrentClassName(Identifier name) {
+		((CurrentClass_scope)CurrentClass_stack.peek()).name = name;
+	}
+	Identifier getCurrentClassName() {
+		if (CurrentClass_stack.isEmpty())
+			return null;
+			
+		return ((CurrentClass_scope)CurrentClass_stack.peek()).name;
 	}
 	ModifierKinds_scope getModifierKinds() {
 		if (ModifierKinds_stack.isEmpty())
@@ -351,6 +360,12 @@ import static com.ochafik.lang.jnaerator.parser.StoredDeclarations.*;
 	protected boolean next(String... ss) {
 		return next(1, ss);
 	}
+	protected boolean next(Identifier id) {
+		if (id == null)
+			return false;
+		return next(id.toString());
+	}
+	
 	protected boolean next(int i, String... ss) {
 		String n = next(i);
 		for (String s : ss)
@@ -820,6 +835,16 @@ scope ModContext;
 				{ next("friend") }? IDENTIFIER friend=declaration ';' {
 					$struct.addDeclaration(new FriendDeclaration(friend.declaration));
 				} |
+				{ next(getCurrentClassName()) }? id=IDENTIFIER s=functionDeclarationSuffix {
+					Function f = new Function();
+					f.setName(getCurrentClassName());
+					f.setType(Function.Type.CppMethod);
+					f.setArgs($s.args);
+					f.addModifiers($s.postModifiers);
+					f.setInitializers($s.initializers);
+					f.setBody($s.body);
+					$struct.addDeclaration(f);
+				} |
 				decl=declaration {
 					$struct.addDeclaration($decl.declaration);
 				} |
@@ -834,6 +859,7 @@ scope ModContext;
 structCore returns [Struct struct]
 scope Symbols;
 scope ModContext;
+scope CurrentClass;
 @init {
 	$Symbols::typeIdentifiers = new HashSet<String>();
 	List<Modifier> modifiers = new ArrayList<Modifier>();
@@ -870,6 +896,7 @@ scope ModContext;
 				} |
 				tag=qualifiedIdentifier {
 					defineTypeIdentifierInParentScope($tag.identifier);
+					setCurrentClassName($tag.identifier);
 				}
 				(
 					(
@@ -932,16 +959,32 @@ scope Symbols;
 				$function.setName($name.identifier); 
 				mark($function, getLine($start));
 			}
-		)	
-		argList {
-			$function.setArgs($argList.args);
+		)
+		s=functionDeclarationSuffix {
+			$function.setArgs($s.args);
+			$function.addModifiers($s.postModifiers);
+			if (!$s.initializers.isEmpty()) {
+				$function.setInitializers($s.initializers);
+				$function.setType(Function.Type.CppMethod);
+			}
+			$function.setBody($s.body);
 		}
-		( postMods=modifiers { $function.addModifiers($postMods.modifiers); } )?
+	;
+
+functionDeclarationSuffix returns [List<Arg> args, List<Modifier> postModifiers, List<FunctionCall> initializers, Block body]
+	:	 
+		{
+			$initializers = new ArrayList<FunctionCall>();
+		}
+		argList {
+			$args = $argList.args;
+		}
+		( postMods=modifiers { $postModifiers = $postMods.modifiers; } )?
 		(
 			':'
-			i1=constructorInitializer { $function.addInitializer($i1.init); }
+			i1=constructorInitializer { $initializers.add($i1.init); }
 			(
-				',' ix=constructorInitializer { $function.addInitializer($ix.init); }
+				',' ix=constructorInitializer { $initializers.add($ix.init); }
 			)*
 		)?
 		(	
@@ -950,11 +993,10 @@ scope Symbols;
 			)?
 			';' |
 			statementsBlock {
-				$function.setBody($statementsBlock.statement);
+				$body = $statementsBlock.statement;
 			}
 		)
 	;
-
 constructorInitializer returns [FunctionCall init]
 	:	qn=qualifiedCppFunctionName {
 			$init = new FunctionCall(new TypeRefExpression(new SimpleTypeRef($qn.identifier)));
