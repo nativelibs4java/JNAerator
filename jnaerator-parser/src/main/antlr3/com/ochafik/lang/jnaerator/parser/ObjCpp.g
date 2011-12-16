@@ -150,6 +150,7 @@ import static com.ochafik.lang.jnaerator.parser.StoredDeclarations.*;
 			scope.forbiddenKinds.addAll(Arrays.asList(kinds));
 	}
 	public void allowKinds(ModifierKind... kinds) {
+		//if (true) return;
 		ModifierKinds_scope scope = getModifierKinds();
 		if (scope == null)
 			return;
@@ -162,6 +163,8 @@ import static com.ochafik.lang.jnaerator.parser.StoredDeclarations.*;
 		if (ModifierKinds_stack.isEmpty())
 			setupScopes();
 			
+		//if (mod == ModifierType.__in) return false;
+		
 		int nScopes = ModifierKinds_stack.size();
 		for (int i = nScopes; i-- != 0;) {
 			ModifierKinds_scope scope = (ModifierKinds_scope)ModifierKinds_stack.get(i);
@@ -348,7 +351,7 @@ import static com.ochafik.lang.jnaerator.parser.StoredDeclarations.*;
 			
 		if (mod.isAnyOf(ModifierKind.Declspec, ModifierKind.Attribute) && !isInExtMod())
 			return null;
-			
+		
 		if (!isAllowed(mod))
 			return null;
 			
@@ -827,6 +830,7 @@ scope ModContext;
 		}
 		'{'
 			(
+			
 				(
 					'public' { $struct.setNextMemberVisibility(Struct.MemberVisibility.Public); } | 
 					'private' { $struct.setNextMemberVisibility(Struct.MemberVisibility.Private); } | 
@@ -1033,8 +1037,8 @@ modifier returns [List<Modifier> modifiers, String asmName]
 @init { $modifiers = new ArrayList<Modifier>(); }
 	:
 		
-		{ next("__pragma") }?=> pragmaContent | 
-		{ next("extern") }?=> IDENTIFIER ex=STRING {
+		{ next("__pragma") }? pragmaContent | 
+		{ next("extern") }? IDENTIFIER ex=STRING {
 			$modifiers.add(ModifierType.Extern); // TODO
 		} |
 		{ parseModifier(next()) != null }? m=IDENTIFIER {
@@ -1056,7 +1060,7 @@ modifier returns [List<Modifier> modifiers, String asmName]
 		IDENTIFIER '(' 'return' binaryOp expression  ')' |
 		
 		// TODO handle it properly @see http://blogs.msdn.com/staticdrivertools/archive/2008/11/06/annotating-for-success.aspx
-		{ next(ModifierKind.VCAnnotation1Arg, ModifierKind.VCAnnotation2Args) }?=>
+		{ next(ModifierKind.VCAnnotation1Arg, ModifierKind.VCAnnotation2Args) }?
 		m=IDENTIFIER '(' x=constant ')' {
 			$modifiers.add(new ValuedModifier(ModifierType.parseModifier($m.text), $x.constant));
 		}

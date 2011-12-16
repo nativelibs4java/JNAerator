@@ -23,8 +23,8 @@
 </security>
 <resources>
   <j2se version="1.6+" />
-  		<jar href="http://nativelibs4java.sourceforge.net/maven/com/jnaerator/jnaerator/0.9.8-SNAPSHOT/jnaerator-0.9.8-SNAPSHOT-shaded.jar"/>
-		<extension name="JNAeratorRuntime" href="http://jnaerator.sourceforge.net/webstart/JNAerator/JNAeratorRuntime.jnlp"/>
+  		<jar href="http://nativelibs4java.sourceforge.net/maven/com/jnaerator/jnaerator/0.9.10-SNAPSHOT/jnaerator-0.9.10-SNAPSHOT-shaded.jar"/>
+		<!--extension name="JNAeratorRuntime" href="http://jnaerator.sourceforge.net/webstart/JNAerator/JNAeratorRuntime.jnlp"/-->
 		<!--
 		<jar href="http://somewhere/yourjar.jar" /> 
 		-->
