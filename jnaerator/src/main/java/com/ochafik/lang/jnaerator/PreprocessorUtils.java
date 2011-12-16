@@ -28,7 +28,6 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
-import java.util.regex.Matcher;
 import org.anarres.cpp.CppReader;
 import org.anarres.cpp.Feature;
 import org.anarres.cpp.FileLexerSource;
@@ -47,7 +46,6 @@ import com.ochafik.lang.jnaerator.parser.Define;
 import com.ochafik.lang.jnaerator.parser.Expression;
 import com.ochafik.util.string.StringUtils;
 import java.util.HashMap;
-import java.util.regex.Pattern;
 
 public class PreprocessorUtils {
 
@@ -202,28 +200,13 @@ public class PreprocessorUtils {
 		//preprocessor.getFrameworksPath().addAll(Arrays.asList(DEFAULT_FRAMEWORKS_PATH.split(":")));
 		preprocessor.getFrameworksPath().addAll(config.frameworksPath);
 		for (Map.Entry<String, String> e : config.macros.entrySet()) {
-            String name = e.getKey();
-            String value = e.getValue();
-            Matcher matcher = macroFuncNamePattern.matcher(name);
-            if (matcher.matches()) {
-                name = matcher.group(1);
-                Macro macro = new Macro(new StringLexerSource(value), name);
-                String argsStr = matcher.group(2);
-                List<String> args = new ArrayList<String>();
-                for (String arg : argsStr.split(","))
-                    args.add(arg.trim());
-                macro.setArgs(args);
-                preprocessor.addMacro(macro);
-            } else {
-                if (e.getValue() != null)
-                    preprocessor.addMacro(name, value);
-                else
-                    preprocessor.addMacro(name);
-            }
+			if (e.getValue() != null)
+				preprocessor.addMacro(e.getKey(), e.getValue());
+			else
+				preprocessor.addMacro(e.getKey());
 		}
 		return preprocessor;
 	}
-    static Pattern macroFuncNamePattern = Pattern.compile("(\\w+)\\(([^)]+)\\)");
 
 	public static String removePreprocessorDirectives(String s) {
 		s = s.replaceAll(";#line", ";\n#line"); /// hack !

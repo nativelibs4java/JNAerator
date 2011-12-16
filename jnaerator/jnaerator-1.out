@@ -1,9 +1,0 @@
-{
-	int* ppp = (int*)malloc(10 * sizeof(int));
-	int* pp = new int[__in];
-	memcpy(pp, p, __in * sizeof(int));
-	int v = pp[10];
-	int vv = *(pp + 10);
-	delete[] pp;
-	return __in + 1;
-}
