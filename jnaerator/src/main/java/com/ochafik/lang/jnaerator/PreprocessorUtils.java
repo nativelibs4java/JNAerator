@@ -46,6 +46,7 @@ import com.ochafik.lang.jnaerator.parser.Define;
 import com.ochafik.lang.jnaerator.parser.Expression;
 import com.ochafik.util.string.StringUtils;
 import java.util.HashMap;
+import org.anarres.cpp.VirtualFile;
 
 public class PreprocessorUtils {
 
@@ -101,6 +102,15 @@ public class PreprocessorUtils {
 
 	public static Preprocessor createPreProcessor(JNAeratorConfig.PreprocessorConfig config, final MacroUseCallback macrosDependenciesOut) throws IOException, LexerException {
 		Preprocessor preprocessor = new Preprocessor() {
+            HashSet<VirtualFile> filesAlreadyIncluded = new HashSet<VirtualFile>();
+	
+	
+            protected boolean include(VirtualFile file) throws IOException, LexerException {
+                if (!filesAlreadyIncluded.add(file))
+                    return true;
+			
+                return super.include(file);
+            }
 			Set<String> pragmaOnces = new HashSet<String>();
 			@Override
 			protected void pragma(Token name, List<Token> value)
