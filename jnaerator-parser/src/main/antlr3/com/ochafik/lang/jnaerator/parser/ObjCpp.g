@@ -131,8 +131,16 @@ import static com.ochafik.lang.jnaerator.parser.StoredDeclarations.*;
 			
 		return ((CurrentClass_scope)CurrentClass_stack.peek()).name;
 	}
-	ModifierKinds_scope getModifierKinds() {
+	boolean hasModifierKinds() {
 		if (ModifierKinds_stack.isEmpty())
+			return false;
+		if (ModifierKinds_stack.size() > 1)
+			return true;
+		ModifierKinds_scope kinds = (ModifierKinds_scope)ModifierKinds_stack.get(0);
+		return kinds.allowedKinds != null || kinds.forbiddenKinds != null;
+	}
+	ModifierKinds_scope getModifierKinds() {
+		if (!hasModifierKinds())
 			setupScopes();
 //			return null;
 		return (ModifierKinds_scope)ModifierKinds_stack.get(ModifierKinds_stack.size() - 1);
@@ -159,7 +167,7 @@ import static com.ochafik.lang.jnaerator.parser.StoredDeclarations.*;
 			scope.allowedKinds.addAll(Arrays.asList(kinds));
 	}
 	public boolean isAllowed(Modifier mod) {
-		if (ModifierKinds_stack.isEmpty())
+		if (!hasModifierKinds())
 			setupScopes();
 			
 		int nScopes = ModifierKinds_stack.size();
@@ -390,7 +398,7 @@ import static com.ochafik.lang.jnaerator.parser.StoredDeclarations.*;
 		return com.ochafik.util.string.StringUtils.implode(strs, " ");
 	}
 	@Override
-	public String getErrorMessage(RecognitionException e, String[] tokenNames) {
+		public String getErrorMessage(RecognitionException e, String[] tokenNames) {
 		if (e instanceof NoViableAltException) {
 			NoViableAltException ne = (NoViableAltException)e;
 			return "Failed to match any alternative with token " + ne.token + "\n\t" +
@@ -521,14 +529,14 @@ scope ModContext;
 		}
 		(
 			(
-				{ next("__pragma") }?=> pragmaContent |
-				{ next("template") }?=> templateDef {
+				{ next("__pragma") }? pragmaContent |
+				{ next("template") }? templateDef {
 					$declaration = $templateDef.template;
 				} |
 				functionDeclaration {
 					$declaration = $functionDeclaration.function;
 				} |
-				{ next("extern") }?=> externDeclarations {
+				{ next("extern") }? externDeclarations {
 					$declaration = $externDeclarations.declaration; 
 				} |
 				varDecl ';' { 
