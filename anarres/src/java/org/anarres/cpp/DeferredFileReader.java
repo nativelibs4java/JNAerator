@@ -30,14 +30,14 @@ public class DeferredFileReader extends Reader {
 	Reader in;
 	File file;
 
-	static java.util.HashSet<File> files = new java.util.HashSet<File>();
+	//static java.util.HashSet<File> files = new java.util.HashSet<File>();
 	public DeferredFileReader(File file) throws FileNotFoundException {
 		this.file = file;
 		if (!file.exists())
 			throw new FileNotFoundException(file.toString());
 		
-		if (!files.add(file))
-			in = new StringReader("");
+		//if (!files.add(file))
+		//	in = new StringReader("");
 			//new Exception("Creating " + file).printStackTrace();
 	}
 	

@@ -88,7 +88,7 @@ Users who are looking for ready-to-use libraries should check the NativeLibs4Jav
   	<dependency>
   		<groupId>org.anarres.cpp</groupId>
   		<artifactId>anarres-cpp-jnaerator</artifactId>
-  		<version>1.2.6-JNAerator.1</version>
+  		<version>1.2.6-JNAerator.2</version>
   		<type>jar</type>
   		<scope>compile</scope>
   		<optional>false</optional>

@@ -7,7 +7,7 @@ mvn "-Dstorepass=$KEYSTORE_PASS" deploy:deploy-file  \
 	-Dpackaging=jar \
 	-DgeneratePom.description="JNAerator's version of Anarres JCPP" \
 	-DuniqueVersion=true \
-	"-Dversion=1.2.6-JNAerator.1" \
+	"-Dversion=1.2.6-JNAerator.2" \
 	-f pom.xml
 	
 #	-f scripts/deploy.pom \
