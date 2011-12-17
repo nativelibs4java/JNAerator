@@ -38,7 +38,8 @@ public class Version {
 		String[]	tmp = VERSION.split("\\.");
 		major = Integer.parseInt(tmp[0]);
 		minor = Integer.parseInt(tmp[1]);
-		patch = Integer.parseInt(tmp[2]);
+        String[] patchAndVariant = tmp[2].split("-");
+		patch = Integer.parseInt(patchAndVariant[0]);
 	}
 
 	public static String getVersion() {
