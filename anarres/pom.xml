@@ -29,13 +29,77 @@
 	</license>
   </licenses>
   
-  <parent>
-	  <groupId>com.jnaerator</groupId>
-	  <artifactId>jnaerator-parent</artifactId>
-	  <version>0.9.10-SNAPSHOT</version>
-	  <relativePath>../parent</relativePath>
-  </parent>
-  
+    <dependencies>
+        
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.10</version>
+			<scope>test</scope>
+		</dependency>
+        <dependency>
+            <groupId>gnu.getopt</groupId>
+            <artifactId>java-getopt</artifactId>
+            <version>1.0.13</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.ant</groupId>
+            <artifactId>ant</artifactId>
+            <version>1.7.0</version>
+        </dependency>
+    </dependencies>
+    
+    <pluginRepositories>
+		<pluginRepository>
+			<id>nativelibs4java-plugins</id>
+			<url>http://nativelibs4java.sourceforge.net/maven</url>
+		</pluginRepository>
+	</pluginRepositories>
+  <build>
+  	<plugins>
+        	
+		  <plugin>
+			  <groupId>org.apache.maven.plugins</groupId>
+			  <artifactId>maven-jar-plugin</artifactId>
+			  <version>2.3.2</version>
+			  <configuration>
+			<archive>
+			  <manifest>
+				<mainClass>org.anarres.cpp.Main</mainClass>
+			  </manifest>
+			</archive>
+			  </configuration>
+		  </plugin>
+		  
+			<plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>2.3.2</version>
+                <configuration>
+                    <source>1.5</source>
+                    <target>1.5</target>
+                    <encoding>UTF-8</encoding>
+                </configuration>
+            </plugin>
+  		<plugin>
+			<groupId>com.nativelibs4java</groupId>
+			<artifactId>maven-velocity-plugin</artifactId>
+			<version>0.7-SNAPSHOT</version>
+			<executions>
+			  <execution>
+				<goals>
+				  <goal>generate</goal>
+				</goals>
+			  </execution>
+			</executions>
+            <configuration>
+                <properties>
+                    <version>${version}</version>
+                </properties>
+            </configuration>
+		</plugin>
+	</plugins>
+  </build>
 </project>
 
 

@@ -15,7 +15,7 @@ public class CppReaderTestCase extends BaseTestCase implements Test {
 		StringReader	r = new StringReader(in);
 		CppReader		p = new CppReader(r);
 		p.getPreprocessor().setSystemIncludePath(
-				Collections.singletonList("src/input")
+				Collections.singletonList("src/test/resources/input")
 					);
 		p.getPreprocessor().getFeatures().add(Feature.LINEMARKERS);
 		BufferedReader	b = new BufferedReader(p);

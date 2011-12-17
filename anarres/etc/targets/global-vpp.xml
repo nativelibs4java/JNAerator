@@ -9,6 +9,9 @@
             <fileset dir="${global.dir.src.java}">
 				<include name="**/*.java" />
             </fileset>
+			<fileset dir="${global.dir.src.velocity}">
+				<include name="**/*.java" />
+            </fileset>
 			<config>
 				<context>
 					<!-- Avoid subversion and RCS tags. -->
