@@ -2,3 +2,4 @@ target
 project/boot
 project/target
 *~
+test/*
