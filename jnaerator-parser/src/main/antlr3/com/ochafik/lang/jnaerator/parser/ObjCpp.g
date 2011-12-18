@@ -458,8 +458,8 @@ lineDirective
 				}				
 				setFile(fileStr);
 			} 
-		)? 
-		depth=DECIMAL_NUMBER?
+		) 
+		depth=DECIMAL_NUMBER
 	;
 	
 sourceFile returns [SourceFile sourceFile]
@@ -529,14 +529,14 @@ scope ModContext;
 		}
 		(
 			(
-				{ next("__pragma") }? pragmaContent |
-				{ next("template") }? templateDef {
+				{ next("__pragma") }?=> pragmaContent |
+				{ next("template") }?=> templateDef {
 					$declaration = $templateDef.template;
 				} |
 				functionDeclaration {
 					$declaration = $functionDeclaration.function;
 				} |
-				{ next("extern") }? externDeclarations {
+				{ next("extern") }?=> externDeclarations {
 					$declaration = $externDeclarations.declaration; 
 				} |
 				varDecl ';' { 
@@ -1577,6 +1577,8 @@ binaryOp returns [Expression.BinaryOperator op]
 		'<=' | '>=' | '<' | '>' | '==' | '!='
 		) {
 			$op = Expression.getBinaryOperator($t.text);
+			if ($op == null)
+				throw new RuntimeException("Failed to parse op " + $t.text);
 		}
 	;
 
@@ -1717,7 +1719,9 @@ encodingExpr
 assignmentExpr returns [Expression expr]
 	:	e=inlineCondExpr  { $expr = $e.expr; } 
 		( 
-			op=assignmentOp f=assignmentExpr { $expr = new AssignmentOp($expr, getAssignmentOperator($op.text), $f.expr); }
+			op=assignmentOp f=assignmentExpr { 
+				$expr = new AssignmentOp($expr, getAssignmentOperator($op.text), $f.expr); 
+			}
 		)?
 	;
 	

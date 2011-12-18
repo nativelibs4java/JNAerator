@@ -672,6 +672,7 @@ public abstract class Expression extends Element {
 	}
 	public enum UnaryOperator  implements Operator {
 		Not("!"), 
+		Minus("-"), 
 		Parenthesis("()"),
 		Complement("~"),
 		Reference("&"),
@@ -716,11 +717,19 @@ public abstract class Expression extends Element {
 	
 
 	public static AssignmentOperator getAssignmentOperator(String s) {
-		return assignOps.get(s);
+		AssignmentOperator op = assignOps.get(s);
+        if (op == null)
+            throw new RuntimeException("Failed to parse op " + s);
+        
+        return op;
 	}
 	
 	public static UnaryOperator getUnaryOperator(String s) {
-		return unOps.get(s);
+		UnaryOperator op = unOps.get(s);
+        if (op == null)
+            throw new RuntimeException("Failed to parse op " + s);
+        
+        return op;
 	}
 	public static java.lang.Enum<?> getAnyOperator(String s) {
 
