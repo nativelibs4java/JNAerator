@@ -11,6 +11,13 @@
   <description>
   </description>
   
+  <parent>
+	  <groupId>com.jnaerator</groupId>
+	  <artifactId>jnaerator-parent</artifactId>
+	  <version>0.9.10-SNAPSHOT</version>
+	  <relativePath>../parent</relativePath>
+  </parent>
+  
 	<developers>
 		<developer>
 			<id>anarres.author</id>
