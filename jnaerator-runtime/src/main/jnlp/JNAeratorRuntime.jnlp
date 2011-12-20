@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<jnlp spec="1.0+"
+<jnlp spec="1.5+"
   codebase="http://jnaerator.sourceforge.net/webstart/JNAerator"
   href="JNAeratorRuntime.jnlp"
 >
@@ -15,7 +15,8 @@
 	</security>
 	<resources>
 		<j2se version="1.5+"/>
-		<extension name="jnidispatch" href="http://jnaerator.sourceforge.net/webstart/jna/3.2.7/jnidispatch.jnlp"/>
+		<extension name="jna-nativelibs" href="http://nativelibs4java.sourceforge.net/webstart/jna/3.3.0/jna-nativelibs.jnlp"/>
+		<!--extension name="jnidispatch" href="http://jnaerator.sourceforge.net/webstart/jna/3.3.0/jnidispatch.jnlp"/-->
 		<jar href="http://nativelibs4java.sourceforge.net/maven/com/jnaerator/jnaerator-runtime/0.9.10-SNAPSHOT/jnaerator-runtime-0.9.10-SNAPSHOT-webstart.jar"/>
 	</resources>
 	

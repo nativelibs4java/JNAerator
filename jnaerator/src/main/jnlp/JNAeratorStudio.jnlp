@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<jnlp spec="1.0+"
+<jnlp spec="1.5+"
   codebase="http://jnaerator.sourceforge.net/webstart/JNAerator"
   href="JNAeratorStudio.jnlp"
 >
