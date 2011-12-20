@@ -114,6 +114,7 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.StringReader;
 import java.text.MessageFormat;
+import java.util.logging.Logger;
 import org.antlr.runtime.ANTLRReaderStream;
 import org.antlr.runtime.CommonTokenStream;
 import static com.ochafik.lang.jnaerator.parser.ElementsHelper.*;
