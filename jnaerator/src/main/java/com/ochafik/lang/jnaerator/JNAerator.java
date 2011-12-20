@@ -173,9 +173,9 @@ public class JNAerator {
 		return argsPref.split(",");
 	}
 
-	public static void main(String[] argsArray) {
-        //argsArray = new String[] { "simple.h" };
     static Logger logger = Logger.getLogger(JNAerator.class.getName());
+    public static void main(String[] argsArray) {
+        //argsArray = new String[] { "/Users/ochafik/bin/python/config.jnaerator" };
         //argsArray = new String[] { "/Users/ochafik/nativelibs4java/FFMpeg/src/main/jnaerator/config.jnaerator" };
         //argsArray = new String[] { "/Users/ochafik/nativelibs4java/Posix/src/main/jnaerator/config.jnaerator" };
 		main(new JNAerator(new JNAeratorConfig()), argsArray);
