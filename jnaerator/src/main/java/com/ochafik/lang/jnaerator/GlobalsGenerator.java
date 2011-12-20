@@ -272,6 +272,6 @@ public class GlobalsGenerator {
 
     private void convertGlobalsBridJ(VariablesDeclaration globals, Signatures signatures, DeclarationsHolder out, Expression nativeLibFieldExpr, Identifier callerLibraryName, String callerLibrary) {
         int[] iChild = new int[1];
-        result.declarationsConverter.convertVariablesDeclarationToBridJ(globals, out, iChild, true, callerLibraryName, callerLibraryName, callerLibrary);//globals, out, null, true, null, null, callerLibraryName, callerLibrary);
+        result.declarationsConverter.convertVariablesDeclarationToBridJ(globals, signatures, out, iChild, true, callerLibraryName, callerLibraryName, callerLibrary);//globals, out, null, true, null, null, callerLibraryName, callerLibrary);
     }
 }

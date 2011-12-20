@@ -1487,13 +1487,18 @@ public abstract class Expression extends Element {
             }
             
 			switch (type) {
+            case Long:
 			case ULong:
+                if (txt != null)
+                    txt += "L";
 			case LongString:
 				type = Type.Long;
 				break;
-			case IntegerString:
 			case UInt:
-				type = Type.Int;
+                if ((getValue() instanceof Long) && ((Long)getValue()) > Integer.MAX_VALUE)
+                    txt = null;
+            case IntegerString:
+			    type = Type.Int;
 				break;
 			}
             

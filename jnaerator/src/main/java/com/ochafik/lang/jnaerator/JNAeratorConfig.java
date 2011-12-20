@@ -48,8 +48,10 @@ import com.ochafik.util.listenable.Pair;
 import java.lang.annotation.Annotation;
 import java.text.MessageFormat;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 
+import java.util.logging.Level;
 import static com.ochafik.lang.jnaerator.parser.ElementsHelper.*;
 
 public class JNAeratorConfig {
@@ -243,6 +245,7 @@ public class JNAeratorConfig {
 	public Map<String, List<File>> libraryFilesByArch = new LinkedHashMap<String, List<File>>();
 	public List<File> libraryFiles = new ArrayList<File>();
 	
+	public final Map<File, String> libraryByDirectory = new HashMap<File, String>();
 	public Map<File, String> libraryByFile = new LinkedHashMap<File, String>();
 	public void addLibraryFile(File file, String arch) {
 		
@@ -257,7 +260,7 @@ public class JNAeratorConfig {
 		
 		others.add(file);
 		libraryByFile.put(file, fn);
-		libraryFiles.add(file);
+        libraryFiles.add(file);
 	}
 	public void addSourceFile(File file, String library, boolean applyFilters, boolean retainAsTarget) throws IOException {
 		if (file.isFile()) {
@@ -268,6 +271,13 @@ public class JNAeratorConfig {
 				sourceFiles.add(file);
 				if (retainAsTarget) {
 					libraryByFile.put(file, library);
+                    
+                    File directory = file.getParentFile().getAbsoluteFile();
+                    String oldLib = libraryByDirectory.put(directory, library);
+                    if (oldLib != null && !oldLib.equals(library)) {
+                        JNAerator.logger.log(Level.WARNING, "Directory " + directory + " contains files from different libraries, so there won't be any default library for its files (symbols defined in files from that library that were included but not explicitly listed will not be JNAerated).");
+                        libraryByDirectory.put(directory, "");
+                    }
 				}
 			}
 		} else {
@@ -293,12 +303,17 @@ public class JNAeratorConfig {
 	public String defaultLibrary;
 	public Map<String, File> libraryProjectSources = new LinkedHashMap<String, File>();
 	public Adapter<File, String> fileToLibrary = new Adapter<File, String>() {
-		public String adapt(File value) {
-			String libraryFile = null;
+		public String adapt(File file) {
+			String libraryName = null;
 			try {
 				//String canoFile = value.getCanonicalPath();
 				//libraryFile = libraryByFile.get(canoFile);
-				libraryFile = libraryByFile.get(value.getCanonicalFile());
+                file = file.getCanonicalFile();
+				libraryName = libraryByFile.get(file);
+                
+                if (libraryName == null) {
+                    libraryName = libraryByDirectory.get(file.getParentFile());
+                }
 				//if (value.toString().startsWith("\""))
 				//	new Exception("Double quotes in file !").printStackTrace();
 //				if (!canoFile.contains("Program Files")) {
@@ -312,7 +327,7 @@ public class JNAeratorConfig {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-			return libraryFile == null ? defaultLibrary : libraryFile;
+			return libraryName == null ? defaultLibrary : libraryName;
 		}
 	};
 	public void addRootDir(File dir) throws IOException {
@@ -360,7 +375,7 @@ public class JNAeratorConfig {
 	public boolean bundleSources = true;
 	public boolean noCPlusPlus;
 	
-	public String getLibrary(String elementFile) {
+    public String getLibrary(String elementFile) {
 		if (elementFile == null)
 			return libraryForElementsInNullFile;
 		

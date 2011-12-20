@@ -1272,7 +1272,7 @@ public class DeclarationsConverter {
 		//List<Declaration> children = new ArrayList<Declaration>();
 		for (Declaration d : struct.getDeclarations()) {
 			if (d instanceof VariablesDeclaration) {
-				convertVariablesDeclaration((VariablesDeclaration)d, structJavaClass, iChild, structName, callerLibraryClass, callerLibrary);
+				convertVariablesDeclaration((VariablesDeclaration)d, childSignatures, structJavaClass, iChild, structName, callerLibraryClass, callerLibrary);
 			} else if (!onlyFields) {
 				if (d instanceof TaggedTypeRefDeclaration) {
 					TaggedTypeRef tr = ((TaggedTypeRefDeclaration) d).getTaggedTypeRef();
@@ -1465,7 +1465,7 @@ public class DeclarationsConverter {
             //    iChild[0] = 0;
 
 			if (d instanceof VariablesDeclaration) {
-				convertVariablesDeclaration((VariablesDeclaration)d, structJavaClass, iChild, structName, callerLibraryClass, callerLibrary);
+				convertVariablesDeclaration((VariablesDeclaration)d, childSignatures, structJavaClass, iChild, structName, callerLibraryClass, callerLibrary);
 			} else if (!onlyFields) {
 				if (d instanceof TaggedTypeRefDeclaration) {
 					TaggedTypeRef tr = ((TaggedTypeRefDeclaration) d).getTaggedTypeRef();
@@ -1790,13 +1790,13 @@ public class DeclarationsConverter {
         }
         return out;
     }
-	public void convertVariablesDeclaration(VariablesDeclaration v, DeclarationsHolder out, int[] iChild, Identifier holderName, Identifier callerLibraryClass, String callerLibrary) {
+	public void convertVariablesDeclaration(VariablesDeclaration v, Signatures signatures, DeclarationsHolder out, int[] iChild, Identifier holderName, Identifier callerLibraryClass, String callerLibrary) {
 		if (result.config.runtime == JNAeratorConfig.Runtime.BridJ)
-	        convertVariablesDeclarationToBridJ(v, out, iChild, false, holderName, callerLibraryClass, callerLibrary);
+	        convertVariablesDeclarationToBridJ(v, signatures, out, iChild, false, holderName, callerLibraryClass, callerLibrary);
         else
-            convertVariablesDeclarationToJNA(v, out, iChild, callerLibraryClass);
+            convertVariablesDeclarationToJNA(v, signatures, out, iChild, callerLibraryClass);
     }
-	public void convertVariablesDeclarationToBridJ(VariablesDeclaration v, DeclarationsHolder out, int[] iChild, boolean isGlobal, Identifier holderName, Identifier callerLibraryClass, String callerLibrary) {
+	public void convertVariablesDeclarationToBridJ(VariablesDeclaration v, Signatures signatures, DeclarationsHolder out, int[] iChild, boolean isGlobal, Identifier holderName, Identifier callerLibraryClass, String callerLibrary) {
         try { 
 			TypeRef valueType = v.getValueType();
 			for (Declarator vs : v.getDeclarators()) {
@@ -1837,10 +1837,16 @@ public class DeclarationsConverter {
 					}*/
                 
                 for (Declaration vd : vds) {
+                    if (vd instanceof Function) {
+                        if (!signatures.methodsSignatures.add(((Function)vd).computeSignature(false)))
+                            continue;
+                    }
+                    
                 	vd.importDetails(mutatedType, true);
                 	vd.moveAllCommentsBefore();
         			if (!(mutatedType instanceof Primitive) && !result.config.noComments)
                         vd.addToCommentBefore("C type : " + mutatedType);
+                    
                     out.addDeclaration(vd);
                 }
 				//}
@@ -1854,7 +1860,7 @@ public class DeclarationsConverter {
 		}
     }
     int nextAnonymousFieldId;
-	public void convertVariablesDeclarationToJNA(VariablesDeclaration v, DeclarationsHolder out, int[] iChild, Identifier callerLibraryClass) {
+	public void convertVariablesDeclarationToJNA(VariablesDeclaration v, Signatures signatures, DeclarationsHolder out, int[] iChild, Identifier callerLibraryClass) {
 		//List<Declaration> out = new ArrayList<Declaration>();
 		try {
 			TypeRef valueType = v.getValueType();
@@ -1898,12 +1904,17 @@ public class DeclarationsConverter {
 					out.addDeclaration(vd);
 				}
 				if (result.config.beanStructs) {
-					out.addDeclaration(new Function(Function.Type.JavaMethod, ident("get" + StringUtils.capitalize(name)), vd.getValueType().clone()).setBody(block(
+                    Function getMethod = new Function(Function.Type.JavaMethod, ident("get" + StringUtils.capitalize(name)), vd.getValueType().clone()).setBody(block(
 						new Statement.Return(varRef(name))
-					)).addModifiers(ModifierType.Public));
-					out.addDeclaration(new Function(Function.Type.JavaMethod, ident("set" + StringUtils.capitalize(name)), typeRef(Void.TYPE), new Arg(name, vd.getValueType().clone())).setBody(block(
+					)).addModifiers(ModifierType.Public);
+                    if (signatures.methodsSignatures.add(getMethod.computeSignature(false)))
+                        out.addDeclaration(getMethod);
+                    
+                    Function setMethod = new Function(Function.Type.JavaMethod, ident("set" + StringUtils.capitalize(name)), typeRef(Void.TYPE), new Arg(name, vd.getValueType().clone())).setBody(block(
 						stat(expr(memberRef(thisRef(), MemberRefStyle.Dot, ident(name)), AssignmentOperator.Equal, varRef(name)))
-					)).addModifiers(ModifierType.Public));
+					)).addModifiers(ModifierType.Public);
+                    if (signatures.methodsSignatures.add(setMethod.computeSignature(false)))
+                        out.addDeclaration(setMethod);
 				}
 				iChild[0]++;
 			}
