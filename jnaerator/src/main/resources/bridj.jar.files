@@ -61,6 +61,8 @@ org/bridj/DefaultPointer.class
 org/bridj/DynamicCallback.class
 org/bridj/DynamicFunction.class
 org/bridj/DynamicFunctionFactory.class
+org/bridj/DyncallStructs$1.class
+org/bridj/DyncallStructs.class
 org/bridj/EllipsisHelper$1.class
 org/bridj/EllipsisHelper.class
 org/bridj/FlagSet.class
