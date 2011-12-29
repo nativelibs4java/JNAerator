@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>com.jnaerator</groupId>
+	<groupId>com.nativelibs4java</groupId>
 	<artifactId>jnaerator-parent</artifactId>
 	<version>0.9.10-SNAPSHOT</version>
 	<packaging>pom</packaging>
@@ -10,16 +10,23 @@
 	<parent>
 		<groupId>com.nativelibs4java</groupId>
 		<artifactId>nativelibs4java-parent</artifactId>
-		<version>1.6</version>
+		<version>1.7-SNAPSHOT</version>
 		<relativePath>../../Parent</relativePath>
 	</parent>
 	
 	
-	<properties>
-		<jnaerator.version>0.9.10-SNAPSHOT</jnaerator.version>
-		<bridj.version>0.7-SNAPSHOT</bridj.version>
-	</properties>
+  <licenses>
+    <license>
+      <name>LGPL 2.1</name>
+      <url>http://www.gnu.org/copyleft/lesser.html</url>
+      <distribution>repo</distribution>
+      <comments></comments>
+	</license>
+  </licenses>
+  
+  
 	<build>
+	  <pluginManagement>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -61,5 +68,6 @@
 				</executions>
 			</plugin>
 		</plugins>
+	  </pluginManagement>
 	</build>
 </project>

@@ -2,7 +2,7 @@
  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
  <modelVersion>4.0.0</modelVersion>
-  <groupId>com.jnaerator</groupId>
+  <groupId>com.nativelibs4java</groupId>
   <artifactId>jnaerator</artifactId>
   <name>JNAerator CLI and Studio Tools</name>
   <url>http://code.google.com/p/jnaerator/</url>
@@ -10,7 +10,7 @@
   <packaging>jar</packaging>
   
   <parent>
-	  <groupId>com.jnaerator</groupId>
+	  <groupId>com.nativelibs4java</groupId>
 	  <artifactId>jnaerator-parent</artifactId>
 	  <version>0.9.10-SNAPSHOT</version>
 	  <relativePath>../parent</relativePath>
@@ -32,82 +32,52 @@ Users who are looking for ready-to-use libraries should check the NativeLibs4Jav
     </mailingList>
   </mailingLists>
   
-  <licenses>
-    <license>
-      <name>LGPL 2.1</name>
-      <url>http://www.gnu.org/copyleft/lesser.html</url>
-      <distribution>repo</distribution>
-      <comments>Covers JNA, Rococoa and everything under packages com.ochafik.*</comments>
-	</license>
-    <license>
-      <name>Apache 2.0</name>
-      <url>http://www.apache.org/licenses/LICENSE-2.0.html</url>
-      <distribution>repo</distribution>
-      <comments>Anarres JCPP</comments>
-	</license>
-  </licenses>
-  
   <dependencies>
     
   	<dependency>
-  		<groupId>com.ochafik</groupId>
+  		<groupId>com.nativelibs4java</groupId>
   		<artifactId>ochafik-swing</artifactId>
   		<version>${jnaerator.version}</version>
-  		<type>jar</type>
-  		<scope>compile</scope>
-  		<optional>false</optional>
   	</dependency>
   	
   	<dependency>
-  		<groupId>com.jnaerator</groupId>
+  		<groupId>com.nativelibs4java</groupId>
   		<artifactId>jnaerator-rococoa-runtime</artifactId>
   		<version>${jnaerator.version}</version>
-  		<type>jar</type>
-  		<scope>compile</scope>
-  		<optional>false</optional>
   	</dependency>
   	
   	<dependency>
   		<groupId>com.nativelibs4java</groupId>
   		<artifactId>bridj</artifactId>
   		<version>${bridj.version}</version>
-  		<type>jar</type>
-  		<scope>compile</scope>
-  		<optional>false</optional>
   	</dependency>
   	
   	<dependency>
-  		<groupId>com.jnaerator</groupId>
+  		<groupId>com.nativelibs4java</groupId>
   		<artifactId>jnaerator-parser</artifactId>
   		<version>${jnaerator.version}</version>
-  		<type>jar</type>
-  		<scope>compile</scope>
-  		<optional>false</optional>
   	</dependency>
   	
   	<dependency>
-  		<groupId>org.anarres.cpp</groupId>
-  		<artifactId>anarres-cpp-jnaerator</artifactId>
-  		<version>1.2.6-JNAerator.2</version>
-  		<type>jar</type>
-  		<scope>compile</scope>
-  		<optional>false</optional>
+  		<groupId>com.nativelibs4java</groupId>
+  		<artifactId>anarres-jnaerator</artifactId>
+  		<version>1.2.7-SNAPSHOT</version>
   	</dependency>
   	
   	<dependency>
   		<groupId>org.eclipse.jdt.core.compiler</groupId>
   		<artifactId>ecj</artifactId>
   		<version>3.7.1</version>
-  		<type>jar</type>
-  		<scope>compile</scope>
-  		<optional>false</optional>
   	</dependency>
   	
   </dependencies>
   
   <build>
 		<plugins>
-		  
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-shade-plugin</artifactId>
+			</plugin>
 		  <plugin>
 			  <groupId>org.apache.maven.plugins</groupId>
 			  <artifactId>maven-jar-plugin</artifactId>
