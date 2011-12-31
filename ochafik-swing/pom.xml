@@ -12,7 +12,7 @@
 	  <groupId>com.nativelibs4java</groupId>
 	  <artifactId>jnaerator-parent</artifactId>
 	  <version>0.9.10-SNAPSHOT</version>
-	  <relativePath>../parent</relativePath>
+	  <relativePath>..</relativePath>
   </parent>
   
   <dependencies>

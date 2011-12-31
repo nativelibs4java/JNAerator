@@ -8,6 +8,13 @@
   <url>http://code.google.com/p/jnaerator/</url>
   <packaging>jar</packaging>
   
+  <parent>
+	  <groupId>com.nativelibs4java</groupId>
+	  <artifactId>jnaerator-parent</artifactId>
+	  <version>0.9.10-SNAPSHOT</version>
+	  <relativePath>..</relativePath>
+  </parent>
+  
   <dependencies>
 	<dependency>
       <groupId>com.nativelibs4java</groupId>
@@ -22,13 +29,6 @@
 		<artifactId>anarres-jnaerator</artifactId>
 	</dependency>
   </dependencies>
-  
-  <parent>
-	  <groupId>com.nativelibs4java</groupId>
-	  <artifactId>jnaerator-parent</artifactId>
-	  <version>0.9.10-SNAPSHOT</version>
-	  <relativePath>../parent</relativePath>
-  </parent>
   
   <build>
 		<plugins>

@@ -13,7 +13,7 @@
 		<groupId>com.nativelibs4java</groupId>
 		<artifactId>nativelibs4java-parent</artifactId>
 		<version>1.7-SNAPSHOT</version>
-		<relativePath>../../Parent</relativePath>
+		<relativePath>..</relativePath>
 	</parent>
 	
 	<developers>
