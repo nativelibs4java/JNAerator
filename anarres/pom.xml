@@ -1,23 +1,21 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0"
- xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
- xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
- <modelVersion>4.0.0</modelVersion>
-  <groupId>com.nativelibs4java</groupId>
-  <artifactId>anarres-jnaerator</artifactId>
-  <name>Anarres JCPP (with JNAerator modifications)</name>
-  <url>http://www.anarres.org/projects/jcpp/</url>
-  <version>1.2.7-SNAPSHOT</version>
-  <packaging>jar</packaging>
-  <description>
-  </description>
-  
-  <parent>
-	  <groupId>com.nativelibs4java</groupId>
-	  <artifactId>jnaerator-parent</artifactId>
-	  <version>0.9.10-SNAPSHOT</version>
-	  <relativePath>../parent</relativePath>
-  </parent>
-  
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>com.nativelibs4java</groupId>
+	<artifactId>anarres-jnaerator</artifactId>
+	<name>Anarres JCPP (with JNAerator modifications)</name>
+	<url>http://www.anarres.org/projects/jcpp/</url>
+	<version>1.2.7-SNAPSHOT</version>
+	<packaging>jar</packaging>
+	<description></description>
+
+	<parent>
+		<groupId>com.nativelibs4java</groupId>
+		<artifactId>nativelibs4java-parent</artifactId>
+		<version>1.7-SNAPSHOT</version>
+		<relativePath>../../Parent</relativePath>
+	</parent>
+	
 	<developers>
 		<developer>
 			<id>anarres.author</id>
@@ -25,102 +23,94 @@
 			<email>contact@anarres.org</email>
 		</developer>
 	</developers>
-  
-  <licenses>
-    <license>
-      <name>Apache 2.0</name>
-      <url>http://www.apache.org/licenses/LICENSE-2.0.html</url>
-      <distribution>repo</distribution>
-      <comments>Anarres JCPP was patched with some modifications for use in JNAerator.. 
+
+	<licenses>
+		<license>
+			<name>Apache 2.0</name>
+			<url>http://www.apache.org/licenses/LICENSE-2.0.html</url>
+			<distribution>repo</distribution>
+			<comments>Anarres JCPP was patched with some modifications for use in JNAerator.. 
 	  Diffs are trivial to make with Original Anarres SVN repository : https://svn.anarres.org/svn/repos/code/java/cpp/trunk/</comments>
-	</license>
-  </licenses>
-  
-    <dependencies>
-        
+		</license>
+	</licenses>
+
+	<dependencies>
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<version>4.10</version>
 			<scope>test</scope>
 		</dependency>
-        <dependency>
-            <groupId>gnu.getopt</groupId>
-            <artifactId>java-getopt</artifactId>
-            <version>1.0.13</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.ant</groupId>
-            <artifactId>ant</artifactId>
-            <version>1.8.2</version>
-        </dependency>
-        <dependency>
-            <groupId>commons-collections</groupId>
-            <artifactId>commons-collections</artifactId>
-            <version>3.2.1</version>
-        </dependency>
-    </dependencies>
-    
-    <!--pluginRepositories>
-		<pluginRepository>
-			<id>nativelibs4java-plugins</id>
-			<url>http://nativelibs4java.sourceforge.net/maven</url>
-		</pluginRepository>
-	</pluginRepositories-->
-  <build>
-  	<plugins>
-        	
-		  <plugin>
-			  <groupId>org.apache.maven.plugins</groupId>
-			  <artifactId>maven-jar-plugin</artifactId>
-			  <version>2.3.2</version>
-			  <configuration>
-			<archive>
-			  <manifest>
-				<mainClass>org.anarres.cpp.Main</mainClass>
-			  </manifest>
-			</archive>
-			  </configuration>
-		  </plugin>
-          
-          <plugin>
-              <groupId>org.apache.maven.plugins</groupId>
-              <artifactId>maven-surefire-plugin</artifactId>
-              <version>2.11</version>
-              <configuration>
-                  <redirectTestOutputToFile>true</redirectTestOutputToFile>
-              </configuration>
-          </plugin>
-		  
+		<dependency>
+			<groupId>gnu.getopt</groupId>
+			<artifactId>java-getopt</artifactId>
+			<version>1.0.13</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.ant</groupId>
+			<artifactId>ant</artifactId>
+			<version>1.8.2</version>
+		</dependency>
+		<dependency>
+			<groupId>commons-collections</groupId>
+			<artifactId>commons-collections</artifactId>
+			<version>3.2.1</version>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<plugins>
 			<plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>2.3.2</version>
-                <configuration>
-                    <source>1.5</source>
-                    <target>1.5</target>
-                    <encoding>UTF-8</encoding>
-                </configuration>
-            </plugin>
-  		<plugin>
-			<groupId>com.nativelibs4java</groupId>
-			<artifactId>maven-velocity-plugin</artifactId>
-			<version>${maven-velocity-plugin.version}</version>
-			<executions>
-			  <execution>
-				<goals>
-				  <goal>generate</goal>
-				</goals>
-			  </execution>
-			</executions>
-            <configuration>
-                <properties>
-                    <version>${version}</version>
-                </properties>
-            </configuration>
-		</plugin>
-	</plugins>
-  </build>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<version>2.3.2</version>
+				<configuration>
+					<archive>
+						<manifest>
+							<mainClass>org.anarres.cpp.Main</mainClass>
+						</manifest>
+					</archive>
+				</configuration>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>2.11</version>
+				<configuration>
+					<redirectTestOutputToFile>true</redirectTestOutputToFile>
+				</configuration>
+			</plugin>
+			
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>2.3.2</version>
+				<configuration>
+					<source>1.5</source>
+					<target>1.5</target>
+					<encoding>UTF-8</encoding>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>com.nativelibs4java</groupId>
+				<artifactId>maven-velocity-plugin</artifactId>
+				<version>${maven-velocity-plugin.version}</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>generate</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<properties>
+						<version>${version}</version>
+					</properties>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
 </project>
 
 

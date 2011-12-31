@@ -1,96 +1,80 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0"
- xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
- xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
- <modelVersion>4.0.0</modelVersion>
-  <groupId>com.nativelibs4java</groupId>
-  <artifactId>jnaerator</artifactId>
-  <name>JNAerator CLI and Studio Tools</name>
-  <url>http://code.google.com/p/jnaerator/</url>
-  <version>0.9.10-SNAPSHOT</version>
-  <packaging>jar</packaging>
-  
-  <parent>
-	  <groupId>com.nativelibs4java</groupId>
-	  <artifactId>jnaerator-parent</artifactId>
-	  <version>0.9.10-SNAPSHOT</version>
-	  <relativePath>../parent</relativePath>
-  </parent>
-  
-  <description>
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>com.nativelibs4java</groupId>
+	<artifactId>jnaerator</artifactId>
+	<name>JNAerator CLI and Studio Tools</name>
+	<url>http://code.google.com/p/jnaerator/</url>
+	<packaging>jar</packaging>
+
+	<parent>
+		<groupId>com.nativelibs4java</groupId>
+		<artifactId>jnaerator-parent</artifactId>
+		<version>0.9.10-SNAPSHOT</version>
+		<relativePath>../parent</relativePath>
+	</parent>
+
+	<description>
 JNAerator (pronounce "generator") simply parses C and Objective-C headers and generates the corresponding JNA and Rococoa Java interfaces (it also has a very limited support for C++).
 
 This lets Java programmers access native libraries transparently, with full IDE support and little to no hand-tweaking.
 
 Users who are looking for ready-to-use libraries should check the NativeLibs4Java project instead.
   </description>
-  
-  <mailingLists>
-    <mailingList>
-      <name>jna-users</name>
-      <post>users@jna.dev.java.net</post>
-      <archive>https://jna.dev.java.net/servlets/SummarizeList?listName=users</archive>
-    </mailingList>
-  </mailingLists>
-  
-  <dependencies>
-    
-  	<dependency>
-  		<groupId>com.nativelibs4java</groupId>
-  		<artifactId>ochafik-swing</artifactId>
-  		<version>${jnaerator.version}</version>
-  	</dependency>
-  	
-  	<dependency>
-  		<groupId>com.nativelibs4java</groupId>
-  		<artifactId>jnaerator-rococoa-runtime</artifactId>
-  		<version>${jnaerator.version}</version>
-  	</dependency>
-  	
-  	<dependency>
-  		<groupId>com.nativelibs4java</groupId>
-  		<artifactId>bridj</artifactId>
-  		<version>${bridj.version}</version>
-  	</dependency>
-  	
-  	<dependency>
-  		<groupId>com.nativelibs4java</groupId>
-  		<artifactId>jnaerator-parser</artifactId>
-  		<version>${jnaerator.version}</version>
-  	</dependency>
-  	
-  	<dependency>
-  		<groupId>com.nativelibs4java</groupId>
-  		<artifactId>anarres-jnaerator</artifactId>
-  		<version>1.2.7-SNAPSHOT</version>
-  	</dependency>
-  	
-  	<dependency>
-  		<groupId>org.eclipse.jdt.core.compiler</groupId>
-  		<artifactId>ecj</artifactId>
-  		<version>3.7.1</version>
-  	</dependency>
-  	
-  </dependencies>
-  
-  <build>
+
+	<mailingLists>
+		<mailingList>
+			<name>jna-users</name>
+			<post>users@jna.dev.java.net</post>
+			<archive>https://jna.dev.java.net/servlets/SummarizeList?listName=users</archive>
+		</mailingList>
+	</mailingLists>
+
+	<dependencies>
+		<dependency>
+			<groupId>com.nativelibs4java</groupId>
+			<artifactId>ochafik-swing</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.nativelibs4java</groupId>
+			<artifactId>jnaerator-rococoa-runtime</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.nativelibs4java</groupId>
+			<artifactId>bridj</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.nativelibs4java</groupId>
+			<artifactId>jnaerator-parser</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.nativelibs4java</groupId>
+			<artifactId>anarres-jnaerator</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.jdt.core.compiler</groupId>
+			<artifactId>ecj</artifactId>
+		</dependency>
+	</dependencies>
+
+	<build>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-shade-plugin</artifactId>
 			</plugin>
-		  <plugin>
-			  <groupId>org.apache.maven.plugins</groupId>
-			  <artifactId>maven-jar-plugin</artifactId>
-			  <version>2.3.2</version>
-			  <configuration>
-			<archive>
-			  <manifest>
-				<mainClass>com.ochafik.lang.jnaerator.JNAerator</mainClass>
-			  </manifest>
-			</archive>
-			  </configuration>
-		  </plugin>
-		  
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<configuration>
+					<archive>
+						<manifest>
+							<mainClass>com.ochafik.lang.jnaerator.JNAerator</mainClass>
+						</manifest>
+					</archive>
+				</configuration>
+			</plugin>
+		
 		</plugins>
 	</build>
 </project>

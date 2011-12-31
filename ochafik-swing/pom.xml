@@ -6,7 +6,6 @@
   <artifactId>ochafik-swing</artifactId>
   <name>OChafik's Swing Utilities</name>
   <url>http://ochafik.free.fr/blog/</url>
-  <version>0.9.10-SNAPSHOT</version>
   <packaging>jar</packaging>
   
   <parent>
@@ -17,14 +16,10 @@
   </parent>
   
   <dependencies>
-  	
 		<dependency>
 		  <groupId>com.nativelibs4java</groupId>
 		  <artifactId>ochafik-util</artifactId>
-		  <version>${jnaerator.version}</version>
-		  <scope>compile</scope>
 		</dependency>
-	
   </dependencies>
   
 </project>
