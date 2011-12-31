@@ -96,7 +96,7 @@ public class BridJer {
         return methodCall(expr(typeRef(ptrClass())), name, args);
     }
     int iFile = 0;
-	public Pair<Element, List<Declaration>> convertToJava(Element element) {
+	public Pair<Element, List<Declaration>> convertToJava(Element element, final Identifier libraryClassName) {
         //element = element.clone();
         try {
             PrintStream out = new PrintStream("jnaerator-" + (iFile++) + ".out");
@@ -107,103 +107,7 @@ public class BridJer {
         }
         final List<Declaration> extraDeclarationsOut = new ArrayList<Declaration>();
         
-        final Set<Pair<Element, Integer>> referencedElements = new HashSet<Pair<Element, Integer>>();
-        element.accept(new Scanner() {
-            @Override
-            public void visitUnaryOp(UnaryOp unaryOp) {
-                super.visitUnaryOp(unaryOp);
-                
-                if (unaryOp.getOperator() == UnaryOperator.Reference) {
-                		if (unaryOp.getOperand() instanceof VariableRef) {
-                			VariableRef vr = (VariableRef)unaryOp.getOperand();
-						Element e = result.symbols.getVariable(vr.getName());
-						if (e != null)
-							referencedElements.add(new Pair<Element, Integer>(e, e.getId()));
-					}	
-                }
-            }
-        });
-        
-        final Set<Element> varDeclTypeRefsTransformedToPointers = new HashSet<Element>();
-        
-        final Map<Integer, String> referencedElementsChangedNames = new HashMap<Integer, String>();
-        for (Pair<Element, Integer> kv : referencedElements) {
-            Element e = kv.getKey();
-            //int id = kv
-            if (e instanceof DirectDeclarator) {
-                DirectDeclarator decl = (DirectDeclarator)e;
-				String name = decl.getName();
-				String changedName = "p" + StringUtils.capitalize(name);
-                referencedElementsChangedNames.put(e.getId(), changedName);
-				decl.setName(changedName);
-				VariablesDeclaration vd = (VariablesDeclaration)decl.getParentElement();
-				TypeRef tr = vd.getValueType();
-				//TypeRef wrapper = getWrapperType(tr);
-				//vd.setValueType(pointerToTypeRef(wrapper));
-                vd.setValueType(new Pointer(tr, PointerStyle.Pointer));
-                varDeclTypeRefsTransformedToPointers.add(vd);
-                Expression defVal = decl.getDefaultValue();
-				if (defVal != null) {
-					decl.setDefaultValue(staticPtrMethod("pointerTo" + primCapName(tr), defVal));
-				}
-			}
-        }
-        
-        
-        // First pass to detect referenced variables (no replacement here) :
-        element.accept(new Scanner() {
-            @Override
-            public void visitIdentifier(Identifier identifier) {
-                super.visitIdentifier(identifier);
-                Element e = result.symbols.getVariable(identifier);
-                if (e != null && isReferenced(e)) {
-					String changedName = referencedElementsChangedNames.get(e.getId());
-					if (changedName != null) {
-						Identifier replacedIdentifier = ident(changedName);
-						identifier.replaceBy(replacedIdentifier);
-						referencedElements.add(new Pair<Element, Integer>(replacedIdentifier, replacedIdentifier.getId()));
-					}
-				}
-            }
-            
-            boolean isReferenced(Element e) {
-            		if (e == null)
-            			return false;
-                return referencedElements.contains(new Pair<Element, Integer>(e, e.getId()));
-            }
-            
-            @Override
-            public void visitVariableRef(VariableRef vr) {
-                super.visitVariableRef(vr);
-                Identifier ident = vr.getName();
-                if (isReferenced(ident)) {
-                    vr.replaceBy(methodCall(varRef(ident), "get"));
-				}
-            }
-            
-            @Override
-            public void visitUnaryOp(UnaryOp unaryOp) {
-                if (unaryOp.getOperator() == UnaryOperator.Reference) {
-                    if (unaryOp.getOperand() instanceof VariableRef) {
-                        VariableRef vr = (VariableRef)unaryOp.getOperand();
-
-                        Identifier ident = vr.getName();
-                        Element e = result.symbols.getVariable(ident);
-						if ((e != null || isReferenced(e)) || isReferenced(ident)) {
-                            String changedName = referencedElementsChangedNames.get(e.getId());
-                            if (changedName != null) {
-                                Element rep = varRef(changedName);
-                                unaryOp.replaceBy(rep);
-                                visit(rep);
-                                return;
-                            }
-						}
-					}
-                }
-                super.visitUnaryOp(unaryOp);
-            }
-        });
-        
+        final ReferencedElements ref = findReferencedElements(element);
         
         // Second pass : replacement !
         element.accept(new Scanner() {
@@ -462,7 +366,7 @@ public class BridJer {
                         TypeRef mutatedType = (TypeRef)mt;
                         if (decl.getDefaultValue() == null) {
 							TypeRef actualType = mutatedType;
-							boolean referenced = varDeclTypeRefsTransformedToPointers.contains(v) && (mutatedType instanceof Pointer);
+							boolean referenced = ref.varDeclTypeRefsTransformedToPointers.contains(v) && (mutatedType instanceof Pointer);
 							if (referenced) {
 								actualType = ((Pointer)mutatedType).getTarget();
 							}
@@ -487,7 +391,7 @@ public class BridJer {
 						}// else {
                             TypeConversion.NL4JConversion conv = result.typeConverter.convertTypeToNL4J(
                                 mutatedType, 
-                                null,//callerLibraryName,
+                                libraryClassName,//callerLibraryName,
                                 null,//thisField("io"),
                                 null,//varRef(name),
                                 -1,//fieldIndex,
@@ -641,5 +545,113 @@ public class BridJer {
 	}
     Class ptrClass() {
         return result.config.runtime.pointerClass;
+    }
+
+    static class ReferencedElements {
+        final Set<Pair<Element, Integer>> referencedElements = new HashSet<Pair<Element, Integer>>();
+        final Set<Element> varDeclTypeRefsTransformedToPointers = new HashSet<Element>();
+    }
+    private ReferencedElements findReferencedElements(Element element) {
+        final ReferencedElements ret = new ReferencedElements();
+        element.accept(new Scanner() {
+            @Override
+            public void visitUnaryOp(UnaryOp unaryOp) {
+                super.visitUnaryOp(unaryOp);
+                
+                if (unaryOp.getOperator() == UnaryOperator.Reference) {
+                		if (unaryOp.getOperand() instanceof VariableRef) {
+                			VariableRef vr = (VariableRef)unaryOp.getOperand();
+						Element e = result.symbols.getVariable(vr.getName());
+						if (e != null)
+							ret.referencedElements.add(new Pair<Element, Integer>(e, e.getId()));
+					}	
+                }
+            }
+        });
+        
+        
+        
+        
+        final Map<Integer, String> referencedElementsChangedNames = new HashMap<Integer, String>();
+        for (Pair<Element, Integer> kv : ret.referencedElements) {
+            Element e = kv.getKey();
+            //int id = kv
+            if (e instanceof DirectDeclarator) {
+                DirectDeclarator decl = (DirectDeclarator)e;
+				String name = decl.getName();
+				String changedName = "p" + StringUtils.capitalize(name);
+                referencedElementsChangedNames.put(e.getId(), changedName);
+				decl.setName(changedName);
+				VariablesDeclaration vd = (VariablesDeclaration)decl.getParentElement();
+				TypeRef tr = vd.getValueType();
+				//TypeRef wrapper = getWrapperType(tr);
+				//vd.setValueType(pointerToTypeRef(wrapper));
+                vd.setValueType(new Pointer(tr, PointerStyle.Pointer));
+                ret.varDeclTypeRefsTransformedToPointers.add(vd);
+                Expression defVal = decl.getDefaultValue();
+				if (defVal != null) {
+					decl.setDefaultValue(staticPtrMethod("pointerTo" + primCapName(tr), defVal));
+				} else {
+                    decl.setDefaultValue(staticPtrMethod("allocate" + primCapName(tr)));
+                }
+			}
+        }
+        
+        
+        // First pass to detect referenced variables (no replacement here) :
+        element.accept(new Scanner() {
+            @Override
+            public void visitIdentifier(Identifier identifier) {
+                super.visitIdentifier(identifier);
+                Element e = result.symbols.getVariable(identifier);
+                if (e != null && isReferenced(e)) {
+					String changedName = referencedElementsChangedNames.get(e.getId());
+					if (changedName != null) {
+						Identifier replacedIdentifier = ident(changedName);
+						identifier.replaceBy(replacedIdentifier);
+						ret.referencedElements.add(new Pair<Element, Integer>(replacedIdentifier, replacedIdentifier.getId()));
+					}
+				}
+            }
+            
+            boolean isReferenced(Element e) {
+            		if (e == null)
+            			return false;
+                return ret.referencedElements.contains(new Pair<Element, Integer>(e, e.getId()));
+            }
+            
+            @Override
+            public void visitVariableRef(VariableRef vr) {
+                super.visitVariableRef(vr);
+                Identifier ident = vr.getName();
+                if (isReferenced(ident)) {
+                    vr.replaceBy(methodCall(varRef(ident), "get"));
+				}
+            }
+            
+            @Override
+            public void visitUnaryOp(UnaryOp unaryOp) {
+                if (unaryOp.getOperator() == UnaryOperator.Reference) {
+                    if (unaryOp.getOperand() instanceof VariableRef) {
+                        VariableRef vr = (VariableRef)unaryOp.getOperand();
+
+                        Identifier ident = vr.getName();
+                        Element e = result.symbols.getVariable(ident);
+						if ((e != null || isReferenced(e)) || isReferenced(ident)) {
+                            String changedName = referencedElementsChangedNames.get(e.getId());
+                            if (changedName != null) {
+                                Element rep = varRef(changedName);
+                                unaryOp.replaceBy(rep);
+                                visit(rep);
+                                return;
+                            }
+						}
+					}
+                }
+                super.visitUnaryOp(unaryOp);
+            }
+        });
+        
+        return ret;
     }
 }

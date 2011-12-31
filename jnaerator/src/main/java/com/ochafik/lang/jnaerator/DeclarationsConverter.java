@@ -1013,7 +1013,7 @@ public class DeclarationsConverter {
         if (result.config.convertBodies && function.getBody() != null)
         {
             try {
-                Pair<Element, List<Declaration>> bodyAndExtraDeclarations = result.bridjer.convertToJava(function.getBody());
+                Pair<Element, List<Declaration>> bodyAndExtraDeclarations = result.bridjer.convertToJava(function.getBody(), libraryClassName);
                 convertedBody = (Block)bodyAndExtraDeclarations.getFirst();
                 for (Declaration d : bodyAndExtraDeclarations.getSecond())
                     out.addDeclaration(d);
