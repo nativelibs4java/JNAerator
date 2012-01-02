@@ -1,6 +1,21 @@
 Current development version (0.9.10-SNAPSHOT)
 
-...
+- Fixed generation of large longs
+- Fixed conditional parsing of __in modifier (and COM modifiers in general)
+- Fixed generation of globals and variables included more than once
+- Fixed parsing of unary '-' operator
+- Fixed parsing of C++ constructors
+- Fixed parsing of default values for type name template arguments
+- Fixed parsing of const type mutator (fixes `void f(struct x * const);`) (issue #205)
+- Fixed parsing of null char escape '\0' (issue #214)
+- Fixed conversion of `int a; f(&a);`
+- Fixed handling of "long int" : should be the same as "long"
+- Added parsing of expression initializer blocks `v = { 1, 2, 3};`
+- Added preservation of original textual representation of constants
+- Added tr1 to default C++ includes
+- Generate symbols of all files in directories where any file was explicitly listed
+- Added support for command-line definition of macros with arguments : -Df(x)=whatever
+- Added conversion of `malloc(x * y * sizeof(whatever))`
 
 Version 0.9.9 (20111107, 1cad7b05da2e89ce53246f30b181159ef8fce0c3)
 
