@@ -32,10 +32,12 @@ import com.ochafik.lang.jnaerator.parser.Struct;
 import com.ochafik.lang.jnaerator.parser.TaggedTypeRefDeclaration;
 import com.ochafik.lang.jnaerator.parser.TypeRef;
 import com.ochafik.lang.jnaerator.parser.Declarator;
+import com.ochafik.lang.jnaerator.parser.TypeRef.Primitive;
 import com.ochafik.lang.jnaerator.parser.VariablesDeclaration;
 import com.ochafik.lang.jnaerator.parser.Declarator.DirectDeclarator;
 import com.ochafik.lang.jnaerator.parser.Declarator.FunctionDeclarator;
 import com.ochafik.lang.jnaerator.parser.Declarator.MutableByDeclarator;
+import com.ochafik.lang.jnaerator.parser.Identifier;
 import com.ochafik.lang.jnaerator.parser.ModifierKind;
 import com.ochafik.lang.jnaerator.parser.StoredDeclarations.TypeDef;
 import com.ochafik.lang.jnaerator.parser.TypeRef.FunctionSignature;
@@ -95,7 +97,17 @@ public class CToJavaPreScanner extends Scanner {
         }
     }
 
-
+    @Override
+    public void visitPrimitive(Primitive primitive) {
+        super.visitPrimitive(primitive);
+        
+        if (ModifierType.Long.isContainedBy(primitive.getModifiers())) {
+            Identifier name = primitive.getName();
+            if (name != null && name.equals("int"))
+                primitive.setName(ident("long"));
+        }
+        
+    }
 	
 	@Override
 	public void visitTypeDef(TypeDef v) {
