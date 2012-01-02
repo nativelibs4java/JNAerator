@@ -39,7 +39,6 @@ public enum Primitive {
 	//Pointer;
 	//Reference;
 	
-	/*
 	static Primitive parsePrimitive(SimpleTypeRef tr) {
 		String name = tr.getName() == null ? null : tr.getName().toString();
 		String basis = StringUtils.capitalize(name);
@@ -68,5 +67,4 @@ public enum Primitive {
 			}
 		}
 	}
-	*/
 }
