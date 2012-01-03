@@ -26,11 +26,9 @@
 grammar ObjCpp;
 options {
 	backtrack = true;
-	//output = AST;
 	memoize = true;
 	k = 2;
 }
-
 
 scope Symbols {
 	Set<String> typeIdentifiers;
@@ -413,6 +411,10 @@ import static com.ochafik.lang.jnaerator.parser.StoredDeclarations.*;
 	public String getTokenErrorDisplay(Token t) {
 		return t.toString();	
 	}
+	protected void checkInterrupt() {
+		if (Thread.interrupted())
+			throw new RuntimeException(new InterruptedException());
+	}
 }
 
 @lexer::header { 
@@ -507,6 +509,9 @@ externDeclarations returns [ExternDeclarations declaration]
 declaration returns [Declaration declaration, List<Modifier> modifiers, String preComment, int startTokenIndex]
 scope IsTypeDef;
 scope ModContext;
+@before {
+	checkInterrupt();
+}
 @after {
 	if ($declaration == null)
 	try {
@@ -1286,6 +1291,9 @@ functionSignatureSuffixNoName returns [FunctionSignature signature]
 	;
 
 mutableTypeRef returns [TypeRef type]
+@before {
+	checkInterrupt();
+}
 	:	
 		nonMutableTypeRef {
 			$type = $nonMutableTypeRef.type;
@@ -1938,6 +1946,9 @@ topLevelExprList returns [List<Expression> exprs]
 	;
 
 expression returns [Expression expr]
+@before {
+	checkInterrupt();
+}
 	:	l=topLevelExprList {
 			if ($l.exprs != null) {
 				if ($l.exprs.size() == 1)

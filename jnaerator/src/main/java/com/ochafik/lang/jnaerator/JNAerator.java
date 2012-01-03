@@ -512,8 +512,8 @@ public class JNAerator {
                     case EmptyStructsAsForwardDecls:
                         config.treatEmptyStructsAsForwardDecls = true;
                         break;
-                    case ParseInOneChunk:
-                        config.parseInOneChunk = true;
+                    case ParseInChunks:
+                        config.parseInChunks = true;
                         break;
 					case Studio:
 						try {

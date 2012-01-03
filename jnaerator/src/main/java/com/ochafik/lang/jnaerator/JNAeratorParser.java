@@ -121,70 +121,26 @@ public class JNAeratorParser {
 	}
 
 	private static void parseSlices(final JNAeratorConfig config, final TypeConversion typeConverter, SourceFiles sourceFilesOut, List<Slice> slices, PrintStream originalOut, PrintStream originalErr, boolean multithreaded) throws InterruptedException {
-	
-			class ResultCountHolder {
-				volatile int nSlicesParsed = 0;
-			};
-			
-			final ResultCountHolder resultCountHolder = new ResultCountHolder();
-			
-			List<Pair<Slice, Future<SourceFile>>> sourceFileFutures = new ArrayList<Pair<Slice, Future<SourceFile>>>(slices.size());
-			final Set<String> topLevelTypeDefs = Collections.synchronizedSet(new HashSet<String>());
-			
-			ExecutorService executorService = Executors.newFixedThreadPool(multithreaded ? Runtime.getRuntime().availableProcessors() * 2 : 1);
-			for (final Slice slice : slices) {
-				sourceFileFutures.add(new Pair<Slice, Future<SourceFile>>(slice, executorService.submit(new Callable<SourceFile>() {
-	
-					public SourceFile call() throws Exception {
-						try {
-							ObjCppParser parser = newObjCppParser(typeConverter, slice.text, config.verbose);
-							parser.topLevelTypeIdentifiers = topLevelTypeDefs;
-							SourceFile sourceFile = parser.sourceFile();//.sourceFile;
-							//sourceFile.setElementFile(slice.file);
-							return sourceFile;
-						} catch (Throwable ex) {
-							ex.printStackTrace();
-							throw new Exception(ex);
-						} finally {
-							resultCountHolder.nSlicesParsed++;
-						}
-					}
-					
-				})));
-	//				sourceFiles.add(newObjCppParser(slice).sourceFile().sourceFile);
-			}
-			if (slices.isEmpty()) {
-				originalOut.println("Slices are empty with the following config : \n" + DebugUtils.toString(config));
-			} else {
-				//boolean waitIndefinitely = true;
-				//if (waitIndefinitely) {
-					executorService.shutdown();
-					executorService.awaitTermination(Long.MAX_VALUE, TimeUnit.MILLISECONDS);
-				/*} else {
-					for (int i = 4; i-- != 0;) {
-						if (executorService.awaitTermination(1000, TimeUnit.MILLISECONDS))
-							break;
-						if (executorService.isTerminated())
-							break;
-						originalOut.println("Parsed " + resultCountHolder.nSlicesParsed + " / " + (slices.isEmpty() ? "0" : slices.size() +"") + "\t(" + ((resultCountHolder.nSlicesParsed * 100/ slices.size())) + " %)");
-						if (resultCountHolder.nSlicesParsed == slices.size())
-							break;
-					}
-				}*/
-				
-				for (Pair<Slice, Future<SourceFile>> p : sourceFileFutures) {
-					try {
-						sourceFilesOut.add(p.getSecond().get(1000, TimeUnit.MILLISECONDS));
-					} catch (ExecutionException e) {
-						originalErr.println("Exception for " + p.getFirst().file + " at line " + p.getFirst().line + ":" + e);
-						e.printStackTrace(originalErr);
-						//e.getCause().printStackTrace();
-					} catch (TimeoutException e) {
-						originalErr.println("TIMEOUT for " + p.getFirst().file + " at line " + p.getFirst().line + ".");
-					}
-				}
-			}
-		}
+        final Set<String> topLevelTypeDefs = Collections.synchronizedSet(new HashSet<String>());
+
+        //ExecutorService executorService = Executors.newFixedThreadPool(multithreaded ? Runtime.getRuntime().availableProcessors() * 2 : 1);
+        if (slices.isEmpty())
+            originalOut.println("Slices are empty with the following config : \n" + DebugUtils.toString(config));
+
+        for (final Slice slice : slices) {
+            try {
+                ObjCppParser parser = newObjCppParser(typeConverter, slice.text, config.verbose);
+                parser.topLevelTypeIdentifiers = topLevelTypeDefs;
+                SourceFile sourceFile = parser.sourceFile();//.sourceFile;
+                //sourceFile.setElementFile(slice.file);
+                sourceFilesOut.add(sourceFile);
+            } catch (Throwable ex) {
+                ex.printStackTrace();
+                originalErr.println("Exception for " + slice.file + " at line " + slice.line + ":" + e);
+                e.printStackTrace(originalErr);
+            }
+        }
+    }
 
 	public static SourceFiles parse(JNAeratorConfig config, TypeConversion typeConverter, MacroUseCallback macrosDependenciesOut) throws IOException, LexerException {
 		SourceFiles sourceFiles = new SourceFiles();
@@ -196,7 +152,7 @@ public class JNAeratorParser {
 		System.setOut(pout);
 		System.setErr(pout);
 		try {
-			if (config.parseInOneChunk) {
+			if (!config.parseInChunks) {
 				// easier to debug but any error might ruin all the rest of the parsing
 				try {
 					ObjCppParser parser = newObjCppParser(typeConverter, sourceContent, config.verbose);
@@ -206,7 +162,7 @@ public class JNAeratorParser {
 					ex.printStackTrace();
 				}
 			} else {
-				// faster on multiprocessor architectures, compartimented parsing (at each change of file)
+				// compartimented parsing (at each change of file)
 				List<Slice> slices = cutSourceContentInSlices(sourceContent, originalOut);
 				if (config.verbose)
 					originalOut.println("Now parsing " + slices.size() + " text blocks");
