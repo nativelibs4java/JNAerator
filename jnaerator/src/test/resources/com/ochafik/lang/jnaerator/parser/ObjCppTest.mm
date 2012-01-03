@@ -25,6 +25,8 @@ void f() {
 --
 void f(int __in);
 --
+void meth(double*) throw(int, SomeEx*);
+--
 void f(void (*g)());
 --
 void (*fptr)();

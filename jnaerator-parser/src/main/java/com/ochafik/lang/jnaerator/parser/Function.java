@@ -36,6 +36,7 @@ public class Function extends Declaration implements Declarator.MutableByDeclara
 	final List<Arg> args = new ArrayList<Arg>();
     final List<TypeRef> thrown = new ArrayList<TypeRef>();
 	final List<FunctionCall> initializers = new ArrayList<FunctionCall>();
+    boolean throws_;
 	Statement.Block body;
 	Type type;
 
@@ -54,6 +55,15 @@ public class Function extends Declaration implements Declarator.MutableByDeclara
 	public enum Type {
 		CFunction, ObjCMethod, CppMethod, JavaMethod, StaticInit
 	}
+
+    public boolean getThrows() {
+        return throws_;
+    }
+
+    public void setThrows(boolean throws_) {
+        this.throws_ = throws_;
+    }
+    
 
 	public void setInitializers(List<FunctionCall> initializers) {
 		changeValue(this, this.initializers, initializers);

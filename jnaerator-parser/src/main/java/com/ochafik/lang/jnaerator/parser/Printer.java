@@ -250,9 +250,19 @@ public class Printer implements Visitor {
             }
             append("(").implode(e.getArgs(), ", ").append(")");
 
-            if (!e.getThrown().isEmpty())
-                append(" throws ").implode(e.getThrown(), ", ");
-
+            switch (e.getType()) {
+                case JavaMethod:
+                    if (!e.getThrown().isEmpty())
+                        append(" throws ").implode(e.getThrown(), ", ");
+                    break;
+                default:
+                    if (e.getThrows()) {
+                        append(" throw(");
+                        implode(e.getThrown(), ", ");
+                        append(")");
+                    }
+            }
+            
             if (!e.getInitializers().isEmpty())
                 append(" : ").implode(e.getInitializers(), ", ");
 

@@ -836,9 +836,9 @@ scope ModContext;
 		'{'
 			(
 				(
-					'public' { $struct.setNextMemberVisibility(Struct.MemberVisibility.Public); } | 
-					'private' { $struct.setNextMemberVisibility(Struct.MemberVisibility.Private); } | 
-					'protected' { $struct.setNextMemberVisibility(Struct.MemberVisibility.Protected); } 
+					{ next("public") }? IDENTIFIER { $struct.setNextMemberVisibility(Struct.MemberVisibility.Public); } | 
+					{ next("private") }? IDENTIFIER { $struct.setNextMemberVisibility(Struct.MemberVisibility.Private); } | 
+					{ next("protected") }? IDENTIFIER { $struct.setNextMemberVisibility(Struct.MemberVisibility.Protected); } 
 				) ':' |
 				{ next("friend") }? IDENTIFIER friend=declaration ';' {
 					$struct.addDeclaration(new FriendDeclaration(friend.declaration));
@@ -911,7 +911,7 @@ scope CurrentClass;
 						( m2=modifiers { modifiers.addAll($m2.modifiers); } )?
 						(
 							':'
-							'public'?//m3=modifiers
+							( { next("public", "private", "virtual") }? IDENTIFIER )?//m3=modifiers
 							parent=qualifiedIdentifier
 						)? 
 						nb=structBody {
@@ -975,11 +975,13 @@ scope Symbols;
 				$function.setInitializers($s.initializers);
 				$function.setType(Function.Type.CppMethod);
 			}
+			$function.setThrows($s.thrown != null);
+			$function.setThrown($s.thrown);
 			$function.setBody($s.body);
 		}
 	;
 
-functionDeclarationSuffix returns [List<Arg> args, List<Modifier> postModifiers, List<FunctionCall> initializers, Block body]
+functionDeclarationSuffix returns [List<Arg> args, List<Modifier> postModifiers, List<FunctionCall> initializers, Block body, List<TypeRef> thrown]
 	:	 
 		{
 			$initializers = new ArrayList<FunctionCall>();
@@ -988,6 +990,24 @@ functionDeclarationSuffix returns [List<Arg> args, List<Modifier> postModifiers,
 			$args = $argList.args;
 		}
 		( postMods=modifiers { $postModifiers = $postMods.modifiers; } )?
+		(
+			{ next("throw") }? IDENTIFIER {
+				$thrown = new ArrayList<TypeRef>();
+			}
+			'('
+				(
+					t1=mutableTypeRef {
+						$thrown.add($t1.type);
+					}
+					(
+						','
+						tx=mutableTypeRef {
+							$thrown.add($tx.type);
+						}
+					)*
+				)?
+			')'
+		)?					
 		(
 			':'
 			i1=constructorInitializer { $initializers.add($i1.init); }

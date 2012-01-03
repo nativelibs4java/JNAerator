@@ -1,7 +1,5 @@
 org/bridj/AbstractBridJRuntime.class
 org/bridj/AbstractIntegral.class
-org/bridj/AndroidClassDefiner.class
-org/bridj/AndroidSupport.class
 org/bridj/BitFields$1.class
 org/bridj/BitFields$2.class
 org/bridj/BitFields$3.class
@@ -343,7 +341,6 @@ org/objectweb/asm/AnnotationVisitor.class
 org/objectweb/asm/AnnotationWriter.class
 org/objectweb/asm/Attribute.class
 org/objectweb/asm/ByteVector.class
-org/objectweb/asm/ClassAdapter.class
 org/objectweb/asm/ClassReader.class
 org/objectweb/asm/ClassVisitor.class
 org/objectweb/asm/ClassWriter.class
@@ -351,10 +348,10 @@ org/objectweb/asm/Edge.class
 org/objectweb/asm/FieldVisitor.class
 org/objectweb/asm/FieldWriter.class
 org/objectweb/asm/Frame.class
+org/objectweb/asm/Handle.class
 org/objectweb/asm/Handler.class
 org/objectweb/asm/Item.class
 org/objectweb/asm/Label.class
-org/objectweb/asm/MethodAdapter.class
 org/objectweb/asm/MethodVisitor.class
 org/objectweb/asm/MethodWriter.class
 org/objectweb/asm/Opcodes.class
