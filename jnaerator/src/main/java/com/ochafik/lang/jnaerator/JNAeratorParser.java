@@ -136,8 +136,8 @@ public class JNAeratorParser {
                 sourceFilesOut.add(sourceFile);
             } catch (Throwable ex) {
                 ex.printStackTrace();
-                originalErr.println("Exception for " + slice.file + " at line " + slice.line + ":" + e);
-                e.printStackTrace(originalErr);
+                originalErr.println("Exception for " + slice.file + " at line " + slice.line + ":" + ex);
+                ex.printStackTrace(originalErr);
             }
         }
     }
