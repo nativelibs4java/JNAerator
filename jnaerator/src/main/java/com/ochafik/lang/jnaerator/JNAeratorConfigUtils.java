@@ -310,8 +310,7 @@ public class JNAeratorConfigUtils {
 			//_CPPUNWIND
 			
 		} else {
-            config.preprocessorConfig.includeStrings.add("#define __attribute__(x)\n");
-			config.preprocessorConfig.macros.put("__GNUC__", null);
+            config.preprocessorConfig.macros.put("__GNUC__", null);
 			
 			if (SystemUtils.isMacOSX()) {
 				config.preprocessorConfig.macros.put("TARGET_API_MAC_OSX", null);
@@ -330,7 +329,7 @@ public class JNAeratorConfigUtils {
 				}
 			};
 		}
-		
+        config.preprocessorConfig.includeStrings.add(0, "#define __attribute__(x)\n");
 		
 		JNAeratorConfigUtils.autoConfigureArchitecture(config);
 	}
