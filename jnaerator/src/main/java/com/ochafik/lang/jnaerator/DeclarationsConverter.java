@@ -113,7 +113,7 @@ public class DeclarationsConverter {
 		callbackStruct.setTag(ident(chosenName));
 		if (!result.config.noComments)
 			callbackStruct.addToCommentBefore(comel.getCommentBefore(), comel.getCommentAfter(), getFileCommentContent(comel));
-		convertFunction(function, new Signatures(), true, callbackStruct, callerLibraryName);
+		convertFunction(function, new Signatures(), true, callbackStruct, callerLibraryName, -1);
 		for (Declaration d : callbackStruct.getDeclarations()) {
 			if (d instanceof Function) {
 				callbackStruct.addAnnotations(callbackStruct.getAnnotations());
@@ -602,7 +602,7 @@ public class DeclarationsConverter {
 	void throwBadRuntime() {
         throw new RuntimeException("Unhandled runtime : " + result.config.runtime.name());
     }
-	public void convertFunction(Function function, Signatures signatures, boolean isCallback, final DeclarationsHolder out, final Identifier libraryClassName) {
+	public void convertFunction(Function function, Signatures signatures, boolean isCallback, final DeclarationsHolder out, final Identifier libraryClassName, int iConstructor) {
 		if (result.config.functionsAccepter != null && !result.config.functionsAccepter.adapt(function))
 			return;
 		
@@ -626,6 +626,9 @@ public class DeclarationsConverter {
 		functionName = result.typeConverter.getValidJavaMethodName(functionName);
 		if (functionName == null)
 			return;
+        
+        //if (functionName.equals("operator"))
+        //    functionName
 
 		String sig = function.computeSignature(false);
 
@@ -674,7 +677,7 @@ public class DeclarationsConverter {
                     convertJNAFunction(function, signatures, isCallback, objOut, libraryClassName, sig, functionName, library);
                     break;
                 case BridJ:
-                    convertBridJFunction(function, signatures, isCallback, objOut, libraryClassName, sig, functionName, library);
+                    convertBridJFunction(function, signatures, isCallback, objOut, libraryClassName, sig, functionName, library, iConstructor);
                     break;
                 default:
                     throwBadRuntime();
@@ -929,7 +932,7 @@ public class DeclarationsConverter {
 		}
     }
 
-    private void convertBridJFunction(Function function, Signatures signatures, boolean isCallback, DeclarationsHolder out, Identifier libraryClassName, String sig, Identifier functionName, String library) throws UnsupportedConversionException {
+    private void convertBridJFunction(Function function, Signatures signatures, boolean isCallback, DeclarationsHolder out, Identifier libraryClassName, String sig, Identifier functionName, String library, int iConstructor) throws UnsupportedConversionException {
 		Element parent = function.getParentElement();
     	MemberVisibility visibility = function.getVisibility();
     	boolean isPublic = visibility == MemberVisibility.Public || function.hasModifier(ModifierType.Public);
@@ -939,10 +942,8 @@ public class DeclarationsConverter {
     	if (isInStruct && result.config.skipPrivateMembers && (isPrivate || !isPublic && !isProtected))
         	return;
         boolean isStatic = function.hasModifier(ModifierType.Static);
-		
-//        Function typedMethod = new Function(Type.JavaMethod, ident(functionName), null);
-//        typedMethod.addModifiers(ModifierType.Public, isStatic ? ModifierType.Static : null);
-        
+		boolean isConstructor = iConstructor != -1;
+            
         Function nativeMethod = new Function(Type.JavaMethod, ident(functionName), null);
         
         nativeMethod.addModifiers(
@@ -958,12 +959,11 @@ public class DeclarationsConverter {
 				nativeMethod.addAnnotation(new Annotation(mgc, "(\"" + function.getName() + "\")"));
 			}
 		}
-        //(TypeRef valueType, Identifier libraryClassName, Expression structPeerExpr, Expression structIOExpr, Expression valueExpr, int fieldIndex, int bits) throws UnsupportedConversionException {
-        NL4JConversion retType = result.typeConverter.convertTypeToNL4J(function.getValueType(), libraryClassName, null, null, -1, -1);
-//        typedMethod.setValueType(retType.getTypedTypeRef());
-//        retType.annotateRawType(nativeMethod).setValueType(retType.getRawType());
-		retType.annotateTypedType(nativeMethod);//.getTypedTypeRef())));
-        nativeMethod.setValueType(retType.typeRef);
+        if (!isConstructor) {
+            NL4JConversion retType = result.typeConverter.convertTypeToNL4J(function.getValueType(), libraryClassName, null, null, -1, -1);
+            retType.annotateTypedType(nativeMethod);//.getTypedTypeRef())));
+            nativeMethod.setValueType(retType.typeRef);
+        }
 
         Map<String, NL4JConversion> argTypes = new LinkedHashMap<String, NL4JConversion>();
 
@@ -971,6 +971,13 @@ public class DeclarationsConverter {
         int iArg = 1;
         Set<String> argNames = new TreeSet<String>();
 
+        List<Expression> superConstructorArgs = null;
+        if (isConstructor) {
+            superConstructorArgs = new ArrayList<Expression>();
+            superConstructorArgs.add(cast(typeRef(Void.class), nullExpr()));
+            superConstructorArgs.add(expr(iConstructor));
+        }
+        
         for (Arg arg : function.getArgs()) {
 
             if (arg.isVarArg()) {
@@ -984,20 +991,14 @@ public class DeclarationsConverter {
                 NL4JConversion argType = result.typeConverter.convertTypeToNL4J(arg.getValueType(), libraryClassName, null, null, -1, -1);
                 argTypes.put(argName, argType);
                 nativeMethod.addArg(argType.annotateTypedType(new Arg(argName, argType.typeRef)));//.getTypedTypeRef())));
+                
+                if (isConstructor) {
+                    superConstructorArgs.add(varRef(argName));
+                }
             }
             iArg++;
         }
-//
-        String //natFullSig = nativeMethod.computeSignature(true), 
-        	natSig = nativeMethod.computeSignature(false);
-//        String , typFullSig = typedMethod.computeSignature(true), typSig = typedMethod.computeSignature(false);
-//
-//        if (!natFullSig.equals(typFullSig)) {
-//            if (natSig.equals(typSig)) {
-//                nativeMethod.setName(ident(functionName + "_native"));
-//                natSig = nativeMethod.computeSignature(false);
-//            }
-//        }
+        String natSig = nativeMethod.computeSignature(false);
 
         Identifier javaMethodName = signatures.findNextMethodName(natSig, functionName);
         if (!javaMethodName.equals(functionName)) {
@@ -1006,11 +1007,10 @@ public class DeclarationsConverter {
         if (!isCallback && !javaMethodName.equals(functionName))
             nativeMethod.addAnnotation(new Annotation(Name.class, expr(functionName.toString())));
 
-        //if (!signatures.methodsSignatures.add(natSig))
-        //    return;
-
         Block convertedBody = null;
-        if (result.config.convertBodies && function.getBody() != null)
+        if (isConstructor) {
+            convertedBody = block(stat(methodCall("super", superConstructorArgs.toArray(new Expression[superConstructorArgs.size()]))));
+        } else if (result.config.convertBodies && function.getBody() != null)
         {
             try {
                 Pair<Element, List<Declaration>> bodyAndExtraDeclarations = result.bridjer.convertToJava(function.getBody(), libraryClassName);
@@ -1028,78 +1028,6 @@ public class DeclarationsConverter {
         else
             nativeMethod.setBody(convertedBody);
         
-//        if (!natFullSig.equals(typFullSig)) {
-//            
-//            if (!signatures.methodsSignatures.add(typSig))
-//                return;
-//
-//            nativeMethod.addAnnotation(new Annotation(Deprecated.class));
-//            String tempPeerVarName = "tempPeers";
-//            List<Expression> tempPeerExprs = new ArrayList<Expression>();
-//            List<Expression> argExprs = new ArrayList<Expression>();
-//
-//            for (Map.Entry<String, TypeConversion.NL4JTypeConversion> e : argTypes.entrySet()) {
-//                TypeConversion.NL4JTypeConversion argType = e.getValue();
-//                String argName = e.getKey();
-//
-//                switch (argType.type) {
-//                    case Pointer:
-//                        argExprs.add(methodCall(varRef(tempPeerVarName), MemberRefStyle.Dot, "get", expr(tempPeerExprs.size())));
-//                        tempPeerExprs.add(varRef(argName));
-//                        break;
-//                    case NativeLong:
-//                    case NativeSize:
-//                    case Primitive:
-//                        argExprs.add(varRef(argName));
-//                        break;
-//                    case Enum:
-//                        argExprs.add(new Expression.Cast(typeRef(Integer.TYPE), methodCall(varRef(argName), MemberRefStyle.Dot, "value")));
-//                        break;
-//                    default:
-//                        throw new UnsupportedConversionException(function, "Cannot convert argument " + argName + " of type " + argType.getTypedTypeRef());
-//                }
-//            }
-//            Expression call = methodCall(nativeMethod.getName().toString(), argExprs.toArray(new Expression[argExprs.size()]));
-//            Statement callStat;
-//            switch (retType.type) {
-//                case Pointer:
-//                    callStat = new Statement.Return(methodCall(expr(typeRef(result.config.runtime.pointerClass)), MemberRefStyle.Dot, "pointerToAddress", call));
-//                    break;
-//                case NativeLong:
-//                case NativeSize:
-//                case Primitive:
-//                    callStat = new Statement.Return(call);
-//                    break;
-//                case Enum:
-//                    callStat = new Statement.Return(methodCall(expr(retType.getTypedTypeRef().clone()), MemberRefStyle.Dot, "fromValue", call));
-//                    break;
-//                case Void:
-//                    callStat = stat(call);
-//                    break;
-//                default:
-//                    throw new UnsupportedConversionException(function, "Cannot convert return argument of type " + retType.getTypedTypeRef());
-//            }
-//            if (tempPeerExprs.isEmpty())
-//                typedMethod.setBody(block(
-//                    callStat
-//                ));
-//            else
-//                typedMethod.setBody(block(
-//                    stat(
-//                        typeRef(TempPointers.class),
-//                        tempPeerVarName,
-//                        new Expression.New(
-//                            typeRef(TempPointers.class),
-//                            tempPeerExprs.toArray(new Expression[tempPeerExprs.size()])
-//                        )
-//                    ),
-//                    new Statement.Try(
-//                        callStat,
-//                        stat(methodCall(varRef(tempPeerVarName), MemberRefStyle.Dot, "release"))
-//                    )
-//                ));
-//            out.addDeclaration(typedMethod);
-//        }
         out.addDeclaration(nativeMethod);
     }
 
@@ -1168,7 +1096,7 @@ public class DeclarationsConverter {
 		if (functions != null) {
 			//System.err.println("FUNCTIONS " + functions);
 			for (Function function : functions) {
-				convertFunction(function, signatures, false, out, libraryClassName);
+				convertFunction(function, signatures, false, out, libraryClassName, -1);
 			}
 		}
 	}
@@ -1295,7 +1223,7 @@ public class DeclarationsConverter {
 					if (library == null)
 						continue;
 					List<Declaration> decls = new ArrayList<Declaration>();
-					convertFunction(f, childSignatures, false, new ListWrapper(decls), callerLibraryClass);
+					convertFunction(f, childSignatures, false, new ListWrapper(decls), callerLibraryClass, -1);
 					for (Declaration md : decls) {
 						if (!(md instanceof Function))
 							continue;
@@ -1451,14 +1379,18 @@ public class DeclarationsConverter {
 
         //    private static StructIO<MyStruct> io = StructIO.getInstance(MyStruct.class);
         
-		structJavaClass.addDeclaration(new Function(Type.JavaMethod, ident(structName), null).setBody(block(stat(methodCall("super")))).addModifiers(ModifierType.Public));
-		String ptrName = "pointer";
-		structJavaClass.addDeclaration(new Function(Type.JavaMethod, ident(structName), null, new Arg(ptrName, typeRef(result.config.runtime.pointerClass))).setBody(block(stat(methodCall("super", varRef(ptrName))))).addModifiers(ModifierType.Public));
+        Function defaultConstructor = new Function(Type.JavaMethod, ident(structName), null).setBody(block(stat(methodCall("super")))).addModifiers(ModifierType.Public);
+        if (childSignatures.methodsSignatures.add(defaultConstructor.computeSignature(false)))
+            structJavaClass.addDeclaration(defaultConstructor);
+        
+        //todo remove this :
+		//String ptrName = "pointer";
+		//structJavaClass.addDeclaration(new Function(Type.JavaMethod, ident(structName), null, new Arg(ptrName, typeRef(result.config.runtime.pointerClass))).setBody(block(stat(methodCall("super", varRef(ptrName))))).addModifiers(ModifierType.Public));
 
         if (isUnion)
             structJavaClass.addAnnotation(new Annotation(result.config.runtime.typeRef(JNAeratorConfig.Runtime.Ann.Union)));
 
-        int iVirtual = 0;
+        int iVirtual = 0, iConstructor = 0;
 		//List<Declaration> children = new ArrayList<Declaration>();
 		for (Declaration d : struct.getDeclarations()) {
             //if (isUnion)
@@ -1484,24 +1416,40 @@ public class DeclarationsConverter {
 					}
 				} else if ((result.config.runtime == JNAeratorConfig.Runtime.BridJ || result.config.genCPlusPlus) && d instanceof Function) {
 					Function f = (Function) d;
-//					boolean isStatic = ModifierType.Static.isContainedBy(modifiers);
+                    
 					boolean isVirtual = f.hasModifier(ModifierType.Virtual);
-                    String library = result.getLibrary(struct);
+                    boolean isConstructor = f.getName().equals(structName) && (f.getValueType() == null || f.getValueType().toString().equals("void"));
+                    if (isConstructor && f.getArgs().isEmpty())
+                        continue; // default constructor was already generated
+                    
+					String library = result.getLibrary(struct);
 					if (library == null)
 						continue;
 					List<Declaration> decls = new ArrayList<Declaration>();
-					convertFunction(f, childSignatures, false, new ListWrapper(decls), callerLibraryClass);
-					for (Declaration md : decls) {
+					convertFunction(f, childSignatures, false, new ListWrapper(decls), callerLibraryClass, isConstructor ? iConstructor : -1);
+                    for (Declaration md : decls) {
 						if (!(md instanceof Function))
 							continue;
 						Function method = (Function) md;
-						//method.addModifiers(ModifierType.Public, isStatic ? ModifierType.Static : null, ModifierType.Native);
+                        boolean commentOut = false;
 						if (isVirtual)
 							method.addAnnotation(new Annotation(result.config.runtime.typeRef(JNAeratorConfig.Runtime.Ann.Virtual), expr(iVirtual)));
-						structJavaClass.addDeclaration(method);
+                        else if (method.getValueType() == null) {
+                            method.addAnnotation(new Annotation(result.config.runtime.typeRef(JNAeratorConfig.Runtime.Ann.Constructor), expr(iConstructor)));
+                            isConstructor = true;
+                        }
+                        if (method.getName().toString().equals("operator"))
+                            commentOut = true;
+                        
+                        if (commentOut)
+                            structJavaClass.addDeclaration(new EmptyDeclaration(method.toString()));
+                        else
+                            structJavaClass.addDeclaration(method);
 					}
 					if (isVirtual)
 						iVirtual++;
+                    if (isConstructor)
+                        iConstructor++;
 				}
 			}
 		}
