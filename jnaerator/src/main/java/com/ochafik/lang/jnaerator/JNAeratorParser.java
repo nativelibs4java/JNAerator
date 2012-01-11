@@ -95,7 +95,6 @@ public class JNAeratorParser {
 					//originalOut.println("Split: " + line.substring("#line".length()).trim());
 					String content = currentBuffer.toString();
 					slices.add(new Slice(lastFile, lastStart, content));
-					//sourceFiles.add(newObjCppParser(content).sourceFile().sourceFile);
 				}
 				currentBuffer.setLength(0);
 				//currentBuffer.append(currentEmptyLines);
@@ -115,80 +114,139 @@ public class JNAeratorParser {
 		if (sliceGotContent) {
 			String content = currentBuffer.toString();
 			slices.add(new Slice(lastFile, lastStart, content));
-			//sourceFiles.add(newObjCppParser(content).sourceFile().sourceFile);
 		}
 		return slices;
 	}
+    
+    static Callable<SourceFile> createParsingCallable(final JNAeratorConfig config, final TypeConversion typeConverter, final String source, final Set<String> topLevelTypeDefs, boolean isFull) {
+        return new Callable<SourceFile>() {
 
-	private static void parseSlices(final JNAeratorConfig config, final TypeConversion typeConverter, SourceFiles sourceFilesOut, List<Slice> slices, PrintStream originalOut, PrintStream originalErr, boolean multithreaded) throws InterruptedException {
-        final Set<String> topLevelTypeDefs = Collections.synchronizedSet(new HashSet<String>());
-
-        //ExecutorService executorService = Executors.newFixedThreadPool(multithreaded ? Runtime.getRuntime().availableProcessors() * 2 : 1);
-        if (slices.isEmpty())
-            originalOut.println("Slices are empty with the following config : \n" + DebugUtils.toString(config));
-
-        for (final Slice slice : slices) {
-            try {
-                ObjCppParser parser = newObjCppParser(typeConverter, slice.text, config.verbose);
-                parser.topLevelTypeIdentifiers = topLevelTypeDefs;
-                SourceFile sourceFile = parser.sourceFile();//.sourceFile;
-                //sourceFile.setElementFile(slice.file);
-                sourceFilesOut.add(sourceFile);
-            } catch (Throwable ex) {
-                ex.printStackTrace();
-                originalErr.println("Exception for " + slice.file + " at line " + slice.line + ":" + ex);
-                ex.printStackTrace(originalErr);
+            public SourceFile call() throws Exception {
+                PrintStream originalOut = System.out, originalErr = System.err;
+                ByteArrayOutputStream bout = new ByteArrayOutputStream();
+                PrintStream pout = new PrintStream(bout);
+                System.setOut(pout);
+                System.setErr(pout);
+                
+                Exception error = null;
+                try {
+                    ObjCppParser parser = newObjCppParser(typeConverter, source, config.verbose, pout);
+                    if (topLevelTypeDefs != null)
+                        parser.topLevelTypeIdentifiers = topLevelTypeDefs;
+                    SourceFile sourceFile = parser.sourceFile();//.sourceFile;
+                    if (sourceFile == null)
+                        throw new RuntimeException("parser.sourceFile() returned null");
+                    return sourceFile;
+                } catch (RuntimeException ex) {
+                    if (ex.getCause() instanceof InterruptedException)
+                        throw (InterruptedException)ex.getCause();
+                    
+                    error = ex;
+                    
+                } finally {
+                    System.setOut(originalOut);
+                    System.setErr(originalErr);
+                }
+                
+                pout.flush();
+                String errorOut = new String(bout.toByteArray()).trim();
+                if (errorOut.length() > 0 && config.verbose)
+                    WriteText.writeText(errorOut, new File("fullParsing.errors.txt"));
+                
+                throw new ParseError(source, errorOut, error);
+                
             }
+            
+        };
+    }
+    public static class ParseError extends RuntimeException {
+        private final String source;
+        private final String errors;
+
+        public ParseError(String source, String errors, Throwable cause) {
+            super("Failed to parse because of " + cause, cause);
+            this.source = source;
+            this.errors = errors;
         }
+
+        public String getErrors() {
+            return errors;
+        }
+
+        public String getSource() {
+            return source;
+        }
+        
     }
 
 	public static SourceFiles parse(JNAeratorConfig config, TypeConversion typeConverter, MacroUseCallback macrosDependenciesOut) throws IOException, LexerException {
 		SourceFiles sourceFiles = new SourceFiles();
-		String sourceContent = PreprocessorUtils.preprocessSources(config, sourceFiles.defines, config.verbose, typeConverter, macrosDependenciesOut);
+        
+        String sourceContent = PreprocessorUtils.preprocessSources(config, sourceFiles.defines, config.verbose, typeConverter, macrosDependenciesOut);
 		
-		PrintStream originalOut = System.out, originalErr = System.err;
-		ByteArrayOutputStream bout = new ByteArrayOutputStream();
-		PrintStream pout = new PrintStream(bout);
-		System.setOut(pout);
-		System.setErr(pout);
-		try {
-			if (!config.parseInChunks) {
-				// easier to debug but any error might ruin all the rest of the parsing
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        try {
+            if (!config.parseInChunks) {
+                try {
+                    sourceFiles.add(executor.submit(createParsingCallable(config, typeConverter, sourceContent, null, true)).get(config.fullParsingTimeout, TimeUnit.MILLISECONDS));
+                    return sourceFiles;
+                } catch (Throwable ex) {
+                    System.err.println("Parsing failed : " + ex);
+                }
+
+                System.gc();
+            }
+			System.err.println("Now trying to parse sources slice by slice.");
+	
+	
+			// compartimented parsing (at each change of file)
+			List<Slice> slices = cutSourceContentInSlices(sourceContent, System.out);
+			if (config.verbose)
+				System.out.println("Now parsing " + slices.size() + " slices");
+	
+			final Set<String> topLevelTypeDefs = Collections.synchronizedSet(new HashSet<String>());
+			boolean firstFailure = true;
+			for (Slice slice : slices) {
 				try {
-					ObjCppParser parser = newObjCppParser(typeConverter, sourceContent, config.verbose);
-					SourceFile sourceFile = parser.sourceFile();//.sourceFile;
-					sourceFiles.add(sourceFile);
-				} catch (Exception ex) {
-					ex.printStackTrace();
+					sourceFiles.add(executor.submit(createParsingCallable(config, typeConverter, sourceContent, topLevelTypeDefs, false)).get(config.sliceParsingTimeout, TimeUnit.MILLISECONDS));
+				} catch (Throwable ex) {
+					if (firstFailure) {
+						WriteText.writeText(slice.text, new File("splitParsing.firstFailure.source.txt"));
+						if (ex.getCause() instanceof ParseError) {
+							ParseError pe = (ParseError)ex.getCause();
+							WriteText.writeText(pe.getErrors(), new File("splitParsing.firstFailure.errors.txt"));
+							//ex.printStackTrace();
+						}
+						firstFailure = false;
+					}
+					System.gc();
+					System.err.println("Parsing failed : " + ex);
 				}
-			} else {
-				// compartimented parsing (at each change of file)
-				List<Slice> slices = cutSourceContentInSlices(sourceContent, originalOut);
-				if (config.verbose)
-					originalOut.println("Now parsing " + slices.size() + " text blocks");
-				parseSlices(config, typeConverter, sourceFiles, slices, originalOut, originalErr, false);
-			} 
-		} catch (InterruptedException e) {
-			e.printStackTrace();
+			}
+			return sourceFiles;
 		} finally {
-			pout.flush();
-			System.setOut(originalOut);
-			System.setErr(originalErr);
-			String errs = new String(bout.toByteArray()).trim();
-			if (errs.length() > 0 && config.verbose)
-				WriteText.writeText(errs, new File("out.errors.txt"));
+			executor.shutdown();
 		}
-		return sourceFiles;
 	}
-	static ObjCppParser newObjCppParser(TypeConversion typeConverter, String s, final boolean verbose) throws IOException {
+	static ObjCppParser newObjCppParser(TypeConversion typeConverter, String s, final boolean verbose, final PrintStream errorOut) throws IOException {
 		ObjCppParser parser = new ObjCppParser(
-				new CommonTokenStream(
-						new ObjCppLexer(
-								new ANTLRReaderStream(new StringReader(s))
-						)
-				)
-//				, new DummyDebugEventListener()
+            new CommonTokenStream(
+                new ObjCppLexer(
+                    new ANTLRReaderStream(new StringReader(s))
+                )
+            )
+//		    , new DummyDebugEventListener()
 		) {
+
+            @Override
+            public void emitErrorMessage(String msg) {
+                if (errorOut == null) {
+//                    if (verbose)
+//                        super.emitErrorMessage(msg);
+                } else
+                    errorOut.println(msg);
+            }
+            
 			@Override
 			public void reportError(RecognitionException arg0) {
 				if (verbose)

@@ -267,7 +267,6 @@ public class CSlicer {
     static String preprocess(File source) throws IOException, LexerException {
         JNAeratorConfig config = new JNAeratorConfig();
         JNAeratorConfigUtils.autoConfigure(config);
-        setParseInOneChunk(config);
         config.preprocessorConfig.includes.add("C:\\program files\\Microsoft SDKs\\Windows\\v7.0A\\Include");
         config.preprocessorConfig.includes.add("C:\\program files\\Microsoft Visual Studio 10.0\\VC\\include");
         //config.preprocessorConfig.includeStrings.add(source);
@@ -276,21 +275,10 @@ public class CSlicer {
         String pre = PreprocessorUtils.preprocessSources(config, Collections.EMPTY_LIST, false, result.typeConverter, null);
         return pre;
     }
-    static void setParseInOneChunk(JNAeratorConfig config) {
-        config.parseInOneChunk = true;
-//        try {
-//            Field f = JNAeratorConfig.class.getField("parseInOneChunk");
-//            f.setAccessible(true);
-//            f.set(null, true);
-//        } catch (Throwable ex) {
-//            Logger.getLogger(Tester.class.getName()).log(Level.SEVERE, null, ex);
-//        }
-    }
-    static List<Declaration> parseDeclarations(String source) throws IOException, LexerException {
+    static List<Declaration> parseDeclarations(String source) throws IOException, LexerException, InterruptedException {
         JNAeratorConfig config = new JNAeratorConfig();
         JNAeratorConfigUtils.autoConfigure(config);
         //config.noCPlusPlus = true;
-        setParseInOneChunk(config);
         config.preprocessorConfig.includeStrings.add(source);
         Result result = new Result(config, null, null);
         SourceFiles parse = JNAeratorParser.parse(config, result.typeConverter, null);

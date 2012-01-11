@@ -130,7 +130,20 @@ public class JNAeratorConfig {
 
         public static final Runtime DEFAULT = BridJ;//JNAerator;
         public enum Ann {
-            Bits, FastCall, Mangling, ObjCBlock, This, ThisCall, Length, ByValue, Field, Virtual, Symbol, Name, Union,
+            Bits, 
+            FastCall, 
+            Mangling, 
+            ObjCBlock, 
+            This, 
+            ThisCall, 
+            Length, 
+            ByValue, 
+            Field, 
+            Symbol, 
+            Name, 
+            Union,
+            Virtual,
+            Constructor,
             IID
         }
         Runtime(boolean hasFastStructs, 
@@ -216,6 +229,7 @@ public class JNAeratorConfig {
 		public boolean preprocess = true;
 	}
 	
+    public long fullParsingTimeout = 5000, sliceParsingTimeout = 1000;
 	public final JNAeratorConfig.PreprocessorConfig preprocessorConfig = new JNAeratorConfig.PreprocessorConfig();
 	public boolean followIncludes;
 	boolean microsoftCOM;

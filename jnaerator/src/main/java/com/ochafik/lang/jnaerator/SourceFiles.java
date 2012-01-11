@@ -30,7 +30,15 @@ import com.ochafik.util.string.StringUtils;
 public class SourceFiles extends Element {
 	public List<Define> defines = new ArrayList<Define>();
 	public List<SourceFile> sourceFiles = new ArrayList<SourceFile>();
+
+    public SourceFiles() {
+    }
 	
+    public SourceFiles(SourceFile sourceFile) {
+        add(sourceFile);
+    }
+	
+    
 	@Override
 	public SourceFiles clone() {
 		return (SourceFiles) super.clone();

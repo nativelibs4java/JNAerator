@@ -175,6 +175,7 @@ public class JNAerator {
 
     static Logger logger = Logger.getLogger(JNAerator.class.getName());
     public static void main(String[] argsArray) {
+        //argsArray = new String[] { "/Users/ochafik/src/boost_1_48_0/config.jnaerator", "-v" };
         //argsArray = new String[] { "/Users/ochafik/bin/python/config.jnaerator" };
         //argsArray = new String[] { "/Users/ochafik/nativelibs4java/FFMpeg/src/main/jnaerator/config.jnaerator" };
         //argsArray = new String[] { "/Users/ochafik/nativelibs4java/Posix/src/main/jnaerator/config.jnaerator" };
@@ -911,7 +912,7 @@ public class JNAerator {
 						}
 						String text = "// @mangling " + dllExport.mangling + "\n" + 
 							dem + ";";
-						ObjCppParser parser = JNAeratorParser.newObjCppParser(result.typeConverter, text, false);//config.verbose);
+						ObjCppParser parser = JNAeratorParser.newObjCppParser(result.typeConverter, text, false, null);//config.verbose);
 						parser.setupScopes();
 						Declaration decl = parser.declarationEOF();
 						if (decl == null)
