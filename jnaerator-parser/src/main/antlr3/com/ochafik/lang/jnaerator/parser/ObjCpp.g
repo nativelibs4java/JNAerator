@@ -399,6 +399,7 @@ import static com.ochafik.lang.jnaerator.parser.StoredDeclarations.*;
 		public String getErrorMessage(RecognitionException e, String[] tokenNames) {
 		if (e instanceof NoViableAltException) {
 			NoViableAltException ne = (NoViableAltException)e;
+			checkInterrupt();
 			return "Failed to match any alternative with token " + ne.token + "\n\t" +
 				" File: " + getFile() + ":" + (ne.line + sourceLineDelta) + "\n\t" +
 				"Input: " + getSurroundings(ne.token, 5).replace('\n', ' ') + "\n\t" +
@@ -411,9 +412,11 @@ import static com.ochafik.lang.jnaerator.parser.StoredDeclarations.*;
 	public String getTokenErrorDisplay(Token t) {
 		return t.toString();	
 	}
-	protected void checkInterrupt() {
+	protected boolean checkInterrupt() {
 		if (Thread.interrupted())
 			throw new RuntimeException(new InterruptedException());
+			
+		return true;
 	}
 }
 

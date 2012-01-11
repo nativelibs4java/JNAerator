@@ -57,6 +57,12 @@ public abstract class Element {
     
     protected Map<Object, Object> attributes;
 
+    public Element() {
+        if (Thread.interrupted())
+            throw new RuntimeException(new InterruptedException());
+    }
+
+    
     public Map<Object, Object> getAttributes() {
         return attributes == null ? Collections.EMPTY_MAP : Collections.unmodifiableMap(attributes);
     }
