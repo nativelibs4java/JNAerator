@@ -1280,6 +1280,9 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
                 	return conv;
                 }
                 
+                // TODO proper namespaces
+                valueName = valueName.resolveLastSimpleIdentifier();
+                
                 // Enums
                 if (valueType instanceof Enum)
                     conv.typeRef = findEnumRef((Enum)valueType, libraryClassName);
@@ -1319,7 +1322,7 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
         }
 
         if (valueType instanceof SimpleTypeRef && allowFakePointers) {
-            conv.typeRef = typeRef(result.getUndefinedType(libraryClassName, ((SimpleTypeRef)valueType).getName().clone()));
+            conv.typeRef = typeRef(result.getUndefinedType(libraryClassName, ((SimpleTypeRef)valueType).getName().resolveLastSimpleIdentifier().clone()));
             conv.isUndefined = true;
             return conv;
         }
