@@ -138,6 +138,7 @@ import com.sun.jna.ptr.LongByReference;
 import com.sun.jna.ptr.NativeLongByReference;
 import com.sun.jna.ptr.PointerByReference;
 import com.sun.jna.ptr.ShortByReference;
+import org.bridj.IntValuedEnum;
 
 public class TypeConversion implements ObjCppParser.ObjCParserHelper {
 
@@ -1281,7 +1282,8 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
                 }
                 
                 // TODO proper namespaces
-                valueName = valueName.resolveLastSimpleIdentifier();
+                if (valueName != null)
+                    valueName = valueName.resolveLastSimpleIdentifier();
                 
                 // Enums
                 if (valueType instanceof Enum)
@@ -1297,7 +1299,7 @@ public class TypeConversion implements ObjCppParser.ObjCParserHelper {
 	                	conv.getExpr = methodCall(structIOExpr.clone(), "getEnumField", thisRef(), expr(fieldIndex));//expr(typeRef(FlagSet.class)), "fromValue", methodCall(structPeerExpr.clone(), "getInt", expr(fieldIndex)), classLiteral(conv.typeRef.clone()));
                 	}
                 	conv.type = ConvType.Enum;
-                	conv.typeRef = typeRef(ident(ValuedEnum.class, expr(conv.typeRef)));
+                	conv.typeRef = typeRef(ident(IntValuedEnum.class, expr(conv.typeRef)));
                 	return conv;
                 }
                 
