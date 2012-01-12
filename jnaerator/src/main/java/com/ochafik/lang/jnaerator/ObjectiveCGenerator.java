@@ -478,7 +478,7 @@ public class ObjectiveCGenerator {
 			if (d instanceof Function) {
 				Function f = (Function)d;
 				List<Declaration> decls = new ArrayList<Declaration>();
-				result.declarationsConverter.convertFunction(f, null, false, new DeclarationsHolder.ListWrapper(decls), fullClassName);
+				result.declarationsConverter.convertFunction(f, null, false, new DeclarationsHolder.ListWrapper(decls), fullClassName, -1);
 				
 				if (f.hasModifier(ModifierType.Static)) {
 					for (Declaration decl : decls) {
