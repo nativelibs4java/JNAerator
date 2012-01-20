@@ -61,6 +61,11 @@
 	<build>
 		<plugins>
 			<plugin>
+				<groupId>com.nativelibs4java</groupId>
+				<artifactId>maven-velocity-plugin</artifactId>
+			</plugin>
+			
+			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jar-plugin</artifactId>
 				<version>2.3.2</version>
@@ -79,15 +84,6 @@
 				<version>2.11</version>
 				<configuration>
 					<redirectTestOutputToFile>true</redirectTestOutputToFile>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>com.nativelibs4java</groupId>
-				<artifactId>maven-velocity-plugin</artifactId>
-				<configuration>
-					<properties>
-						<version>${version}</version>
-					</properties>
 				</configuration>
 			</plugin>
 		</plugins>
