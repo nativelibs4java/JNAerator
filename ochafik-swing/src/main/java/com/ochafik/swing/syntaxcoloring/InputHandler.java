@@ -33,7 +33,7 @@ import javax.swing.text.BadLocationException;
  *
  * @author Slava Pestov
  * @version $Id: InputHandler.java,v 1.14 1999/12/13 03:40:30 sp Exp $
- * @see org.gjt.sp.jedit.textarea.DefaultInputHandler
+ * @see DefaultInputHandler
  */
 @SuppressWarnings("unchecked")
 public abstract class InputHandler extends KeyAdapter
@@ -185,7 +185,7 @@ public abstract class InputHandler extends KeyAdapter
 
 	/**
 	 * Returns the name of the specified text area action.
-	 * @param listener The action
+	 * @param listener The action listener
 	 */
 	public static String getActionName(ActionListener listener)
 	{
@@ -238,7 +238,7 @@ public abstract class InputHandler extends KeyAdapter
 	/**
 	 * Grabs the next key typed event and invokes the specified
 	 * action with the key as a the action command.
-	 * @param action The action
+	 * @param listener The action listener
 	 */
 	public void grabNextKeyStroke(ActionListener listener)
 	{
