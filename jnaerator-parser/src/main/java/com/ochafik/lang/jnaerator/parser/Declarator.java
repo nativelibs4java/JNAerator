@@ -27,7 +27,7 @@ import java.util.TreeMap;
 import com.ochafik.lang.jnaerator.parser.Function.Type;
 
 /**
- * @see http://msdn.microsoft.com/en-us/library/4x7sfztk(VS.80).aspx
+ * @see <a href="http://msdn.microsoft.com/en-us/library/4x7sfztk(VS.80).aspx">MSDN Typedef Declarations</a>
  * @author ochafik
  *
  */

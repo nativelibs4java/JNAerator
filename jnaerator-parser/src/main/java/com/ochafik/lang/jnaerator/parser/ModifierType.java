@@ -28,7 +28,7 @@ import java.util.Map;
 import static com.ochafik.lang.jnaerator.parser.ModifierKind.*;
 
 /**
- * @see http://msdn.microsoft.com/en-us/library/dabb5z75.aspx
+ * @see <a href="http://msdn.microsoft.com/en-us/library/dabb5z75.aspx">MSDN __declspec</a>
  */
 public enum ModifierType implements Modifier {
 	__cdecl(of(CallingConvention)),
