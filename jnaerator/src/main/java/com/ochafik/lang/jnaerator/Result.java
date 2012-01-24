@@ -88,7 +88,9 @@ public class Result extends Scanner {
 		callbacksFullNames = new HashSet<Identifier>();
 
 	/**
-	 * @param aerator
+	 * @param config
+	 * @param classOutputter
+	 * @param feedback
 	 */
 	public Result(JNAeratorConfig config, ClassOutputter classOutputter, Feedback feedback) {
 		if (config == null)
