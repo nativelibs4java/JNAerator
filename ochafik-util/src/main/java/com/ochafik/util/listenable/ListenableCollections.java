@@ -276,7 +276,7 @@ public class ListenableCollections {
 	 * @param input input values that are to be transformed by the adapter
 	 * @param mapper converter from the input type to the output type
 	 * @param threadsCount 0 for no multithreading, X > 0 for X threads, -X for X threads per-core 
-	 * @return
+	 * @return MapResult object
 	 */
 	public static <U, V> MapResult<U, V> map(Collection<U> input, final Adapter<U, V> mapper, int threadsCount) {
 		if (threadsCount < 0)
