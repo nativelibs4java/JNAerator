@@ -40,7 +40,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * @see http://landonf.bikemonkey.org/static/soylatte/
+ * @see <a href="http://landonf.bikemonkey.org/static/soylatte/">SoyLatte: Java 6 Port for Mac OS X</a>
  * @author ochafik
  *
  */
