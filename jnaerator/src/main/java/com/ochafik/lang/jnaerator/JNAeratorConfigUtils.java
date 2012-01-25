@@ -268,6 +268,8 @@ public class JNAeratorConfigUtils {
 		config.preprocessorConfig.macros.put("NDEBUG", null);
 
 		config.preprocessorConfig.macros.put("__STDC__", null);
+		config.preprocessorConfig.macros.put("HAVE_PROTOTYPES", null);
+		config.preprocessorConfig.macros.put("STDC_HEADERS", null);
 
 		config.preprocessorConfig.includes.addAll(getDefaultIncludePath(config.verbose));//JNAeratorConfigUtils.DEFAULT_INCLUDE_PATH);
 		config.preprocessorConfig.frameworksPath.addAll(getDefaultFrameworkPath(config.verbose));//JNAeratorConfigUtils.DEFAULT_FRAMEWORKS_PATH);
