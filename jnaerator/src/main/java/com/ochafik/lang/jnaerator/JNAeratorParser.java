@@ -208,7 +208,7 @@ public class JNAeratorParser {
 			boolean firstFailure = true;
 			for (Slice slice : slices) {
 				try {
-					sourceFiles.add(executor.submit(createParsingCallable(config, typeConverter, sourceContent, topLevelTypeDefs, false)).get(config.sliceParsingTimeout, TimeUnit.MILLISECONDS));
+					sourceFiles.add(executor.submit(createParsingCallable(config, typeConverter, slice.text, topLevelTypeDefs, false)).get(config.sliceParsingTimeout, TimeUnit.MILLISECONDS));
 				} catch (Throwable ex) {
 					if (firstFailure) {
 						WriteText.writeText(slice.text, new File("splitParsing.firstFailure.source.txt"));
