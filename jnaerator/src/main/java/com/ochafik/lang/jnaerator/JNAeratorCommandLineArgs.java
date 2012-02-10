@@ -6,20 +6,12 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.NoSuchElementException;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;	
+import static org.bridj.Platform.*;
 
 public class JNAeratorCommandLineArgs {
-	
 	public static abstract class ArgsParser {
 		Map<PathType, List<File>> paths = new HashMap<PathType, List<File>>();
 		
@@ -195,7 +187,7 @@ public class JNAeratorCommandLineArgs {
 		ExtractionOut(		"-extractionOut", 		"Write the symbols extracted from libraries in a file (automatically set when ${Verbose} is used).", new ArgDef(Type.OutputFile, "outFile")),
 		BridgeSupportOutFile("-bridgeSupportOut", 	"Write the definitions extracted from bridgesupport files in a file (automatically set when ${Verbose} is used).", new ArgDef(Type.OutputFile, "outFile")),
 		WikiDoc(			"-wikiHelp",		 	"Output a wiki-friendly help"),
-		Arch(				"-arch",		 		"Define the current architecture for libraries (state variable)", new ArgDef(Type.String, "archName")),
+		Arch(				"-arch",		 		"Define the current architecture for libraries (state variable)", new ArgDef(Type.Enum, "archName", NativePlatform.class)),
 		MacrosOut(			"-macrosOut", 			"Write the preprocessor macros in a file (automatically set when ${Verbose} is used).", new ArgDef(Type.OutputFile, "outFile")),
 		NoPrimitiveArrays(	"-noPrimitiveArrays",	"Never output primitive arrays for function arguments (use NIO buffers instead)"),
 		File(				null,		 			"Any header (or directory containing headers at any level of hierarchy), shared library, *.bridgesupport file or *.jnaerator file", new ArgDef(Type.OptionalFile, "file", PathType.SourcePath)), 
@@ -300,7 +292,11 @@ public class JNAeratorCommandLineArgs {
                         throw new FileNotFoundException(f.toString());
                     return f;
                 case Enum:
-                    return Enum.valueOf((Class<? extends Enum>)additionalClass, arg);
+                    try {
+                        return Enum.valueOf((Class<? extends Enum>)additionalClass, arg);
+                    } catch (Throwable th) {
+                        throw new IllegalArgumentException("Argument '" + arg + "' is not one of the expected values " + StringUtils.implode(additionalClass.getEnumConstants()));
+                    }
                 case OutputDir:
                     f = findFile(arg, parser);
                     if (f.isFile())
@@ -343,7 +339,10 @@ public class JNAeratorCommandLineArgs {
 			for (OptionDef opt : opts) {
 				System.out.print(" * *" + (opt.clSwitch == null ? "" : opt.clSwitch) +"*");
 				for (OptionDef.ArgDef ad : opt.args) {
-					System.out.print(" <" + ad.name + ": " + ad.type + ">");
+                    String desc = 
+                        ad.type == OptionDef.Type.Enum ? StringUtils.implode(ad.additionalClass.getEnumConstants(), " | ") :
+                            ad.type.toString();
+					System.out.print(" <" + ad.name + ": " + desc + ">");
 				}
 				System.out.println();
 				System.out.println("  " + opt.description.replaceAll("\\*", "`*`").replaceAll("\n", "\n  "));
@@ -359,7 +358,10 @@ public class JNAeratorCommandLineArgs {
 			for (OptionDef opt : opts) {
 				System.out.print("\t" + (opt.clSwitch == null ? "" : opt.clSwitch));
 				for (OptionDef.ArgDef ad : opt.args) {
-					System.out.print(" <" + ad.name + ": " + ad.type + ">");
+					String desc = 
+                        ad.type == OptionDef.Type.Enum ? StringUtils.implode(ad.additionalClass.getEnumConstants(), " | ") :
+                            ad.type.toString();
+					System.out.print(" <" + ad.name + ": " + desc + ">");
 				}
 				System.out.println();
 				System.out.println("\t\t" + opt.description);

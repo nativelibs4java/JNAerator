@@ -256,12 +256,12 @@ public class JNAeratorConfig {
 	boolean skipIncludedFrameworks;
 	public FileFilter fileFilter = new FileExtensionFilter(DEFAULT_HEADER_EXTENSIONS.split("[:;]"));
 	
-	public Map<String, List<File>> libraryFilesByArch = new LinkedHashMap<String, List<File>>();
+	public Map<NativePlatform, List<File>> libraryFilesByArch = new LinkedHashMap<NativePlatform, List<File>>();
 	public List<File> libraryFiles = new ArrayList<File>();
 	
 	public final Map<File, String> libraryByDirectory = new HashMap<File, String>();
 	public Map<File, String> libraryByFile = new LinkedHashMap<File, String>();
-	public void addLibraryFile(File file, String arch) {
+	public void addLibraryFile(File file, NativePlatform arch) {
 		
 		List<File> others = libraryFilesByArch.get(arch);
 		if (others == null)

@@ -303,7 +303,7 @@ public class JNAerator {
 				Feedback feedback = null;
 				
 				boolean simpleGUI = false;
-				String arch = LibraryExtractor.getCurrentOSAndArchString();
+				NativePlatform arch = NativePlatform.getCurrentPlatform();//LibraryExtractor.getCurrentOSAndArchString();
 				String currentLibrary = null;
 				
 				@Override
@@ -542,9 +542,7 @@ public class JNAerator {
 					case IncludeArgs:
 						return parsedArgsInclude(a);
 					case Arch:
-						arch = a.getStringParam(0).trim();
-                        if (arch.length() == 0)
-                            arch = null;
+						arch = a.getEnumParam(0, NativePlatform.class);
 						break;
 					
 					}
@@ -579,9 +577,20 @@ public class JNAerator {
 						else if (fn.matches(".*\\.bridgesupport"))
 							config.bridgeSupportFiles.add(file);
 						else if (file.isFile() && isLibraryFile(file)) {
+                            if (arch == null) {
+                                System.out.println("No arch defined for file " + file + " !");
+                                System.out.println("Please use the option " + OptionDef.Arch.clSwitch + " with one of " + StringUtils.implode(NativePlatform.getPossiblePlatformsOfLibraryFile(file.toString()), ", "));
+                                System.exit(1);
+                            }
+                            if (!arch.pattern.matcher(file.toString()).matches()) {
+                                System.out.println("File file " + file + " doesn't look like a native library for arch " + arch + " (expected file extension = '" + arch.extension + "') !");
+                                System.exit(1);
+                            }
+                                
 							if (config.verbose)
 								System.out.println("Adding file '" + file + "' for arch '" + arch +"'.");
 							config.addLibraryFile(file, arch);
+                            arch = null;
 						} else {
 							String lib = currentLibrary;
 							if (file.isDirectory() && fn.endsWith(".xcode") ||
@@ -981,32 +990,32 @@ public class JNAerator {
 		Map<String, File> additionalFiles = new HashMap<String,File>();
 
 		if (config.bundleLibraries) {
-			for (Map.Entry<String, List<File>> e : config.libraryFilesByArch.entrySet()) {
-				String arch = e.getKey();
+			for (Map.Entry<NativePlatform, List<File>> e : config.libraryFilesByArch.entrySet()) {
+				NativePlatform arch = e.getKey();
 				for (File libraryFile : e.getValue())
 					additionalFiles.put(
-						"libraries/" + (arch == null || arch.length() == 0 ? "" : arch + "/") + libraryFile.getName(), 
+						"lib/" + arch.name() + "/" + libraryFile.getName(), 
 						libraryFile
 					);
 			}
-			for (String library : new HashSet<String>(config.libraryByFile.values())) {
-				String libraryFileName = System.mapLibraryName(library);
-				File libraryFile = new File(libraryFileName); 
-				//TODO lookup in library path
-				if (!libraryFile.exists() && libraryFileName.endsWith(".jnilib"))
-					libraryFile = new File(libraryFileName = libraryFileName.substring(0, libraryFileName.length() - ".jnilib".length()) + ".dylib");
-					
-				String key = "libraries/" + LibraryExtractor.getCurrentOSAndArchString() + "/" + libraryFile.getName();
-				if (additionalFiles.containsKey(key))
-					continue;
-				
-				if (libraryFile.exists()) {
-					System.out.println("Bundling " + libraryFile);
-					additionalFiles.put(key, libraryFile);
-				}// else {
-					//System.out.println("File " + libraryFileName + " not found");
-				//}
-			}
+//			for (String library : new HashSet<String>(config.libraryByFile.values())) {
+//				String libraryFileName = System.mapLibraryName(library);
+//				File libraryFile = new File(libraryFileName); 
+//				//TODO lookup in library path
+//				if (!libraryFile.exists() && libraryFileName.endsWith(".jnilib"))
+//					libraryFile = new File(libraryFileName = libraryFileName.substring(0, libraryFileName.length() - ".jnilib".length()) + ".dylib");
+//					
+//				String key = "libraries/" + LibraryExtractor.getCurrentOSAndArchString() + "/" + libraryFile.getName();
+//				if (additionalFiles.containsKey(key))
+//					continue;
+//				
+//				if (libraryFile.exists()) {
+//					System.out.println("Bundling " + libraryFile);
+//					additionalFiles.put(key, libraryFile);
+//				}// else {
+//					//System.out.println("File " + libraryFileName + " not found");
+//				//}
+//			}
 		}
 		return additionalFiles;
 	}
