@@ -103,6 +103,8 @@ public class JNAeratorCommandLineArgs {
 						args.addAll(i + 1, parsed(pa));
 					}
 				}
+            } catch (JNAerator.ExitException ex) {
+                throw ex;
 			} catch (Throwable ex) {
 				JNAeratorCommandLineArgs.displayHelp(false);
 				throw new RuntimeException("Error parsing arguments :\n" + StringUtils.implode(args, " ") + " : " + ex, ex);

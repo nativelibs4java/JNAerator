@@ -762,7 +762,7 @@ public class JNAerator {
 			e.printStackTrace();
 		}
 	}
-	private static class ExitException extends RuntimeException {
+	static class ExitException extends RuntimeException {
 		int errorCode;
 		public ExitException(int errorCode) {
 			super();
