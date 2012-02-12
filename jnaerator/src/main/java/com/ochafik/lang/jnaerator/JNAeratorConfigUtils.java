@@ -327,7 +327,7 @@ public class JNAeratorConfigUtils {
 			config.functionsAccepter = new Adapter<Function, Boolean>() {
 	
 				public Boolean adapt(Function value) {
-					return !value.hasModifier(ModifierType.Inline);
+					return config.convertBodies || !value.hasModifier(ModifierType.Inline);
 				}
 			};
 		}

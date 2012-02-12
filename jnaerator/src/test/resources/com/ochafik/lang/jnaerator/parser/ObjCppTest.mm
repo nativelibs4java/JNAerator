@@ -296,6 +296,8 @@ int f(int* out, char byref, double in);
 --
 typedef int (*fncptr)(int);
 --
+__inline long f();
+--
 struct GC_thread;
 extern volatile GC_thread GC_threads[];
 --
