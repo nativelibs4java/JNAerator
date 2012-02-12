@@ -1232,7 +1232,7 @@ public abstract class Expression extends Element {
 		public static Constant parseCharOrStringInteger(final String orig) {
             String string = orig;
 			int len = string.length();
-			if (len <= 2 || string.charAt(0) != '\'' || string.charAt(len - 1) != '\'')
+			if (len < 2 || string.charAt(0) != '\'' || string.charAt(len - 1) != '\'')
 				throw new IllegalArgumentException("Expecting char or integer string, got " + string);
 			
 			string = string.substring(1, len - 1);

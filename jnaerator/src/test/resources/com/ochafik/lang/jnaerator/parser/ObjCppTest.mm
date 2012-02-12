@@ -121,6 +121,7 @@ struct BitField {
 --
 class string;
 string name = "ok";
+string empty = "";
 --
 class CPPClass {
 	static void f();
