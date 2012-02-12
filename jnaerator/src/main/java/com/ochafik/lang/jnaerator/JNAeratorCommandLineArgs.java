@@ -199,6 +199,7 @@ public class JNAeratorCommandLineArgs {
 //		EnableCPlusPlus(	"-cppInstanceMethods",	"Enable experimental C++ instance methods wrapping"),
 		NoLibBundle(		"(?i)-noLibBundle",		"Do not bundle libraries in output JAR"),
 		LibFile(            "-libFile",             "Bundle the provided file with the JNAerated JAR so that it is extracted with the library when it is first used.", new ArgDef(Type.ExistingFile, "resourceFile")),
+        RemoveInlineAsm(    "-removeInlineAsm",     "Remove inline asm from preprocessed source, useful when its unsupported syntax makes parsing to fail."),
         MaxConstructedFields(
 							"-maxConstrFields",		"Maximum number of fields allowed for structure fields constructors. If a struct has more fields, it will only get a default constructor.", new ArgDef(Type.Int, "fieldCount")),
 		GenPrivateMembers(	"-genPrivateMembers", 	"Generate wrappers for private fields and methods (will be protected and deprecated)."),

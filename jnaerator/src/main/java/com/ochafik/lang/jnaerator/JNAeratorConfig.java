@@ -55,7 +55,6 @@ import java.util.logging.Level;
 import static com.ochafik.lang.jnaerator.parser.ElementsHelper.*;
 
 public class JNAeratorConfig {
-
 	public enum Compiler {
 		GCC4, MSVC9
 	}
@@ -250,6 +249,7 @@ public class JNAeratorConfig {
 	public boolean beanStructs;
     public boolean reification;
     public boolean convertBodies;
+    public boolean removeInlineAsm;
 	
 	public Map<String, String> extraJavaSourceFilesContents = new LinkedHashMap<String, String>();
 	public Set<String> frameworks = new LinkedHashSet<String>();

@@ -179,11 +179,29 @@ public class JNAeratorParser {
         
     }
 
+    static final Pattern asmPattern = Pattern.compile("(?s)__asm\\s*\\{.*?\\}");
+    public static String removeInlineAsm(String source) {
+        // Hack to replace __asm blocks :
+        String replaced = RegexUtils.regexReplace(asmPattern, source, new RegexUtils.Replacer() {
+            public String replace(String[] groups) {
+                int i = -1;
+                StringBuilder b = new StringBuilder();
+                for (char c : groups[0].toCharArray())
+                    if (c == '\n')
+                        b.append(c);
+                return b.toString();
+            }
+        });
+        return replaced;
+    }
 	public static SourceFiles parse(JNAeratorConfig config, TypeConversion typeConverter, MacroUseCallback macrosDependenciesOut) throws IOException, LexerException {
 		SourceFiles sourceFiles = new SourceFiles();
         
         String sourceContent = PreprocessorUtils.preprocessSources(config, sourceFiles.defines, config.verbose, typeConverter, macrosDependenciesOut);
-		
+        
+        if (config.removeInlineAsm)
+            sourceContent = removeInlineAsm(sourceContent);
+        
         ExecutorService executor = Executors.newSingleThreadExecutor();
         try {
             if (!config.parseInChunks) {

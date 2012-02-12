@@ -507,6 +507,9 @@ public class JNAerator {
 					case RootPackage:
 						config.rootPackageName = a.getStringParam(0);
 						break;
+                    case RemoveInlineAsm:
+                        config.removeInlineAsm = true;
+                        break;
 					case StructsInLibrary:
 						config.putTopStructsInSeparateFiles = false;
 						break;

@@ -1993,10 +1993,14 @@ statement returns [Statement stat]
 		b=statementsBlock { 
 			$stat = $b.statement; 
 		} |
-		// see http://ibiblio.org/gferg/ldp/GCC-Inline-Assembly-HOWTO.html
+		// GCC inline asm (see http://ibiblio.org/gferg/ldp/GCC-Inline-Assembly-HOWTO.html)
 		{ next("__asm__") }?=> IDENTIFIER '('
 			STRING* ( ':' gccAsmInOuts )*
 		')' ';' ? |
+		// MSVC inline asm soup
+		{ next("__asm") }?=> IDENTIFIER '{'
+			( expression | ',' )*
+		'}'|
 		{ next("foreach") }?=> IDENTIFIER '(' varDecl { next("in") }? IDENTIFIER expression ')' statement { 
 			// TODO
 		} |

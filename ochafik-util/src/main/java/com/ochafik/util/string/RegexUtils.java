@@ -63,7 +63,22 @@ public class RegexUtils {
 			return Pattern.compile(pattern,Pattern.CASE_INSENSITIVE|Pattern.UNICODE_CASE|Pattern.LITERAL);
 		}
 	}
-	public static String regexReplace(Pattern pattern, String string, MessageFormat replacement) {
+    public static interface Replacer {
+        String replace(String[] groups);
+    }
+    public static String regexReplace(Pattern pattern, String string, final MessageFormat replacement) {
+        return regexReplace(pattern, string, new Replacer() {
+
+            public String replace(String[] groups) {
+                if (replacement!=null)
+                    return replacement.format(groups);
+                else
+                    return groups[0];
+            }
+            
+        });
+    }
+	public static String regexReplace(Pattern pattern, String string, Replacer replacer) {
 		StringBuffer b=new StringBuffer(string.length());
 		int iLastCommitted=0;
 		Matcher matcher=pattern.matcher(string);
@@ -72,10 +87,7 @@ public class RegexUtils {
 			String s = string.substring(iLastCommitted,start);
 			String g = matcher.group(0);
 			b.append(s);
-			if (replacement!=null)
-				b.append(replacement.format(getGroups(matcher),b,null));
-			else
-				b.append(g);
+            b.append(replacer.replace(getGroups(matcher)));
 			
 			iLastCommitted = start + g.length();
 		}
