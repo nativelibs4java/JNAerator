@@ -95,6 +95,8 @@ public class JNAeratorUtils {
 			if (st instanceof DirectDeclarator) {
 				DirectDeclarator decl = (DirectDeclarator)st;
 				String name = decl.getName();
+                if (name == null)
+                    continue;
 				if (name.equals(idealName)) {
 					idealDecl = decl;
 					break;
