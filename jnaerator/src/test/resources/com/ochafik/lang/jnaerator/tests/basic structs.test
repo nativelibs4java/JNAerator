@@ -1,5 +1,7 @@
 struct A {
     int i;
+	short int s;
+	long int l;
 };
 struct B {
    A a;
@@ -14,3 +16,6 @@ B b = new B();
 b.a = new A.ByValue();
 b.pa = new A.ByReference();
 int i = b.pa.i = 10;
+short s = b.pa.s;
+long l;
+b.pa.l = l;

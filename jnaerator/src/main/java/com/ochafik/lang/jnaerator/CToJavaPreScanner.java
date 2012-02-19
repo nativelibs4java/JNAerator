@@ -105,6 +105,10 @@ public class CToJavaPreScanner extends Scanner {
             Identifier name = primitive.getName();
             if (name != null && name.equals("int"))
                 primitive.setName(ident("long"));
+        } else if (ModifierType.Short.isContainedBy(primitive.getModifiers())) {
+            Identifier name = primitive.getName();
+            if (name != null && name.equals("int"))
+                primitive.setName(ident("short"));
         }
         
     }
