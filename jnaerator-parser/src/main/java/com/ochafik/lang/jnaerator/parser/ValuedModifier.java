@@ -104,7 +104,15 @@ public class ValuedModifier implements Modifier {
 
     @Override
     public String toString() {
-        return getModifier() + "(" + getValue() + ")";
+        
+        String s = getModifier() + "(" + getValue() + ")";
+        Collection<ModifierKind> kinds = modifier.getKinds();
+        if (modifier.getKinds().contains(ModifierKind.Declspec))
+			return "__declspec(" + s + ")";
+        
+        if (kinds.contains(ModifierKind.Attribute))
+			return "__attribute__((" + s + "))";
+        return s;
     }
 
 

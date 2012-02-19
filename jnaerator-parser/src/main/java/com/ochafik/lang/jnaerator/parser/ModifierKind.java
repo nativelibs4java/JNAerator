@@ -31,5 +31,6 @@ public enum ModifierKind {
 	StringAnnotation,
 	VCAnnotationNoArg,
 	VCAnnotation2Args,
-	VCAnnotation1Arg
+	VCAnnotation1Arg,
+    VCParameterAnnotation
 }

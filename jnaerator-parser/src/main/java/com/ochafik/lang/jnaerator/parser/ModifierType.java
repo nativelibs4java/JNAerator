@@ -50,26 +50,26 @@ public enum ModifierType implements Modifier {
 	/// @see http://msdn.microsoft.com/en-us/library/cc264104.aspx
 	
     
-	__pre(of(VCAnnotationNoArg)),
-	__valid(of(VCAnnotationNoArg)),
-	__reserved(of(VCAnnotationNoArg)),
-	__checkReturn(of(VCAnnotationNoArg)),
-	__fallthrough(of(VCAnnotationNoArg)),
-	__readonly(of(VCAnnotationNoArg)),
-	__null(of(VCAnnotationNoArg)),
-	__in(of(VCAnnotationNoArg)),
-	__out(of(VCAnnotationNoArg)),
-	__inout(of(VCAnnotationNoArg)),
-	__refparam(of(VCAnnotationNoArg)),
-	__exceptthat(of(VCAnnotationNoArg)),
+	__pre(of(VCAnnotationNoArg, VCParameterAnnotation)),
+	__valid(of(VCAnnotationNoArg, VCParameterAnnotation)),
+	__reserved(of(VCAnnotationNoArg, VCParameterAnnotation)),
+	__checkReturn(of(VCAnnotationNoArg, VCParameterAnnotation)),
+	__fallthrough(of(VCAnnotationNoArg, VCParameterAnnotation)),
+	__readonly(of(VCAnnotationNoArg, VCParameterAnnotation)),
+	__null(of(VCAnnotationNoArg, VCParameterAnnotation)),
+	__in(of(VCAnnotationNoArg, VCParameterAnnotation)),
+	__out(of(VCAnnotationNoArg, VCParameterAnnotation)),
+	__inout(of(VCAnnotationNoArg, VCParameterAnnotation)),
+	__refparam(of(VCAnnotationNoArg, VCParameterAnnotation)),
+	__exceptthat(of(VCAnnotationNoArg, VCParameterAnnotation)),
 	
-	_opt(of(VCAnnotationNoArg)),
-	_deref(of(VCAnnotationNoArg)),
-	_deref_opt(of(VCAnnotationNoArg)),
-	_ecount(of(VCAnnotation1Arg)),
-	_bcount(of(VCAnnotation1Arg)),
-	_full(of(VCAnnotation1Arg)),
-	_part(of(VCAnnotation2Args)),
+	_opt(of(VCAnnotationNoArg, VCParameterAnnotation)),
+	_deref(of(VCAnnotationNoArg, VCParameterAnnotation)),
+	_deref_opt(of(VCAnnotationNoArg, VCParameterAnnotation)),
+	_ecount(of(VCAnnotation1Arg, VCParameterAnnotation)),
+	_bcount(of(VCAnnotation1Arg, VCParameterAnnotation)),
+	_full(of(VCAnnotation1Arg, VCParameterAnnotation)),
+	_part(of(VCAnnotation2Args, VCParameterAnnotation)),
 	
 	__ptr64(of(TypeQualifier)), // TODO find better kind 
 	__maybenull(of(TypeQualifier)),
@@ -268,8 +268,8 @@ public enum ModifierType implements Modifier {
 	static Map<String, Modifier> mods = new 
 	HashMap<String, Modifier>();
 	static {
-		for (Modifier m : values()) {
-			mods.put(m.toString(), m);
+		for (ModifierType m : values()) {
+			mods.put(m.name().toLowerCase(), m);
 		}
 	}
 	/**
@@ -338,14 +338,16 @@ public enum ModifierType implements Modifier {
 		return toString(null);
 	}
 	public String toString(ModifierType.Compiler compiler) {
-		String low = super.toString().toLowerCase();
-        /*if (kinds.contains(Declspec) && (compiler == null || compiler == Compiler.MSVC))
-			return "__declspec(" + low + ")";
+		String low = name().toLowerCase();
+        
+        if (!kinds.contains(VCAnnotation1Arg) && !kinds.contains(VCAnnotation2Args) && !kinds.contains(VCAnnotationNoArg))
+            if (kinds.contains(Declspec))// && (compiler == null || compiler == Compiler.MSVC))
+                return "__declspec(" + low + ")";
 		
-		if (kinds.contains(Attribute) && (compiler == null || compiler == Compiler.GCC))
+		if (kinds.contains(Attribute))// && !kin (compiler == null || compiler == Compiler.GCC))
 			return "__attribute__((" + low + "))";
-		*/
-		return low;
+		
+        return low;
 	}
     
     public Collection<ModifierKind> getKinds() {

@@ -136,6 +136,14 @@ typedef struct _NSSize {
 --
 void f() {}
 --
+struct __declspec(uuid("9B")) __declspec(novtable) ID3D10DeviceChild : IUnknown
+{
+	void f(); 
+};
+--
+struct __attribute__((__unused__)) U {
+};
+--
 template <typename _CharT, typename _Traits = char_traits<_CharT >, typename _Alloc = allocator<_CharT > >
 class basic_string;
 template < > struct char_traits<char >;
@@ -227,7 +235,7 @@ enum {
 --
 @class NSAppleEventDescriptor;
 --
-typedef const struct __NSAppleEventManagerSuspension *NSAppleEventManagerSuspensionID;
+typedef struct const __NSAppleEventManagerSuspension *NSAppleEventManagerSuspensionID;
 --
 extern const double NSAppleEventTimeOutNone;
 --

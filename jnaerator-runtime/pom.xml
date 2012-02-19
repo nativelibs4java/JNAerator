@@ -44,9 +44,12 @@
 					<!--shadedClassifierName>webstart</shadedClassifierName-->
 							<filters>
 								<filter>
-									<artifact>com.jnaerator:jna-jnaerator</artifact>
+									<artifact>*:*</artifact>
 									<excludes>
-										<exclude>META-INF/**</exclude>
+										<exclude>META-INF/*.SF</exclude>
+										<exclude>META-INF/*.DSA</exclude>
+										<exclude>META-INF/*.RSA</exclude>
+										<exclude>META-INF/maven/**</exclude>
 									</excludes>
 								</filter>
 							</filters>

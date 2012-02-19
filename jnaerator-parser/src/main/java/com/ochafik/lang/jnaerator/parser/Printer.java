@@ -320,19 +320,21 @@ public class Printer implements Visitor {
 		if (!e.getAnnotations().isEmpty())
             implode(e.getAnnotations(), "\n" + indent).append("\n", indent);
 
-        modifiersStringPrefix(e);
-
 		if (e.getType() != null)
 		switch (e.getType()) {
 			case CPPClass:
+                modifiersStringPrefix(e);
 				append("class ", e.getTag());
+                if (!e.getParents().isEmpty())
+                    append(" : ").implode(e.getParents(), ", ");
                 break;
 			case CUnion:
+                modifiersStringPrefix(e);
 				append("union ", e.getTag() == null ? null : " ", e.getTag());
                 break;
 			case JavaClass:
             case JavaInterface:
-			
+                modifiersStringPrefix(e);
 				append(e.getType() == Struct.Type.JavaClass ? "class " : "interface ", e.getTag());
                 if (!e.getParents().isEmpty())
                     append(" extends ").implode(e.getParents(), ", ");
@@ -341,16 +343,22 @@ public class Printer implements Visitor {
 
                 break;
 			case ObjCClass:
+                modifiersStringPrefix(e);
 				append(e.isForwardDeclaration() ? "@class " : "@interface ", e.getTag());
                 if (e.getCategoryName() != null)
                     append(" (", e.getCategoryName(), ")");
                 break;
 			case ObjCProtocol:
+                modifiersStringPrefix(e);
 				append("@protocol ", e.getTag());
                 break;
 			case CStruct:
 			default:
-				append("struct ", e.getTag());
+				append("struct ");
+                modifiersStringPrefix(e);
+                append(e.getTag());
+                if (!e.getParents().isEmpty())
+                    append(" : ").implode(e.getParents(), ", ");
                 break;
 		}
 

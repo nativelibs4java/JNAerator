@@ -115,7 +115,7 @@ import static com.ochafik.lang.jnaerator.parser.StoredDeclarations.*;
     		//mk.allowedKinds = EnumSet.allOf(ModifierKind.class);
     		
     		mk.forbiddenKinds = EnumSet.noneOf(ModifierKind.class);
-    		mk.forbiddenKinds.addAll(Arrays.asList(COMKinds));
+    		mk.forbiddenKinds.addAll(Arrays.asList(ModifierKind.VCParameterAnnotation));
     		//mk.forbiddenKinds.add(ModifierKind.ObjectiveCRemoting);
     		
     		ModifierKinds_stack.push(mk);
@@ -143,9 +143,6 @@ import static com.ochafik.lang.jnaerator.parser.StoredDeclarations.*;
 //			return null;
 		return (ModifierKinds_scope)ModifierKinds_stack.get(ModifierKinds_stack.size() - 1);
 	}
-	ModifierKind[] COMKinds = new ModifierKind[] {
-		ModifierKind.VCAnnotationNoArg, ModifierKind.VCAnnotation1Arg, ModifierKind.VCAnnotation2Args
-	};
 	public void forbidKinds(ModifierKind... kinds) {
 		ModifierKinds_scope scope = getModifierKinds();
 		if (scope == null)
@@ -167,7 +164,7 @@ import static com.ochafik.lang.jnaerator.parser.StoredDeclarations.*;
 	public boolean isAllowed(Modifier mod) {
 		if (!hasModifierKinds())
 			setupScopes();
-			
+		
 		int nScopes = ModifierKinds_stack.size();
 		for (int i = nScopes; i-- != 0;) {
 			ModifierKinds_scope scope = (ModifierKinds_scope)ModifierKinds_stack.get(i);
@@ -352,12 +349,12 @@ import static com.ochafik.lang.jnaerator.parser.StoredDeclarations.*;
 		if (mod.isA(ModifierKind.Java))
 			return null;
 			
-		if (mod.isAnyOf(ModifierKind.Declspec, ModifierKind.Attribute) && !isInExtMod())
-			return null;
+		//if (mod.isAnyOf(ModifierKind.Declspec, ModifierKind.Attribute) && !isInExtMod())
+		//	return null;
 			
 		if (!isAllowed(mod))
 			return null;
-			
+		
 		return mod;
 	}
 	protected boolean next(ModifierKind... anyModKind) {
@@ -879,6 +876,7 @@ scope CurrentClass;
 @init {
 	$Symbols::typeIdentifiers = new HashSet<String>();
 	List<Modifier> modifiers = new ArrayList<Modifier>();
+	Identifier parentIdentifier = null;
 }
 @after {
 	$struct = mark($struct, getLine($typeToken)); 
@@ -919,14 +917,16 @@ scope CurrentClass;
 						( m2=modifiers { modifiers.addAll($m2.modifiers); } )?
 						(
 							':'
-							( { next("public", "private", "virtual") }? IDENTIFIER )?//m3=modifiers
-							parent=qualifiedIdentifier
+							( { next("public", "private", "virtual") }? p=IDENTIFIER )?//m3=modifiers
+							parent=qualifiedIdentifier {
+								parentIdentifier = $parent.identifier;
+							}
 						)? 
 						nb=structBody {
 							$struct = $nb.struct;
 							$struct.setForwardDeclaration(false);
-							if ($parent.text != null)
-								$struct.addParent($parent.identifier);
+							if (parentIdentifier != null)
+								$struct.addParent(parentIdentifier);
 						} 
 					) | {
 						$struct = new Struct();
@@ -1076,18 +1076,30 @@ modifier returns [List<Modifier> modifiers, String asmName]
 		{ parseModifier(next()) != null }? m=IDENTIFIER {
 			$modifiers.add(ModifierType.parseModifier($m.text));
 		} |
-		{ next("__declspec", "__attribute__", "__asm") }?=>
-		IDENTIFIER
-		'(' (
-			( an=STRING { 
+		//{ next("__declspec", "__attribute__") }?=> IDENTIFIER
+		( '__declspec' | '__attribute__' )
+		'('+ (	
+			{ next(ModifierKind.Extended) }? m=IDENTIFIER 
+			(
+				'(' arg=constant ')' {
+					$modifiers.add(new ValuedModifier(ModifierType.parseModifier($m.text), $arg.constant));
+				} |
+				{
+					$modifiers.add(ModifierType.parseModifier($m.text));
+				}
+			)
+			//extendedModifiers { $modifiers.addAll($extendedModifiers.modifiers); }
+		
+		)* ')'+ |
+		{ next("__asm") }?=> IDENTIFIER '(' ( 
+			an=STRING { 
 				String s = String.valueOf(Constant.parseString($an.text).getValue());
 				if ($asmName == null) 
 					$asmName = s; 
 				else 
 					$asmName += s; 
-			} )* |
-			extendedModifiers { $modifiers.addAll($extendedModifiers.modifiers); }
-		) ')' |
+			} 
+		)+ ')' |
 		{ next("__success") }?=>
 		IDENTIFIER '(' 'return' binaryOp expression  ')' |
 		
@@ -1513,7 +1525,7 @@ scope ModifierKinds;
 			modifiers.addAll($preMods.modifiers);
 			try {
 				if (ModifierType.UUID.isContainedBy(modifiers))
-					allowKinds(COMKinds);
+					allowKinds(ModifierKind.VCParameterAnnotation);
 			} catch (Throwable th) {
 				th.printStackTrace();
 			}

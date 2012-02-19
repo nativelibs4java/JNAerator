@@ -205,11 +205,14 @@ public class JNAeratorParser {
         ExecutorService executor = Executors.newSingleThreadExecutor();
         try {
             if (!config.parseInChunks) {
+                Future<SourceFile> fut = executor.submit(createParsingCallable(config, typeConverter, sourceContent, null, true));
                 try {
-                    sourceFiles.add(executor.submit(createParsingCallable(config, typeConverter, sourceContent, null, true)).get(config.fullParsingTimeout, TimeUnit.MILLISECONDS));
+                    sourceFiles.add(fut.get(config.fullParsingTimeout, TimeUnit.MILLISECONDS));
                     return sourceFiles;
                 } catch (Throwable ex) {
                     System.err.println("Parsing failed : " + ex);
+                    fut.cancel(true);
+//                    Thread.sleep(200);
                 }
 
                 System.gc();
