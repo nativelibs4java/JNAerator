@@ -17,5 +17,5 @@ b.a = new A.ByValue();
 b.pa = new A.ByReference();
 int i = b.pa.i = 10;
 short s = b.pa.s;
-long l;
+long l = 0;
 b.pa.l = l;
