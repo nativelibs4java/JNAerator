@@ -9,7 +9,13 @@ Current development version (0.9.10-SNAPSHOT)
 - Fixed parsing of const type mutator (fixes `void f(struct x * const);`) (issue #205)
 - Fixed parsing of null char escape '\0' (issue #214)
 - Fixed conversion of `int a; f(&a);`
-- Fixed handling of "long int" : should be the same as "long"
+- Fixed handling of "long int" and "short int" (issue #267)
+- Fixed parsing of __declspec, __attribute__ and some modifiers-related regressions
+- Fixed conversion of __inline functions when -convertBodies is on
+- Fixed NPE in JNAeratorUtils.findBestPlainStorageName (issue #258)
+- Fixed parsing of empty strings (spotted by @ENargit in issue #255)
+- Added support for MSVC asm soups + added -removeInlineAsm hack switch that tries to regex-remove __asm soups that still cannot be parsed out
+- Added support for BridJ's bundled libraries mechanism and paths (+ enforce them using an enum param)
 - Added parsing of expression initializer blocks `v = { 1, 2, 3};`
 - Added preservation of original textual representation of constants
 - Added tr1 to default C++ includes
