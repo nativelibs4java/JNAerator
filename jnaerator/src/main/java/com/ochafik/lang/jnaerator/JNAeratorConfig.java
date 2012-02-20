@@ -108,7 +108,7 @@ public class JNAeratorConfig {
 
             @Override
             public String toString() {
-                return "BridJ (experimental dyncall-based runtime)";
+                return "BridJ (faster runtime that supports C++)";
             }
 
         };//,

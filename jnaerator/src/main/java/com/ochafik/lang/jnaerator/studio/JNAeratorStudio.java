@@ -396,7 +396,7 @@ public class JNAeratorStudio extends JPanel {
 					generateAction.actionPerformed(null);
 			}
 		});
-		libBox.add(new JLabel("Runtime"));
+		libBox.add(new JLabel("Target Runtime"));
         libBox.add(runtimeCombo);
 
         libBox.add(new JLabel("Library Name :", JLabel.RIGHT));

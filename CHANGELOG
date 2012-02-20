@@ -1,10 +1,10 @@
 Current development version (0.9.10-SNAPSHOT)
 
-- Fixed generation of large longs
+- Fixed generation of large long values
 - Fixed conditional parsing of __in modifier (and COM modifiers in general)
 - Fixed generation of globals and variables included more than once
 - Fixed parsing of unary '-' operator
-- Fixed parsing of C++ constructors
+- Fixed parsing of C++ constructors and class inheritance
 - Fixed parsing of default values for type name template arguments
 - Fixed parsing of const type mutator (fixes `void f(struct x * const);`) (issue #205)
 - Fixed parsing of null char escape '\0' (issue #214)
@@ -14,6 +14,7 @@ Current development version (0.9.10-SNAPSHOT)
 - Fixed conversion of __inline functions when -convertBodies is on
 - Fixed NPE in JNAeratorUtils.findBestPlainStorageName (issue #258)
 - Fixed parsing of empty strings (spotted by @ENargit in issue #255)
+- Fixed parsing strategy : now trying to parse the whole source as one chunk, then switching to "sliced" parsing if the complete parsing times out.
 - Added support for MSVC asm soups + added -removeInlineAsm hack switch that tries to regex-remove __asm soups that still cannot be parsed out
 - Added support for BridJ's bundled libraries mechanism and paths (+ enforce them using an enum param)
 - Added parsing of expression initializer blocks `v = { 1, 2, 3};`
