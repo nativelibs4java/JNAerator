@@ -154,6 +154,8 @@ com/ochafik/util/listenable/UnmodifiableListenableList.class
 com/ochafik/util/listenable/UnmodifiableListenableMap.class
 com/ochafik/util/listenable/UnmodifiableListenableSet.class
 com/ochafik/util/progress/ProgressModel.class
+com/ochafik/util/string/RegexUtils$1.class
+com/ochafik/util/string/RegexUtils$Replacer.class
 com/ochafik/util/string/RegexUtils.class
 com/ochafik/util/string/StringUtils.class
 com/ochafik/xml/XMLUtils.class

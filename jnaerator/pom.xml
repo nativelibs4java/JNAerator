@@ -14,6 +14,11 @@
 		<relativePath>..</relativePath>
 	</parent>
 
+	
+	<properties>
+		<shadedArtifactAttached>true</shadedArtifactAttached>
+	</properties>
+	
 	<description>
 JNAerator (pronounce "generator") simply parses C and Objective-C headers and generates the corresponding JNA and Rococoa Java interfaces (it also has a very limited support for C++).
 
