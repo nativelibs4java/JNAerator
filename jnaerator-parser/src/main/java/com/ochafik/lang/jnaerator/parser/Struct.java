@@ -44,8 +44,12 @@ public class Struct extends TypeRef.TaggedTypeRef implements DeclarationsHolder 
         ObjCProtocol,
         CUnion,
         JavaClass,
-        JavaInterface
-	}
+        JavaInterface;
+
+        public boolean isObjC() {
+            return this == ObjCClass || this == ObjCProtocol;
+        }
+    }
 
 	@Override
 	public Struct addModifiers(Modifier... mds) {

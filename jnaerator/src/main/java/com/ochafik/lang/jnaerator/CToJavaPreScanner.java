@@ -44,6 +44,7 @@ import com.ochafik.lang.jnaerator.parser.TypeRef.FunctionSignature;
 import com.ochafik.lang.jnaerator.parser.TypeRef.TaggedTypeRef;
 import com.ochafik.util.string.StringUtils;
 import java.util.Arrays;
+import java.util.List;
 
 public class CToJavaPreScanner extends Scanner {
 	public CToJavaPreScanner() {
@@ -65,11 +66,28 @@ public class CToJavaPreScanner extends Scanner {
 			}
 		}
 	}
-	@Override
-	public void visitFunctionSignature(FunctionSignature functionSignature) {
-		// TODO Auto-generated method stub
-		super.visitFunctionSignature(functionSignature);
-	}
+
+    @Override
+    public void visitFunction(Function function) {
+        if (function.getValueType() == null) {
+            List<Modifier> modifiers = function.getModifiers();
+            
+            for (ModifierType mod : new ModifierType[] { ModifierType.Long, ModifierType.Short }) {
+                if (mod.isContainedBy(modifiers)) {
+                    function.removeModifiers(mod);
+                    function.setValueType(typeRef(mod.toString()));
+                    break;
+                }
+            }
+            if (function.getValueType() == null) {
+                if (!(function.getParentElement() instanceof Struct) || !((Struct)function.getParentElement()).getType().isObjC())
+                    function.setValueType(typeRef("int"));
+            }
+        }
+        super.visitFunction(function);
+    }
+    
+    
 	
 	@Override
 	public void visitTaggedTypeRefDeclaration(TaggedTypeRefDeclaration taggedTypeRefDeclaration) {
