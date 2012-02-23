@@ -1,7 +1,19 @@
 extern bool operator/=(int&, float);
+
+class T {
+	T& operator+=(const T&);
+};
 --
 #runtime(JNAerator)
 import test.*;
 import static test.TestLibrary.*;
 
 INSTANCE.operatorDivideEqual((IntByReference)null, 0f);
+--
+#runtime(BridJ)
+import test.*;
+import static test.TestLibrary.*;
+
+T t = new T();
+Pointer<T> p = pointerTo(t);
+p = t.operatorDivideEqual(p);

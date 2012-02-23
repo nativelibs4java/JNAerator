@@ -845,9 +845,14 @@ scope ModContext;
 					{ next("private") }? IDENTIFIER { $struct.setNextMemberVisibility(Struct.MemberVisibility.Private); } | 
 					{ next("protected") }? IDENTIFIER { $struct.setNextMemberVisibility(Struct.MemberVisibility.Protected); } 
 				) ':' |
-				{ next("friend") }? IDENTIFIER friend=declaration ';' {
-					$struct.addDeclaration(new FriendDeclaration(friend.declaration));
-				} |
+				{ next("friend") }? IDENTIFIER (
+					friendDecl=declaration {
+						$struct.addDeclaration(new FriendDeclaration(friendDecl.declaration));
+					} |
+					friendVar=varDecl ';' {
+						$struct.addDeclaration(new FriendDeclaration(decl.declaration));
+					}
+				) |
 				{ next(getCurrentClassName()) }? id=IDENTIFIER s=functionDeclarationSuffix {
 					Function f = new Function();
 					f.setName(getCurrentClassName());

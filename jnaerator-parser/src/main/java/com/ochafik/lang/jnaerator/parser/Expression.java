@@ -733,10 +733,10 @@ public abstract class Expression extends Element {
 	}
 	public static java.lang.Enum<?> getAnyOperator(String s) {
 
-		java.lang.Enum<?> e = Expression.getBinaryOperator(s);
+		java.lang.Enum<?> e = binOps.get(s);//Expression.getBinaryOperator(s);
 		if (e != null)
 			return e;
-		e = Expression.getUnaryOperator(s);
+		e = unOps.get(s);//Expression.getUnaryOperator(s);
 		if (e != null)
 			return e;
 		return Expression.getAssignmentOperator(s);

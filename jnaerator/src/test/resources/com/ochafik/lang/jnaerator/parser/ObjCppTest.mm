@@ -127,6 +127,10 @@ class CPPClass {
 	static void f();
 };
 --
+struct S {
+	friend long f();
+};
+--
 extern void **const GC_objfreelist_ptr;
 --
 typedef struct _NSSize {
