@@ -462,7 +462,7 @@ public class DeclarationsConverter {
                             )
                         )).addModifiers(ModifierType.Public));
 
-                        body.addDeclaration(new Function(Type.JavaMethod, ident("fromValue"), typeRef(ident(ValuedEnum.class, expr(typeRef(enumName.clone())))), new Arg(valueArgName, typeRef(Long.TYPE))).setBody(block(
+                        body.addDeclaration(new Function(Type.JavaMethod, ident("fromValue"), typeRef(ident(IntValuedEnum.class, expr(typeRef(enumName.clone())))), new Arg(valueArgName, typeRef(Integer.TYPE))).setBody(block(
                             new Statement.Return(
                                 methodCall(
                                     expr(typeRef(FlagSet.class)),
