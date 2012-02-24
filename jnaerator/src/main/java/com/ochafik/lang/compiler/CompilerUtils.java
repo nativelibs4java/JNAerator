@@ -58,7 +58,7 @@ public class CompilerUtils {
 				if (diagnostic.getKind() == Kind.ERROR) {
 					errors.add(diagnostic);
 					sb.append("Error in " + (diagnostic.getSource() == null ? "?" : diagnostic.getSource().toUri()) + " at line " + diagnostic.getLineNumber() + ", col " + diagnostic.getColumnNumber() + " :\n\t" + diagnostic.getMessage(Locale.getDefault()) + "\n");//.toUri());
-					if (diagnostic.getSource() == null)
+					if (diagnostic.getSource() != null)
 						sb.append(RegexUtils.regexReplace(Pattern.compile("\n"), "\n" + diagnostic.getSource().getCharContent(true), new Adapter<String[], String>() {
 							int line = 0;
 	
