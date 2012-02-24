@@ -57,16 +57,17 @@ public class CompilerUtils {
 					continue;
 				if (diagnostic.getKind() == Kind.ERROR) {
 					errors.add(diagnostic);
-					sb.append("Error in " + diagnostic.getSource().toUri() + " at line " + diagnostic.getLineNumber() + ", col " + diagnostic.getColumnNumber() + " :\n\t" + diagnostic.getMessage(Locale.getDefault()) + "\n");//.toUri());
-					sb.append(RegexUtils.regexReplace(Pattern.compile("\n"), "\n" +  diagnostic.getSource().getCharContent(true), new Adapter<String[], String>() {
-						int line = 0;
-
-						@Override
-						public String adapt(String[] value) {
-							line++;
-							return "\n" + line + ":" + (diagnostic.getLineNumber() == line ? ">>>" : "") +"\t\t";
-						}
-					}) + "\n");
+					sb.append("Error in " + (diagnostic.getSource() == null ? "?" : diagnostic.getSource().toUri()) + " at line " + diagnostic.getLineNumber() + ", col " + diagnostic.getColumnNumber() + " :\n\t" + diagnostic.getMessage(Locale.getDefault()) + "\n");//.toUri());
+					if (diagnostic.getSource() == null)
+						sb.append(RegexUtils.regexReplace(Pattern.compile("\n"), "\n" + diagnostic.getSource().getCharContent(true), new Adapter<String[], String>() {
+							int line = 0;
+	
+							@Override
+							public String adapt(String[] value) {
+								line++;
+								return "\n" + line + ":" + (diagnostic.getLineNumber() == line ? ">>>" : "") +"\t\t";
+							}
+						}) + "\n");
 				}
 				//System.out.println("Error on line " + diagnostic.getLineNumber() + ":" + diagnostic.getColumnNumber() + " in " + (diagnostic.getSource() == null ? "<unknown source>" : diagnostic.getSource().getName()) + ": " + diagnostic.getMessage(Locale.getDefault()));
 			}
