@@ -116,6 +116,7 @@ import static com.ochafik.lang.jnaerator.parser.StoredDeclarations.*;
     		
     		mk.forbiddenKinds = EnumSet.noneOf(ModifierKind.class);
     		mk.forbiddenKinds.addAll(Arrays.asList(ModifierKind.VCParameterAnnotation));
+    		mk.forbiddenKinds.addAll(Arrays.asList(ModifierKind.Attribute));
     		//mk.forbiddenKinds.add(ModifierKind.ObjectiveCRemoting);
     		
     		ModifierKinds_stack.push(mk);
@@ -352,7 +353,7 @@ import static com.ochafik.lang.jnaerator.parser.StoredDeclarations.*;
 		//if (mod.isAnyOf(ModifierKind.Declspec, ModifierKind.Attribute) && !isInExtMod())
 		//	return null;
 			
-		if (!isAllowed(mod))
+		if (!mod.isAnyOf(anyModKind) && !isAllowed(mod))
 			return null;
 		
 		return mod;
