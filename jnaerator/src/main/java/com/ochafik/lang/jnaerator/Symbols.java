@@ -18,53 +18,15 @@
 */
 package com.ochafik.lang.jnaerator;
 
-import com.ochafik.lang.jnaerator.parser.Identifier.SimpleIdentifier;
-import com.ochafik.lang.jnaerator.parser.Statement.ExpressionStatement;
-import org.bridj.FlagSet;
-import org.bridj.IntValuedEnum;
-import org.bridj.StructObject;
-import org.bridj.ValuedEnum;
-import org.bridj.cpp.CPPObject;
-
-import static com.ochafik.lang.SyntaxUtils.as;
-//import org.bridj.structs.StructIO;
-//import org.bridj.structs.Array;
-
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.HashMap;
-import java.util.Set;
-import java.util.HashSet;
-import java.util.Arrays;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.regex.Pattern;
-
-import com.ochafik.lang.jnaerator.JNAeratorConfig.GenFeatures;
-import com.ochafik.lang.jnaerator.TypeConversion.NL4JConversion;
-import com.ochafik.lang.jnaerator.cplusplus.CPlusPlusMangler;
 import com.ochafik.lang.jnaerator.parser.*;
 import static com.ochafik.lang.jnaerator.parser.Statement.*;
 import com.ochafik.lang.jnaerator.parser.StoredDeclarations.*;
-import com.ochafik.lang.jnaerator.parser.Struct.MemberVisibility;
 import com.ochafik.lang.jnaerator.parser.TypeRef.*;
 import com.ochafik.lang.jnaerator.parser.Expression.*;
-import com.ochafik.lang.jnaerator.parser.Function.Type;
-import com.ochafik.lang.jnaerator.parser.DeclarationsHolder.ListWrapper;
 import com.ochafik.lang.jnaerator.parser.Declarator.*;
-import com.ochafik.lang.jnaerator.runtime.VirtualTablePointer;
-import com.ochafik.util.CompoundCollection;
-import com.ochafik.util.listenable.Pair;
-import com.ochafik.util.string.StringUtils;
-
-import java.net.URL;
-import java.net.URLConnection;
-import java.text.MessageFormat;
 import static com.ochafik.lang.jnaerator.parser.ElementsHelper.*;
-import static com.ochafik.lang.jnaerator.TypeConversion.*;
 
 public class Symbols {
 		public final Map<Integer, Element> resolvedVariables = new HashMap<Integer, Element>();

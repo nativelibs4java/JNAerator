@@ -49,6 +49,9 @@ public class Struct extends TypeRef.TaggedTypeRef implements DeclarationsHolder 
         public boolean isObjC() {
             return this == ObjCClass || this == ObjCProtocol;
         }
+        public boolean isCpp() {
+            return this == CPPClass;
+        }
     }
 
 	@Override

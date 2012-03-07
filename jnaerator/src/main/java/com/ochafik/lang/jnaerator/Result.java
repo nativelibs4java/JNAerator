@@ -102,9 +102,17 @@ public class Result extends Scanner {
         init();
     }
     public void init() {
-		typeConverter = new TypeConversion(this);
-		declarationsConverter = new DeclarationsConverter(this);
-		globalsGenerator = new GlobalsGenerator(this);
+        if (config.runtime == JNAeratorConfig.Runtime.BridJ) {
+            declarationsConverter =  new BridJDeclarationsConverter(this);
+            globalsGenerator = new BridJGlobalsGenerator(this);
+            typeConverter = new BridJTypeConversion(this);
+		
+        } else {
+            declarationsConverter = new JNADeclarationsConverter(this);
+            globalsGenerator = new JNAGlobalsGenerator(this);
+            typeConverter = new JNATypeConversion(this);
+		
+        }
 		objectiveCGenerator = new ObjectiveCGenerator(this);
 		universalReconciliator = new UniversalReconciliator();
         bridjer = new BridJer(this);

@@ -1,22 +1,13 @@
 package com.ochafik.lang.jnaerator;
 
-import com.ochafik.io.IOUtils;
-import com.ochafik.lang.jnaerator.JNAeratorConfig;
-import com.ochafik.lang.jnaerator.JNAeratorConfigUtils;
-import com.ochafik.lang.jnaerator.JNAeratorParser;
-import com.ochafik.lang.jnaerator.PreprocessorUtils;
-import com.ochafik.lang.jnaerator.Result;
-import com.ochafik.lang.jnaerator.SourceFiles;
 import com.ochafik.lang.jnaerator.parser.Declaration;
 import com.ochafik.lang.jnaerator.parser.DeclarationsHolder;
 import com.ochafik.lang.jnaerator.parser.Element;
 import com.ochafik.lang.jnaerator.parser.SourceFile;
-import com.ochafik.util.string.StringUtils;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.lang.reflect.Field;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -281,7 +272,7 @@ public class CSlicer {
         //config.noCPlusPlus = true;
         config.preprocessorConfig.includeStrings.add(source);
         Result result = new Result(config, null, null);
-        SourceFiles parse = JNAeratorParser.parse(config, result.typeConverter, null);
+        SourceFiles parse = new JNAeratorParser().parse(config, result.typeConverter, null);
         
         List<Declaration> ret = new ArrayList<Declaration>();
         flatten(parse, ret);

@@ -18,57 +18,29 @@
 */
 package com.ochafik.lang.jnaerator;
 
-import org.bridj.ann.Name;
-import org.bridj.BridJ;
-import org.bridj.FlagSet;
-import org.bridj.IntValuedEnum;
-import org.bridj.StructObject;
-import org.bridj.ValuedEnum;
-import org.bridj.cpp.CPPObject;
-import org.bridj.cpp.com.IUnknown;
 
 import static com.ochafik.lang.SyntaxUtils.as;
-//import org.bridj.structs.StructIO;
-//import org.bridj.structs.Array;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.Method;
 import java.util.*;
-import java.util.regex.Pattern;
-
-import org.rococoa.AlreadyRetained;
-import org.rococoa.cocoa.foundation.NSObject;
-
-import com.ochafik.lang.jnaerator.JNAeratorConfig.GenFeatures;
-import com.ochafik.lang.jnaerator.TypeConversion.NL4JConversion;
-import com.ochafik.lang.jnaerator.cplusplus.CPlusPlusMangler;
 import com.ochafik.lang.jnaerator.parser.*;
 import com.ochafik.lang.jnaerator.parser.Enum;
 import com.ochafik.lang.jnaerator.parser.Scanner;
-import com.ochafik.lang.jnaerator.parser.Statement.Block;
 import com.ochafik.lang.jnaerator.parser.StoredDeclarations.*;
-import com.ochafik.lang.jnaerator.parser.Struct.MemberVisibility;
 import com.ochafik.lang.jnaerator.parser.TypeRef.*;
 import com.ochafik.lang.jnaerator.parser.Expression.*;
 import com.ochafik.lang.jnaerator.parser.Function.Type;
-import com.ochafik.lang.jnaerator.parser.DeclarationsHolder.ListWrapper;
 import com.ochafik.lang.jnaerator.parser.Declarator.*;
 import com.ochafik.lang.jnaerator.runtime.VirtualTablePointer;
-import com.ochafik.util.CompoundCollection;
 import com.ochafik.util.listenable.Pair;
-import com.ochafik.util.string.StringUtils;
-
-import java.net.URL;
-import java.net.URLConnection;
-import java.text.MessageFormat;
 import static com.ochafik.lang.jnaerator.parser.ElementsHelper.*;
 import static com.ochafik.lang.jnaerator.TypeConversion.*;
 
-public class DeclarationsConverter {
-	private static final String DEFAULT_VPTR_NAME = "_vptr";
-	private static final Pattern manglingCommentPattern = Pattern.compile("@mangling (.*)$", Pattern.MULTILINE);
+public abstract class DeclarationsConverter {
+	protected static final String DEFAULT_VPTR_NAME = "_vptr";
 
 	public DeclarationsConverter(Result result) {
 		this.result = result;
@@ -76,7 +48,8 @@ public class DeclarationsConverter {
 
 	protected final Result result;
 	
-	
+    protected abstract SimpleTypeRef getCallbackType(FunctionSignature functionSignature, Identifier name);
+    
 	public void convertCallback(FunctionSignature functionSignature, Signatures signatures, DeclarationsHolder out, Identifier callerLibraryName) {
 		Identifier name = result.typeConverter.inferCallBackName(functionSignature, true, false, callerLibraryName);
 		if (name == null)
@@ -96,20 +69,8 @@ public class DeclarationsConverter {
 		Element comel = parent != null && parent instanceof TypeDef ? parent : functionSignature;
 		
 		Struct callbackStruct = new Struct();
-		if (result.config.runtime == JNAeratorConfig.Runtime.BridJ) {
-			callbackStruct.setType(Struct.Type.JavaClass);
-			callbackStruct.addModifiers(ModifierType.Public, ModifierType.Static, ModifierType.Abstract);
-		} else {
-			callbackStruct.setType(Struct.Type.JavaInterface);
-			callbackStruct.addModifiers(ModifierType.Public);
-		}
-		callbackStruct.setParents(Arrays.asList(
-			FunctionSignature.Type.ObjCBlock.equals(functionSignature.getType()) ?
-				result.config.runtime.typeRef(JNAeratorConfig.Runtime.Ann.ObjCBlock) :
-					result.config.runtime == JNAeratorConfig.Runtime.BridJ ? 
-							(SimpleTypeRef)typeRef(ident(result.config.runtime.callbackClass, expr(typeRef(chosenName.clone())))) :
-							(SimpleTypeRef)typeRef(result.config.runtime.callbackClass)
-		));
+        configureCallbackStruct(callbackStruct);
+		callbackStruct.setParents(Arrays.asList(getCallbackType(functionSignature, chosenName)));
 		callbackStruct.setTag(ident(chosenName));
 		if (!result.config.noComments)
 			callbackStruct.addToCommentBefore(comel.getCommentBefore(), comel.getCommentAfter(), getFileCommentContent(comel));
@@ -140,6 +101,10 @@ public class DeclarationsConverter {
 		
 	}
 
+    protected abstract void configureCallbackStruct(Struct callbackStruct);
+
+    protected abstract void convertFunction(Function function, Signatures signatures, boolean callback, DeclarationsHolder objOut, Identifier libraryClassName, String sig, Identifier functionName, String library, int iConstructor);
+    
     static class EnumItemResult {
         public Enum.EnumItem originalItem;
         public Expression value;
@@ -147,7 +112,7 @@ public class DeclarationsConverter {
         public String exceptionMessage;
         public Declaration errorElement;
     }
-    private List<EnumItemResult> getEnumValuesAndCommentsByName(Enum e, Signatures signatures, Identifier libraryClassName) {
+    protected List<EnumItemResult> getEnumValuesAndCommentsByName(Enum e, Signatures signatures, Identifier libraryClassName) {
         List<EnumItemResult> ret = new ArrayList<EnumItemResult>();
         Integer lastAdditiveValue = null;
 		Expression lastRefValue = null;
@@ -213,15 +178,6 @@ public class DeclarationsConverter {
         return ret;
     }
 
-	public static class DeclarationsOutput {
-		Map<String, DeclarationsHolder> holders = new HashMap<String, DeclarationsHolder>();
-		public void add(Declaration d, String libraryName) {
-			
-		}
-		public void set(String libraryName, DeclarationsHolder holder) {
-			
-		}
-	}
 	public void convertConstants(String library, List<Define> defines, Element sourcesRoot, final Signatures signatures, final DeclarationsHolder out, final Identifier libraryClassName) {
 		//final List<Define> defines = new ArrayList<Define>();
 		final Map<String, String> constants = Result.getMap(result.stringConstants, library);
@@ -277,6 +233,8 @@ public class DeclarationsConverter {
 						if (!signatures.variablesSignatures.add(name))
 							continue;
 						
+                        
+                        // TODO
 						TypeRef tr = prim == JavaPrim.NativeLong || prim == JavaPrim.NativeSize ?
 							typeRef("long") :
 							result.typeConverter.convertTypeToJNA(mutatedType, TypeConversion.TypeConversionMode.FieldType, libraryClassName)
@@ -321,7 +279,7 @@ public class DeclarationsConverter {
 	}
 
 
-	private void outputNSString(String name, String value, DeclarationsHolder out, Signatures signatures, Element... elementsToTakeCommentsFrom) {
+	protected void outputNSString(String name, String value, DeclarationsHolder out, Signatures signatures, Element... elementsToTakeCommentsFrom) {
 
 		if (!signatures.variablesSignatures.add(name))
 			return;
@@ -375,115 +333,9 @@ public class DeclarationsConverter {
 		return new EmptyDeclaration(mess.toArray(new String[0]));
 	}
 	
-	public void convertEnum(Enum e, Signatures signatures, DeclarationsHolder out, Identifier libraryClassName) {
-		if (e.isForwardDeclaration())
-			return;
-		
-		Identifier enumName = getActualTaggedTypeName(e);
-        List<EnumItemResult> results = getEnumValuesAndCommentsByName(e, signatures, libraryClassName);
+	public abstract void convertEnum(Enum e, Signatures signatures, DeclarationsHolder out, Identifier libraryClassName);
 
-        switch (result.config.runtime) {
-            case JNA:
-            case JNAerator:
-//            case JNAeratorNL4JStructs:
-                boolean hasEnumClass = false;
-                if (enumName != null && enumName.resolveLastSimpleIdentifier().getName() != null) {
-                    if (!signatures.classSignatures.add(enumName))
-                        return;
-
-                    hasEnumClass = true;
-
-                    Struct struct = publicStaticClass(enumName, null, Struct.Type.JavaInterface, e);
-                    out.addDeclaration(new TaggedTypeRefDeclaration(struct));
-                    if (!result.config.noComments)
-                        struct.addToCommentBefore("enum values");
-
-                    out = struct;
-                    signatures = new Signatures();
-                }
-                
-                outputEnumItemsAsConstants(results, out, signatures, libraryClassName, hasEnumClass);
-                break;
-            case BridJ:
-            	hasEnumClass = false;
-                if (enumName != null && enumName.resolveLastSimpleIdentifier().getName() != null) {
-                    if (!signatures.classSignatures.add(enumName))
-                        return;
-
-                    signatures = new Signatures();
-                
-                    Enum en = new Enum();
-	                en.setType(Enum.Type.Java);
-	            	en.setTag(enumName.clone());
-	                en.addModifiers(ModifierType.Public);
-	                out.addDeclaration(new TaggedTypeRefDeclaration(en));
-	                Struct body = new Struct();
-	                en.setBody(body);
-                    boolean hasValidItem = false;
-	                for (EnumItemResult er : results) {
-	                    if (er.errorElement != null) {
-	                        out.addDeclaration(er.errorElement);
-	                        continue;
-	                    }
-	                    Enum.EnumItem item = new Enum.EnumItem(er.originalItem.getName(), er.value);
-	                    en.addItem(item);
-                        hasValidItem = true;
-	                    if (!result.config.noComments)
-	                        if (item != null && hasEnumClass) {
-	                            String c = item.getCommentBefore();
-	                            item.setCommentBefore(er.originalItem.getCommentBefore());
-	                            item.addToCommentBefore(c);
-	                        }
-	                }
-                    if (hasValidItem) {
-                        en.addInterface(ident(IntValuedEnum.class, expr(typeRef(enumName.clone()))));
-                        String valueArgName = "value";
-                        body.addDeclaration(new Function(Type.JavaMethod, enumName.clone(), null, new Arg(valueArgName, typeRef(Long.TYPE))).setBody(block(
-                            stat(expr(memberRef(thisRef(), MemberRefStyle.Dot, valueArgName), AssignmentOperator.Equal, varRef(valueArgName)))
-                        )));
-                        body.addDeclaration(new VariablesDeclaration(typeRef(Long.TYPE), new DirectDeclarator(valueArgName)).addModifiers(ModifierType.Public, ModifierType.Final));
-                        body.addDeclaration(new Function(Type.JavaMethod, ident(valueArgName), typeRef(Long.TYPE)).setBody(block(
-                            new Statement.Return(memberRef(thisRef(), MemberRefStyle.Dot, valueArgName))
-                        )).addModifiers(ModifierType.Public));
-
-
-                        body.addDeclaration(new Function(Type.JavaMethod, ident("iterator"), typeRef(ident(Iterator.class, expr(typeRef(enumName.clone()))))).setBody(block(
-                            new Statement.Return(
-                                methodCall(
-                                    methodCall(
-                                        expr(typeRef(Collections.class)),
-                                        MemberRefStyle.Dot,
-                                        "singleton",
-                                        thisRef()
-                                    ),
-                                    MemberRefStyle.Dot,
-                                    "iterator"
-                                )
-                            )
-                        )).addModifiers(ModifierType.Public));
-
-                        body.addDeclaration(new Function(Type.JavaMethod, ident("fromValue"), typeRef(ident(IntValuedEnum.class, expr(typeRef(enumName.clone())))), new Arg(valueArgName, typeRef(Integer.TYPE))).setBody(block(
-                            new Statement.Return(
-                                methodCall(
-                                    expr(typeRef(FlagSet.class)),
-                                    MemberRefStyle.Dot,
-                                    "fromValue",
-                                    varRef(valueArgName),
-                                    methodCall(
-                                        "values"
-                                    )
-                                )
-                            )
-                        )).addModifiers(ModifierType.Public, ModifierType.Static));
-                    }
-                } else {
-                	outputEnumItemsAsConstants(results, out, signatures, libraryClassName, hasEnumClass);
-                }
-                break;
-        }
-	}
-
-	private void outputEnumItemsAsConstants(List<EnumItemResult> results,
+	protected void outputEnumItemsAsConstants(List<EnumItemResult> results,
 			DeclarationsHolder out, Signatures signatures, Identifier libraryClassName,
 			boolean hasEnumClass) {
 		
@@ -519,11 +371,11 @@ public class DeclarationsConverter {
         }
 	}
 
-	private Declaration outputConstant(String name, Expression x, Signatures signatures, Element element, String elementTypeDescription, Identifier libraryClassName, boolean addFileComment, boolean signalErrors, boolean forceInteger) throws UnsupportedConversionException {
+	protected Declaration outputConstant(String name, Expression x, Signatures signatures, Element element, String elementTypeDescription, Identifier libraryClassName, boolean addFileComment, boolean signalErrors, boolean forceInteger) throws UnsupportedConversionException {
 		return outputConstant(name, pair(x, (TypeRef)null), signatures, element, elementTypeDescription, libraryClassName, addFileComment, signalErrors, forceInteger, false);
 	}
 	@SuppressWarnings("static-access")
-	private Declaration outputConstant(String name, Pair<Expression, TypeRef> x, Signatures signatures, Element element, String elementTypeDescription, Identifier libraryClassName, boolean addFileComment, boolean signalErrors, boolean forceInteger, boolean alreadyConverted) throws UnsupportedConversionException {
+	protected Declaration outputConstant(String name, Pair<Expression, TypeRef> x, Signatures signatures, Element element, String elementTypeDescription, Identifier libraryClassName, boolean addFileComment, boolean signalErrors, boolean forceInteger, boolean alreadyConverted) throws UnsupportedConversionException {
 		try {
 			if (result.typeConverter.isJavaKeyword(name))
 				throw new UnsupportedConversionException(element, "The name '" + name + "' is invalid for a Java field.");
@@ -670,18 +522,7 @@ public class DeclarationsConverter {
         ;
         
         try {
-            switch (result.config.runtime) {
-                case JNA:
-                case JNAerator:
-//                case JNAeratorNL4JStructs:
-                    convertJNAFunction(function, signatures, isCallback, objOut, libraryClassName, sig, functionName, library);
-                    break;
-                case BridJ:
-                    convertBridJFunction(function, signatures, isCallback, objOut, libraryClassName, sig, functionName, library, iConstructor);
-                    break;
-                default:
-                    throwBadRuntime();
-            }
+            convertFunction(function, signatures, isCallback, objOut, libraryClassName, sig, functionName, library, iConstructor);
         } catch (UnsupportedConversionException ex) {
             Declaration d = skipDeclaration(function);
             if (d != null) {
@@ -691,389 +532,15 @@ public class DeclarationsConverter {
         }
 	}
 
-    private void convertJNAFunction(Function function, Signatures signatures, boolean isCallback, DeclarationsHolder out, Identifier libraryClassName, String sig, Identifier functionName, String library) {
-        Pair<Function, List<Function>> alternativesPair = functionAlternativesByNativeSignature.get(sig);
-		if (alternativesPair != null) {
-			if (result.config.choicesInputFile != null) {
-				for (Function alt : alternativesPair.getValue())
-					out.addDeclaration(alt.clone());
-				return;
-			}
-		} else {
-			functionAlternativesByNativeSignature.put(
-				sig,
-				alternativesPair = new Pair<Function, List<Function>>(
-					cleanClone(function),
-					new ArrayList<Function>()
-				)
-			);
-		}
-		List<Function> alternatives = alternativesPair.getValue();
-
-		Function natFunc = new Function();
-
-		Element parent = function.getParentElement();
-		List<String> ns = new ArrayList<String>(function.getNameSpace());
-		boolean isMethod = parent instanceof Struct;
-		if (isMethod) {
-			ns.clear();
-			ns.addAll(parent.getNameSpace());
-			switch (((Struct)parent).getType()) {
-			case ObjCClass:
-			case ObjCProtocol:
-				break;
-			case CPPClass:
-				if (!result.config.genCPlusPlus && !function.hasModifier(ModifierType.Static))
-					return;
-				ns.add(((Struct)parent).getTag().toString());
-				break;
-			}
-		}
-
-		if (!isMethod && library != null) {
-			Boolean alreadyRetained = Result.getMap(result.retainedRetValFunctions, library).get(functionName.toString());
-			if (alreadyRetained != null && alreadyRetained) {
-				natFunc.addAnnotation(new Annotation(AlreadyRetained.class, expr(alreadyRetained)));
-			}
-		}
-		//String namespaceArrayStr = "{\"" + StringUtils.implode(ns, "\", \"") + "\"}";
-		//if (!ns.isEmpty())
-		//	natFunc.addAnnotation(new Annotation(Namespace.class, "(value=" + namespaceArrayStr + (isMethod ? ", isClass=true" : "") + ")"));
-		boolean isObjectiveC = function.getType() == Type.ObjCMethod;
-
-		natFunc.setType(Function.Type.JavaMethod);
-		if (result.config.synchronizedMethods && !isCallback && (result.config.useJNADirectCalls || result.config.runtime == JNAeratorConfig.Runtime.BridJ))
-			natFunc.addModifiers(ModifierType.Synchronized);
-		if (result.config.useJNADirectCalls && !isCallback && !isObjectiveC) {
-			natFunc.addModifiers(ModifierType.Public, ModifierType.Static, ModifierType.Native);
-		}
-
-		try {
-			//StringBuilder outPrefix = new StringBuilder();
-			TypeRef returnType = null;
-
-			if (!isObjectiveC) {
-				returnType = function.getValueType();
-				if (returnType == null)
-					returnType = new TypeRef.Primitive("int");
-				if (returnType != null)
-					returnType.addModifiers(function.getModifiers());
-			} else {
-				returnType = RococoaUtils.fixReturnType(function);
-				functionName = ident(RococoaUtils.getMethodName(function));
-			}
-
-			Identifier modifiedMethodName;
-			if (isCallback) {
-				modifiedMethodName = ident(result.config.callbackInvokeMethodName);
-			} else {
-				modifiedMethodName = result.typeConverter.getValidJavaMethodName(ident(StringUtils.implode(ns, result.config.cPlusPlusNameSpaceSeparator) + (ns.isEmpty() ? "" : result.config.cPlusPlusNameSpaceSeparator) + functionName));
-			}
-			Set<String> names = new LinkedHashSet<String>();
-			//if (ns.isEmpty())
-
-			if (!result.config.noMangling)
-				if (!isCallback && !isObjectiveC && result.config.features.contains(JNAeratorConfig.GenFeatures.CPlusPlusMangling))
-					addCPlusPlusMangledNames(function, names);
-
-			if (function.getName() != null && !modifiedMethodName.equals(function.getName().toString()) && ns.isEmpty())
-				names.add(function.getName().toString());
-			if (function.getAsmName() != null)
-				names.add(function.getAsmName());
-
-			if (!isCallback && !names.isEmpty()) {
-                TypeRef mgc = result.config.runtime.typeRef(JNAeratorConfig.Runtime.Ann.Mangling);
-                if (mgc != null) {
-                    natFunc.addAnnotation(new Annotation(mgc, "({\"" + StringUtils.implode(names, "\", \"") + "\"})"));
-                }
-            }
-
-			boolean needsThis = false, needsThisAnnotation = false;
-			if (function.hasModifier(ModifierType.__fastcall)) {
-				natFunc.addAnnotation(new Annotation(result.config.runtime.typeRef(JNAeratorConfig.Runtime.Ann.FastCall)));
-				needsThis = true;
-			}
-			if (function.hasModifier(ModifierType.__thiscall)) {
-				natFunc.addAnnotation(new Annotation(result.config.runtime.typeRef(JNAeratorConfig.Runtime.Ann.ThisCall)));
-				needsThis = true;
-			}
-			if (function.getType() == Type.CppMethod && !function.getModifiers().contains(ModifierType.Static)) {
-				needsThisAnnotation = true;
-				needsThis = true;
-			}
-
-			if (needsThis && !result.config.genCPlusPlus)
-				return;
-
-            /*
-			if (needsThis) {
-				natFunc.addAnnotation(new Annotation(Deprecated.class));
-
-				TypeRef classRef;
-				if (parent instanceof Struct) {
-					classRef = typeRef(((Struct)function.getParentElement()).getTag().clone());
-				} else {
-					classRef = null;
-				}
-				if (classRef != null) {
-					natFunc.addArg((Arg)new Arg("__this__", classRef)).addAnnotation(needsThisAnnotation ? new Annotation(This.class) : null);
-				}
-			}*/
-
-			//if (isCallback || !modifiedMethodName.equals(functionName))
-			//	natFunc.addAnnotation(new Annotation(Name.class, "(value=\"" + functionName + "\"" + (ns.isEmpty() ? "" : ", namespace=" + namespaceArrayStr)  + (isMethod ? ", classMember=true" : "") + ")"));
-
-            if (!isCallback && !modifiedMethodName.equals(functionName))
-				natFunc.addAnnotation(new Annotation(Name.class, expr(functionName.toString())));
-
-			//if (modifiedMethodName.toString().equals("NSStringFromSelector"))
-			//	modifiedMethodName = ident("NSStringFromSelector");
-
-			natFunc.setName(modifiedMethodName);
-			natFunc.setValueType(result.typeConverter.convertTypeToJNA(returnType, TypeConversionMode.ReturnType, libraryClassName));
-			if (!result.config.noComments) {
-				natFunc.importDetails(function, false);
-				natFunc.moveAllCommentsBefore();
-				if (!isCallback)
-					natFunc.addToCommentBefore(getFileCommentContent(function));
-			}
-
-            if (function.getName() != null) {
-                Object[] name = new Object[] {function.getName().toString()};
-                for (Pair<MessageFormat, MessageFormat> mf : result.config.onlineDocumentationURLFormats) {
-                    try {
-                        MessageFormat urlFormat = mf.getSecond();
-                        URL url = new URL(urlFormat.format(name));
-                        URLConnection con = url.openConnection();
-                        con.getInputStream().close();
-                        MessageFormat displayFormat = mf.getFirst();
-                        natFunc.addToCommentBefore("@see <a href=\"" + url + "\">" + displayFormat.format(name) + "</a>");
-                        break;
-                    } catch (Exception ex) {
-                        //ex.printStackTrace();
-                    }
-                }
-            }
-
-			boolean alternativeOutputs = !isCallback;
-
-			Function primOrBufFunc = alternativeOutputs ? natFunc.clone() : null;
-			Function natStructFunc = alternativeOutputs ? natFunc.clone() : null;
-
-			Set<String> argNames = new TreeSet<String>();
-//			for (Arg arg : function.getArgs())
-//				if (arg.getName() != null)
-//					argNames.add(arg.getName());
-
-			int iArg = 1;
-			for (Arg arg : function.getArgs()) {
-				if (arg.isVarArg() && arg.getValueType() == null) {
-					//TODO choose vaname dynamically !
-					Identifier vaType = ident(isObjectiveC ? NSObject.class : Object.class);
-					String argName = chooseJavaArgName("varargs", iArg, argNames);
-					natFunc.addArg(new Arg(argName, typeRef(vaType.clone()))).setVarArg(true);
-					if (alternativeOutputs) {
-						primOrBufFunc.addArg(new Arg(argName, typeRef(vaType.clone()))).setVarArg(true);
-						natStructFunc.addArg(new Arg(argName, typeRef(vaType.clone()))).setVarArg(true);
-					}
-				} else {
-					String argName = chooseJavaArgName(arg.getName(), iArg, argNames);
-
-					TypeRef mutType = arg.createMutatedType();
-					if (mutType == null)
-						throw new UnsupportedConversionException(function, "Argument " + arg.getName() + " cannot be converted");
-
-					if (mutType.toString().contains("NSOpenGLContextParameter")) {
-						argName = argName.toString();
-					}
-					natFunc.addArg(new Arg(argName, result.typeConverter.convertTypeToJNA(mutType, TypeConversionMode.NativeParameter, libraryClassName)));
-					if (alternativeOutputs) {
-						primOrBufFunc.addArg(new Arg(argName, result.typeConverter.convertTypeToJNA(mutType, TypeConversionMode.PrimitiveOrBufferParameter, libraryClassName)));
-						natStructFunc.addArg(new Arg(argName, result.typeConverter.convertTypeToJNA(mutType, TypeConversionMode.NativeParameterWithStructsPtrPtrs, libraryClassName)));
-					}
-				}
-				iArg++;
-			}
-
-			String natSign = natFunc.computeSignature(false),
-				primOrBufSign = alternativeOutputs ? primOrBufFunc.computeSignature(false) : null,
-				bufSign = alternativeOutputs ? natStructFunc.computeSignature(false) : null;
-
-			if (signatures == null || signatures.methodsSignatures.add(natSign)) {
-				if (alternativeOutputs && !primOrBufSign.equals(natSign)) {
-					if (!result.config.noComments) {
-						if (primOrBufSign.equals(bufSign))
-							natFunc.addToCommentBefore(Arrays.asList("@deprecated use the safer method {@link #" + primOrBufSign + "} instead"));
-						else
-							natFunc.addToCommentBefore(Arrays.asList("@deprecated use the safer methods {@link #" + primOrBufSign + "} and {@link #" + bufSign + "} instead"));
-					}
-					natFunc.addAnnotation(new Annotation(Deprecated.class));
-				}
-				collectParamComments(natFunc);
-				out.addDeclaration(natFunc);
-				alternatives.add(cleanClone(natFunc));
-			}
-
-			if (alternativeOutputs) {
-				if (signatures == null || signatures.methodsSignatures.add(primOrBufSign)) {
-					collectParamComments(primOrBufFunc);
-					out.addDeclaration(primOrBufFunc);
-					alternatives.add(cleanClone(primOrBufFunc));
-				}
-				if (signatures == null || signatures.methodsSignatures.add(bufSign)) {
-					collectParamComments(natStructFunc);
-					out.addDeclaration(natStructFunc);
-					alternatives.add(cleanClone(natStructFunc));
-				}
-			}
-		} catch (UnsupportedConversionException ex) {
-			if (!result.config.limitComments)
-				out.addDeclaration(new EmptyDeclaration(getFileCommentContent(function), ex.toString()));
-		}
-    }
-
-    private void convertBridJFunction(Function function, Signatures signatures, boolean isCallback, DeclarationsHolder out, Identifier libraryClassName, String sig, Identifier functionName, String library, int iConstructor) throws UnsupportedConversionException {
-		Element parent = function.getParentElement();
-    	MemberVisibility visibility = function.getVisibility();
-    	boolean isPublic = visibility == MemberVisibility.Public || function.hasModifier(ModifierType.Public);
-    	boolean isPrivate = visibility == MemberVisibility.Private || function.hasModifier(ModifierType.Private);
-    	boolean isProtected = visibility == MemberVisibility.Protected || function.hasModifier(ModifierType.Protected);
-		boolean isInStruct = parent instanceof Struct;
-    	if (isInStruct && result.config.skipPrivateMembers && (isPrivate || !isPublic && !isProtected))
-        	return;
-        boolean isStatic = function.hasModifier(ModifierType.Static);
-		boolean isConstructor = iConstructor != -1;
-            
-        Function nativeMethod = new Function(Type.JavaMethod, ident(functionName), null);
-        
-        nativeMethod.addModifiers(
-            isProtected ? ModifierType.Protected : ModifierType.Public, 
-            isStatic || !isCallback && !isInStruct ? ModifierType.Static : null
-        );
-        if (result.config.synchronizedMethods && !isCallback)
-			nativeMethod.addModifiers(ModifierType.Synchronized);
-		
-        if (function.getName() != null && !functionName.toString().equals(function.getName().toString()) && !isCallback) {
-        	TypeRef mgc = result.config.runtime.typeRef(JNAeratorConfig.Runtime.Ann.Name);
-			if (mgc != null) {
-				nativeMethod.addAnnotation(new Annotation(mgc, "(\"" + function.getName() + "\")"));
-			}
-		}
-        if (!isConstructor) {
-            NL4JConversion retType = result.typeConverter.convertTypeToNL4J(function.getValueType(), libraryClassName, null, null, -1, -1);
-            retType.annotateTypedType(nativeMethod);//.getTypedTypeRef())));
-            nativeMethod.setValueType(retType.typeRef);
-        }
-
-        Map<String, NL4JConversion> argTypes = new LinkedHashMap<String, NL4JConversion>();
-
-        boolean isObjectiveC = function.getType() == Type.ObjCMethod;
-        int iArg = 1;
-        Set<String> argNames = new TreeSet<String>();
-
-        List<Expression> superConstructorArgs = null;
-        if (isConstructor) {
-            superConstructorArgs = new ArrayList<Expression>();
-            superConstructorArgs.add(cast(typeRef(Void.class), nullExpr()));
-            superConstructorArgs.add(expr(iConstructor));
-        }
-        
-        for (Arg arg : function.getArgs()) {
-
-            if (arg.isVarArg()) {
-            		assert arg.getValueType() == null;
-                // TODO choose vaname dynamically !
-                Identifier vaType = ident(isObjectiveC ? NSObject.class : Object.class);
-                String argName = chooseJavaArgName("varargs", iArg, argNames);
-                nativeMethod.addArg(new Arg(argName, typeRef(vaType.clone()))).setVarArg(true);
-            } else {
-                String argName = chooseJavaArgName(arg.getName(), iArg, argNames);
-                NL4JConversion argType = result.typeConverter.convertTypeToNL4J(arg.getValueType(), libraryClassName, null, null, -1, -1);
-                argTypes.put(argName, argType);
-                nativeMethod.addArg(argType.annotateTypedType(new Arg(argName, argType.typeRef)));//.getTypedTypeRef())));
-                
-                if (isConstructor) {
-                    superConstructorArgs.add(varRef(argName));
-                }
-            }
-            iArg++;
-        }
-        String natSig = nativeMethod.computeSignature(false);
-
-        Identifier javaMethodName = signatures.findNextMethodName(natSig, functionName);
-        if (!javaMethodName.equals(functionName)) {
-            nativeMethod.setName(javaMethodName);
-        }
-        if (!isCallback && !javaMethodName.equals(functionName))
-            nativeMethod.addAnnotation(new Annotation(Name.class, expr(functionName.toString())));
-
-        Block convertedBody = null;
-        if (isConstructor) {
-            convertedBody = block(stat(methodCall("super", superConstructorArgs.toArray(new Expression[superConstructorArgs.size()]))));
-        } else if (result.config.convertBodies && function.getBody() != null)
-        {
-            try {
-                Pair<Element, List<Declaration>> bodyAndExtraDeclarations = result.bridjer.convertToJava(function.getBody(), libraryClassName);
-                convertedBody = (Block)bodyAndExtraDeclarations.getFirst();
-                for (Declaration d : bodyAndExtraDeclarations.getSecond())
-                    out.addDeclaration(d);
-            } catch (Exception ex) {
-                ex.printStackTrace(System.out);
-                nativeMethod.addToCommentBefore("TRANSLATION OF BODY FAILED: " + ex);
-            }
-        }
-        
-        if (convertedBody == null)
-            nativeMethod.addModifiers(isCallback ? ModifierType.Abstract : ModifierType.Native);
-        else
-            nativeMethod.setBody(convertedBody);
-        
-        out.addDeclaration(nativeMethod);
-    }
-
-	protected boolean isCPlusPlusFileName(String file) {
+    protected boolean isCPlusPlusFileName(String file) {
 		if (file == null)
 			return true;
 			
 		file = file.toLowerCase();
 		return !file.endsWith(".c") && !file.endsWith(".m");
 	}
-	private void addCPlusPlusMangledNames(Function function, Set<String> names) {
-		if (function.getType() == Type.ObjCMethod)
-			return;
-		
-		String elementFile = result.resolveFile(function);
-		if (elementFile != null && (
-				elementFile.contains(".framework/") ||
-				elementFile.endsWith(".bridgesupport")))
-			return;
-		
-		ExternDeclarations externDeclarations = function.findParentOfType(ExternDeclarations.class);
-		if (externDeclarations != null && !"C++".equals(externDeclarations.getLanguage()))
-			return;
-		
-		if (!isCPlusPlusFileName(Element.getFileOfAscendency(function)))
-			return;
-		
-		/// Parse or infer name manglings
-		List<String[]> mats = function.getCommentBefore() == null ? null : com.ochafik.util.string.RegexUtils.find(function.getCommentBefore(), manglingCommentPattern);
-		if (mats != null && !mats.isEmpty()) {
-			for (String[] mat : mats)
-				names.add(mat[1]);
-		} else {
-			for (CPlusPlusMangler mangler : result.config.cPlusPlusManglers) {
-				try {
-					names.add(mangler.mangle(function, result));
-				} catch (Exception ex) {
-					System.err.println("Error in mangling of '" + function.computeSignature(true) + "' : " + ex);
-					ex.printStackTrace();
-				}
-			}
-		}
-		
-	}
-
-	private void collectParamComments(Function f) {
+	
+	protected void collectParamComments(Function f) {
 		for (Arg arg : f.getArgs()) {
 			arg.moveAllCommentsBefore();
 			TypeRef argType = arg.getValueType();
@@ -1129,156 +596,8 @@ public class DeclarationsConverter {
 			structName = tag;
 		return structName == null ? null : structName.clone();
 	}
-	public Struct convertStruct(Struct struct, Signatures signatures, Identifier callerLibraryClass, String callerLibrary, boolean onlyFields) throws IOException {
-        if (result.config.runtime == JNAeratorConfig.Runtime.BridJ)
-            return convertStructToBridJ(struct, signatures, callerLibraryClass, callerLibrary, onlyFields);
-        else
-            return convertStructToJNA(struct, signatures, callerLibraryClass, callerLibrary, onlyFields);
-    }
-	public Struct convertStructToJNA(Struct struct, Signatures signatures, Identifier callerLibraryClass, String callerLibrary, boolean onlyFields) throws IOException {
-		Identifier structName = getActualTaggedTypeName(struct);
-		if (structName == null)
-			return null;
-		
-		//if (structName.toString().contains("MonoSymbolFile"))
-		//	structName.toString();
-		
-		if (struct.isForwardDeclaration())// && !result.structsByName.get(structName).isForwardDeclaration())
-			return null;
-		
-		if (!signatures.classSignatures.add(structName))
-			return null;
-
-		boolean isUnion = struct.getType() == Struct.Type.CUnion;
-		boolean inheritsFromStruct = false;
-		Identifier baseClass = null;
-		if (!onlyFields) {
-			if (!struct.getParents().isEmpty()) {
-				for (SimpleTypeRef parentName : struct.getParents()) {
-					Struct parent = result.structsByName.get(parentName.getName());
-					if (parent == null) {
-						// TODO report error
-						continue;
-					}
-					baseClass = result.getTaggedTypeIdentifierInJava(parent);
-					if (baseClass != null) {
-						inheritsFromStruct = true;
-						break; // TODO handle multiple and virtual inheritage
-					}
-				}
-			}
-			if (baseClass == null) {
-				Class<?> c = isUnion ? result.config.runtime.unionClass : result.config.runtime.structClass;
-                if (result.config.runtime != JNAeratorConfig.Runtime.JNA) {
-					baseClass = ident(
-						c, 
-						expr(typeRef(structName.clone())), 
-						expr(typeRef(ident(structName.clone(), "ByValue"))), 
-						expr(typeRef(ident(structName.clone(), "ByReference")))
-					);
-				} else
-					baseClass = ident(c);
-			}
-		}
-		Struct structJavaClass = publicStaticClass(structName, baseClass, Struct.Type.JavaClass, struct);
-		
-		final int iChild[] = new int[] {0};
-		
-		//cl.addDeclaration(new EmptyDeclaration())
-		Signatures childSignatures = new Signatures();
-		
-//		if (isVirtual(struct) && !onlyFields) {
-//			String vptrName = DEFAULT_VPTR_NAME;
-//			VariablesDeclaration vptr = new VariablesDeclaration(typeRef(VirtualTablePointer.class), new Declarator.DirectDeclarator(vptrName));
-//            //VariablesDeclaration vptr = new VariablesDeclaration(typeRef(result.config.runtime.pointerClass), new Declarator.DirectDeclarator(vptrName));
-//			vptr.addModifiers(ModifierType.Public);
-//			structJavaClass.addDeclaration(vptr);
-//			childSignatures.variablesSignatures.add(vptrName);
-//			// TODO add vptr grabber to constructor !
-//		}
-		
-		//List<Declaration> children = new ArrayList<Declaration>();
-		for (Declaration d : struct.getDeclarations()) {
-			if (d instanceof VariablesDeclaration) {
-				convertVariablesDeclaration((VariablesDeclaration)d, childSignatures, structJavaClass, iChild, structName, callerLibraryClass, callerLibrary);
-			} else if (!onlyFields) {
-				if (d instanceof TaggedTypeRefDeclaration) {
-					TaggedTypeRef tr = ((TaggedTypeRefDeclaration) d).getTaggedTypeRef();
-					if (tr instanceof Struct) {
-						outputConvertedStruct((Struct)tr, childSignatures, structJavaClass, callerLibraryClass, callerLibrary, false);
-					} else if (tr instanceof Enum) {
-						convertEnum((Enum)tr, childSignatures, structJavaClass, callerLibraryClass);
-					}
-				} else if (d instanceof TypeDef) {
-					TypeDef td = (TypeDef)d;
-					TypeRef tr = td.getValueType();
-					if (tr instanceof Struct) {
-						outputConvertedStruct((Struct)tr, childSignatures, structJavaClass, callerLibraryClass, callerLibrary, false);
-					} else if (tr instanceof FunctionSignature) {
-						convertCallback((FunctionSignature)tr, childSignatures, structJavaClass, callerLibraryClass);
-					}
-				} else if (result.config.genCPlusPlus && d instanceof Function) {
-					Function f = (Function) d;
-					String library = result.getLibrary(struct);
-					if (library == null)
-						continue;
-					List<Declaration> decls = new ArrayList<Declaration>();
-					convertFunction(f, childSignatures, false, new ListWrapper(decls), callerLibraryClass, -1);
-					for (Declaration md : decls) {
-						if (!(md instanceof Function))
-							continue;
-						Function method = (Function) md;
-						Identifier methodImplName = method.getName().clone();
-						Identifier methodName = result.typeConverter.getValidJavaMethodName(f.getName());
-						method.setName(methodName);
-						List<Expression> args = new ArrayList<Expression>();
-						
-						boolean isStatic = f.hasModifier(ModifierType.Static);
-						int iArg = 0;
-						for (Arg arg : new ArrayList<Arg>(method.getArgs())) {
-							if (iArg == 0 && !isStatic) {
-								arg.replaceBy(null);
-								args.add(thisRef());
-							} else
-								args.add(varRef(arg.getName()));
-							iArg++;
-						}
-						Expression implCall = methodCall(result.getLibraryInstanceReferenceExpression(library), MemberRefStyle.Dot, methodImplName.toString(), args.toArray(new Expression[args.size()]));
-						method.setBody(block(
-							"void".equals(String.valueOf(method.getValueType())) ?
-								stat(implCall) : 
-								new Statement.Return(implCall)
-						));
-						method.addModifiers(ModifierType.Public, isStatic ? ModifierType.Static : null);
-						structJavaClass.addDeclaration(method);
-					}
-				}
-			}
-		}
-		
-		if (!onlyFields) {
-			if (result.config.features.contains(GenFeatures.StructConstructors))
-				addStructConstructors(structName, structJavaClass/*, byRef, byVal*/, struct);
-			
-			Struct byRef = publicStaticClass(ident("ByReference"), structName, Struct.Type.JavaClass, null, ident(ident(result.config.runtime.structClass), "ByReference"));
-			Struct byVal = publicStaticClass(ident("ByValue"), structName, Struct.Type.JavaClass, null, ident(ident(result.config.runtime.structClass), "ByValue"));
-			
-			if (result.config.runtime != JNAeratorConfig.Runtime.JNA) {
-				if (!inheritsFromStruct) {
-					structJavaClass.addDeclaration(createNewStructMethod("newByReference", byRef));
-					structJavaClass.addDeclaration(createNewStructMethod("newByValue", byVal));
-				}
-				structJavaClass.addDeclaration(createNewStructMethod("newInstance", structJavaClass));
-	
-				structJavaClass.addDeclaration(createNewStructArrayMethod(structJavaClass, isUnion));
-			}
-
-			structJavaClass.addDeclaration(decl(byRef));
-			structJavaClass.addDeclaration(decl(byVal));
-		}
-		return structJavaClass;
-	}
-	
+	public abstract Struct convertStruct(Struct struct, Signatures signatures, Identifier callerLibraryClass, String callerLibrary, boolean onlyFields) throws IOException;
+    
 	public int countFieldsInStruct(Struct s) throws UnsupportedConversionException {
 		int count = 0;
 		for (Declaration declaration : s.getDeclarations()) {
@@ -1296,166 +615,7 @@ public class DeclarationsConverter {
 		return count;
 	}
 
-    public Struct convertStructToBridJ(Struct struct, Signatures signatures, Identifier callerLibraryClass, String callerLibrary, boolean onlyFields) throws IOException {
-		Identifier structName = getActualTaggedTypeName(struct);
-		if (structName == null)
-			return null;
-
-		//if (structName.toString().contains("MonoObject"))
-		//	structName.toString();
-
-		if (struct.isForwardDeclaration())// && !result.structsByName.get(structName).isForwardDeclaration())
-			return null;
-
-		if (!signatures.classSignatures.add(structName))
-			return null;
-
-		boolean isUnion = struct.getType() == Struct.Type.CUnion;
-		boolean inheritsFromStruct = false;
-		Identifier baseClass = null;
-		int parentFieldsCount = 0;
-		List<String> preComments = new ArrayList<String>();
-		for (SimpleTypeRef parentName : struct.getParents()) {
-			Struct parent = result.structsByName.get(parentName.getName());
-			if (parent == null) {
-				// TODO report error
-				continue;
-			}
-			try {
-				parentFieldsCount += countFieldsInStruct(parent);
-			} catch (UnsupportedConversionException ex) {
-				preComments.add("Error: " + ex);
-			}
-			baseClass = result.getTaggedTypeIdentifierInJava(parent);
-			if (baseClass != null) {
-				inheritsFromStruct = true;
-				break; // TODO handle multiple and virtual inheritage
-			}
-		}
-		boolean hasMemberFunctions = false;
-		for (Declaration d : struct.getDeclarations()) {
-			if (d instanceof Function) {
-				hasMemberFunctions = true;
-				break;
-			}
-		}
-		Constant uuid = (Constant)struct.getModifierValue(ModifierType.UUID);
-        if (baseClass == null) {
-			switch (struct.getType()) {
-			case CStruct:
-			case CUnion:
-				if (!hasMemberFunctions) {
-					baseClass = ident(StructObject.class);
-					break;
-				}
-			case CPPClass:
-				baseClass = ident(uuid == null ? CPPObject.class : IUnknown.class);
-				result.hasCPlusPlus = true;
-				break;
-			default:
-				throw new UnsupportedOperationException();
-			}
-		}
-		Struct structJavaClass = publicStaticClass(structName, baseClass, Struct.Type.JavaClass, struct);
-        //if (result.config.microsoftCOM) {
-        if (uuid != null) {
-            structJavaClass.addAnnotation(new Annotation(result.config.runtime.typeRef(JNAeratorConfig.Runtime.Ann.IID), uuid));
-        }
-		structJavaClass.addToCommentBefore(preComments);
-		//System.out.println("parentFieldsCount(structName = " + structName + ") = " + parentFieldsCount);
-		final int iChild[] = new int[] { parentFieldsCount };
-
-		//cl.addDeclaration(new EmptyDeclaration())
-		Signatures childSignatures = new Signatures();
-
-		/*if (isVirtual(struct) && !onlyFields) {
-			String vptrName = DEFAULT_VPTR_NAME;
-			VariablesDeclaration vptr = new VariablesDeclaration(typeRef(VirtualTablePointer.class), new Declarator.DirectDeclarator(vptrName));
-			vptr.addModifiers(ModifierType.Public);
-			structJavaClass.addDeclaration(vptr);
-			childSignatures.variablesSignatures.add(vptrName);
-			// TODO add vptr grabber to constructor !
-		}*/
-
-        //    private static StructIO<MyStruct> io = StructIO.getInstance(MyStruct.class);
-        
-        Function defaultConstructor = new Function(Type.JavaMethod, ident(structName), null).setBody(block(stat(methodCall("super")))).addModifiers(ModifierType.Public);
-        if (childSignatures.methodsSignatures.add(defaultConstructor.computeSignature(false)))
-            structJavaClass.addDeclaration(defaultConstructor);
-        
-        //todo remove this :
-		//String ptrName = "pointer";
-		//structJavaClass.addDeclaration(new Function(Type.JavaMethod, ident(structName), null, new Arg(ptrName, typeRef(result.config.runtime.pointerClass))).setBody(block(stat(methodCall("super", varRef(ptrName))))).addModifiers(ModifierType.Public));
-
-        if (isUnion)
-            structJavaClass.addAnnotation(new Annotation(result.config.runtime.typeRef(JNAeratorConfig.Runtime.Ann.Union)));
-
-        int iVirtual = 0, iConstructor = 0;
-		//List<Declaration> children = new ArrayList<Declaration>();
-		for (Declaration d : struct.getDeclarations()) {
-            //if (isUnion)
-            //    iChild[0] = 0;
-
-			if (d instanceof VariablesDeclaration) {
-				convertVariablesDeclaration((VariablesDeclaration)d, childSignatures, structJavaClass, iChild, structName, callerLibraryClass, callerLibrary);
-			} else if (!onlyFields) {
-				if (d instanceof TaggedTypeRefDeclaration) {
-					TaggedTypeRef tr = ((TaggedTypeRefDeclaration) d).getTaggedTypeRef();
-					if (tr instanceof Struct) {
-						outputConvertedStruct((Struct)tr, childSignatures, structJavaClass, callerLibraryClass, callerLibrary, false);
-					} else if (tr instanceof Enum) {
-						convertEnum((Enum)tr, childSignatures, structJavaClass, callerLibraryClass);
-					}
-				} else if (d instanceof TypeDef) {
-					TypeDef td = (TypeDef)d;
-					TypeRef tr = td.getValueType();
-					if (tr instanceof Struct) {
-						outputConvertedStruct((Struct)tr, childSignatures, structJavaClass, callerLibraryClass, callerLibrary, false);
-					} else if (tr instanceof FunctionSignature) {
-						convertCallback((FunctionSignature)tr, childSignatures, structJavaClass, callerLibraryClass);
-					}
-				} else if ((result.config.runtime == JNAeratorConfig.Runtime.BridJ || result.config.genCPlusPlus) && d instanceof Function) {
-					Function f = (Function) d;
-                    
-					boolean isVirtual = f.hasModifier(ModifierType.Virtual);
-                    boolean isConstructor = f.getName().equals(structName) && (f.getValueType() == null || f.getValueType().toString().equals("void"));
-                    if (isConstructor && f.getArgs().isEmpty())
-                        continue; // default constructor was already generated
-                    
-					String library = result.getLibrary(struct);
-					if (library == null)
-						continue;
-					List<Declaration> decls = new ArrayList<Declaration>();
-					convertFunction(f, childSignatures, false, new ListWrapper(decls), callerLibraryClass, isConstructor ? iConstructor : -1);
-                    for (Declaration md : decls) {
-						if (!(md instanceof Function))
-							continue;
-						Function method = (Function) md;
-                        boolean commentOut = false;
-						if (isVirtual)
-							method.addAnnotation(new Annotation(result.config.runtime.typeRef(JNAeratorConfig.Runtime.Ann.Virtual), expr(iVirtual)));
-                        else if (method.getValueType() == null) {
-                            method.addAnnotation(new Annotation(result.config.runtime.typeRef(JNAeratorConfig.Runtime.Ann.Constructor), expr(iConstructor)));
-                            isConstructor = true;
-                        }
-                        if (method.getName().toString().equals("operator"))
-                            commentOut = true;
-                        
-                        if (commentOut)
-                            structJavaClass.addDeclaration(new EmptyDeclaration(method.toString()));
-                        else
-                            structJavaClass.addDeclaration(method);
-					}
-					if (isVirtual)
-						iVirtual++;
-                    if (isConstructor)
-                        iConstructor++;
-				}
-			}
-		}
-		return structJavaClass;
-	}
-	void outputConvertedStruct(Struct struct, Signatures signatures, DeclarationsHolder out, Identifier callerLibraryClass, String callerLibrary, boolean onlyFields) throws IOException {
+	protected void outputConvertedStruct(Struct struct, Signatures signatures, DeclarationsHolder out, Identifier callerLibraryClass, String callerLibrary, boolean onlyFields) throws IOException {
 		Struct structJavaClass = convertStruct(struct, signatures, callerLibraryClass, callerLibrary, onlyFields);
 		if (structJavaClass == null)
 			return;
@@ -1478,39 +638,7 @@ public class DeclarationsConverter {
 			out.addDeclaration(decl(structJavaClass));
 	}
 
-	Map<Identifier, Boolean> structsVirtuality = new HashMap<Identifier, Boolean>();
-	public boolean isVirtual(Struct struct) {
-		Identifier name = getActualTaggedTypeName(struct);
-		Boolean bVirtual = structsVirtuality.get(name);
-		if (bVirtual == null) {
-			boolean hasVirtualParent = false, hasVirtualMembers = false;
-			for (SimpleTypeRef parentName : struct.getParents()) {
-				Struct parentStruct = result.structsByName.get(parentName.getName());
-				if (parentStruct == null) {
-					if (result.config.verbose)
-						System.out.println("Failed to resolve parent '" + parentName + "' for struct '" + name + "'");
-					continue;
-				}
-				if (isVirtual(parentStruct)) {
-					hasVirtualParent = true;
-					break;
-				}
-			}
-
-			for (Declaration mb : struct.getDeclarations()) {
-				if (mb.hasModifier(ModifierType.Virtual)) {
-					hasVirtualMembers = true;
-					break;
-				}
-			}
-			bVirtual = hasVirtualMembers && !hasVirtualParent;
-			structsVirtuality.put(name, bVirtual);
-		}
-		return bVirtual;
-	}
-
-
-	private Function createNewStructMethod(String name, Struct byRef) {
+	protected Function createNewStructMethod(String name, Struct byRef) {
 		TypeRef tr = typeRef(byRef.getTag().clone());
 		Function f = new Function(Function.Type.JavaMethod, ident(name), tr);
 		String varName = "s";
@@ -1532,7 +660,7 @@ public class DeclarationsConverter {
 		}
 		return f;
 	}
-	private Function createNewStructArrayMethod(Struct struct, boolean isUnion) {
+	protected Function createNewStructArrayMethod(Struct struct, boolean isUnion) {
 		if (result.config.runtime == JNAeratorConfig.Runtime.JNA)
 			return null;
 
@@ -1562,316 +690,17 @@ public class DeclarationsConverter {
 				if (struct.findParentOfType(Struct.class) != null)
 					continue;
 					
+                if (!result.config.genCPlusPlus && struct.getType().isCpp())
+                    continue;
+
 				outputConvertedStruct(struct, signatures, out, libraryClassName, library, false);
 			}
 		}
 	}
 
-	public VariablesDeclaration convertVariablesDeclarationToJNA(String name, TypeRef mutatedType, int[] iChild, Identifier callerLibraryName, Element... toImportDetailsFrom) throws UnsupportedConversionException {
-		name = result.typeConverter.getValidJavaArgumentName(ident(name)).toString();
-		//convertVariablesDeclaration(name, mutatedType, out, iChild, callerLibraryName);
-
-		Expression initVal = null;
-		TypeRef  javaType = result.typeConverter.convertTypeToJNA(
-			mutatedType, 
-			TypeConversion.TypeConversionMode.FieldType,
-			callerLibraryName
-		);
-		mutatedType = result.typeConverter.resolveTypeDef(mutatedType, callerLibraryName, true, false);
-		
-		VariablesDeclaration convDecl = new VariablesDeclaration();
-		convDecl.addModifiers(ModifierType.Public);
-		
-		if (javaType instanceof ArrayRef && mutatedType instanceof ArrayRef) {
-			ArrayRef mr = (ArrayRef)mutatedType;
-			ArrayRef jr = (ArrayRef)javaType;
-			Expression mul = null;
-			List<Expression> dims = mr.flattenDimensions();
-			for (int i = dims.size(); i-- != 0;) {
-				Expression x = dims.get(i);
-			
-				if (x == null || x instanceof EmptyArraySize) {
-					javaType = jr = new ArrayRef(typeRef(Pointer.class));
-					break;
-				} else {
-					Pair<Expression, TypeRef> c = result.typeConverter.convertExpressionToJava(x, callerLibraryName, false);
-					c.getFirst().setParenthesis(dims.size() == 1);
-					if (mul == null)
-						mul = c.getFirst();
-					else
-						mul = expr(c.getFirst(), BinaryOperator.Multiply, mul);
-				}
-			}
-			initVal = new Expression.NewArray(jr.getTarget(), new Expression[] { mul }, new Expression[0]);
-		}
-		if (javaType == null) {
-			throw new UnsupportedConversionException(mutatedType, "failed to convert type to Java");
-		} else if (javaType.toString().equals("void")) {
-			throw new UnsupportedConversionException(mutatedType, "void type !");
-			//out.add(new EmptyDeclaration("SKIPPED:", v.formatComments("", true, true, false), v.toString()));
-		} else {
-			for (Element e : toImportDetailsFrom)
-				convDecl.importDetails(e, false);
-			convDecl.importDetails(mutatedType, true);
-			convDecl.importDetails(javaType, true);
-			
-//			convDecl.importDetails(v, false);
-//			convDecl.importDetails(vs, false);
-//			convDecl.importDetails(valueType, false);
-//			valueType.stripDetails();
-			convDecl.moveAllCommentsBefore();
-			convDecl.setValueType(javaType);
-			convDecl.addDeclarator(new DirectDeclarator(name, initVal));
-			
-			return convDecl;//out.addDeclaration(convDecl);
-		}
-	}
-    protected String ioVarName = "io", ioStaticVarName = "IO";
-	public List<Declaration> convertVariablesDeclarationToBridJ(String name, TypeRef mutatedType, int[] iChild, int bits, boolean isGlobal, Identifier holderName, Identifier callerLibraryName, String callerLibrary, Element... toImportDetailsFrom) throws UnsupportedConversionException {
-		name = result.typeConverter.getValidJavaArgumentName(ident(name)).toString();
-		//convertVariablesDeclaration(name, mutatedType, out, iChild, callerLibraryName);
-
-		//Expression initVal = null;
-		int fieldIndex = iChild[0];
-		//convertTypeToNL4J(TypeRef valueType, Identifier libraryClassName, Expression structPeerExpr, Expression structIOExpr, Expression valueExpr, int fieldIndex, int bits) throws UnsupportedConversionException {
-			
-        TypeConversion.NL4JConversion conv = result.typeConverter.convertTypeToNL4J(
-    		mutatedType, 
-    		callerLibraryName,
-    		thisField("io"),
-    		varRef(name),
-    		fieldIndex,
-    		bits
-		);
-
-        if (conv == null) {
-			throw new UnsupportedConversionException(mutatedType, "failed to convert type to Java");
-		} else if ("void".equals(String.valueOf(conv.typeRef))) {
-			throw new UnsupportedConversionException(mutatedType, "void type !");
-			//out.add(new EmptyDeclaration("SKIPPED:", v.formatComments("", true, true, false), v.toString()));
-		}
-
-        Function convDecl = new Function();
-        conv.annotateTypedType(convDecl);
-        convDecl.setType(Type.JavaMethod);
-		convDecl.addModifiers(ModifierType.Public);
-
-		if (conv.arrayLengths != null)
-            convDecl.addAnnotation(new Annotation(result.config.runtime.typeRef(JNAeratorConfig.Runtime.Ann.Length), "({" + StringUtils.implode(conv.arrayLengths, ", ") + "})"));
-        if (conv.bits != null)
-            convDecl.addAnnotation(new Annotation(result.config.runtime.typeRef(JNAeratorConfig.Runtime.Ann.Bits), conv.bits));
-        if (conv.byValue)
-            convDecl.addAnnotation(new Annotation(result.config.runtime.typeRef(JNAeratorConfig.Runtime.Ann.ByValue)));
-
-        for (Element e : toImportDetailsFrom)
-            convDecl.importDetails(e, false);
-        convDecl.importDetails(mutatedType, true);
-        //convDecl.importDetails(javaType, true);
-
-//			convDecl.importDetails(v, false);
-//			convDecl.importDetails(vs, false);
-//			convDecl.importDetails(valueType, false);
-//			valueType.stripDetails();
-        convDecl.moveAllCommentsBefore();
-
-        convDecl.setName(ident(name));
-
-        if (!isGlobal)
-            convDecl.addAnnotation(new Annotation(result.config.runtime.typeRef(JNAeratorConfig.Runtime.Ann.Field), expr(fieldIndex)));
-        convDecl.setValueType(conv.typeRef);
-
-        TypeRef javaType = convDecl.getValueType();
-        String pointerGetSetMethodSuffix = StringUtils.capitalize(javaType.toString());
-
-        Expression getGlobalPointerExpr = null;
-        if (isGlobal) {
-            getGlobalPointerExpr = methodCall(methodCall(methodCall(expr(typeRef(BridJ.class)), "getNativeLibrary", expr(callerLibrary)), "getSymbolPointer", expr(name)), "as", result.typeConverter.typeLiteral(javaType.clone()));
-        }
-        List<Declaration> out = new ArrayList<Declaration>();
-        if (conv.getExpr != null) {
-	        Function getter = convDecl.clone();
-            if (isGlobal) {
-                getter.setBody(block(
-                    tryRethrow(new Statement.Return(cast(javaType.clone(), methodCall(getGlobalPointerExpr, "get"))))
-                ));
-            } else {
-                getter.setBody(block(
-                    new Statement.Return(conv.getExpr)
-                ));
-            }
-	        out.add(getter);
-        }
-        
-        if (!conv.readOnly && conv.setExpr != null) {
-            Function setter = convDecl.clone();
-            setter.setValueType(typeRef(holderName.clone()));//Void.TYPE));
-            setter.addArg(new Arg(name, javaType));
-            //setter.addModifiers(ModifierType.Native);
-            if (isGlobal) {
-                setter.setBody(block(
-                    tryRethrow(block(
-                        stat(methodCall(getGlobalPointerExpr, "set", varRef(name))),
-                        new Statement.Return(thisRef())
-                    ))
-                ));
-            } else {
-                setter.setBody(block(
-                    stat(conv.setExpr),
-                    new Statement.Return(thisRef())
-                ));
-            }
-            out.add(setter);
-            
-            if (result.config.scalaStructSetters) {
-                setter = new Function();
-                setter.setType(Type.JavaMethod);
-                setter.setName(ident(name + "_$eq"));
-                setter.setValueType(javaType.clone());
-                setter.addArg(new Arg(name, javaType.clone()));
-                setter.addModifiers(ModifierType.Public, ModifierType.Final);
-                setter.setBody(block(
-                    stat(methodCall(name, varRef(name))),
-                    new Statement.Return(varRef(name))
-                ));
-                out.add(setter);
-            }
-        }
-        return out;
-    }
-	public void convertVariablesDeclaration(VariablesDeclaration v, Signatures signatures, DeclarationsHolder out, int[] iChild, Identifier holderName, Identifier callerLibraryClass, String callerLibrary) {
-		if (result.config.runtime == JNAeratorConfig.Runtime.BridJ)
-	        convertVariablesDeclarationToBridJ(v, signatures, out, iChild, false, holderName, callerLibraryClass, callerLibrary);
-        else
-            convertVariablesDeclarationToJNA(v, signatures, out, iChild, callerLibraryClass);
-    }
-	public void convertVariablesDeclarationToBridJ(VariablesDeclaration v, Signatures signatures, DeclarationsHolder out, int[] iChild, boolean isGlobal, Identifier holderName, Identifier callerLibraryClass, String callerLibrary) {
-        try { 
-			TypeRef valueType = v.getValueType();
-			for (Declarator vs : v.getDeclarators()) {
-				String name = vs.resolveName();
-				if (name == null || name.length() == 0) {
-					name = "anonymous" + (nextAnonymousFieldId++);
-				}
-
-				TypeRef mutatedType = valueType;
-				if (!(vs instanceof DirectDeclarator))
-				{
-					mutatedType = (TypeRef)vs.mutateType(valueType);
-					vs = new DirectDeclarator(vs.resolveName());
-				}
-				Declarator d = v.getDeclarators().get(0);
-                List<Declaration> vds = convertVariablesDeclarationToBridJ(name, mutatedType, iChild, d.getBits(), isGlobal, holderName, callerLibraryClass, callerLibrary, v, vs);
-                if (d.getBits() > 0)
-					for (Declaration vd : vds)
-                        vd.addAnnotation(new Annotation(result.config.runtime.typeRef(JNAeratorConfig.Runtime.Ann.Bits), expr(d.getBits())));
-				/*if (vd != null && vd.size() > 0) {
-					Declarator d = v.getDeclarators().get(0);
-					if (d.getBits() > 0) {
-						int bits = d.getBits();
-						vd.addAnnotation(new Annotation(Bits.class, "(" + bits + ")"));
-						String st = vd.getValueType().toString(), mst = st;
-						if (st.equals("int") || st.equals("long") || st.equals("short") || st.equals("long")) {
-							if (bits <= 8)
-								mst = "byte";
-							else if (bits <= 16)
-								mst = "short";
-							else if (bits <= 32)
-								mst = "int";
-							else
-								mst = "long"; // should not happen
-						}
-						if (!st.equals(mst))
-							vd.setValueType(new Primitive(mst));
-					}*/
-                
-                for (Declaration vd : vds) {
-                    if (vd instanceof Function) {
-                        if (!signatures.methodsSignatures.add(((Function)vd).computeSignature(false)))
-                            continue;
-                    }
-                    
-                	vd.importDetails(mutatedType, true);
-                	vd.moveAllCommentsBefore();
-        			if (!(mutatedType instanceof Primitive) && !result.config.noComments)
-                        vd.addToCommentBefore("C type : " + mutatedType);
-                    
-                    out.addDeclaration(vd);
-                }
-				//}
-				iChild[0]++;
-			}
-		} catch (Throwable e) {
-            if (!(e instanceof UnsupportedConversionException))
-                e.printStackTrace();
-			if (!result.config.limitComments)
-				out.addDeclaration(new EmptyDeclaration(e.toString()));
-		}
-    }
-    int nextAnonymousFieldId;
-	public void convertVariablesDeclarationToJNA(VariablesDeclaration v, Signatures signatures, DeclarationsHolder out, int[] iChild, Identifier callerLibraryClass) {
-		//List<Declaration> out = new ArrayList<Declaration>();
-		try {
-			TypeRef valueType = v.getValueType();
-			for (Declarator vs : v.getDeclarators()) {
-				String name = vs.resolveName();
-				if (name == null || name.length() == 0) {
-					name = "anonymous" + (nextAnonymousFieldId++);
-				}
+	public abstract void convertVariablesDeclaration(VariablesDeclaration v, Signatures signatures, DeclarationsHolder out, int[] iChild, boolean isGlobal, Identifier holderName, Identifier callerLibraryClass, String callerLibrary);
 	
-				TypeRef mutatedType = valueType;
-				if (!(vs instanceof DirectDeclarator))
-				{
-					mutatedType = (TypeRef)vs.mutateType(valueType);
-					vs = new DirectDeclarator(vs.resolveName());
-				}
-				VariablesDeclaration vd = convertVariablesDeclarationToJNA(name, mutatedType, iChild, callerLibraryClass, v, vs);
-				if (vd != null) {
-					Declarator d = v.getDeclarators().get(0);
-					if (d.getBits() > 0) {
-						int bits = d.getBits();
-                                                if (!result.config.runtime.hasBitFields)
-                                                    throw new UnsupportedConversionException(d, "This runtime does not support bit fields : " + result.config.runtime);
-                                                
-						vd.addAnnotation(new Annotation(result.config.runtime.typeRef(JNAeratorConfig.Runtime.Ann.Bits), expr(bits)));
-						String st = vd.getValueType().toString(), mst = st;
-						if (st.equals("int") || st.equals("long") || st.equals("short") || st.equals("long")) {
-							if (bits <= 8)
-								mst = "byte";
-							else if (bits <= 16)
-								mst = "short";
-							else if (bits <= 32)
-								mst = "int";
-							else
-								mst = "long"; // should not happen
-						}
-						if (!st.equals(mst))
-							vd.setValueType(new Primitive(mst));
-					}
-					if (!(mutatedType instanceof Primitive) && !result.config.noComments)
-						vd.addToCommentBefore("C type : " + mutatedType);
-					out.addDeclaration(vd);
-				}
-				if (result.config.beanStructs) {
-                    Function getMethod = new Function(Function.Type.JavaMethod, ident("get" + StringUtils.capitalize(name)), vd.getValueType().clone()).setBody(block(
-						new Statement.Return(varRef(name))
-					)).addModifiers(ModifierType.Public);
-                    if (signatures.methodsSignatures.add(getMethod.computeSignature(false)))
-                        out.addDeclaration(getMethod);
-                    
-                    Function setMethod = new Function(Function.Type.JavaMethod, ident("set" + StringUtils.capitalize(name)), typeRef(Void.TYPE), new Arg(name, vd.getValueType().clone())).setBody(block(
-						stat(expr(memberRef(thisRef(), MemberRefStyle.Dot, ident(name)), AssignmentOperator.Equal, varRef(name)))
-					)).addModifiers(ModifierType.Public);
-                    if (signatures.methodsSignatures.add(setMethod.computeSignature(false)))
-                        out.addDeclaration(setMethod);
-				}
-				iChild[0]++;
-			}
-		} catch (UnsupportedConversionException e) {
-			if (!result.config.limitComments)
-				out.addDeclaration(new EmptyDeclaration(e.toString()));
-		}
-	}
-	TaggedTypeRefDeclaration publicStaticClassDecl(Identifier name, Identifier parentName, Struct.Type type, Element toCloneCommentsFrom, Identifier... interfaces) {
+    TaggedTypeRefDeclaration publicStaticClassDecl(Identifier name, Identifier parentName, Struct.Type type, Element toCloneCommentsFrom, Identifier... interfaces) {
 		return decl(publicStaticClass(name, parentName, type, toCloneCommentsFrom, interfaces));
 	}
 	Struct publicStaticClass(Identifier name, Identifier parentName, Struct.Type type, Element toCloneCommentsFrom, Identifier... interfaces) {
@@ -1930,196 +759,7 @@ public class DeclarationsConverter {
 				
 		return ret;
 	}
-	@SuppressWarnings("unchecked")
-	private void addStructConstructors(Identifier structName, Struct structJavaClass/*, Struct byRef,
-			Struct byVal*/, Struct nativeStruct) throws IOException {
-		
-		List<Declaration> initialMembers = new ArrayList<Declaration>(structJavaClass.getDeclarations());
-		Set<String> signatures = new TreeSet<String>();
-		
-		Function emptyConstructor = new Function(Function.Type.JavaMethod, structName.clone(), null).addModifiers(ModifierType.Public);
-		emptyConstructor.setBody(block(stat(methodCall("super"))));
-		addConstructor(structJavaClass, emptyConstructor);
-		
-		
-		boolean isUnion = nativeStruct.getType() == Struct.Type.CUnion;
-		if (isUnion) {
-			Map<String, Pair<TypeRef, List<Pair<String, String>>>> fieldsAndCommentsByTypeStr = new HashMap<String, Pair<TypeRef, List<Pair<String, String>>>>();
-			for (Declaration d : initialMembers) {
-				if (!(d instanceof VariablesDeclaration))
-					continue;
-					
-				VariablesDeclaration vd = (VariablesDeclaration)d;
-				if (vd.getDeclarators().size() != 1)
-					continue; // should not happen !
-				String name = vd.getDeclarators().get(0).resolveName();
-				TypeRef tr = vd.getValueType();
-				if (!isField(vd))
-					continue;
-				
-				String trStr = tr.toString();
-				Pair<TypeRef, List<Pair<String, String>>> pair = fieldsAndCommentsByTypeStr.get(trStr);
-				if (pair == null)
-					fieldsAndCommentsByTypeStr.put(trStr, pair = new Pair<TypeRef, List<Pair<String, String>>>(tr, new ArrayList<Pair<String, String>>()));
-				
-				pair.getSecond().add(new Pair<String, String>(vd.getCommentBefore(), name));
-			}
-			for (Pair<TypeRef, List<Pair<String, String>>> pair : fieldsAndCommentsByTypeStr.values()) {
-				List<String> commentBits = new ArrayList<String>(), nameBits = new ArrayList<String>();
-				for (Pair<String, String> p : pair.getValue()) {
-					if (p.getFirst() != null)
-						commentBits.add(p.getFirst());
-					nameBits.add(p.getValue());
-				}
-				String name = StringUtils.implode(nameBits, "_or_");
-				TypeRef tr = pair.getFirst();
-				Function unionValConstr = new Function(Function.Type.JavaMethod, structName.clone(), null, new Arg(name, tr.clone()));
-				if (!result.config.noComments)
-					if (!commentBits.isEmpty())
-						unionValConstr.addToCommentBefore("@param " + name + " " + StringUtils.implode(commentBits, ", or "));
-				
-				unionValConstr.addModifiers(ModifierType.Public);
-				
-				Expression assignmentExpr = varRef(name);
-				for (Pair<String, String> p : pair.getValue())
-					assignmentExpr = new Expression.AssignmentOp(memberRef(thisRef(), MemberRefStyle.Dot, ident(p.getValue())), AssignmentOperator.Equal, assignmentExpr);
-				
-				unionValConstr.setBody(block(
-					stat(methodCall("super")),
-					tr instanceof TypeRef.ArrayRef ? throwIfArraySizeDifferent(name) : null,
-					stat(assignmentExpr),
-					stat(methodCall("setType", result.typeConverter.getJavaClassLitteralExpression(tr)))
-				));
-				
-				if (signatures.add(unionValConstr.computeSignature(false))) {
-					structJavaClass.addDeclaration(unionValConstr);
-//					byRef.addDeclaration(unionValConstr.clone().setName(byRef.getTag().clone()));
-//					byVal.addDeclaration(unionValConstr.clone().setName(byVal.getTag().clone()));
-				}
-			}
-		} else {
-			Function fieldsConstr = new Function(Function.Type.JavaMethod, structName.clone(), null);
-			fieldsConstr.setBody(new Block()).addModifiers(ModifierType.Public);
-			
-			Pair<List<VariablesDeclaration>, List<VariablesDeclaration>> decls = getParentAndOwnDeclarations(structJavaClass, nativeStruct);
-			Map<Integer, String> namesById = new TreeMap<Integer, String>();
-			Set<String> names = new HashSet<String>();
-			List<Expression> orderedFieldNames = new ArrayList<Expression>();
-			int iArg = 0;
-			for (VariablesDeclaration vd : new CompoundCollection<VariablesDeclaration>(decls.getFirst(), decls.getSecond())) {
-				String name = chooseJavaArgName(vd.getDeclarators().get(0).resolveName(), iArg, names);
-				namesById.put(vd.getId(), name);
-				fieldsConstr.addArg(new Arg(name, vd.getValueType().clone()));
-				iArg++;
-			}
-            
-			FunctionCall superCall = methodCall("super");
-            // Adding parent fields
-			for (VariablesDeclaration vd : decls.getFirst()) {
-				String name = vd.getDeclarators().get(0).resolveName(), uname = namesById.get(vd.getId());
-				Struct parent = (Struct)vd.getParentElement();
-				Identifier parentTgName = result.getTaggedTypeIdentifierInJava(parent);
-				if (!result.config.noComments)
-					fieldsConstr.addToCommentBefore("@param " + name + " @see " + parentTgName + "#" + vd.getDeclarators().get(0).resolveName());
-				superCall.addArgument(varRef(uname));
-                //orderedFieldNames.add(expr(name));
-			}
-			fieldsConstr.getBody().addStatement(stat(superCall));
-			
-			// Adding class' own fields
-			for (VariablesDeclaration vd : decls.getSecond()) {
-				String name = vd.getDeclarators().get(0).resolveName(), uname = namesById.get(vd.getId());
-				if (!result.config.noComments)
-					if (vd.getCommentBefore() != null)
-						fieldsConstr.addToCommentBefore("@param " + uname + " " + vd.getCommentBefore());
-				if (vd.getValueType() instanceof TypeRef.ArrayRef)
-					fieldsConstr.getBody().addStatement(throwIfArraySizeDifferent(uname));
-				fieldsConstr.getBody().addStatement(stat(
-						new Expression.AssignmentOp(memberRef(thisRef(), MemberRefStyle.Dot, ident(name)), AssignmentOperator.Equal, varRef(uname))));
-                
-                orderedFieldNames.add(expr(name));
-			}
-            
-            if (result.config.runtime != JNAeratorConfig.Runtime.BridJ) {
-                String initOrderName = "initFieldOrder";
-                Function initOrder = new Function(Type.JavaMethod, ident(initOrderName), typeRef(Void.TYPE)).setBody(block(
-					stat(
-						methodCall("setFieldOrder", new Expression.NewArray(typeRef(String.class), new Expression[0], orderedFieldNames.toArray(new Expression[orderedFieldNames.size()])))
-					)
-				)).addModifiers(ModifierType.Protected);
-                if (signatures.add(initOrder.computeSignature(false))) {
-                		structJavaClass.addDeclaration(initOrder);
-	                 Statement callInitOrder = stat(methodCall(initOrderName));
-					emptyConstructor.getBody().addStatement(callInitOrder);
-					fieldsConstr.getBody().addStatement(callInitOrder.clone());
-				}
-            }
-            
-			int nArgs = fieldsConstr.getArgs().size();
-			if (nArgs == 0)
-				System.err.println("Struct with no field : " + structName);
-			
-			if (nArgs > 0 && nArgs < result.config.maxConstructedFields) {
-				if (signatures.add(fieldsConstr.computeSignature(false))) {
-					structJavaClass.addDeclaration(fieldsConstr);
-				}
-			}
-		}
-		
-//		Function pointerConstructor = new Function(Function.Type.JavaMethod, structName.clone(), null, 
-//			new Arg("pointer", new TypeRef.SimpleTypeRef(Pointer.class.getName())),
-//			new Arg("offset", new TypeRef.Primitive("int"))
-//		).addModifiers(ModifierType.Public).setBody(block(
-//			stat(methodCall("super", varRef("pointer"), varRef("offset")))
-//		).setCompact(true));
-//		pointerConstructor.setCommentBefore("Cast data at given memory location (pointer + offset) as an existing " + structName + " struct");
-//		pointerConstructor.setBody(block(
-//			stat(methodCall("super")),
-//			stat(methodCall("useMemory", varRef("pointer"), varRef("offset"))),
-//			stat(methodCall("read"))
-//		));
-//		boolean addedPointerConstructor = false;
-//		if (signatures.add(pointerConstructor.computeSignature(false))) {
-//			addConstructor(structJavaClass, pointerConstructor);
-//			addedPointerConstructor = true;
-//		}
-		
-//		String copyArgName = isUnion ? "otherUnion" : "otherStruct";
-//		Function shareMemConstructor = new Function(Function.Type.JavaMethod, structName.clone(), null, 
-//			new Arg(copyArgName, new TypeRef.SimpleTypeRef(structName.clone()))
-//		).addModifiers(ModifierType.Public);
-		
-//		Block useCopyMem = //addedPointerConstructor ? 
-//			//null : 
-//			block(
-//					stat(methodCall("super")),
-//					stat(methodCall("useMemory", methodCall(varRef(copyArgName), MemberRefStyle.Dot, "getPointer"), expr(0))),
-//					stat(methodCall("read"))
-//			)
-//		;
-//		shareMemConstructor.setBody(//addedPointerConstructor ? 
-////			block(
-////					stat(methodCall("super", methodCall(varRef(copyArgName), MemberRefStyle.Dot, "getPointer"), expr(0)))
-////			).setCompact(true) :
-//			useCopyMem
-//		);
-//		shareMemConstructor.setCommentBefore("Create an instance that shares its memory with another " + structName + " instance");
-//		if (signatures.add(shareMemConstructor.computeSignature(false))) {
-////			addConstructor(byRef, shareMemConstructor);
-////			shareMemConstructor = shareMemConstructor.clone();
-////			addConstructor(byVal, shareMemConstructor);
-//		
-//			shareMemConstructor = shareMemConstructor.clone();
-//			shareMemConstructor.setBody(/*addedPointerConstructor ?
-//				block(
-//					stat(methodCall("this", methodCall(varRef(copyArgName), MemberRefStyle.Dot, "getPointer"), expr(0)))
-//				).setCompact(true) :*/
-//				useCopyMem.clone()
-//			);
-//			addConstructor(structJavaClass, shareMemConstructor);
-//		}
-	}
-	private boolean isField(VariablesDeclaration vd) {
+	protected boolean isField(VariablesDeclaration vd) {
 		List<Modifier> mods = vd.getModifiers();
 		if (vd.hasModifier(ModifierType.Final))
 			return false;
@@ -2234,7 +874,7 @@ public class DeclarationsConverter {
 		});
 	}
 	
-	private String chooseJavaArgName(String name, int iArg, Set<String> names) {
+	protected String chooseJavaArgName(String name, int iArg, Set<String> names) {
 		Identifier jan = result.typeConverter.getValidJavaArgumentName(ident(name));
 		String baseArgName = jan == null ? null : jan.toString();
 		int i = 1;

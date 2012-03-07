@@ -67,7 +67,7 @@ public class JNAeratorParser {
 	}
 	private static final boolean EASILY_DEBUGGABLE_BUT_FRAGILE_PARSING_MODE = false;
 	
-	private static List<Slice> cutSourceContentInSlices(String sourceContent, PrintStream originalOut) {
+	protected List<Slice> cutSourceContentInSlices(String sourceContent, PrintStream originalOut) {
 		StringBuffer currentEmptyLines = new StringBuffer();
 		StringBuffer currentBuffer = new StringBuffer();
 		
@@ -118,7 +118,7 @@ public class JNAeratorParser {
 		return slices;
 	}
     
-    static Callable<SourceFile> createParsingCallable(final JNAeratorConfig config, final TypeConversion typeConverter, final String source, final Set<String> topLevelTypeDefs, boolean isFull) {
+    protected Callable<SourceFile> createParsingCallable(final JNAeratorConfig config, final TypeConversion typeConverter, final String source, final Set<String> topLevelTypeDefs, boolean isFull) {
         return new Callable<SourceFile>() {
 
             public SourceFile call() throws Exception {
@@ -180,7 +180,7 @@ public class JNAeratorParser {
     }
 
     static final Pattern asmPattern = Pattern.compile("(?s)__asm\\s*\\{.*?\\}");
-    public static String removeInlineAsm(String source) {
+    protected String removeInlineAsm(String source) {
         // Hack to replace __asm blocks :
         String replaced = RegexUtils.regexReplace(asmPattern, source, new RegexUtils.Replacer() {
             public String replace(String[] groups) {
@@ -194,7 +194,7 @@ public class JNAeratorParser {
         });
         return replaced;
     }
-	public static SourceFiles parse(JNAeratorConfig config, TypeConversion typeConverter, MacroUseCallback macrosDependenciesOut) throws IOException, LexerException {
+	public SourceFiles parse(JNAeratorConfig config, TypeConversion typeConverter, MacroUseCallback macrosDependenciesOut) throws IOException, LexerException {
 		SourceFiles sourceFiles = new SourceFiles();
         
         String sourceContent = PreprocessorUtils.preprocessSources(config, sourceFiles.defines, config.verbose, typeConverter, macrosDependenciesOut);
@@ -249,7 +249,7 @@ public class JNAeratorParser {
 			executor.shutdown();
 		}
 	}
-	static ObjCppParser newObjCppParser(TypeConversion typeConverter, String s, final boolean verbose, final PrintStream errorOut) throws IOException {
+	protected ObjCppParser newObjCppParser(TypeConversion typeConverter, String s, final boolean verbose, final PrintStream errorOut) throws IOException {
 		ObjCppParser parser = new ObjCppParser(
             new CommonTokenStream(
                 new ObjCppLexer(

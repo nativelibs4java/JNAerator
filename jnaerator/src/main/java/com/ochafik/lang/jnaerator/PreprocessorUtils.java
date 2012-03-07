@@ -275,7 +275,7 @@ public class PreprocessorUtils {
 			
 			try {
 				String preprocessedMacro = preprocessSources(config, Collections.singletonList(macro.getText()), Collections.EMPTY_LIST, null, verbose, typeConverter, null, macros);
-				Expression expression = JNAeratorParser.newObjCppParser(typeConverter, preprocessedMacro, verbose, null).expression();//.expr;
+				Expression expression = new JNAeratorParser().newObjCppParser(typeConverter, preprocessedMacro, verbose, null).expression();//.expr;
 				if (expression == null)
 					continue;
 			

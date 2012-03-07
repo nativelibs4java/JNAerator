@@ -141,7 +141,7 @@ public class JNAerator {
         d.setModifiers(modifiers);
     }
 
-	public static interface Feedback {
+    public static interface Feedback {
 		void setStatus(final String string);
 		void setFinished(File toOpen);
 		void setFinished(Throwable e);
@@ -304,6 +304,7 @@ public class JNAerator {
 				
 				boolean simpleGUI = false;
 				NativePlatform arch = NativePlatform.getCurrentPlatform();//LibraryExtractor.getCurrentOSAndArchString();
+                File libraryFileForCurrentArch = null;
 				String currentLibrary = null;
 				
 				@Override
@@ -546,6 +547,7 @@ public class JNAerator {
 						return parsedArgsInclude(a);
 					case Arch:
 						arch = a.getEnumParam(0, NativePlatform.class);
+                        libraryFileForCurrentArch = null;
 						break;
 					
 					}
@@ -590,10 +592,21 @@ public class JNAerator {
                                 System.exit(1);
                             }
                                 
-							if (config.verbose)
-								System.out.println("Adding file '" + file + "' for arch '" + arch +"'.");
-							config.addLibraryFile(file, arch);
-                            arch = null;
+                            if (config.verbose)
+                                System.out.println("Adding file '" + file + "' for arch '" + arch +"'.");
+                            config.addLibraryFile(file, arch);
+
+//							if (libraryFileForCurrentArch == null) {
+//                                if (config.verbose)
+//                                    System.out.println("Adding file '" + file + "' for arch '" + arch +"'.");
+//                                config.addLibraryFile(currentLibrary, file, arch);
+//                                libraryFileForCurrentArch = file;
+//                            } else {
+//                                if (config.verbose)
+//                                    System.out.println("Adding dependency '" + file + "' for arch '" + arch +"'.");
+//                                config.addDependentLibraryFile(currentLibrary, file, arch);
+//                            }
+                                
 						} else {
 							String lib = currentLibrary;
 							if (file.isDirectory() && fn.endsWith(".xcode") ||
@@ -924,7 +937,7 @@ public class JNAerator {
 						}
 						String text = "// @mangling " + dllExport.mangling + "\n" + 
 							dem + ";";
-						ObjCppParser parser = JNAeratorParser.newObjCppParser(result.typeConverter, text, false, null);//config.verbose);
+						ObjCppParser parser = new JNAeratorParser().newObjCppParser(result.typeConverter, text, false, null);//config.verbose);
 						parser.setupScopes();
 						Declaration decl = parser.declarationEOF();
 						if (decl == null)
@@ -1132,8 +1145,13 @@ public class JNAerator {
 			
 	public SourceFiles parseSources(Feedback feedback, TypeConversion typeConverter) throws IOException, LexerException {
 		feedback.setStatus("Parsing native headers...");
-		return JNAeratorParser.parse(config, typeConverter, null);
+        return createJNAeratorParser().parse(config, typeConverter, null);
 	}
+    protected JNAeratorParser createJNAeratorParser() {
+        return new JNAeratorParser();
+    }
+
+	
 	public void addFile(File file, List<File> out) throws IOException {
 		if (file.isFile()) {
 			out.add(file);
