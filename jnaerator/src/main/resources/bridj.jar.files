@@ -352,11 +352,13 @@ org/bridj/relocated/org/objectweb/asm/signature/SignatureVisitor.class
 org/bridj/relocated/org/objectweb/asm/signature/SignatureWriter.class
 org/bridj/util/AnnotationUtils.class
 org/bridj/util/BytecodeAnalyzer$1.class
+org/bridj/util/BytecodeAnalyzer$2.class
+org/bridj/util/BytecodeAnalyzer$3.class
 org/bridj/util/BytecodeAnalyzer$EmptyVisitor.class
-org/bridj/util/BytecodeAnalyzer$Features.class
 org/bridj/util/BytecodeAnalyzer.class
 org/bridj/util/ConcurrentCache.class
 org/bridj/util/DefaultParameterizedType.class
+org/bridj/util/JNIUtils$NativeMethodsCache.class
 org/bridj/util/JNIUtils.class
 org/bridj/util/Pair.class
 org/bridj/util/ProcessUtils$Kernel32.class
