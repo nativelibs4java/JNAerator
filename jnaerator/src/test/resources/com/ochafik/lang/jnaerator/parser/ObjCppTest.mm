@@ -142,6 +142,8 @@ void f() {}
 --
 free(void* _Memory);
 malloc(int _Size);
+int align(int);
+int dllexport(int);
 --
 struct __declspec(uuid("9B")) __declspec(novtable) ID3D10DeviceChild : IUnknown
 {

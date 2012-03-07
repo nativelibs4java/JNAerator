@@ -73,6 +73,8 @@ public enum ModifierType implements Modifier {
 	
 	__ptr64(of(TypeQualifier)), // TODO find better kind 
 	__maybenull(of(TypeQualifier)),
+    
+    // http://msdn.microsoft.com/en-us/library/aa383701(v=vs.85).aspx
 	__nullterminated(of(TypeQualifier, StringAnnotation)),
 	__nullnullterminated(of(TypeQualifier, StringAnnotation)),
 	__possibly_notnullterminated(of(TypeQualifier, StringAnnotation)),

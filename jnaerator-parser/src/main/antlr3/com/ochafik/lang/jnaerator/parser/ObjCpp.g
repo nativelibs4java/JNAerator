@@ -106,6 +106,9 @@ import static com.ochafik.lang.jnaerator.parser.StoredDeclarations.*;
 		return EnumSet.of(first, rest);
 	}
 	public void setupScopes() {
+		if (hasModifierKinds())
+			return;
+			
     		Symbols_scope ss = new Symbols_scope();
     		ss.typeIdentifiers = new HashSet();
     		Symbols_stack.push(ss);
@@ -115,8 +118,15 @@ import static com.ochafik.lang.jnaerator.parser.StoredDeclarations.*;
     		//mk.allowedKinds = EnumSet.allOf(ModifierKind.class);
     		
     		mk.forbiddenKinds = EnumSet.noneOf(ModifierKind.class);
-    		mk.forbiddenKinds.addAll(Arrays.asList(ModifierKind.VCParameterAnnotation));
-    		mk.forbiddenKinds.addAll(Arrays.asList(ModifierKind.Attribute));
+    		mk.forbiddenKinds.addAll(Arrays.asList(
+    			ModifierKind.VCParameterAnnotation, 
+    			ModifierKind.Attribute,
+    			ModifierKind.Declspec,
+    			ModifierKind.Java,
+    			//ModifierKind.ObjectiveC, // TODO find a way to disable this...
+    			ModifierKind.OpenCL,
+    			ModifierKind.StringAnnotation
+			));
     		//mk.forbiddenKinds.add(ModifierKind.ObjectiveCRemoting);
     		
     		ModifierKinds_stack.push(mk);
@@ -152,6 +162,9 @@ import static com.ochafik.lang.jnaerator.parser.StoredDeclarations.*;
 			scope.forbiddenKinds = EnumSet.copyOf(Arrays.asList(kinds));
 		else
 			scope.forbiddenKinds.addAll(Arrays.asList(kinds));
+			
+		if (scope.allowedKinds != null)
+			scope.allowedKinds.removeAll(Arrays.asList(kinds));
 	}
 	public void allowKinds(ModifierKind... kinds) {
 		ModifierKinds_scope scope = getModifierKinds();
@@ -161,6 +174,9 @@ import static com.ochafik.lang.jnaerator.parser.StoredDeclarations.*;
 			scope.allowedKinds = EnumSet.copyOf(Arrays.asList(kinds));
 		else
 			scope.allowedKinds.addAll(Arrays.asList(kinds));
+			
+		if (scope.forbiddenKinds != null)
+			scope.forbiddenKinds.removeAll(Arrays.asList(kinds));
 	}
 	public boolean isAllowed(Modifier mod) {
 		if (!hasModifierKinds())
