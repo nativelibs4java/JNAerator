@@ -17,6 +17,7 @@
 	
 	<properties>
 		<shadedArtifactAttached>true</shadedArtifactAttached>
+		<mainClass>com.ochafik.lang.jnaerator.JNAerator</mainClass>
 	</properties>
 	
 	<description>
@@ -71,15 +72,7 @@ Users who are looking for ready-to-use libraries should check the NativeLibs4Jav
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jar-plugin</artifactId>
-				<configuration>
-					<archive>
-						<manifest>
-							<mainClass>com.ochafik.lang.jnaerator.JNAerator</mainClass>
-						</manifest>
-					</archive>
-				</configuration>
 			</plugin>
-		
 		</plugins>
 	</build>
 </project>

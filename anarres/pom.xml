@@ -16,6 +16,10 @@
 		<relativePath>../..</relativePath>
 	</parent>
 	
+	<properties>
+		<mainClass>org.anarres.cpp.Main</mainClass>
+	</properties>
+	
 	<developers>
 		<developer>
 			<id>anarres.author</id>
@@ -69,14 +73,6 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jar-plugin</artifactId>
-				<version>2.3.2</version>
-				<configuration>
-					<archive>
-						<manifest>
-							<mainClass>org.anarres.cpp.Main</mainClass>
-						</manifest>
-					</archive>
-				</configuration>
 			</plugin>
 
 			<plugin>
