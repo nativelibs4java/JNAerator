@@ -47,6 +47,7 @@ import java.net.URLConnection;
 import java.text.MessageFormat;
 import static com.ochafik.lang.jnaerator.parser.ElementsHelper.*;
 import static com.ochafik.lang.jnaerator.TypeConversion.*;
+import com.sun.jna.win32.StdCallLibrary;
 
 public class JNADeclarationsConverter extends DeclarationsConverter {
 	private static final Pattern manglingCommentPattern = Pattern.compile("@mangling (.*)$", Pattern.MULTILINE);
@@ -54,15 +55,22 @@ public class JNADeclarationsConverter extends DeclarationsConverter {
 	public JNADeclarationsConverter(Result result) {
 		super(result);
 	}
-
-    @Override
-    protected SimpleTypeRef getCallbackType(FunctionSignature functionSignature, Identifier name) {
-        return
-			(SimpleTypeRef)typeRef(result.config.runtime.callbackClass);
-    }
-
     
-
+    //protected abstract SimpleTypeRef getCallbackType(FunctionSignature functionSignature, Identifier name);
+    @Override
+    public Struct convertCallback(FunctionSignature functionSignature, Signatures signatures, Identifier callerLibraryName) {
+        Struct decl = super.convertCallback(functionSignature, signatures, callerLibraryName);
+        if (decl != null) {
+            List<Modifier> mods = functionSignature.getFunction().getModifiers();
+            decl.setParents(Arrays.asList((SimpleTypeRef)typeRef(
+                functionSignature.getFunction().hasModifier(ModifierType.__stdcall) ?
+                    StdCallLibrary.StdCallCallback.class :
+                    result.config.runtime.callbackClass
+            )));
+        }
+        return decl;
+    }
+    
 	public void convertConstants(String library, List<Define> defines, Element sourcesRoot, final Signatures signatures, final DeclarationsHolder out, final Identifier libraryClassName) {
 		//final List<Define> defines = new ArrayList<Define>();
 		final Map<String, String> constants = Result.getMap(result.stringConstants, library);

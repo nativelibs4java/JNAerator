@@ -75,6 +75,9 @@ public class ElementsHelper {
             return varRef((SimpleIdentifier)name);
 		return memberRef(expr(typeRef(name.resolveAllButLastIdentifier())), MemberRefStyle.Dot, name.resolveLastSimpleIdentifier());
 	}
+    public static Expression enumRef(java.lang.Enum e) {
+        return memberRef(expr(typeRef(e.getDeclaringClass())), e.name());
+    }
 	public static Identifier ident(String... others) {
         if (others == null)
             return null;

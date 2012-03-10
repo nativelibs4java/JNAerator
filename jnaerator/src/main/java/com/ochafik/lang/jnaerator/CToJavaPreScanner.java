@@ -18,32 +18,20 @@
 */
 package com.ochafik.lang.jnaerator;
 
-import com.ochafik.lang.jnaerator.parser.Arg;
+import com.ochafik.lang.jnaerator.parser.*;
 import static com.ochafik.lang.jnaerator.parser.Identifier.*;
 import static com.ochafik.lang.jnaerator.parser.ElementsHelper.*;
-import com.ochafik.lang.jnaerator.parser.Declaration;
-import com.ochafik.lang.jnaerator.parser.Element;
-import com.ochafik.lang.jnaerator.parser.Function;
-import com.ochafik.lang.jnaerator.parser.Modifier;
-import com.ochafik.lang.jnaerator.parser.ModifierType;
-import com.ochafik.lang.jnaerator.parser.Scanner;
-import com.ochafik.lang.jnaerator.parser.StoredDeclarations;
-import com.ochafik.lang.jnaerator.parser.Struct;
-import com.ochafik.lang.jnaerator.parser.TaggedTypeRefDeclaration;
-import com.ochafik.lang.jnaerator.parser.TypeRef;
-import com.ochafik.lang.jnaerator.parser.Declarator;
 import com.ochafik.lang.jnaerator.parser.TypeRef.Primitive;
-import com.ochafik.lang.jnaerator.parser.VariablesDeclaration;
 import com.ochafik.lang.jnaerator.parser.Declarator.DirectDeclarator;
 import com.ochafik.lang.jnaerator.parser.Declarator.FunctionDeclarator;
 import com.ochafik.lang.jnaerator.parser.Declarator.MutableByDeclarator;
-import com.ochafik.lang.jnaerator.parser.Identifier;
-import com.ochafik.lang.jnaerator.parser.ModifierKind;
 import com.ochafik.lang.jnaerator.parser.StoredDeclarations.TypeDef;
 import com.ochafik.lang.jnaerator.parser.TypeRef.FunctionSignature;
 import com.ochafik.lang.jnaerator.parser.TypeRef.TaggedTypeRef;
 import com.ochafik.util.string.StringUtils;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.List;
 
 public class CToJavaPreScanner extends Scanner {
@@ -66,12 +54,30 @@ public class CToJavaPreScanner extends Scanner {
 			}
 		}
 	}
+    
+    void moveModifiersOfType(ModifierKind kind, ModifiableElement source, ModifiableElement destination) {
+        List<Modifier> mods = null;
+        
+        for (Modifier m : source.getModifiers()) {
+            if (m.isA(kind)) {
+                if (mods == null)
+                    mods = new ArrayList<Modifier>();
+                
+                mods.add(m);
+            }
+        }
+        if (mods != null) {
+            Modifier[] modsArray = mods.toArray(new Modifier[mods.size()]);
+            source.removeModifiers(modsArray);
+            destination.addModifiers(modsArray);
+        }
+    }
 
     @Override
     public void visitFunction(Function function) {
-        if (function.getValueType() == null) {
-            List<Modifier> modifiers = function.getModifiers();
+        List<Modifier> modifiers = function.getModifiers();
             
+        if (function.getValueType() == null) {
             for (ModifierType mod : new ModifierType[] { ModifierType.Long, ModifierType.Short }) {
                 if (mod.isContainedBy(modifiers)) {
                     function.removeModifiers(mod);
@@ -83,6 +89,8 @@ public class CToJavaPreScanner extends Scanner {
                 if (!(function.getParentElement() instanceof Struct) || !((Struct)function.getParentElement()).getType().isObjC())
                     function.setValueType(typeRef("int"));
             }
+        } else {
+            moveModifiersOfType(ModifierKind.CallingConvention, function.getValueType(), function);
         }
         super.visitFunction(function);
     }
@@ -108,9 +116,12 @@ public class CToJavaPreScanner extends Scanner {
             Declarator declarator = d.getDeclarators().get(0);
             if (declarator instanceof FunctionDeclarator) {
                 FunctionDeclarator fd = (FunctionDeclarator)declarator;
-                FunctionSignature fs = new FunctionSignature(new Function(Function.Type.CFunction, null, d.getValueType(), fd.getArgs()));
+                Function f = new Function(Function.Type.CFunction, null, d.getValueType(), fd.getArgs());
+                f.addModifiers(fd.getTarget().getModifiers());
+                FunctionSignature fs = new FunctionSignature(f);
                 d.setValueType(fs);
                 d.setDeclarators(Arrays.asList((Declarator)new DirectDeclarator(fd.resolveName(), fd.getDefaultValue())));
+                d.accept(this);
             }
         }
     }

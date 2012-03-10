@@ -48,12 +48,16 @@ public abstract class DeclarationsConverter {
 
 	protected final Result result;
 	
-    protected abstract SimpleTypeRef getCallbackType(FunctionSignature functionSignature, Identifier name);
     
-	public void convertCallback(FunctionSignature functionSignature, Signatures signatures, DeclarationsHolder out, Identifier callerLibraryName) {
+    public void convertCallback(FunctionSignature functionSignature, Signatures signatures, DeclarationsHolder out, Identifier callerLibraryName) {
+        Struct decl = convertCallback(functionSignature, signatures, callerLibraryName);
+        if (decl != null)
+            out.addDeclaration(new TaggedTypeRefDeclaration(decl));
+    }
+	public Struct convertCallback(FunctionSignature functionSignature, Signatures signatures, Identifier callerLibraryName) {
 		Identifier name = result.typeConverter.inferCallBackName(functionSignature, true, false, callerLibraryName);
 		if (name == null)
-			return;
+			return null;
 		
 		name = result.typeConverter.getValidJavaArgumentName(name);
 		
@@ -70,7 +74,7 @@ public abstract class DeclarationsConverter {
 		
 		Struct callbackStruct = new Struct();
         configureCallbackStruct(callbackStruct);
-		callbackStruct.setParents(Arrays.asList(getCallbackType(functionSignature, chosenName)));
+		//callbackStruct.setParents(Arrays.asList(getCallbackType(functionSignature, chosenName)));
 		callbackStruct.setTag(ident(chosenName));
 		if (!result.config.noComments)
 			callbackStruct.addToCommentBefore(comel.getCommentBefore(), comel.getCommentAfter(), getFileCommentContent(comel));
@@ -82,7 +86,7 @@ public abstract class DeclarationsConverter {
 				break;
 			}
 		}
-		out.addDeclaration(new TaggedTypeRefDeclaration(callbackStruct));
+		return callbackStruct;
 	}
 
 	public void convertCallbacks(List<FunctionSignature> functionSignatures, Signatures signatures, DeclarationsHolder out, Identifier libraryClassName) {

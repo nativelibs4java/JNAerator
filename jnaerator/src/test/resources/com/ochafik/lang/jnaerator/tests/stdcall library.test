@@ -1,0 +1,12 @@
+void __stdcall hello();
+typedef void (__stdcall * someFun)();
+--
+#runtime(JNAerator)
+import test.*;
+import static test.TestLibrary.*;
+import com.sun.jna.win32.StdCallLibrary;
+
+StdCallLibrary lib = INSTANCE;
+INSTANCE.hello();
+
+StdCallLibrary.StdCallCallback cb = (someFun)null;

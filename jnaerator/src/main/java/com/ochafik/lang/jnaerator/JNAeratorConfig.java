@@ -131,6 +131,7 @@ public class JNAeratorConfig {
         public enum Ann {
             Bits, 
             FastCall, 
+            StdCall, 
             Mangling, 
             ObjCBlock, 
             This, 

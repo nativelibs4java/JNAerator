@@ -46,20 +46,28 @@ import com.ochafik.util.listenable.Pair;
 import com.ochafik.util.string.StringUtils;
 
 import static com.ochafik.lang.jnaerator.parser.ElementsHelper.*;
+import com.sun.jna.win32.StdCallLibrary;
+import org.bridj.ann.Convention;
 import org.bridj.objc.NSObject;
 
 public class BridJDeclarationsConverter extends DeclarationsConverter {
 	public BridJDeclarationsConverter(Result result) {
         super(result);
 	}
-	
-    
+
     @Override
-    protected SimpleTypeRef getCallbackType(FunctionSignature functionSignature, Identifier name) {
-        return
-			FunctionSignature.Type.ObjCBlock.equals(functionSignature.getType()) ?
-				result.config.runtime.typeRef(JNAeratorConfig.Runtime.Ann.ObjCBlock) :
-                    (SimpleTypeRef)typeRef(ident(result.config.runtime.callbackClass, expr(typeRef(name.clone()))));
+    public Struct convertCallback(FunctionSignature functionSignature, Signatures signatures, Identifier callerLibraryName) {
+        Struct decl = super.convertCallback(functionSignature, signatures, callerLibraryName);
+        if (decl != null) {
+            decl.setParents(Arrays.asList((SimpleTypeRef)(
+                FunctionSignature.Type.ObjCBlock.equals(functionSignature.getType()) ?
+                    result.config.runtime.typeRef(JNAeratorConfig.Runtime.Ann.ObjCBlock) :
+                    (SimpleTypeRef)typeRef(ident(result.config.runtime.callbackClass, expr(typeRef(decl.getTag().clone()))))
+            )));
+            //addCallingConventionAnnotation(functionSignature.getFunction(), decl);
+        }
+        
+        return decl;
     }
     
 	public void convertEnum(Enum e, Signatures signatures, DeclarationsHolder out, Identifier libraryClassName) {
@@ -146,6 +154,22 @@ public class BridJDeclarationsConverter extends DeclarationsConverter {
         }
 	}
 
+    void addCallingConventionAnnotation(Function originalFunction, ModifiableElement target) {
+        Convention.Style cc = null;
+        if (originalFunction.hasModifier(ModifierType.__stdcall))
+            cc = Convention.Style.StdCall;
+        else if (originalFunction.hasModifier(ModifierType.__fastcall))
+            cc = Convention.Style.FastCall;
+        else if (originalFunction.hasModifier(ModifierType.__thiscall))
+            cc = Convention.Style.ThisCall;
+        else if (originalFunction.hasModifier(ModifierType.__pascal))
+            cc = Convention.Style.Pascal;
+        
+        if (cc != null) {
+            target.addAnnotation(new Annotation(typeRef(ident(Convention.class, enumRef(cc)))));
+        }
+    }
+    
     @Override
     public void convertFunction(Function function, Signatures signatures, boolean isCallback, DeclarationsHolder out, Identifier libraryClassName, String sig, Identifier functionName, String library, int iConstructor) throws UnsupportedConversionException {
 		Element parent = function.getParentElement();
@@ -168,11 +192,7 @@ public class BridJDeclarationsConverter extends DeclarationsConverter {
         if (result.config.synchronizedMethods && !isCallback)
 			nativeMethod.addModifiers(ModifierType.Synchronized);
 		
-        if (function.hasModifier(ModifierType.__fastcall))
-            nativeMethod.addAnnotation(new Annotation(result.config.runtime.typeRef(JNAeratorConfig.Runtime.Ann.FastCall)));
-        
-        if (function.hasModifier(ModifierType.__thiscall))
-            nativeMethod.addAnnotation(new Annotation(result.config.runtime.typeRef(JNAeratorConfig.Runtime.Ann.ThisCall)));
+        addCallingConventionAnnotation(function, nativeMethod);
         
 		if (function.getName() != null && !functionName.toString().equals(function.getName().toString()) && !isCallback) {
         	TypeRef mgc = result.config.runtime.typeRef(JNAeratorConfig.Runtime.Ann.Name);

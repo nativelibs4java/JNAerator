@@ -1269,18 +1269,21 @@ functionSignatureSuffix returns [FunctionSignature signature]
 			$signature = mark(new FunctionSignature(new Function(Function.Type.CFunction, null, null)), getLine($tk));
 			$signature.getFunction().setType(Function.Type.CFunction);
 		}
-		m1=modifiers? {
-			if ($m1.modifiers != null)
-				$signature.getFunction().addModifiers($m1.modifiers);
-		}
 		(
-			pt=('*' | '^') 
-			m2=modifiers? {
-				if ($m2.modifiers != null)
-					$signature.getFunction().addModifiers($m2.modifiers);
+			m1=modifiers {
+				$signature.getFunction().addModifiers($m1.modifiers);
+			}
+		)?
+		(
+			pt=('*' | '^') {
 				if ($pt.text != null && $pt.text.equals("^"))
 					$signature.setType(FunctionSignature.Type.ObjCBlock);
 			}
+			(
+				m2=modifiers {
+					$signature.getFunction().addModifiers($m2.modifiers);
+				}
+			)?
 		)?
 		(
 			ii=IDENTIFIER {
