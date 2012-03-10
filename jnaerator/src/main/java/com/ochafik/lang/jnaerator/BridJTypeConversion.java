@@ -512,8 +512,7 @@ public class BridJTypeConversion extends TypeConversion {
             }
         }
         if (res == null) {
-//			return convertExpressionToJava(x);
-            throw new UnsupportedConversionException(x, null);
+            return super.convertExpressionToJava(x, libraryClassName, promoteNativeLongToLong);
         }
         if (res.getFirst() == null) {
             return null;
