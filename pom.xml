@@ -15,6 +15,11 @@
 		<relativePath>..</relativePath>
 	</parent>
 	
+	<properties>
+		<jna.version>3.4.0</jna.version>
+		<rococoa.version>0.5</rococoa.version>
+	</properties>
+	
 	<modules>
 		<module>anarres</module>
 		<module>ochafik-util</module>
@@ -94,12 +99,12 @@
 			<dependency>
 				<groupId>net.java.dev.jna</groupId>
 				<artifactId>jna</artifactId>
-				<version>3.4.0</version>
+				<version>${jna.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.rococoa</groupId>
 				<artifactId>rococoa-core</artifactId>
-				<version>0.5</version>
+				<version>${rococoa.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.antlr</groupId>
