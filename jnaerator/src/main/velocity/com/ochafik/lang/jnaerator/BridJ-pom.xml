@@ -1,0 +1,12 @@
+#parse("main/velocity/com/ochafik/lang/jnaerator/head.vm")
+
+	<dependencies>
+		<dependency>
+			<groupId>com.nativelibs4java</groupId>
+			<artifactId>bridj</artifactId>
+			<version>${bridj_version}</version>
+		</dependency>
+	</dependencies>
+	
+#parse("main/velocity/com/ochafik/lang/jnaerator/tail.vm")
+

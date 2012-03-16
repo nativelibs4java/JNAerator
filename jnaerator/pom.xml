@@ -66,6 +66,10 @@ Users who are looking for ready-to-use libraries should check the NativeLibs4Jav
 	<build>
 		<plugins>
 			<plugin>
+				<groupId>com.nativelibs4java</groupId>
+				<artifactId>maven-velocity-plugin</artifactId>
+			</plugin>
+			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-shade-plugin</artifactId>
 			</plugin>
