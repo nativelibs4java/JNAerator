@@ -238,6 +238,8 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
         return memberRef(expr(c), MemberRefStyle.Dot, "class");
     }
 
+    protected abstract JavaPrim getCppBoolMappingType();
+    
     public void initTypes() {
 
         prim("void", JavaPrim.Void);
@@ -351,9 +353,10 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
         prim("NSDouble", JavaPrim.Double);
         prim("CGDouble", JavaPrim.Double);
 
-        prim("bool", JavaPrim.Boolean);
-        prim("Boolean", JavaPrim.Boolean);
-        prim("boolean_t", JavaPrim.Boolean);
+        JavaPrim cppBoolType = getCppBoolMappingType();
+        prim("bool", cppBoolType);
+        prim("Boolean", cppBoolType);
+        prim("boolean_t", cppBoolType);
 
 
 

@@ -520,4 +520,9 @@ public class BridJTypeConversion extends TypeConversion {
         res.getFirst().setParenthesis(x.getParenthesis());
         return (Pair<Expression, TypeRef>) res;
     }
+
+    @Override
+    protected JavaPrim getCppBoolMappingType() {
+        return JavaPrim.Boolean;
+    }
 }

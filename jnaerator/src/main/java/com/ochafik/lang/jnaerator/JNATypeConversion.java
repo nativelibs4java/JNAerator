@@ -20,5 +20,11 @@ public class JNATypeConversion extends TypeConversion {
     public Expression getEnumItemValue(com.ochafik.lang.jnaerator.parser.Enum.EnumItem enumItem) { 
         return cast(typeRef(int.class), findEnumItem(enumItem));
     }
+
+    @Override
+    protected JavaPrim getCppBoolMappingType() {
+        return JavaPrim.Byte;
+    }
+    
     
 }
