@@ -13,6 +13,9 @@ public class Pair<U, V> implements Comparable<Pair<U, V>>, Map.Entry<U, V> {
 	
 	public Pair() {}
 
+    public static <U, V> Pair<U, V> create(U u, V v) {
+        return new Pair<U, V>(u, v);
+    }
 	public U getFirst() {
 		return first;
 	}
