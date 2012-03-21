@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>com.mycompany</groupId>
+	<artifactId>my-native-bindings</artifactId>
+	<name>my-native-bindings</name>
+	<version>1.0-SNAPSHOT</version>
+	<packaging>jar</packaging>
+	
+
+	<dependencies>
+		<dependency>
+			<groupId>com.nativelibs4java</groupId>
+			<artifactId>bridj</artifactId>
+			<version>0.7-SNAPSHOT</version>
+		</dependency>
+	</dependencies>
+	
+
+	<build>
+		<plugins>
+			<!--
+				If you're okay that your bindings will be regenerated at each build : 
+			-->
+			<plugin>
+				<groupId>com.nativelibs4java</groupId>
+				<artifactId>maven-jnaerator-plugin</artifactId>
+				<version>0.9.10-SNAPSHOT</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>generate</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			
+			<!--
+				If you'd rather re-generate bindings on demand inside src/main/java (with "mvn jnaerator:generate"), maybe to tweak them after generation and version them :
+			
+			<plugin>
+				<groupId>com.nativelibs4java</groupId>
+				<artifactId>maven-jnaerator-plugin</artifactId>
+				<version>0.9.10-SNAPSHOT</version>
+				<configuration>
+					<javaOutputDirectory>src/main/java</javaOutputDirectory>
+				</configuration>
+			</plugin>
+			-->
+		</plugins>
+	</build>
+	
+</project>
+
+
+
+
+

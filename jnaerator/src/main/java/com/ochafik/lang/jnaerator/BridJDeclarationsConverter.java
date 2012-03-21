@@ -166,7 +166,7 @@ public class BridJDeclarationsConverter extends DeclarationsConverter {
             cc = Convention.Style.Pascal;
         
         if (cc != null) {
-            target.addAnnotation(new Annotation(typeRef(ident(Convention.class, enumRef(cc)))));
+            target.addAnnotation(new Annotation(typeRef(Convention.class), enumRef(cc)));
         }
     }
     
