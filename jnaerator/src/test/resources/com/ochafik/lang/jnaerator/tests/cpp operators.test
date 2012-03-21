@@ -16,4 +16,7 @@ import static test.TestLibrary.*;
 
 T t = new T();
 Pointer<T> p = pointerTo(t);
-p = t.operatorDivideEqual(p);
+p = t.operatorPlusEqual(p);
+
+Pointer<Integer> pInt = allocateInt();
+boolean b = operatorDivideEqual(pInt, 10f);
