@@ -32,3 +32,5 @@ TestLibrary.fptr.get().apply(10);
 TestLibrary.fptr.set(new TestLibrary.fptr_callback() {
 	public void apply(int value) {}
 });
+--
+#runtime(-BridJ)

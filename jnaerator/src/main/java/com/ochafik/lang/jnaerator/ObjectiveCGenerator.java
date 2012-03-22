@@ -478,7 +478,7 @@ public class ObjectiveCGenerator {
 			if (d instanceof Function) {
 				Function f = (Function)d;
 				List<Declaration> decls = new ArrayList<Declaration>();
-				result.declarationsConverter.convertFunction(f, signatures, false, new DeclarationsHolder.ListWrapper(decls), fullClassName, -1);
+				result.declarationsConverter.convertFunction(f, null/*signatures*/, false, new DeclarationsHolder.ListWrapper(decls), fullClassName, -1);
 				
 				if (f.hasModifier(ModifierType.Static)) {
 					for (Declaration decl : decls) {
@@ -487,7 +487,7 @@ public class ObjectiveCGenerator {
 						
 						if (!isProtocol && decl instanceof Function) {
 							instanceStruct.addDeclaration(createProxyCopy(f, (Function)decl));
-							signatures.methodsSignatures.add(((Function)decl).computeSignature(false));
+							signatures.addMethod((Function)decl);
 						}
 
 						if (classStruct.getType() == Type.JavaClass) {
@@ -503,7 +503,7 @@ public class ObjectiveCGenerator {
 						if (!isProtocol && decl instanceof Function) {
 //							
 							Function addedF = createCreateCopyFromInit((Function)decl, instanceStruct);
-							signatures.methodsSignatures.add(((Function)decl).computeSignature(false));
+							signatures.addMethod((Function)decl);
 							instanceStruct.addDeclaration(addedF);
 							
 							if (instanceStruct.getType() == Type.JavaClass) {
@@ -541,7 +541,7 @@ public class ObjectiveCGenerator {
 			for (Set<?> sigs : additionalMethodSignatures)
 				if (sigs.contains(sig))
 					return false;
-			if (signatures.methodsSignatures.add(sig)) {
+			if (signatures.addMethod(sig)) {
 				classStruct.addDeclaration(decl);
 				return true;
 			} else

@@ -47,6 +47,7 @@ import com.ochafik.junit.ParameterizedWithDescription;
 import com.ochafik.lang.compiler.CompilerUtils;
 import com.ochafik.lang.compiler.MemoryJavaFile;
 import com.ochafik.lang.jnaerator.JNAerator.Feedback;
+import com.ochafik.lang.jnaerator.JNAeratorConfig.OutputMode;
 import com.ochafik.lang.jnaerator.studio.JNAeratorStudio.SyntaxException;
 import com.ochafik.net.URLUtils;
 import com.ochafik.util.listenable.Adapter;
@@ -121,7 +122,8 @@ public class JNAerationTest {
 	public void test() throws SyntaxException, IOException, LexerException, RecognitionException {
 		JNAeratorConfig config = new JNAeratorConfig();
 		config.defaultLibrary = test.libraryName;
-		config.compile = true;
+		config.outputMode = OutputMode.StandaloneJar;
+        config.outputDir = new File("target/jnaeratorOut");
 		config.runtime = test.runtime;
 		config.preferJavac = true;
 		config.extraJavaSourceFilesContents.putAll(test.extraJavaSourceFilesContents);
@@ -194,7 +196,7 @@ public class JNAerationTest {
 			}
 		});
 	}
-	static Pattern runtimePattern = Pattern.compile("(?m)#runtime\\(((?:\\w+)(?:,\\w+)*)\\).*");
+	static Pattern runtimePattern = Pattern.compile("(?m)#runtime\\((-?(?:\\w+)(?:,\\w+)*)\\).*");
 	@Parameters
 	public static List<Object[]> readParameters() throws IOException {
 		//List<String> lines = ReadText.readLines(ObjCppParsingTests.class.getClassLoader().getResource(TEST_FILE));
@@ -213,16 +215,44 @@ public class JNAerationTest {
 			}
 		})) {
 			String t = ReadText.readText(testURL);
-			String[] tt = t.split("\n--\n");
+			String[] tt = t.split("\n\\s*--\\s*\n");
 			String cSource = tt[0];
 			String n = new File(URLDecoder.decode(testURL.toString(), "utf-8")).getName();
+            
+            Map<JNAeratorConfig.Runtime, String> sourceByRuntime = new HashMap<JNAeratorConfig.Runtime, String>();
+            sourceByRuntime.put(JNAeratorConfig.Runtime.BridJ, "");
+                
+            //System.out.println("tt.length = " + tt.length);
 			for (int i = 1; i < tt.length; i++) {
 				String rawSource = tt[i];
-				String runtimeString = JNAeratorConfig.Runtime.JNAerator.toString();
-				Matcher m = runtimePattern.matcher(rawSource);
+				String runtimeString = JNAeratorConfig.Runtime.JNAerator.name();
+                Matcher m = runtimePattern.matcher(rawSource);
 				if (m.find()) {
 					runtimeString = m.group(1);	
 				}
+                boolean neg = runtimeString.startsWith("-");
+                if (neg)
+                    runtimeString = runtimeString.substring(1).trim();
+				
+                for (String runtimeStr : runtimeString.split(",")) {
+					String rs = runtimeStr.trim();
+					if (rs.isEmpty())
+						continue;
+                    
+                    JNAeratorConfig.Runtime runtime;
+                    try {
+                        runtime = Enum.valueOf(JNAeratorConfig.Runtime.class, rs);
+                    } catch (Throwable th) {
+                        throw new RuntimeException("Failed to parse runtime '" + rs + "'", th);
+                    }
+				
+					String javaSource = rawSource.replaceAll("^#", "//#");
+                    if (neg)
+                        sourceByRuntime.remove(runtime);
+                    else
+                        sourceByRuntime.put(runtime, javaSource);
+                }
+                /*
 				for (String runtimeStr : runtimeString.split(",")) {
 					String rs = runtimeStr.trim();
 					if (rs.isEmpty())
@@ -238,8 +268,25 @@ public class JNAerationTest {
 								"// " + testName + "\n" + javaSource
 							) 
 					});
-				}
+				}*/
 			}
+            
+            for (Map.Entry<JNAeratorConfig.Runtime, String> e : sourceByRuntime.entrySet()) {
+                JNAeratorConfig.Runtime runtime = e.getKey();
+                String javaSource = e.getValue();
+
+                String testName = n + " / " + runtime.name();
+
+                //System.out.println("Got runtime " + runtime + " " + testName);
+
+                data.add(new Object[] { 
+                        testName, 
+                        new TestDesc(cSource, runtime).addMainContentSource(
+                            "Test" + runtime.name(),
+                            "// " + testName + "\n" + javaSource
+                        ) 
+                });
+            }
 		}
 		return data;
 	}

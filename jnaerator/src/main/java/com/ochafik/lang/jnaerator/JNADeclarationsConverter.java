@@ -123,7 +123,7 @@ public class JNADeclarationsConverter extends DeclarationsConverter {
 						//DirectDeclarator dd = (DirectDeclarator)decl;
 						Pair<Expression, TypeRef> val = result.typeConverter.convertExpressionToJava(decl.getDefaultValue(), libraryClassName, true);
 						
-						if (!signatures.variablesSignatures.add(name))
+						if (!signatures.addVariable(name))
 							continue;
 						
 						TypeRef tr = prim == JavaPrim.NativeLong || prim == JavaPrim.NativeSize ?
@@ -138,8 +138,8 @@ public class JNADeclarationsConverter extends DeclarationsConverter {
 							vd.addToCommentBefore(v.getCommentAfter());
 						}
 
-                        if (result.config.runtime == JNAeratorConfig.Runtime.BridJ)
-                            vd.addModifiers(ModifierType.Public, ModifierType.Static, ModifierType.Final);
+//                        if (result.config.runtime == JNAeratorConfig.Runtime.BridJ)
+//                            vd.addModifiers(ModifierType.Public, ModifierType.Static, ModifierType.Final);
 						
 						out.addDeclaration(vd);
 					} catch (UnsupportedConversionException e) {
@@ -193,7 +193,7 @@ public class JNADeclarationsConverter extends DeclarationsConverter {
 	
 	public void addMissingMethods(Class<?> originalLib, Signatures existingSignatures, Struct outputLib) {
 		for (Pair<Function, String> f : getMethodsAndTheirSignatures(originalLib).getFirst())
-			if (existingSignatures.methodsSignatures.add(f.getSecond()))
+			if (existingSignatures.addMethod(f.getSecond()))
 				outputLib.addDeclaration(f.getFirst().clone());
 	}
 	
@@ -218,7 +218,7 @@ public class JNADeclarationsConverter extends DeclarationsConverter {
 
         boolean hasEnumClass = false;
         if (enumName != null && enumName.resolveLastSimpleIdentifier().getName() != null) {
-            if (!signatures.classSignatures.add(enumName))
+            if (!signatures.addClass(enumName))
                 return;
 
             hasEnumClass = true;
@@ -290,7 +290,7 @@ public class JNADeclarationsConverter extends DeclarationsConverter {
 		boolean isObjectiveC = function.getType() == Type.ObjCMethod;
 
 		natFunc.setType(Function.Type.JavaMethod);
-		if (result.config.synchronizedMethods && !isCallback && (result.config.useJNADirectCalls || result.config.runtime == JNAeratorConfig.Runtime.BridJ))
+		if (result.config.synchronizedMethods && !isCallback && result.config.useJNADirectCalls)
 			natFunc.addModifiers(ModifierType.Synchronized);
 		if (result.config.useJNADirectCalls && !isCallback && !isObjectiveC) {
 			natFunc.addModifiers(ModifierType.Public, ModifierType.Static, ModifierType.Native);
@@ -409,7 +409,7 @@ public class JNADeclarationsConverter extends DeclarationsConverter {
 				primOrBufSign = alternativeOutputs ? primOrBufFunc.computeSignature(false) : null,
 				bufSign = alternativeOutputs ? natStructFunc.computeSignature(false) : null;
 
-			if (signatures == null || signatures.methodsSignatures.add(natSign)) {
+			if (signatures == null || signatures.addMethod(natSign)) {
 				if (alternativeOutputs && !primOrBufSign.equals(natSign)) {
 					if (!result.config.noComments) {
 						if (primOrBufSign.equals(bufSign))
@@ -425,12 +425,12 @@ public class JNADeclarationsConverter extends DeclarationsConverter {
 			}
 
 			if (alternativeOutputs) {
-				if (signatures == null || signatures.methodsSignatures.add(primOrBufSign)) {
+				if (signatures == null || signatures.addMethod(primOrBufSign)) {
 					collectParamComments(primOrBufFunc);
 					out.addDeclaration(primOrBufFunc);
 					alternatives.add(cleanClone(primOrBufFunc));
 				}
-				if (signatures == null || signatures.methodsSignatures.add(bufSign)) {
+				if (signatures == null || signatures.addMethod(bufSign)) {
 					collectParamComments(natStructFunc);
 					out.addDeclaration(natStructFunc);
 					alternatives.add(cleanClone(natStructFunc));
@@ -489,7 +489,7 @@ public class JNADeclarationsConverter extends DeclarationsConverter {
 		if (struct.isForwardDeclaration())// && !result.structsByName.get(structName).isForwardDeclaration())
 			return null;
 		
-		if (!signatures.classSignatures.add(structName))
+		if (!signatures.addClass(structName))
 			return null;
 
 		boolean isUnion = struct.getType() == Struct.Type.CUnion;
@@ -747,13 +747,13 @@ public class JNADeclarationsConverter extends DeclarationsConverter {
                     Function getMethod = new Function(Function.Type.JavaMethod, ident("get" + StringUtils.capitalize(name)), vd.getValueType().clone()).setBody(block(
 						new Statement.Return(varRef(name))
 					)).addModifiers(ModifierType.Public);
-                    if (signatures.methodsSignatures.add(getMethod.computeSignature(false)))
+                    if (signatures.addMethod(getMethod))
                         out.addDeclaration(getMethod);
                     
                     Function setMethod = new Function(Function.Type.JavaMethod, ident("set" + StringUtils.capitalize(name)), typeRef(Void.TYPE), new Arg(name, vd.getValueType().clone())).setBody(block(
 						stat(expr(memberRef(thisRef(), MemberRefStyle.Dot, ident(name)), AssignmentOperator.Equal, varRef(name)))
 					)).addModifiers(ModifierType.Public);
-                    if (signatures.methodsSignatures.add(setMethod.computeSignature(false)))
+                    if (signatures.addMethod(setMethod))
                         out.addDeclaration(setMethod);
 				}
 				iChild[0]++;
@@ -932,19 +932,17 @@ public class JNADeclarationsConverter extends DeclarationsConverter {
                 orderedFieldNames.add(expr(name));
 			}
             
-            if (result.config.runtime != JNAeratorConfig.Runtime.BridJ) {
-                String initOrderName = "initFieldOrder";
-                Function initOrder = new Function(Type.JavaMethod, ident(initOrderName), typeRef(Void.TYPE)).setBody(block(
-					stat(
-						methodCall("setFieldOrder", new Expression.NewArray(typeRef(String.class), new Expression[0], orderedFieldNames.toArray(new Expression[orderedFieldNames.size()])))
-					)
-				)).addModifiers(ModifierType.Protected);
-                if (signatures.add(initOrder.computeSignature(false))) {
-                		structJavaClass.addDeclaration(initOrder);
-	                 Statement callInitOrder = stat(methodCall(initOrderName));
-					emptyConstructor.getBody().addStatement(callInitOrder);
-					fieldsConstr.getBody().addStatement(callInitOrder.clone());
-				}
+            String initOrderName = "initFieldOrder";
+            Function initOrder = new Function(Type.JavaMethod, ident(initOrderName), typeRef(Void.TYPE)).setBody(block(
+                stat(
+                    methodCall("setFieldOrder", new Expression.NewArray(typeRef(String.class), new Expression[0], orderedFieldNames.toArray(new Expression[orderedFieldNames.size()])))
+                )
+            )).addModifiers(ModifierType.Protected);
+            if (signatures.add(initOrder.computeSignature(false))) {
+                    structJavaClass.addDeclaration(initOrder);
+                    Statement callInitOrder = stat(methodCall(initOrderName));
+                emptyConstructor.getBody().addStatement(callInitOrder);
+                fieldsConstr.getBody().addStatement(callInitOrder.clone());
             }
             
 			int nArgs = fieldsConstr.getArgs().size();

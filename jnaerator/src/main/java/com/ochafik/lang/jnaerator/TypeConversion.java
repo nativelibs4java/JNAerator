@@ -46,20 +46,8 @@ import org.rococoa.cocoa.foundation.NSObject;
 import org.bridj.util.DefaultParameterizedType;
 import com.ochafik.lang.SyntaxUtils;
 import com.ochafik.lang.jnaerator.JNAeratorConfig.GenFeatures;
-import com.ochafik.lang.jnaerator.parser.Arg;
-import com.ochafik.lang.jnaerator.parser.Declarator;
-import com.ochafik.lang.jnaerator.parser.Define;
-import com.ochafik.lang.jnaerator.parser.Element;
 import com.ochafik.lang.jnaerator.parser.Enum;
-import com.ochafik.lang.jnaerator.parser.Expression;
-import com.ochafik.lang.jnaerator.parser.Function;
-import com.ochafik.lang.jnaerator.parser.Identifier;
-import com.ochafik.lang.jnaerator.parser.Modifier;
-import com.ochafik.lang.jnaerator.parser.ModifierType;
-import com.ochafik.lang.jnaerator.parser.ObjCppParser;
-import com.ochafik.lang.jnaerator.parser.Scanner;
-import com.ochafik.lang.jnaerator.parser.Struct;
-import com.ochafik.lang.jnaerator.parser.TypeRef;
+import com.ochafik.lang.jnaerator.parser.*;
 import com.ochafik.lang.jnaerator.parser.Declarator.ArrayDeclarator;
 import com.ochafik.lang.jnaerator.parser.Enum.EnumItem;
 import com.ochafik.lang.jnaerator.parser.Expression.Constant;
@@ -1773,6 +1761,46 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
                 } else {
                     TypeRef conv = convertTypeToJNA(tr, TypeConversionMode.ExpressionType, libraryClassName);
                     res = typed(new Expression.TypeRefExpression(conv), conv);
+                }
+            }
+        } else if (x instanceof Expression.VariableRef) {
+            Expression.VariableRef fr = (Expression.VariableRef) x;
+            Identifier name = fr.getName();
+            if (name != null) {
+                Define define = result.defines.get(name);
+                if (define != null && define.getValue() != null) {
+                    if (x.toString().equals(define.getValue().toString())) {
+                        res = null; // avoid some nasty loops
+                    } else {
+                        Expression defineValue = define.getValue();
+                        if (defineValue instanceof Expression.Constant) {
+                            Expression.Constant constant = (Expression.Constant) defineValue;
+                            res = typed(findDefine(name), convertToJavaType(constant.getType()));
+                        }
+
+                        if (res == null) {
+                            res = convertExpressionToJava(defineValue, libraryClassName, promoteNativeLongToLong);
+                        }
+                    }
+                } else {
+                    String sname = name.toString();
+                    if (sname.equals("True") || sname.equals("true")) {
+                        res = typed(expr(Expression.Constant.Type.Bool, true), primRef(JavaPrim.Boolean));
+                    } else if (sname.equals("False") || sname.equals("false")) {
+                        res = typed(expr(Expression.Constant.Type.Bool, false), primRef(JavaPrim.Boolean));
+                    } else {
+                        Enum.EnumItem enumItem = result.enumItems.get(name);
+                        if (enumItem != null) {
+                            res = typed(getEnumItemValue(enumItem), typeRef(Long.TYPE));
+                        } else {
+                            VariablesDeclaration constant = result.globalVariablesByName.get(name);
+                            if (constant != null) {
+                                res = typed(varRef(findRef(name, constant, libraryClassName, true)), null);
+                            } else {
+                                res = typed(new Expression.VariableRef(name), null);
+                            }
+                        }
+                    }
                 }
             }
         }

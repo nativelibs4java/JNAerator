@@ -409,105 +409,23 @@ public class BridJTypeConversion extends TypeConversion {
         if (x instanceof Expression.Cast) {
             TypeRef tpe = ((Expression.Cast) x).getType();
             Pair<Expression, TypeRef> casted = convertExpressionToJava(((Expression.Cast) x).getTarget(), libraryClassName, promoteNativeLongToLong);
-            if (result.config.runtime.hasJNA) {
-                TypeRef tr = convertTypeToJNA(tpe, TypeConversionMode.ExpressionType, libraryClassName);
-                JavaPrim prim = getPrimitive(tr, libraryClassName);
-                if (promoteNativeLongToLong && (prim == JavaPrim.NativeLong || prim == JavaPrim.NativeSize)) {
-                    prim = JavaPrim.Long;
-                    tr = typeRef(Long.TYPE);
-                }
-                Expression val = casted.getFirst();
-                if (isString(val)) {
-                		val = methodCall(new Expression.New(typeRef(com.ochafik.lang.jnaerator.runtime.StringPointer.class), val), "getPointer");
-                } else {
-					if (prim == JavaPrim.NativeLong) {
-						val = (Expression) new Expression.New(typeRef(com.sun.jna.NativeLong.class), val);
-					} else if (prim == JavaPrim.NativeSize) {
-						val = (Expression) new Expression.New(typeRef(NativeSize.class), val);
-					}
-				}
-				res = typed(val, tr);
-            } else {
-                NL4JConversion conv = convertTypeToNL4J(tpe, libraryClassName, null, null, -1, -1);
-                TypeRef tr = conv.typeRef;
-                Expression val = casted.getFirst();
-                if (conv.isPtr) {
-                		if (isString(val))
-                			val = methodCall(expr(typeRef(result.config.runtime.pointerClass)), "pointerToCString", val);
-                		else
-                			val = methodCall(expr(typeRef(result.config.runtime.pointerClass)), "pointerToAddress", val);
-                }
-                res = typed(val, tr);
+            
+            NL4JConversion conv = convertTypeToNL4J(tpe, libraryClassName, null, null, -1, -1);
+            TypeRef tr = conv.typeRef;
+            Expression val = casted.getFirst();
+            if (conv.isPtr) {
+                    if (isString(val))
+                        val = methodCall(expr(typeRef(result.config.runtime.pointerClass)), "pointerToCString", val);
+                    else
+                        val = methodCall(expr(typeRef(result.config.runtime.pointerClass)), "pointerToAddress", val);
             }
-
-        } else if (x instanceof Expression.VariableRef) {
-            Expression.VariableRef fr = (Expression.VariableRef) x;
-            Identifier name = fr.getName();
-            if (name != null) {
-                Define define = result.defines.get(name);
-                if (define != null && define.getValue() != null) {
-                    if (x.toString().equals(define.getValue().toString())) {
-                        res = null; // avoid some nasty loops
-                    } else {
-                        Expression defineValue = define.getValue();
-                        if (defineValue instanceof Expression.Constant) {
-                            Expression.Constant constant = (Expression.Constant) defineValue;
-                            res = typed(findDefine(name), convertToJavaType(constant.getType()));
-                        }
-
-                        if (res == null) {
-                            res = convertExpressionToJava(defineValue, libraryClassName, promoteNativeLongToLong);
-                        }
-                    }
-                } else {
-                    String sname = name.toString();
-                    if (sname.equals("True") || sname.equals("true")) {
-                        res = typed(expr(Expression.Constant.Type.Bool, true), primRef(JavaPrim.Boolean));
-                    } else if (sname.equals("False") || sname.equals("false")) {
-                        res = typed(expr(Expression.Constant.Type.Bool, false), primRef(JavaPrim.Boolean));
-                    } else {
-                        Enum.EnumItem enumItem = result.enumItems.get(name);
-                        if (enumItem != null) {
-                            res = typed(getEnumItemValue(enumItem), typeRef(Long.TYPE));
-                        } else {
-                            VariablesDeclaration constant = result.globalVariablesByName.get(name);
-                            if (constant != null) {
-                                res = typed(varRef(findRef(name, constant, libraryClassName, true)), null);
-                            } else {
-                                res = typed(new Expression.VariableRef(name), null);
-                            }
-                        }
-                    }
-                }
-            }
+            res = typed(val, tr);
         } else if (x instanceof Expression.FunctionCall) {
             Expression.FunctionCall fc = (Expression.FunctionCall) x;
             if ("sizeof".equals(String.valueOf(fc.getFunction())) && fc.getArguments().size() == 1) {
                 Expression.TypeRefExpression typeEx = SyntaxUtils.as(fc.getArguments().get(0).getValue(), Expression.TypeRefExpression.class);
                 if (typeEx != null) {
                     res = typed(sizeofToJava(typeEx.getType(), libraryClassName), typeRef(Integer.TYPE));
-                }
-            }
-        }
-        if (x instanceof Expression.TypeRefExpression) {
-
-            Expression.TypeRefExpression tre = (Expression.TypeRefExpression) x;
-            TypeRef tr = tre.getType();
-            if (tr instanceof TypeRef.SimpleTypeRef) {
-                TypeRef.SimpleTypeRef str = (TypeRef.SimpleTypeRef) tr;
-                Identifier ident = str.getName();
-                if (ident != null) {
-                    if (result.enumItemsFullName.contains(ident)) {
-                        res = typed(tre, typeRef(Integer.TYPE));
-                    }
-                }
-            }
-            if (res == null) {
-                if (tr.isMarkedAsResolved()) {
-                    res = typed(tre, tr);
-                } else {
-                    TypeRef conv = convertTypeToJNA(tr, TypeConversionMode.ExpressionType, libraryClassName);
-                    res = typed(new Expression.TypeRefExpression(conv), conv);
                 }
             }
         }

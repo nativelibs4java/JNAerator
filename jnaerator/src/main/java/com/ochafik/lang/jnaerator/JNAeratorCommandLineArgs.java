@@ -1,6 +1,8 @@
 package com.ochafik.lang.jnaerator;
 
+import com.ochafik.lang.jnaerator.JNAeratorConfig.OutputMode;
 import com.ochafik.lang.jnaerator.JNAeratorConfig.Runtime;
+import com.ochafik.util.listenable.Pair;
 import com.ochafik.util.string.StringUtils;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -54,12 +56,14 @@ public class JNAeratorCommandLineArgs {
             }
 		}
 		
+        List<Pair<OptionDef, List<String>>> parsedArgs = new ArrayList<Pair<OptionDef, List<String>>>();
+        
 		public void parse(List<String> args) throws Exception {
 			try {
 				for (int i = 0; i < args.size(); i++) {
 					String arg = args.get(i);
 					OptionDef defaultOpt = null;
-					for (OptionDef opt : OptionDef.values()) {
+                    for (OptionDef opt : OptionDef.values()) {
 						if (opt.switchPattern == null) {
 							defaultOpt = opt;
 							continue;
@@ -85,23 +89,35 @@ public class JNAeratorCommandLineArgs {
                                 pa.params[iArg] = opt.args[iArg].convertArg(gp, this);
                                 iArg++;
                             }
-                            for (; iArg < opt.args.length; iArg++)
-                                pa.params[iArg] = opt.args[iArg].convertArg(args.get(++i), this);
+                            List<String> parsedArg = new ArrayList<String>();
+                            parsedArg.add(arg);
+                            for (; iArg < opt.args.length; iArg++) {
+                                String param = args.get(++i);
+                                pa.params[iArg] = opt.args[iArg].convertArg(param, this);
+                                parsedArg.add(param);
+                            }
 
+                            //int iParsedArg = parsedArgs.size();
+                            parsedArgs.add(Pair.create(opt, parsedArg));
                             List<String> parsed = parsed(pa);
-                            if (parsed == null)
+                            if (parsed == null) {
                                 return;
+                            }
                             args.addAll(i + 1, parsed);
                             defaultOpt = null;
                             break;
                         }
+                        
 					}
+                    
 					if (defaultOpt != null) {
 						ParsedArg pa = new ParsedArg();
 						pa.def = defaultOpt;
 						pa.params = new Object[] { defaultOpt.args[0].convertArg(arg, this) };
+                        //parsedArgs.add(Pair.create(defaultOpt, Arrays.asList(arg)));
 						args.addAll(i + 1, parsed(pa));
 					}
+                    
 				}
             } catch (JNAerator.ExitException ex) {
                 throw ex;
@@ -121,8 +137,8 @@ public class JNAeratorCommandLineArgs {
 		SourcePath,
 		LibraryPath
 	}
-	public enum OptionDef {
-	
+    public enum OptionDef {
+        OutputMode(         "-mode",                "Choose the output mode of JNAerator",  new ArgDef(Type.Enum, "mode", OutputMode.class)),
 		IncludeArgs(		"@(.+)?",				"Read command-line arguments from a file. File may contain multiple lines (those beginning with \"//\" will be skipped), file wildcards will be resolved within the file content, as well as variables substitutions : $(someEnvOrJavaVarName), with $(DIR) being the parent directory of the current arguments file.", new ArgDef(Type.ExistingFile, "argumentsFile.jnaerator")),
 		OutputDir(			"-o", 					"Output directory for all artifacts", new ArgDef(Type.OutputDir, "outDir")),
 		ExtractSymbols(		"-scanSymbols", 		"Extract, unmangle and parse the symbols all listed shared libraries"),
@@ -138,7 +154,7 @@ public class JNAeratorCommandLineArgs {
 		Reification(         "-reification",   		"Automatically create OO shortcuts for functions that look like methods (typedPtr.someFunc() for someFunc(typedPtr))"),
         Undefine(             "-U(.+)",               "Undefine a preprocessor symbol after the autoconfiguration phase.", new ArgDef(Type.String, "symbolName")),
         GUI(				    "-gui",		 			"Show minimalist progression GUI"),
-		NoRuntime(			"-noRuntime",		 	"Don't copy runtime classes to JAR output"),
+		//NoRuntime(			"-noRuntime",		 	"Don't copy runtime classes to JAR output"),
 		Synchronized(	    "-synchronized",			"Generate synchronized native methods"),
 		BeanStructs(		    "-beanStructs",			"Generate getters and setters for struct fields"),
 		BeautifyNames(		"-beautifyNames",		"Transform C names to Java-looking names : some_func() => someFunc()"),
@@ -194,12 +210,16 @@ public class JNAeratorCommandLineArgs {
 		NoPrimitiveArrays(	"-noPrimitiveArrays",	"Never output primitive arrays for function arguments (use NIO buffers instead)"),
 		File(				null,		 			"Any header (or directory containing headers at any level of hierarchy), shared library, *.bridgesupport file or *.jnaerator file", new ArgDef(Type.OptionalFile, "file", PathType.SourcePath)), 
 		NoPreprocessing(	"-fpreprocessed",		"Consider source files as being already preprocessed (preprocessor won't be run)"),
-		NoCompile(			"(?i)-noComp",				"Do not compile JNAerated headers"),
-		NoJAR(				"(?i)-noJar",			"Do not create an output JAR"),
+		//NoCompile(			"(?i)-noComp",				"Do not compile JNAerated headers"),
+		//NoJAR(				"(?i)-noJar",			"Do not create an output JAR"),
 //		EnableCPlusPlus(	"-cppInstanceMethods",	"Enable experimental C++ instance methods wrapping"),
 		NoLibBundle(		"(?i)-noLibBundle",		"Do not bundle libraries in output JAR"),
 		LibFile(            "-libFile",             "Bundle the provided file with the JNAerated JAR so that it is extracted with the library when it is first used.", new ArgDef(Type.ExistingFile, "resourceFile")),
         RemoveInlineAsm(    "-removeInlineAsm",     "Remove inline asm from preprocessed source, useful when its unsupported syntax makes parsing to fail."),
+        ForceOverwrite(     "-f",                   "Force the overwrite of existing files"),
+        MavenVersion(       "-mavenVersion",        "Set version of the generated Maven project", new ArgDef(Type.String, "version")),
+        MavenArtifactId(    "-mavenArtifactId",     "Set artifact id of the generated Maven project", new ArgDef(Type.String, "artifactId")),
+        MavenGroupId(       "-mavenGroupId",        "Set group id of the generated Maven project", new ArgDef(Type.String, "groupId")),
         MaxConstructedFields(
 							"-maxConstrFields",		"Maximum number of fields allowed for structure fields constructors. If a struct has more fields, it will only get a default constructor.", new ArgDef(Type.Int, "fieldCount")),
 		GenPrivateMembers(	"-genPrivateMembers", 	"Generate wrappers for private fields and methods (will be protected and deprecated)."),
@@ -216,6 +236,23 @@ public class JNAeratorCommandLineArgs {
 		public String toString() {
 			return super.toString() + ": " + description; 
 		}
+        public String format(Object... fargs) {
+            if (fargs.length != args.length)
+                throw new IllegalArgumentException("Expected " + args.length + " args to format " + name() + ", got " + fargs.length);
+            
+            StringBuilder b = new StringBuilder();
+            b.append(clSwitch);
+            for (int i = 0, n = fargs.length; i < n; i++) {
+                Object farg = fargs[i];
+                ArgDef arg = args[i];
+                String f = arg.format(farg);
+                if (f != null) {
+                    b.append(' ');
+                    b.append(arg.format(farg));
+                }
+            }
+            return b.toString();
+        }
 		public final ArgDef[] args;
 		public final Pattern switchPattern;
 		public final String clSwitch;
@@ -246,6 +283,27 @@ public class JNAeratorCommandLineArgs {
 				this(type, name, null, pathType);
 			}
 
+            public String format(Object arg) {
+                switch (type) {
+                    case Enum:
+                        return ((Enum)additionalClass.cast(arg)).name();
+                    case ExistingDir:
+                    case ExistingFile:
+                    case ExistingFileOrDir:
+                    case File:
+                    case OutputDir:
+                    case OutputFile:
+                        return ((File)arg).toString();
+                    case OptionalFile:
+                        return arg == null ? null : ((File)arg).toString();
+                    case String:
+                        return (String)arg;
+                    case Int:
+                        return ((Integer)arg).toString();
+                    default:
+                        throw new UnsupportedOperationException("unknown type " + type);
+                }
+            }
 			File findFile(String arg, ArgsParser parser) {
 				File f = new File(arg);
 				if (!f.exists()) {
@@ -298,7 +356,7 @@ public class JNAeratorCommandLineArgs {
                     try {
                         return Enum.valueOf((Class<? extends Enum>)additionalClass, arg);
                     } catch (Throwable th) {
-                        throw new IllegalArgumentException("Argument '" + arg + "' is not one of the expected values " + StringUtils.implode(additionalClass.getEnumConstants()));
+                        throw new IllegalArgumentException("Argument '" + arg + "' is not one of the expected values :\n\t" + StringUtils.implode(additionalClass.getEnumConstants(), ",\n\t"));
                     }
                 case OutputDir:
                     f = findFile(arg, parser);

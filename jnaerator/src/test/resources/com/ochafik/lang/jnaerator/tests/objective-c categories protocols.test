@@ -24,4 +24,5 @@ base.print();
 base.as_Base_Categ().test((Printing)null);
 //base.test((org.rococoa.NSObject)null);
 //base.asCateg().test((org.rococoa.ObjCObject)null);
-
+--
+#runtime(-BridJ)

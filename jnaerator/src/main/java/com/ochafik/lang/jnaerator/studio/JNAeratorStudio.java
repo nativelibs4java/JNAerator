@@ -83,6 +83,7 @@ import com.ochafik.lang.jnaerator.JNAeratorConfig;
 import com.ochafik.lang.jnaerator.Result;
 import com.ochafik.lang.jnaerator.SourceFiles;
 import com.ochafik.lang.jnaerator.JNAerator.Feedback;
+import com.ochafik.lang.jnaerator.JNAeratorConfig.OutputMode;
 import com.ochafik.swing.SimpleDocumentAdapter;
 import com.ochafik.swing.UndoRedoUtils;
 import com.ochafik.swing.syntaxcoloring.CCTokenMarker;
@@ -118,6 +119,7 @@ public class JNAeratorStudio extends JPanel {
 		noCommentNoManglingCb = new JCheckBox("No comment & no mangling", false);
 
     JComboBox runtimeCombo;
+    JComboBox modeCombo;
 
 	JTextArea errorsArea = new JTextArea();
 	JSplitPane sp;
@@ -239,6 +241,7 @@ public class JNAeratorStudio extends JPanel {
 			setPref("options.scalaSetters", scalaSetters.isSelected());
 			setPref("options.charPtrAsString", charPtrAsString.isSelected());
 			setPref("options.targetRuntime", ((JNAeratorConfig.Runtime)runtimeCombo.getSelectedItem()).name());
+			setPref("options.outputMode", ((JNAeratorConfig.OutputMode)modeCombo.getSelectedItem()).name());
 			setPref("options.noCommentNoMangling", noCommentNoManglingCb.isSelected());
 			setPref("splitPane.orientation", sp.getOrientation());
 			setPref("splitPane.dividedLocation", getProportionalDividerLocation(sp));
@@ -270,7 +273,7 @@ public class JNAeratorStudio extends JPanel {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				try {
-					SystemUtils.runSystemOpenURL(new URL("http://sourceforge.net/donate/index.php?group_id=266856"));
+					SystemUtils.runSystemOpenURL(new URL(JNAerator.DONATE_URL));
 				} catch (Exception ex) {
 					ex.printStackTrace();
 				}
@@ -283,10 +286,10 @@ public class JNAeratorStudio extends JPanel {
 				generateButton.requestFocus();
 			}
 		},
-		aboutJNAeratorAction = aboutLink("About JNAerator", "http://code.google.com/p/jnaerator/wiki/AboutJNAerator"),
-		aboutRococoaAction = aboutLink("About Rococoa", "http://code.google.com/p/rococoa"),
-		aboutBridJAction = aboutLink("About BridJ", "http://code.google.com/p/bridj/wiki"),
-		aboutJNAAction = aboutLink("About JNA", "http://jna.dev.java.net/"),
+		aboutJNAeratorAction = aboutLink("About JNAerator", JNAerator.ABOUT_JNAERATOR_URL),
+		aboutRococoaAction = aboutLink("About Rococoa", JNAerator.ABOUT_ROCOCOA_URL),
+		aboutBridJAction = aboutLink("About BridJ", JNAerator.ABOUT_BRIDJ_URL),
+		aboutJNAAction = aboutLink("About JNA", JNAerator.ABOUT_JNA_URL),
 		showExampleAction = new AbstractAction("Open Example") {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -323,14 +326,14 @@ public class JNAeratorStudio extends JPanel {
 	public JNAeratorStudio() {
 		super(new BorderLayout());
 
-        List<JNAeratorConfig.Runtime> runtimeValues = new ArrayList<JNAeratorConfig.Runtime>();
-        for (JNAeratorConfig.Runtime runtime : JNAeratorConfig.Runtime.values())
-        //if (runtime != JNAeratorConfig.Runtime.NL4J)
-            runtimeValues.add(runtime);
-
-        runtimeCombo = new JComboBox(runtimeValues.toArray()) {{
+        runtimeCombo = new JComboBox(JNAeratorConfig.Runtime.values()) {{
             setToolTipText("Target runtime library");
             setSelectedItem(JNAeratorConfig.Runtime.JNAerator);
+        }};
+
+		modeCombo = new JComboBox(OutputMode.values()) {{
+            setToolTipText("Output mode");
+            setSelectedItem(JNAeratorConfig.OutputMode.StandaloneJar);
         }};
 
 		resultsListCombo.setModel(new ListenableComboModel<ResultContent>(results));
@@ -367,7 +370,7 @@ public class JNAeratorStudio extends JPanel {
 		
 		JComponent sourcePane = new JPanel(new BorderLayout()), resultPane = new JPanel(new BorderLayout());
 		Box libBox = Box.createHorizontalBox();
-		showJarButton = new JButton("Show JAR");
+		showJarButton = new JButton("Show Output");
 		showJarButton.setEnabled(false);
 		showJarButton.addActionListener(new ActionListener() {
 			@Override
@@ -402,9 +405,16 @@ public class JNAeratorStudio extends JPanel {
         libBox.add(new JLabel("Library Name :", JLabel.RIGHT));
 		libBox.add(libraryName);
 
-		Box optBox = Box.createVerticalBox();
-		optBox.add(libBox);
 		
+        Box modeBox = Box.createHorizontalBox();
+        modeBox.add(new JLabel("Output Mode"));
+        modeBox.add(modeCombo);
+
+        Box optBox = Box.createVerticalBox();
+		optBox.add(libBox);
+		optBox.add(modeBox);
+		
+        
 		JPanel optPanel = new JPanel(new GridLayout(3, 3));
 		optPanel.add(directCallingCb);
 		optPanel.add(noCommentNoManglingCb);
@@ -509,7 +519,6 @@ public class JNAeratorStudio extends JPanel {
 			public void run() {
 				JNAeratorConfig config = new JNAeratorConfig();
 				config.outputJar = getOutputJarFile();
-				config.compile = true;
 				config.useJNADirectCalls = directCallingCb.isSelected();
 				config.putTopStructsInSeparateFiles = structsAsTopLevelClassesCb.isSelected();
 				config.reification = reificationCb.isSelected();
@@ -517,6 +526,7 @@ public class JNAeratorStudio extends JPanel {
 				config.scalaStructSetters = scalaSetters.isSelected();
                 config.stringifyConstCStringReturnValues = config.charPtrAsString = charPtrAsString.isSelected();
                 config.runtime = (Runtime) runtimeCombo.getSelectedItem();
+				config.outputMode = (OutputMode) modeCombo.getSelectedItem();
 				config.noComments = config.noMangling = noCommentNoManglingCb.isSelected();
 				config.defaultLibrary = libraryName.getText();
 				config.libraryForElementsInNullFile = libraryName.getText();

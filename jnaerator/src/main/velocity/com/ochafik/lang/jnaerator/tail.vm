@@ -1,0 +1,65 @@
+
+	<build>
+		<plugins>
+			<!--
+				If you're okay that your bindings will be regenerated at each build : 
+			-->
+			<plugin>
+				<groupId>com.nativelibs4java</groupId>
+				<artifactId>maven-jnaerator-plugin</artifactId>
+				<version>${jnaerator_version}</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>generate</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			
+			<!--
+				If you'd rather re-generate bindings on demand inside src/main/java (with "mvn jnaerator:generate"), maybe to tweak them after generation and version them :
+			
+			<plugin>
+				<groupId>com.nativelibs4java</groupId>
+				<artifactId>maven-jnaerator-plugin</artifactId>
+				<version>${jnaerator_version}</version>
+				<configuration>
+					<javaOutputDirectory>src/main/java</javaOutputDirectory>
+				</configuration>
+			</plugin>
+			-->
+			
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-shade-plugin</artifactId>
+				<version>1.4</version>
+				
+				<configuration>
+					<shadedArtifactAttached>true</shadedArtifactAttached>
+					<!--shadedClassifierName>${shadedClassifierName}</shadedClassifierName-->
+					<artifactSet>
+						<excludes>
+							<exclude>org.scala-lang:scala-library</exclude>
+						</excludes>
+					</artifactSet>
+					<filters>
+						<filter>
+							<artifact>*:*</artifact>
+							<excludes>
+								<exclude>META-INF/*.SF</exclude>
+								<exclude>META-INF/*.DSA</exclude>
+								<exclude>META-INF/*.RSA</exclude>
+								<exclude>META-INF/maven/**</exclude>
+							</excludes>
+						</filter>
+					</filters>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+	
+</project>
+
+
+

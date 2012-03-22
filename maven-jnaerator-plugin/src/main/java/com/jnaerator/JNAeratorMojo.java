@@ -20,6 +20,8 @@ import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.project.MavenProject;
 
+import com.ochafik.lang.jnaerator.*;
+
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -79,11 +81,20 @@ public class JNAeratorMojo
     public void execute()
         throws MojoExecutionException
     {
+    	if (!config.exists()) {
+    		getLog().info("No JNAerator config file '" + config + "' found");
+    		return;
+    	}
         try
         {
             List<String> args = new ArrayList<String>();
 
-            args.add("-noComp");
+            args.add(config.getAbsolutePath());
+            
+            // Override settings from config file :
+            args.add("-mode");
+            args.add(JNAeratorConfig.OutputMode.Directory.name());
+            args.add("-f");
             args.add("-o");
             
             File javaDir = canonizeDir(javaOutputDirectory);
@@ -95,8 +106,6 @@ public class JNAeratorMojo
                 args.add("-scalaOut");
                 args.add(canonizeDir(scalaOutputDirectory).toString());
             }
-
-            args.add(config.getAbsolutePath());
 
             com.ochafik.lang.jnaerator.JNAerator.main(args.toArray(new String[0]));
         }

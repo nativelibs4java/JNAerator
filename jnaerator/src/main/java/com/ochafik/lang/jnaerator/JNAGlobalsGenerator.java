@@ -67,7 +67,7 @@ public class JNAGlobalsGenerator extends GlobalsGenerator {
 				
 				
 				if (true) {//!result.config.useJNADirectCalls) {
-					if (!signatures.variablesSignatures.add(name.toString()))
+					if (!signatures.addVariable(name.toString()))
 						continue;
 					
 					boolean isPointer = type instanceof com.ochafik.lang.jnaerator.parser.TypeRef.Pointer;
@@ -132,7 +132,7 @@ public class JNAGlobalsGenerator extends GlobalsGenerator {
 					}
 				}
 				
-				if (!signatures.classSignatures.add(name))
+				if (!signatures.addClass(name))
 					continue;
 				
 				

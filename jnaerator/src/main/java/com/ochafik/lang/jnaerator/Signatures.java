@@ -23,15 +23,28 @@ import java.util.Set;
 
 import com.ochafik.lang.jnaerator.parser.Identifier;
 import static com.ochafik.lang.jnaerator.parser.ElementsHelper.*;
+import com.ochafik.lang.jnaerator.parser.Function;
 
 public class Signatures {
-	public Set<Identifier> 
+	private final Set<Identifier> 
 		classSignatures = new HashSet<Identifier>();
 
-	public Set<String> 
+	private final Set<String> 
 		variablesSignatures = new HashSet<String>(),
 		methodsSignatures = new HashSet<String>();
 
+    public boolean addClass(Identifier sig) {
+        return classSignatures.add(sig);
+    }
+    public boolean addMethod(Function fun) {
+        return addMethod(fun.computeSignature(false));
+    }
+	public boolean addMethod(String sig) {
+        return methodsSignatures.add(sig);
+    }
+	public boolean addVariable(String sig) {
+        return variablesSignatures.add(sig);
+    }
 	/**
 	 * TODO: CLEAN THIS UGLY HACK
 	 * Rewrites function name until its signature doesn't collide anymore with existing signatures

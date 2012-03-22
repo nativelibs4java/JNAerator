@@ -65,7 +65,7 @@ public abstract class DeclarationsConverter {
 		
 		int i = 1;
 		Identifier chosenName = name;
-		while (!(signatures.classSignatures.add(chosenName))) {
+		while (!(signatures.addClass(chosenName))) {
 			chosenName = ident(name.toString() + (++i));
 		}
 		
@@ -234,7 +234,7 @@ public abstract class DeclarationsConverter {
 						//DirectDeclarator dd = (DirectDeclarator)decl;
 						Pair<Expression, TypeRef> val = result.typeConverter.convertExpressionToJava(decl.getDefaultValue(), libraryClassName, true);
 						
-						if (!signatures.variablesSignatures.add(name))
+						if (!signatures.addVariable(name))
 							continue;
 						
                         
@@ -285,7 +285,7 @@ public abstract class DeclarationsConverter {
 
 	protected void outputNSString(String name, String value, DeclarationsHolder out, Signatures signatures, Element... elementsToTakeCommentsFrom) {
 
-		if (!signatures.variablesSignatures.add(name))
+		if (!signatures.addVariable(name))
 			return;
 		
 		TypeRef tr = typeRef(String.class);
@@ -322,7 +322,7 @@ public abstract class DeclarationsConverter {
 	
 	public void addMissingMethods(Class<?> originalLib, Signatures existingSignatures, Struct outputLib) {
 		for (Pair<Function, String> f : getMethodsAndTheirSignatures(originalLib).getFirst())
-			if (existingSignatures.methodsSignatures.add(f.getSecond()))
+			if (existingSignatures.addMethod(f.getSecond()))
 				outputLib.addDeclaration(f.getFirst().clone());
 	}
 	
@@ -403,7 +403,7 @@ public abstract class DeclarationsConverter {
 //				if (prim == JavaPrim.Int)
 //					tr = typeRef("long");
 				
-				if (signatures.variablesSignatures.add(name)) {
+				if (signatures.addVariable(name)) {
 					String t = converted.toString();
 					if (t.contains("sizeof")) {
 						converted = alreadyConverted ? x : result.typeConverter.convertExpressionToJava(x.getFirst(), libraryClassName, false);

@@ -17,5 +17,15 @@ b.a = new A.ByValue();
 b.pa = new A.ByReference();
 int i = b.pa.i = 10;
 short s = b.pa.s;
-long l = 0;
-b.pa.l = l;
+b.pa.l = (NativeLong)null;
+--
+#runtime(BridJ)
+import test.*;
+import static test.TestLibrary.*;
+
+B b = new B();
+b.pa(allocate(A.class));
+int i = b.pa().get().i();
+short s = b.pa().get().s();
+b.pa().get().l((long)0);
+long l = b.pa().get().l(); 

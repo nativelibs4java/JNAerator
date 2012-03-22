@@ -80,7 +80,7 @@ public class BridJDeclarationsConverter extends DeclarationsConverter {
         boolean hasEnumClass = false;
         
         if (enumName != null && enumName.resolveLastSimpleIdentifier().getName() != null) {
-            if (!signatures.classSignatures.add(enumName))
+            if (!signatures.addClass(enumName))
                 return;
 
             signatures = new Signatures();
@@ -241,7 +241,7 @@ public class BridJDeclarationsConverter extends DeclarationsConverter {
         }
         String natSig = nativeMethod.computeSignature(false);
 
-        Identifier javaMethodName = signatures.findNextMethodName(natSig, functionName);
+        Identifier javaMethodName = signatures == null ? functionName : signatures.findNextMethodName(natSig, functionName);
         if (!javaMethodName.equals(functionName)) {
             nativeMethod.setName(javaMethodName);
         }
@@ -283,7 +283,7 @@ public class BridJDeclarationsConverter extends DeclarationsConverter {
 		if (struct.isForwardDeclaration())// && !result.structsByName.get(structName).isForwardDeclaration())
 			return null;
 
-		if (!signatures.classSignatures.add(structName))
+		if (!signatures.addClass(structName))
 			return null;
 
 		boolean isUnion = struct.getType() == Struct.Type.CUnion;
@@ -356,7 +356,7 @@ public class BridJDeclarationsConverter extends DeclarationsConverter {
         //    private static StructIO<MyStruct> io = StructIO.getInstance(MyStruct.class);
         
         Function defaultConstructor = new Function(Type.JavaMethod, ident(structName), null).setBody(block(stat(methodCall("super")))).addModifiers(ModifierType.Public);
-        if (childSignatures.methodsSignatures.add(defaultConstructor.computeSignature(false)))
+        if (childSignatures.addMethod(defaultConstructor))
             structJavaClass.addDeclaration(defaultConstructor);
         
         //todo remove this :
@@ -390,7 +390,7 @@ public class BridJDeclarationsConverter extends DeclarationsConverter {
 					} else if (tr instanceof FunctionSignature) {
 						convertCallback((FunctionSignature)tr, childSignatures, structJavaClass, callerLibraryClass);
 					}
-				} else if ((result.config.runtime == JNAeratorConfig.Runtime.BridJ || result.config.genCPlusPlus) && d instanceof Function) {
+				} else if (result.config.genCPlusPlus && d instanceof Function) {
 					Function f = (Function) d;
                     
 					boolean isVirtual = f.hasModifier(ModifierType.Virtual);
@@ -578,6 +578,9 @@ public class BridJDeclarationsConverter extends DeclarationsConverter {
         try { 
 			TypeRef valueType = v.getValueType();
 			for (Declarator vs : v.getDeclarators()) {
+                if (vs.getDefaultValue() != null)
+                    continue;
+                
 				String name = vs.resolveName();
 				if (name == null || name.length() == 0) {
 					name = "anonymous" + (nextAnonymousFieldId++);
@@ -589,15 +592,15 @@ public class BridJDeclarationsConverter extends DeclarationsConverter {
 					mutatedType = (TypeRef)vs.mutateType(valueType);
 					vs = new DirectDeclarator(vs.resolveName());
 				}
-				Declarator d = v.getDeclarators().get(0);
-                List<Declaration> vds = convertVariablesDeclarationToBridJ(name, mutatedType, iChild, d.getBits(), isGlobal, holderName, callerLibraryClass, callerLibrary, v, vs);
-                if (d.getBits() > 0)
+				//Declarator d = v.getDeclarators().get(0);
+                List<Declaration> vds = convertVariablesDeclarationToBridJ(name, mutatedType, iChild, vs.getBits(), isGlobal, holderName, callerLibraryClass, callerLibrary, v, vs);
+                if (vs.getBits() > 0)
 					for (Declaration vd : vds)
-                        vd.addAnnotation(new Annotation(result.config.runtime.typeRef(JNAeratorConfig.Runtime.Ann.Bits), expr(d.getBits())));
+                        vd.addAnnotation(new Annotation(result.config.runtime.typeRef(JNAeratorConfig.Runtime.Ann.Bits), expr(vs.getBits())));
 				
                 for (Declaration vd : vds) {
                     if (vd instanceof Function) {
-                        if (!signatures.methodsSignatures.add(((Function)vd).computeSignature(false)))
+                        if (!signatures.addMethod((Function)vd))
                             continue;
                     }
                     
