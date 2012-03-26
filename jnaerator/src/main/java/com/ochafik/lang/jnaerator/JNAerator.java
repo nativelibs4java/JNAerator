@@ -415,9 +415,12 @@ public class JNAerator {
                     case OutputMode:
                         config.outputMode = a.getEnumParam(0, OutputMode.class);
                         break;
-//                    case NoCompile:
-//						config.compile = false;
-//						break;
+                    case NoJAR:
+                        config.legacyNoJar = true;
+                        break;
+                    case NoCompile:
+						config.legacyNoCompile = true;
+						break;
                     case SkipLibInstance:
                     	config.skipLibraryInstanceDeclarations = true;
                     	break;
@@ -735,8 +738,14 @@ public class JNAerator {
 
 				@Override
 				void finished() throws IOException {
-                    if (config.outputMode == null)
-                        throw new IllegalArgumentException("Missing output mode parameter " + OptionDef.OutputMode.clSwitch + " !");
+                    if (config.outputMode == null) {
+                        if (config.legacyNoCompile && config.legacyNoJar) {
+                            config.outputMode = OutputMode.Directory;
+                            System.err.println("WARNING: legacy options " + OptionDef.NoJAR.clSwitch + " and " + OptionDef.NoCompile.clSwitch + " used, defaulting " + OptionDef.OutputMode.clSwitch + " to " + config.outputMode.name());                            
+                        }
+                        if (config.outputMode == null)
+                            throw new IllegalArgumentException("Missing output mode parameter " + OptionDef.OutputMode.clSwitch + " !");
+                    }
                     
                     //System.out.println("Mode = " + config.outputMode.name());
                     config.parsedArgs = parsedArgs;

@@ -9,6 +9,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;	
 import static org.bridj.Platform.*;
@@ -78,6 +80,8 @@ public class JNAeratorCommandLineArgs {
                             throw new RuntimeException("Error while matching arg " + arg + " with option " + opt + " (pattern = " + opt.switchPattern + ") : " + ex, ex);
                         }
                         if (matches) {
+                            if (opt.isDeprecated())
+                                System.err.println("WARNING: option " + opt.clSwitch + " is deprecated and might be removed in future versions.");
                             ParsedArg pa = new ParsedArg();
                             pa.def = opt;
                             pa.params = new Object[opt.args.length];
@@ -210,8 +214,10 @@ public class JNAeratorCommandLineArgs {
 		NoPrimitiveArrays(	"-noPrimitiveArrays",	"Never output primitive arrays for function arguments (use NIO buffers instead)"),
 		File(				null,		 			"Any header (or directory containing headers at any level of hierarchy), shared library, *.bridgesupport file or *.jnaerator file", new ArgDef(Type.OptionalFile, "file", PathType.SourcePath)), 
 		NoPreprocessing(	"-fpreprocessed",		"Consider source files as being already preprocessed (preprocessor won't be run)"),
-		//NoCompile(			"(?i)-noComp",				"Do not compile JNAerated headers"),
-		//NoJAR(				"(?i)-noJar",			"Do not create an output JAR"),
+		@Deprecated
+        NoCompile(			"(?i)-noComp",				"Do not compile JNAerated headers"),
+		@Deprecated
+        NoJAR(				"(?i)-noJar",			"Do not create an output JAR"),
 //		EnableCPlusPlus(	"-cppInstanceMethods",	"Enable experimental C++ instance methods wrapping"),
 		NoLibBundle(		"(?i)-noLibBundle",		"Do not bundle libraries in output JAR"),
 		LibFile(            "-libFile",             "Bundle the provided file with the JNAerated JAR so that it is extracted with the library when it is first used.", new ArgDef(Type.ExistingFile, "resourceFile")),
@@ -234,7 +240,7 @@ public class JNAeratorCommandLineArgs {
 				args[i].position = i;
 		}
 		public String toString() {
-			return super.toString() + ": " + description; 
+			return super.toString() + ": " + description(); 
 		}
         public String format(Object... fargs) {
             if (fargs.length != args.length)
@@ -256,7 +262,18 @@ public class JNAeratorCommandLineArgs {
 		public final ArgDef[] args;
 		public final Pattern switchPattern;
 		public final String clSwitch;
-		public final String description;
+		private final String description;
+
+        public String description() {
+            return isDeprecated() ? "(deprecated) " + description : description;
+        }
+        private boolean isDeprecated() {
+            try {
+                return OptionDef.class.getField(name()).isAnnotationPresent(Deprecated.class);
+            } catch (Exception ex) {
+                throw new RuntimeException(ex);
+            }
+        }
 		
 		public enum Type {
 			ExistingFile, ExistingDir, File, MessageFormat, String, Int, ExistingFileOrDir, OutputDir, OutputFile, OptionalFile, Enum
@@ -406,7 +423,7 @@ public class JNAeratorCommandLineArgs {
 					System.out.print(" <" + ad.name + ": " + desc + ">");
 				}
 				System.out.println();
-				System.out.println("  " + opt.description.replaceAll("\\*", "`*`").replaceAll("\n", "\n  "));
+				System.out.println("  " + opt.description().replaceAll("\\*", "`*`").replaceAll("\n", "\n  "));
 			}
 		} else {
 			System.out.println("Credits:   JNAerator is Copyright (c) 2008-2009 Olivier Chafik");
@@ -425,7 +442,7 @@ public class JNAeratorCommandLineArgs {
 					System.out.print(" <" + ad.name + ": " + desc + ">");
 				}
 				System.out.println();
-				System.out.println("\t\t" + opt.description);
+				System.out.println("\t\t" + opt.description());
 				System.out.println();
 			}
 		}

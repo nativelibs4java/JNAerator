@@ -436,7 +436,10 @@ public class JNAeratorConfig {
     public Set<String> undefines = new HashSet<String>();
 	public boolean gccLong, sizeAsLong;
     public OutputMode outputMode = OutputMode.Maven;
-	//public boolean compile = true;
+    @Deprecated
+	public boolean legacyNoJar;
+    @Deprecated
+	public boolean legacyNoCompile;
     public boolean noAutoImports;
 	public boolean bundleSources = true;
 	public boolean noCPlusPlus;
