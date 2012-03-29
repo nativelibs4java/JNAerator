@@ -868,7 +868,7 @@ public class JNAerator {
             else
                 throw new IOException("File '" + file + "' already exists (use " + JNAeratorCommandLineArgs.OptionDef.ForceOverwrite.clSwitch + " to force overwrite).");
         }
-        file.getParentFile().mkdirs();
+        file.getAbsoluteFile().getParentFile().mkdirs();
         return new PrintWriter(file) {
             @Override
             public void print(String s) {

@@ -269,6 +269,12 @@ public class BridJDeclarationsConverter extends DeclarationsConverter {
         else
             nativeMethod.setBody(convertedBody);
         
+        if (!result.config.noComments) {
+            nativeMethod.importDetails(function, false);
+            nativeMethod.moveAllCommentsBefore();
+            if (!isCallback)
+                nativeMethod.addToCommentBefore(getFileCommentContent(function));
+        }
         out.addDeclaration(nativeMethod);
     }
 	
