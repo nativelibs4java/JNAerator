@@ -807,15 +807,21 @@ public class JNAerator {
 							
 							@Override
 							public void setFinished(Throwable e) {
-								System.out.println("JNAeration failed !");
 								e.printStackTrace();
+								System.out.println("#\n# JNAeration failed !#\n");
 								throw new ExitException(1);
 							}
 							
 							@Override
 							public void setFinished(File toOpen) {
-								System.out.println("JNAeration completed !");
-								System.out.println(toOpen.getAbsolutePath());
+								System.out.println("#\n# JNAeration successfully completed !");
+								System.out.println("# Output mode is '" + config.outputMode.name() + "(" + config.outputMode.getDescription() + ")\n#");
+								System.out.println("# Output is in '" + toOpen.getAbsolutePath() + "'");
+								if (config.outputMode.isMaven()) {
+									System.out.println("#\n# To build the resulting Maven project, use commands like :");
+									System.out.println("#\tcd " + toOpen.getAbsolutePath());
+									System.out.println("#\tmvn install\n#");
+								}
 								throw new ExitException(0);
 							}
 

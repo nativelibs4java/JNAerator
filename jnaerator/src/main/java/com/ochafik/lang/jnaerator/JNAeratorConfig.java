@@ -236,6 +236,9 @@ public class JNAeratorConfig {
             this.desc = desc;
         }
 
+        public String getDescription() { 
+        	return desc;
+        }
         @Override
         public String toString() {
             return "'" + name() + "' : " + desc;
