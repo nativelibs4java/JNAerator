@@ -438,7 +438,7 @@ public class JNAeratorConfig {
     public boolean forceOverwrite;
     public Set<String> undefines = new HashSet<String>();
 	public boolean gccLong, sizeAsLong;
-    public OutputMode outputMode = OutputMode.Maven;
+    public OutputMode outputMode;// = OutputMode.Maven;
     @Deprecated
 	public boolean legacyNoJar;
     @Deprecated
