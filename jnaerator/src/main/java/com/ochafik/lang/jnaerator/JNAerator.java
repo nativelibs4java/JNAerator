@@ -121,6 +121,7 @@ import org.antlr.runtime.ANTLRReaderStream;
 import org.antlr.runtime.CommonTokenStream;
 import static com.ochafik.lang.jnaerator.parser.ElementsHelper.*;
 import static com.ochafik.lang.jnaerator.nativesupport.NativeExportUtils.*;
+import java.io.*;
 /*
 //include com/ochafik/lang/jnaerator/parser/*.mm
 //include com/ochafik/lang/jnaerator/parser/ObjCpp.g
@@ -180,13 +181,19 @@ public class JNAerator {
         //	entry = config.result.typeConversion.getValidJavaIdentifier(ident(entry)).toString();
 
         if (config.outputDir == null)
-            config.outputDir = new File("jnaeratorOut");
+            config.outputDir = new File(".");
 
         if (config.sourcesOutputDir == null) {
             if (config.outputMode == OutputMode.Maven)
                 config.sourcesOutputDir = new File(config.outputDir, "src/main/java");
             else
                 config.sourcesOutputDir = config.outputDir;
+        }
+        if (config.resourcesOutputDir == null) {
+            if (config.outputMode.isMaven())
+                config.resourcesOutputDir = new File(config.outputDir, "src/main/resources");
+            else
+                config.resourcesOutputDir = config.outputDir;
         }
         if (config.outputJar == null && config.outputMode.isJar())
             config.outputJar = new File(config.outputDir, (entry == null ? "out" : entry) + ".jar");
@@ -618,6 +625,11 @@ public class JNAerator {
 				private void parsedActualFile(File file, boolean retainAsTarget) throws Exception {
 					String lib = currentLibrary;
 					String fn = file.getName();
+                    String lfn = fn.toLowerCase();
+                    if (!lfn.matches(".*?\\.(c|cpp|h|hpp|hxx|m)")) {
+                        System.err.println("File '" + file + "' does not seem to be a C, C++ or Objective-C source file, nor a dynamic library, nor a *.jnaerator file.");
+                        System.exit(1);
+                    }
 					if (lib == null) {
 						String name = fn;
 						int i = name.indexOf('.');
@@ -861,9 +873,16 @@ public class JNAerator {
     protected void autoConfigure() {
         JNAeratorConfigUtils.autoConfigure(config);
     }
+    
     PrintWriter newFileWriter(File file) throws IOException {
+        return newFileWriter(file, false);
+    }
+    PrintWriter newFileOverwriter(File file) throws IOException {
+        return newFileWriter(file, true);
+    }
+    PrintWriter newFileWriter(File file, boolean overwrite) throws IOException {
         if (file.exists()) {
-            if (config.forceOverwrite)
+            if (config.forceOverwrite || overwrite)
                 System.out.println("Overwriting file '" + file + "'");
             else
                 throw new IOException("File '" + file + "' already exists (use " + JNAeratorCommandLineArgs.OptionDef.ForceOverwrite.clSwitch + " to force overwrite).");
@@ -1004,7 +1023,22 @@ public class JNAerator {
                 }
                 if (config.outputMode.isJar()) {
                     feedback.setStatus("Generating " + config.outputJar.getName());
-                    javaCompilerMemoryFileManager.writeJar(config.outputJar, config.bundleSources, getAdditionalFiles());
+                    javaCompilerMemoryFileManager.writeJar(config.outputJar, config.bundleSources, getResourceFiles());
+                } else if (config.outputMode.isDirectory()) {
+                    for (Map.Entry<String, File> e : getResourceFiles().entrySet()) {
+                        File inFile = e.getValue();
+                        File outFile = new File(config.resourcesOutputDir, e.getKey());
+                        outFile.getAbsoluteFile().getParentFile().mkdirs();
+                        
+                        FileInputStream in = new FileInputStream(inFile);
+                        FileOutputStream out = new FileOutputStream(outFile);
+                        try {
+                            IOUtils.readWrite(in, out);
+                        } finally {
+                            in.close();
+                            out.close();
+                        }
+                    }
                 }
             }
 //			if (true)
@@ -1022,7 +1056,7 @@ public class JNAerator {
 		if (config.extractedSymbolsOut != null) {
 			if (config.verbose)
 				System.out.println("Writing symbols extracted from libraries to '" + config.extractedSymbolsOut + "'");
-			fileOut = newFileWriter(config.extractedSymbolsOut);
+			fileOut = newFileOverwriter(config.extractedSymbolsOut);
 		}
 		
 		for (File libFile : config.libraryFiles) {
@@ -1110,7 +1144,7 @@ public class JNAerator {
 		if (fileOut != null)
 			fileOut.close();
 	}
-	private Map<String, File> getAdditionalFiles() {
+	private Map<String, File> getResourceFiles() {
 
 		Map<String, File> additionalFiles = new HashMap<String,File>();
 
@@ -1899,7 +1933,7 @@ public class JNAerator {
 				System.out.println("Unknown Type: " + unknownType);
 
 		if (result.config.choicesOutFile != null) {
-			PrintWriter out = newFileWriter(result.config.choicesOutFile);
+			PrintWriter out = newFileOverwriter(result.config.choicesOutFile);
 			for (Map.Entry<String, Pair<Function, List<Function>>> e : result.declarationsConverter.functionAlternativesByNativeSignature.entrySet()) {
 				Function f = e.getValue().getKey();
 				String ff = f.getElementFile();

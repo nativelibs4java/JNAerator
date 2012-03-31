@@ -360,7 +360,7 @@ public class JNAeratorConfig {
 	}
 	public boolean verbose;
     boolean parseInChunks;
-    public File outputDir, sourcesOutputDir;
+    public File outputDir, sourcesOutputDir, resourcesOutputDir;
 	public List<String> rootDirectoriesPrefixesForSourceComments = new ArrayList<String>();
 	public Adapter<Function, Boolean> functionsAccepter;
 	public String packageName = null, rootPackageName = null;
