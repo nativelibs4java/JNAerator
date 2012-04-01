@@ -123,8 +123,7 @@ public class JNAGlobalsGenerator extends GlobalsGenerator {
 							);
 	
 							vd.addModifiers(ModifierType.Public, ModifierType.Static, ModifierType.Final);
-							vd.importDetails(globals, false);
-							vd.moveAllCommentsBefore();
+							vd.importComments(globals);
 							
 							out.addDeclaration(vd);
 							continue;

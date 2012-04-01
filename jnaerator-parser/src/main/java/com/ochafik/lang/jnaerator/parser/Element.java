@@ -116,6 +116,15 @@ public abstract class Element {
 		this.nameSpace.addAll(nameSpace);
 	}
 	
+    public Element importComments(Element e, String... extraComments) {
+        if (e != null) {
+            importDetails(e, false);
+            moveAllCommentsBefore();
+        }
+        addToCommentBefore(extraComments);
+        return this;
+    }
+	
 	public Element importDetails(Element from, boolean move) {
 		if (from == null)
 			return this;

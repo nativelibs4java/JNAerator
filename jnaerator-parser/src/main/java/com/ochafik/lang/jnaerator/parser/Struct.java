@@ -33,8 +33,8 @@ public class Struct extends TypeRef.TaggedTypeRef implements DeclarationsHolder 
 	final List<SimpleTypeRef> protocols = new ArrayList<SimpleTypeRef>();
 	String categoryName;
 	final List<Declaration> declarations = new ArrayList<Declaration>();
-	
-	public enum MemberVisibility {
+
+    public enum MemberVisibility {
 		Public, Private, Protected
 	}
 	public enum Type {

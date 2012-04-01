@@ -589,8 +589,9 @@ public class Printer implements Visitor {
         if (e.getTaggedTypeRef() == null)
 			return;
 
-		TaggedTypeRef tr = e.getTaggedTypeRef();
+        TaggedTypeRef tr = e.getTaggedTypeRef();
 		formatComments(e, false, true, true);
+        formatComments(tr, false, true, true);
         //append(tr, tr.isForwardDeclaration() ? ";" : null, e.getCommentAfter());
 		append(tr, ";", e.getCommentAfter());
     }

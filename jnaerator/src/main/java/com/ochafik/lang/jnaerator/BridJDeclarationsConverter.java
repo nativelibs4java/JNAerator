@@ -80,12 +80,17 @@ public class BridJDeclarationsConverter extends DeclarationsConverter {
         boolean hasEnumClass = false;
         
         if (enumName != null && enumName.resolveLastSimpleIdentifier().getName() != null) {
+            hasEnumClass = true;
+            
             if (!signatures.addClass(enumName))
                 return;
 
             signatures = new Signatures();
 
             Enum en = new Enum();
+            if (!result.config.noComments)
+                en.importComments(e, "enum values", getFileCommentContent(e));
+
             en.setType(Enum.Type.Java);
             en.setTag(enumName.clone());
             en.addModifiers(ModifierType.Public);
@@ -102,10 +107,8 @@ public class BridJDeclarationsConverter extends DeclarationsConverter {
                 en.addItem(item);
                 hasValidItem = true;
                 if (!result.config.noComments)
-                    if (item != null && hasEnumClass) {
-                        String c = item.getCommentBefore();
-                        item.setCommentBefore(er.originalItem.getCommentBefore());
-                        item.addToCommentBefore(c);
+                    if (item != null) {// && hasEnumClass) {
+                        item.importComments(er.originalItem);
                     }
             }
             if (hasValidItem) {
@@ -269,12 +272,9 @@ public class BridJDeclarationsConverter extends DeclarationsConverter {
         else
             nativeMethod.setBody(convertedBody);
         
-        if (!result.config.noComments) {
-            nativeMethod.importDetails(function, false);
-            nativeMethod.moveAllCommentsBefore();
-            if (!isCallback)
-                nativeMethod.addToCommentBefore(getFileCommentContent(function));
-        }
+        if (!result.config.noComments)
+            nativeMethod.importComments(function, isCallback ? null : getFileCommentContent(function));
+        
         out.addDeclaration(nativeMethod);
     }
 	

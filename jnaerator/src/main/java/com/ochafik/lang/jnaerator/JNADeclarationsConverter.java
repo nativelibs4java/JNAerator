@@ -341,13 +341,9 @@ public class JNADeclarationsConverter extends DeclarationsConverter {
 
 			natFunc.setName(modifiedMethodName);
 			natFunc.setValueType(result.typeConverter.convertTypeToJNA(returnType, TypeConversionMode.ReturnType, libraryClassName));
-			if (!result.config.noComments) {
-				natFunc.importDetails(function, false);
-				natFunc.moveAllCommentsBefore();
-				if (!isCallback)
-					natFunc.addToCommentBefore(getFileCommentContent(function));
-			}
-
+			if (!result.config.noComments)
+				natFunc.importComments(function, isCallback ? null : getFileCommentContent(function));
+			
             if (function.getName() != null) {
                 Object[] name = new Object[] {function.getName().toString()};
                 for (Pair<MessageFormat, MessageFormat> mf : result.config.onlineDocumentationURLFormats) {
@@ -780,11 +776,8 @@ public class JNADeclarationsConverter extends DeclarationsConverter {
                 cl.addProtocol(typeRef(inter));
 		
 		if (!result.config.noComments)
-			if (toCloneCommentsFrom != null ) {
-				cl.importDetails(toCloneCommentsFrom, false);
-				cl.moveAllCommentsBefore();
-				cl.addToCommentBefore(getFileCommentContent(toCloneCommentsFrom));
-			}
+            cl.importComments(toCloneCommentsFrom, getFileCommentContent(toCloneCommentsFrom));
+        
 		cl.addModifiers(ModifierType.Public, ModifierType.Static);
 		return cl;
 	}

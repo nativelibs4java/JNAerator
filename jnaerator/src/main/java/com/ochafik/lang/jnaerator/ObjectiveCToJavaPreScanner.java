@@ -76,7 +76,7 @@ public class ObjectiveCToJavaPreScanner extends Scanner {
 	public void visitVariablesDeclaration(VariablesDeclaration v) {
 		if (v.getDeclarators().isEmpty() && v.getValueType() instanceof TaggedTypeRef) {
 			TaggedTypeRefDeclaration d = new TaggedTypeRefDeclaration((TaggedTypeRef)v.getValueType());
-			d.importDetails(v, false);
+			d.importComments(v);
 			v.replaceBy(d);
 			d.accept(this);
 		} else

@@ -414,11 +414,8 @@ public abstract class DeclarationsConverter {
 
 					Declaration declaration = new VariablesDeclaration(tr, new DirectDeclarator(name, value));
 					declaration.addModifiers(ModifierType.Public, ModifierType.Static, ModifierType.Final);
-					declaration.importDetails(element, false);
-					declaration.moveAllCommentsBefore();
 					if (!result.config.noComments)
-						if (addFileComment)
-							declaration.addToCommentBefore(getFileCommentContent(element));
+                        declaration.importComments(element, addFileComment ? getFileCommentContent(element) : null);
 					return declaration;
 				}
 			}
@@ -721,11 +718,8 @@ public abstract class DeclarationsConverter {
                 cl.addProtocol(typeRef(inter));
 		
 		if (!result.config.noComments)
-			if (toCloneCommentsFrom != null ) {
-				cl.importDetails(toCloneCommentsFrom, false);
-				cl.moveAllCommentsBefore();
-				cl.addToCommentBefore(getFileCommentContent(toCloneCommentsFrom));
-			}
+            cl.importComments(toCloneCommentsFrom, getFileCommentContent(toCloneCommentsFrom));
+			
 		cl.addModifiers(ModifierType.Public, ModifierType.Static);
 		return cl;
 	}
@@ -808,7 +802,7 @@ public abstract class DeclarationsConverter {
 		return null;
 	}
 	String getFileCommentContent(Element e) {
-		if (result.config.limitComments)
+		if (e == null || result.config.limitComments)
 			return null;
 		
 		String f = Element.getFileOfAscendency(e);

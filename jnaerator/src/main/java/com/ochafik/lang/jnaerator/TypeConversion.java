@@ -1292,7 +1292,7 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
                 default:
                     if (prim != null) {
                         if (prim == JavaPrim.Byte) {
-                            return typeRef(result.config.runtime.pointerClass).importDetails(convArgType, false);
+                            return (TypeRef)typeRef(result.config.runtime.pointerClass).importComments(convArgType);
                         }
 
                         Class<? extends ByReference> byRefClass = primToByReference.get(prim);
