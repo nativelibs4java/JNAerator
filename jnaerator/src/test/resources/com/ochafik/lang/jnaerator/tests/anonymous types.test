@@ -8,6 +8,8 @@ void ComplexArgFunction(
                 void (*fptr)(); 
         }* pArg
 );
+
+void f(void (*arg)());
 --
 #runtime(JNAerator)
 import test.*;
@@ -19,6 +21,8 @@ a.fptr.apply();
 a.u = new ComplexArgFunction_pArg_struct.u_union.ByValue();
 a.u.e = ComplexArgFunction_pArg_struct.u_union.e_enum.A;
 INSTANCE.ComplexArgFunction(a);
+
+INSTANCE.f((f_arg_callback)null);
 --
 #runtime(BridJ)
 import test.*;
@@ -30,3 +34,5 @@ a.fptr().get().apply();
 //a.u(new ComplexArgFunction_pArg_struct.u_union());
 a.u().e(ComplexArgFunction_pArg_struct.u_union.e_enum.A);
 ComplexArgFunction(Pointer.pointerTo(a));
+
+f((Pointer<f_arg_callback>)null);

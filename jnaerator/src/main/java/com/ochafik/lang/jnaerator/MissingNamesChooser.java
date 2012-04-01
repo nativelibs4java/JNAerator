@@ -51,6 +51,15 @@ import com.ochafik.util.string.StringUtils;
 import static com.ochafik.lang.jnaerator.parser.ElementsHelper.*;
 
 public class MissingNamesChooser extends Scanner {
+
+    public static boolean isNamedFunctionType(TypeRef tr) {
+        if (!(tr instanceof FunctionSignature))
+            return false;
+        
+        FunctionSignature fs = (FunctionSignature) tr;
+        Function f = fs.getFunction();
+        return f != null && f.getName() != null;
+    }
 	public enum NameGenerationStyle {
 		Java, PreserveCaseAndSeparateByUnderscores
 	}
@@ -81,8 +90,12 @@ public class MissingNamesChooser extends Scanner {
 		}
 		throw new UnsupportedConversionException(tr, String.valueOf(tr));
 	}
+    
 	@Override
 	public void visitFunction(Function function) {
+		
+		super.visitFunction(function);
+        
 		switch (function.getType()) {
 			case CFunction:
 			case CppMethod:
@@ -91,7 +104,7 @@ public class MissingNamesChooser extends Scanner {
 				int i = 0;//, n = function.getArgs().size();
 				
 				for (Arg arg : function.getArgs()) {
-					if (arg.getName() == null) {
+					if (arg.getName() == null && !isNamedFunctionType(arg.getValueType())) {
 						missing.add(new Pair<Arg, Integer>(arg, i));
 					} else
 						names.add(arg.getName());
@@ -119,8 +132,6 @@ public class MissingNamesChooser extends Scanner {
 				}
 				break;
 		}
-		
-		super.visitFunction(function);
 	}
 	
 	static boolean isNull(Identifier i) {

@@ -11,7 +11,7 @@ import static test.TestLibrary.*;
 S s = new S();
 s.functions[0].apply((Pointer)null);
 s.fptr.apply();
-S.foo_callback_arg1_union u = new S.foo_callback_arg1_union();
+S.foo_callback_union u = new S.foo_callback_union();
 u.l = (NativeLong)null;
 u.i = 12;
 s.foo[0].apply(u.byValue());
