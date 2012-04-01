@@ -234,6 +234,8 @@ public class JNAerator {
     }
 
 	public static void main(final JNAerator jnaerator, String[] argsArray) {
+        final Feedback[] feedback = new Feedback[1];
+				
 		try {
 		
 			String[] jnAeratorArgsFromPref = getJNAeratorArgsFromPref();
@@ -351,7 +353,6 @@ public class JNAerator {
 			config.preprocessorConfig.frameworksPath.addAll(JNAeratorConfigUtils.DEFAULT_FRAMEWORKS_PATH);
 			new JNAeratorCommandLineArgs.ArgsParser() {
 
-				Feedback feedback = null;
 				
 				boolean simpleGUI = false;
 				NativePlatform arch = NativePlatform.getCurrentPlatform();//LibraryExtractor.getCurrentOSAndArchString();
@@ -627,8 +628,7 @@ public class JNAerator {
 					String fn = file.getName();
                     String lfn = fn.toLowerCase();
                     if (!lfn.matches(".*?\\.(c|cpp|h|hpp|hxx|m)")) {
-                        System.err.println("File '" + file + "' does not seem to be a C, C++ or Objective-C source file, nor a dynamic library, nor a *.jnaerator file.");
-                        System.exit(1);
+                        throw new CommandLineException("File '" + file + "' does not seem to be a C, C++ or Objective-C source file, nor a dynamic library, nor a *.jnaerator file.");
                     }
 					if (lib == null) {
 						String name = fn;
@@ -647,7 +647,7 @@ public class JNAerator {
 						String fn = file.getName();
 						if (fn.startsWith("-") && !file.exists()) {
 							JNAeratorCommandLineArgs.displayHelp(false);
-							System.exit(1);
+                            throw new CommandLineException("Invalid switch : " + file);
 						}
                         if (file.isFile() && fn.matches(".*\\.jnaerator"))
 							return parsedArgsInclude(a);
@@ -659,13 +659,11 @@ public class JNAerator {
                                 config.bridgeSupportFiles.add(file);
                             else if (file.isFile() && isLibraryFile(file)) {
                                 if (arch == null) {
-                                    System.out.println("No arch defined for file " + file + " !");
-                                    System.out.println("Please use the option " + OptionDef.Arch.clSwitch + " with one of " + StringUtils.implode(NativePlatform.getPossiblePlatformsOfLibraryFile(file.toString()), ", "));
-                                    System.exit(1);
+                                    throw new CommandLineException("No arch defined for file " + file + " !\n" +
+                                            "Please use the option " + OptionDef.Arch.clSwitch + " with one of " + StringUtils.implode(NativePlatform.getPossiblePlatformsOfLibraryFile(file.toString()), ", "));
                                 }
                                 if (!arch.pattern.matcher(file.toString()).matches()) {
-                                    System.out.println("File file " + file + " doesn't look like a native library for arch " + arch + " (expected file extension = '" + arch.extension + "') !");
-                                    System.exit(1);
+                                    throw new CommandLineException("File file " + file + " doesn't look like a native library for arch " + arch + " (expected file extension = '" + arch.extension + "') !");
                                 }
 
                                 if (config.verbose)
@@ -756,7 +754,7 @@ public class JNAerator {
                             System.err.println("WARNING: legacy options " + OptionDef.NoJAR.clSwitch + " and " + OptionDef.NoCompile.clSwitch + " used, defaulting " + OptionDef.OutputMode.clSwitch + " to " + config.outputMode.name());                            
                         }
                         if (config.outputMode == null)
-                            throw new IllegalArgumentException("Missing output mode parameter " + OptionDef.OutputMode.clSwitch + " !");
+                            throw new CommandLineException("Missing output mode parameter " + OptionDef.OutputMode.clSwitch + " !");
                     }
                     
                     //System.out.println("Mode = " + config.outputMode.name());
@@ -794,10 +792,10 @@ public class JNAerator {
 					
 					if (simpleGUI) {
 						SimpleGUI gui = new SimpleGUI(config);
-						feedback = gui;
+						feedback[0] = gui;
 						gui.show();
 					} else {
-						feedback = new Feedback() {
+						feedback[0] = new Feedback() {
 							
 							@Override
 							public void setStatus(String string) {
@@ -807,13 +805,8 @@ public class JNAerator {
 							
 							@Override
 							public void setFinished(Throwable e) {
-								e.printStackTrace();
-								System.out.println("#");
-								System.out.println("# ERROR: JNAeration failed !");
-								System.out.println("#");
-								System.out.println("#\t" + e);
-								System.out.println("#");
-								throw new ExitException(1);
+								e.fillInStackTrace();
+								throw new ExitException(1, e);
 							}
 							
 							@Override
@@ -847,7 +840,7 @@ public class JNAerator {
 						}; 
 					}
 
-                    jnaerator.jnaerate(feedback);
+                    jnaerator.jnaerate(feedback[0]);
 					if (!simpleGUI)
 						throw new ExitException(0);
 				}
@@ -855,17 +848,44 @@ public class JNAerator {
 			}.parse(args);
 			
 		} catch (ExitException e) {
-			if (e.errorCode != 0)
-				System.err.println("Finished with errors.");
+			if (e.errorCode != 0) {
+                finalError(e.getCause());
+            }
 		} catch (Exception e) {
-			System.err.println("Finished with errors.");
-			e.printStackTrace();
+            finalError(e);
 		}
 	}
+    private static void finalError(Throwable e) {
+        if (e != null)
+            e.printStackTrace();
+        System.err.println("#");
+        System.err.println("# ERROR: JNAeration failed !");
+        System.err.println("#");
+        if (e != null) {
+            if (e instanceof CommandLineException) {
+                System.err.println("#\t" + e.getMessage().replaceAll("\n", "\n#\t"));
+                System.err.println("#\tPlease use -h for help on the command-line options available.");
+            } else {
+                System.err.println("#\t" + e.toString().replaceAll("\n", "\n#\t"));
+            }
+            System.err.println("#");
+        }
+    }
+    static class CommandLineException extends RuntimeException {
+        public CommandLineException(String msg) {
+            this(msg, null);
+        }
+        public CommandLineException(String msg, Throwable cause) {
+            super(msg, cause);
+        }
+    }
 	static class ExitException extends RuntimeException {
 		int errorCode;
 		public ExitException(int errorCode) {
-			super();
+            this(errorCode, null);
+        }
+        public ExitException(int errorCode, Throwable cause) {
+			super(cause);
 			this.errorCode = errorCode;
 		}
 	}

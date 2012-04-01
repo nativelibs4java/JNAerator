@@ -1,6 +1,5 @@
 #parse("main/velocity/com/ochafik/lang/jnaerator/head.vm")
 
-	<dependencies>
 		<dependency>
 			<groupId>net.java.dev.jna</groupId>
 			<artifactId>jna</artifactId>
@@ -11,7 +10,6 @@
 			<artifactId>rococoa</artifactId>
 			<version>${rococoa_version}</version>
 		</dependency>
-	</dependencies>
 	
 #parse("main/velocity/com/ochafik/lang/jnaerator/tail.vm")
 

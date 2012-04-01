@@ -77,7 +77,7 @@ public class JNAeratorCommandLineArgs {
                             m = opt.switchPattern.matcher(arg);
                             matches = m.matches();
                         } catch (Throwable ex) {
-                            throw new RuntimeException("Error while matching arg " + arg + " with option " + opt + " (pattern = " + opt.switchPattern + ") : " + ex, ex);
+                            throw new JNAerator.CommandLineException("Error while matching arg " + arg + " with option " + opt + " (pattern = " + opt.switchPattern + ") : " + ex, ex);
                         }
                         if (matches) {
                             if (opt.isDeprecated())
@@ -127,7 +127,7 @@ public class JNAeratorCommandLineArgs {
                 throw ex;
 			} catch (Throwable ex) {
 				JNAeratorCommandLineArgs.displayHelp(false);
-				throw new RuntimeException("Error parsing arguments :\n" + StringUtils.implode(args, " ") + " : " + ex, ex);
+				throw new JNAerator.CommandLineException("Error parsing arguments :\n" + StringUtils.implode(args, " ") + " : " + ex, ex);
 			}
 			finished();
 		}
@@ -244,7 +244,7 @@ public class JNAeratorCommandLineArgs {
 		}
         public String format(Object... fargs) {
             if (fargs.length != args.length)
-                throw new IllegalArgumentException("Expected " + args.length + " args to format " + name() + ", got " + fargs.length);
+                throw new JNAerator.CommandLineException("Expected " + args.length + " args to format " + name() + ", got " + fargs.length);
             
             StringBuilder b = new StringBuilder();
             b.append(clSwitch);
@@ -373,7 +373,7 @@ public class JNAeratorCommandLineArgs {
                     try {
                         return Enum.valueOf((Class<? extends Enum>)additionalClass, arg);
                     } catch (Throwable th) {
-                        throw new IllegalArgumentException("Argument '" + arg + "' is not one of the expected values :\n\t" + StringUtils.implode(additionalClass.getEnumConstants(), ",\n\t"));
+                        throw new JNAerator.CommandLineException("Argument '" + arg + "' is not one of the expected values :\n\t" + StringUtils.implode(additionalClass.getEnumConstants(), ",\n\t"));
                     }
                 case OutputDir:
                     f = findFile(arg, parser);
