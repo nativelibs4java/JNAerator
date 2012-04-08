@@ -1412,7 +1412,7 @@ public abstract class Expression extends Element {
 			
 			//TODO handle unsigned properly !
 			if ((form == IntForm.Hex && len <= 8) || val > Integer.MIN_VALUE && val < Integer.MAX_VALUE)
-				return new Constant(unsigned ? Type.UInt : Type.Int, form, (int)val, orig);
+				return new Constant(form == IntForm.Hex || unsigned ? Type.UInt : Type.Int, form, (int)val, orig);
 			else if (val >= 0 && val < MAX_UINT_VALUE)
 				return new Constant(Type.UInt, form, (int)val, orig);
 			else
