@@ -472,7 +472,8 @@ public class JNAeratorConfig {
 	public boolean synchronizedMethods;
 	public File scalaOut;
 	public boolean skipPrivateMembers = true;
-	public File rawParsedSourcesOutFile, normalizedParsedSourcesOutFile;
+	public boolean castConstants = true;
+    public File rawParsedSourcesOutFile, normalizedParsedSourcesOutFile;
     public List<Pair<OptionDef, List<String>>> parsedArgs;
     public boolean skipLibraryInstanceDeclarations;
 	public String callbackInvokeMethodName = "apply";

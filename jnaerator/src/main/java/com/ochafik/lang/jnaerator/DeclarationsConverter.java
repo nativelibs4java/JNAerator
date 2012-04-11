@@ -410,7 +410,10 @@ public abstract class DeclarationsConverter {
 					}
                     //TypeRef tr = new TypeRef.SimpleTypeRef(result.typeConverter.typeToJNA(type, vs, TypeConversion.TypeConversionMode.FieldType, callerLibraryClass));
                     TypeRef tr = converted.getValue();
-                    Expression value = new Cast(tr, converted.getFirst());
+                    Expression value = converted.getFirst();
+                    if (result.config.castConstants)
+                        value = new Cast(tr, value);
+                        
 
 					Declaration declaration = new VariablesDeclaration(tr, new DirectDeclarator(name, value));
 					declaration.addModifiers(ModifierType.Public, ModifierType.Static, ModifierType.Final);

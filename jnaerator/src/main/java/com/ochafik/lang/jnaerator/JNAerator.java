@@ -372,6 +372,9 @@ public class JNAerator {
                         
                         getPath(PathType.SourcePath).add(includedFile);
 						break;
+                    case DontCastConstants:
+                        config.castConstants = false;
+                        break;
 					case CallbackInvokeName:
 						config.callbackInvokeMethodName = a.getStringParam(0);
 						break;
