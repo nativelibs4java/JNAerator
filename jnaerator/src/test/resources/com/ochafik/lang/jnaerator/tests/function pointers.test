@@ -3,6 +3,7 @@ extern void test_cb1(foo_cb_t func);
 extern void test_cb2(foo_cb_t *func);
 extern void test_cb3(int (func)(void*));
 extern void test_cb4(int (*func)(void*));
+extern void test_cb5(int (*)(void*));
 --
 #runtime(JNAerator)
 import test.*;
@@ -15,6 +16,7 @@ INSTANCE.test_cb1((TestLibrary.foo_cb_t)null);
 INSTANCE.test_cb2((Pointer)null);
 INSTANCE.test_cb3((TestLibrary.test_cb3_func_callback)null);
 INSTANCE.test_cb4((TestLibrary.test_cb4_func_callback)null);
+INSTANCE.test_cb5((TestLibrary.test_cb5_arg1_callback)null);
 --
 #runtime(BridJ)
 import test.*;
@@ -27,3 +29,4 @@ test_cb1((Pointer<TestLibrary.foo_cb_t>)null);
 test_cb2((Pointer<Pointer<TestLibrary.foo_cb_t>>)null);
 test_cb3((Pointer<TestLibrary.test_cb3_func_callback>)null);
 test_cb4((Pointer<TestLibrary.test_cb4_func_callback>)null);
+test_cb5((Pointer<TestLibrary.test_cb5_arg1_callback>)null);

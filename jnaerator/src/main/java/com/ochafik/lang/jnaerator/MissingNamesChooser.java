@@ -102,10 +102,11 @@ public class MissingNamesChooser extends Scanner {
 				int i = 0;//, n = function.getArgs().size();
 				
 				for (Arg arg : function.getArgs()) {
-					if (arg.getName() == null && !isNamedFunctionType(arg.getValueType())) {
+                    String name = arg.getName();
+					if (name == null && !isNamedFunctionType(arg.getValueType())) {
 						missing.add(new Pair<Arg, Integer>(arg, i));
-					} else
-						names.add(arg.getName());
+					} else if (name != null)
+						names.add(name);
 					i++;
 				}
 				for (Pair<Arg, Integer> p : missing) {
