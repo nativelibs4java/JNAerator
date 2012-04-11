@@ -94,8 +94,6 @@ public class MissingNamesChooser extends Scanner {
 	@Override
 	public void visitFunction(Function function) {
 		
-		super.visitFunction(function);
-        
 		switch (function.getType()) {
 			case CFunction:
 			case CppMethod:
@@ -132,6 +130,8 @@ public class MissingNamesChooser extends Scanner {
 				}
 				break;
 		}
+        
+        super.visitFunction(function);
 	}
 	
 	static boolean isNull(Identifier i) {
