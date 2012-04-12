@@ -184,6 +184,9 @@ public class JNAeratorStudio extends JPanel {
 	public File getInputFile() {
 		return new File(getDir(), "input.h");
 	}
+    public File getOutputDir() {
+        return new File(getDir(), "out");
+    }
 	public File getOutputJarFile() {
 		String lib = libraryName.getText().trim();
 		if (lib.length() == 0)
@@ -519,6 +522,7 @@ public class JNAeratorStudio extends JPanel {
 			public void run() {
 				JNAeratorConfig config = new JNAeratorConfig();
 				config.outputJar = getOutputJarFile();
+                config.outputDir = getOutputDir();
 				config.useJNADirectCalls = directCallingCb.isSelected();
 				config.putTopStructsInSeparateFiles = structsAsTopLevelClassesCb.isSelected();
 				config.reification = reificationCb.isSelected();
