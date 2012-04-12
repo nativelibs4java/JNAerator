@@ -47,6 +47,7 @@ import com.ochafik.util.string.StringUtils;
 
 import static com.ochafik.lang.jnaerator.parser.ElementsHelper.*;
 import com.sun.jna.win32.StdCallLibrary;
+import org.bridj.*;
 import org.bridj.ann.Convention;
 import org.bridj.objc.NSObject;
 
@@ -634,5 +635,22 @@ public class BridJDeclarationsConverter extends DeclarationsConverter {
         callbackStruct.setType(Struct.Type.JavaClass);
         callbackStruct.addModifiers(ModifierType.Public, ModifierType.Static, ModifierType.Abstract);
     }
+    
+    @Override
+    protected Struct createFakePointerClass(Identifier fakePointer) {
+        Struct ptClass = result.declarationsConverter.publicStaticClass(fakePointer, ident(TypedPointer.class), Struct.Type.JavaClass, null);
 
+        String addressVarName = "address";
+        ptClass.addDeclaration(new Function(Function.Type.JavaMethod, fakePointer, null,
+            new Arg(addressVarName, typeRef(long.class))
+        ).addModifiers(ModifierType.Public).setBody(
+            block(stat(methodCall("super", varRef(addressVarName)))))
+        );
+        ptClass.addDeclaration(new Function(Function.Type.JavaMethod, fakePointer, null,
+            new Arg(addressVarName, typeRef(org.bridj.Pointer.class))
+        ).addModifiers(ModifierType.Public).setBody(
+            block(stat(methodCall("super", varRef(addressVarName)))))
+        );
+        return ptClass;
+    }
 }

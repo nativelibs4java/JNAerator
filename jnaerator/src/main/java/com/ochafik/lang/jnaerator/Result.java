@@ -77,6 +77,7 @@ public class Result extends Scanner {
 	public GlobalsGenerator globalsGenerator;
 	public ObjectiveCGenerator objectiveCGenerator;
 	public UniversalReconciliator universalReconciliator;
+    public Reifier reifier;
     public BridJer bridjer;
     public Symbols symbols;
     public boolean hasCPlusPlus;
@@ -113,6 +114,7 @@ public class Result extends Scanner {
             typeConverter = new JNATypeConversion(this);
 		
         }
+        reifier = new Reifier(this);
 		objectiveCGenerator = new ObjectiveCGenerator(this);
 		universalReconciliator = new UniversalReconciliator();
         bridjer = new BridJer(this);

@@ -47,6 +47,7 @@ import java.net.URLConnection;
 import java.text.MessageFormat;
 import static com.ochafik.lang.jnaerator.parser.ElementsHelper.*;
 import static com.ochafik.lang.jnaerator.TypeConversion.*;
+import com.sun.jna.PointerType;
 import com.sun.jna.win32.StdCallLibrary;
 
 public class JNADeclarationsConverter extends DeclarationsConverter {
@@ -618,6 +619,52 @@ public class JNADeclarationsConverter extends DeclarationsConverter {
 		return structJavaClass;
 	}
 	
+	protected Function createNewStructMethod(String name, Struct byRef) {
+		TypeRef tr = typeRef(byRef.getTag().clone());
+		Function f = new Function(Function.Type.JavaMethod, ident(name), tr);
+		String varName = "s";
+
+		f.addModifiers(ModifierType.Protected);
+		if (result.config.runtime != JNAeratorConfig.Runtime.JNA) {
+			f.setBody(block(
+				//new Statement.Return(methodCall("setupClone", new Expression.New(tr.clone(), methodCall(null))))
+					new Statement.Return(new Expression.New(tr.clone(), methodCall(null)))
+			).setCompact(true));
+		} else {
+			f.setBody(block(
+				stat(tr.clone(), varName, new Expression.New(tr.clone(), methodCall(null))),
+				stat(methodCall(varRef(varName), MemberRefStyle.Dot, "useMemory", methodCall("getPointer"))),
+				stat(methodCall("write")),
+				stat(methodCall(varRef(varName), MemberRefStyle.Dot, "read")),
+				new Statement.Return(varRef(varName))
+			));
+		}
+		return f;
+	}
+	protected Function createNewStructArrayMethod(Struct struct, boolean isUnion) {
+		if (result.config.runtime == JNAeratorConfig.Runtime.JNA)
+			return null;
+
+		TypeRef tr = typeRef(struct.getTag().clone());
+		TypeRef ar = new TypeRef.ArrayRef(tr);
+		String varName = "arrayLength";
+		Function f = new Function(Function.Type.JavaMethod, ident("newArray"), ar, new Arg(varName, typeRef(Integer.TYPE)));
+		
+		f.addModifiers(ModifierType.Public, ModifierType.Static);
+		f.setBody(block(
+			new Statement.Return(
+				methodCall(
+					expr(typeRef(isUnion ? result.config.runtime.unionClass : result.config.runtime.structClass)),
+					MemberRefStyle.Dot,
+					"newArray",
+					result.typeConverter.typeLiteral(tr),
+					varRef(varName)
+				)
+			)
+		));
+		return f;
+	}
+    
 	public int countFieldsInStruct(Struct s) throws UnsupportedConversionException {
 		int count = 0;
 		for (Declaration declaration : s.getDeclarations()) {
@@ -954,5 +1001,23 @@ public class JNADeclarationsConverter extends DeclarationsConverter {
     protected void configureCallbackStruct(Struct callbackStruct) {
         callbackStruct.setType(Struct.Type.JavaInterface);
         callbackStruct.addModifiers(ModifierType.Public);
+    }
+
+    @Override
+    protected Struct createFakePointerClass(Identifier fakePointer) {
+        Struct ptClass = result.declarationsConverter.publicStaticClass(fakePointer, ident(PointerType.class), Struct.Type.JavaClass, null);
+
+        String pointerVarName = "address";
+        ptClass.addDeclaration(new Function(Function.Type.JavaMethod, fakePointer, null,
+            new Arg(pointerVarName, typeRef(com.sun.jna.Pointer.class))
+        ).addModifiers(ModifierType.Public).setBody(
+            block(stat(methodCall("super", varRef(pointerVarName)))))
+        );
+        ptClass.addDeclaration(new Function(Function.Type.JavaMethod, fakePointer, null)
+        .addModifiers(ModifierType.Public)
+        .setBody(
+            block(stat(methodCall("super")))
+        ));
+        return ptClass;
     }
 }
