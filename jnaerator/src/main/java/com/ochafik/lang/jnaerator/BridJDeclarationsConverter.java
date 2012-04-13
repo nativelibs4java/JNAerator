@@ -366,10 +366,6 @@ public class BridJDeclarationsConverter extends DeclarationsConverter {
         if (childSignatures.addMethod(defaultConstructor))
             structJavaClass.addDeclaration(defaultConstructor);
         
-        //todo remove this :
-		//String ptrName = "pointer";
-		//structJavaClass.addDeclaration(new Function(Type.JavaMethod, ident(structName), null, new Arg(ptrName, typeRef(result.config.runtime.pointerClass))).setBody(block(stat(methodCall("super", varRef(ptrName))))).addModifiers(ModifierType.Public));
-
         if (isUnion)
             structJavaClass.addAnnotation(new Annotation(result.config.runtime.typeRef(JNAeratorConfig.Runtime.Ann.Union)));
 
@@ -436,6 +432,12 @@ public class BridJDeclarationsConverter extends DeclarationsConverter {
 				}
 			}
 		}
+        
+        String ptrName = "pointer";
+		Function castConstructor = new Function(Type.JavaMethod, ident(structName), null, new Arg(ptrName, typeRef(result.config.runtime.pointerClass))).setBody(block(stat(methodCall("super", varRef(ptrName))))).addModifiers(ModifierType.Public);
+        if (childSignatures.addMethod(castConstructor))
+            structJavaClass.addDeclaration(castConstructor);
+        
 		return structJavaClass;
 	}
 	Map<Identifier, Boolean> structsVirtuality = new HashMap<Identifier, Boolean>();

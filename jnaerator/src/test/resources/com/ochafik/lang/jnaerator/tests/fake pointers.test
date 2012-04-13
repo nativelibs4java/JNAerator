@@ -1,0 +1,8 @@
+typedef struct _cl_event *          cl_event;
+void f(cl_event, cl_event*);
+--
+#runtime(BridJ)
+import test.*;
+import static test.TestLibrary.*;
+
+f((cl_event)null, (Pointer<cl_event>)null);

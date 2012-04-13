@@ -1,0 +1,14 @@
+typedef unsigned int cl_uint;
+typedef cl_uint cl_info;
+f(cl_info);
+--
+#runtime(JNAerator)
+import test.*;
+
+int i = f(10);
+--
+#runtime(BridJ)
+import test.*;
+import static test.TestLibrary.*;
+
+int i = f(10);
