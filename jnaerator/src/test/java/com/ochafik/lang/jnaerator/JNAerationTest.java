@@ -34,16 +34,12 @@ import java.util.Map.Entry;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 
-import junit.framework.Assert;
+import org.junit.*;
 
 import org.anarres.cpp.LexerException;
 import org.antlr.runtime.RecognitionException;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized.Parameters;
 
 import com.ochafik.io.ReadText;
-import com.ochafik.junit.ParameterizedWithDescription;
 import com.ochafik.lang.compiler.CompilerUtils;
 import com.ochafik.lang.compiler.MemoryJavaFile;
 import com.ochafik.lang.jnaerator.JNAerator.Feedback;
@@ -54,7 +50,12 @@ import com.ochafik.util.listenable.Adapter;
 import com.ochafik.util.listenable.Filter;
 import com.ochafik.util.string.RegexUtils;
 import com.ochafik.util.string.StringUtils;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
+import com.ochafik.junit.ParameterizedWithDescription;
 
 @RunWith(Parameterized.class)
 public class JNAerationTest {
