@@ -15,6 +15,7 @@ f(S, void (*fptr)(), T*, lfptr p2);
 --
 #runtime(JNAerator)
 import test.*;
+import static test.TestLibrary.*;
 
 S s = new S();
 (s.p = (test.TestLibrary.lfptr)null).apply();

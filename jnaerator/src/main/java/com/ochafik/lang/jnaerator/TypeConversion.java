@@ -443,6 +443,14 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
         if (tr != null)
             return tr;
         
+        tr = findCallbackRef(name, libraryClassName);
+        if (tr != null)
+            return tr;
+        
+        tr = findObjCClass(name);
+        if (tr != null)
+            return tr;
+        
         return null;
     }
     boolean isResoluble(TypeRef tr, Identifier libraryClassName) {

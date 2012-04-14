@@ -4,8 +4,9 @@ f(cl_info);
 --
 #runtime(JNAerator)
 import test.*;
+import static test.TestLibrary.*;
 
-int i = f(10);
+int i = INSTANCE.f(10);
 --
 #runtime(BridJ)
 import test.*;
