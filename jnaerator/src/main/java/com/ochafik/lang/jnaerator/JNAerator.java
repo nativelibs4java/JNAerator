@@ -544,7 +544,7 @@ public class JNAerator {
                             else if (file.isFile() && isLibraryFile(file)) {
                                 if (arch == null) {
                                     throw new CommandLineException("No arch defined for file " + file + " !\n" +
-                                            "Please use the option " + OptionDef.Arch.clSwitch + " with one of " + StringUtils.implode(NativePlatform.getPossiblePlatformsOfLibraryFile(file.toString()), ", "));
+                                            "Please use the option " + OptionDef.Arch.clSwitch + " *on each binary file* with one of " + StringUtils.implode(NativePlatform.getPossiblePlatformsOfLibraryFile(file.toString()), ", "));
                                 }
                                 if (!arch.pattern.matcher(file.toString()).matches()) {
                                     throw new CommandLineException("File file " + file + " doesn't look like a native library for arch " + arch + " (expected file extension = '" + arch.extension + "') !");
