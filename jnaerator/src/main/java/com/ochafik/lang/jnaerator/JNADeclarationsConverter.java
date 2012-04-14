@@ -663,7 +663,7 @@ public class JNADeclarationsConverter extends DeclarationsConverter {
 					break;
 				} else {
 					Pair<Expression, TypeRef> c = result.typeConverter.convertExpressionToJava(x, callerLibraryName, false);
-					c.getFirst().setParenthesis(dims.size() == 1);
+					c.getFirst().setParenthesis(dims.size() != 1);
 					if (mul == null)
 						mul = c.getFirst();
 					else
