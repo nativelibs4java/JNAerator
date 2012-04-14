@@ -1,0 +1,26 @@
+struct S {
+	intptr_t pi;
+	uintptr_t pui;
+	long l;
+	int i;
+};
+--
+#runtime(JNAerator)
+import test.*;
+import static test.TestLibrary.*;
+
+S s = null;
+s.pi = (IntByReference)null;
+s.pui = (IntByReference)null;
+s.l = (NativeLong)null;
+int i = s.i = 10;
+--
+#runtime(BridJ)
+import test.*;
+import static test.TestLibrary.*;
+
+S s = null;
+s.pi((Pointer<Integer>)null);
+s.pui((Pointer<Integer>)null);
+s.l(10L);
+int i = s.i();

@@ -388,7 +388,10 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
         primToBuffer.put(JavaPrim.Float, FloatBuffer.class);
         primToBuffer.put(JavaPrim.Double, DoubleBuffer.class);
         //primToBuffer.put(JavaPrim.NativeLong, NativeLongByReference.class);
-
+        
+        TypeRef pInt = new TypeRef.Pointer(new Primitive("int"), Declarator.PointerStyle.Pointer);
+        manualTypeDefs.put("intptr_t", pInt);
+        manualTypeDefs.put("uintptr_t", pInt);
     }
     Map<String, TypeRef> manualTypeDefs = new HashMap<String, TypeRef>();
 
@@ -431,10 +434,7 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
     }
 
     protected TypeRef findTypeRef(Identifier name, Identifier libraryClassName) {
-        TypeRef tr = manualTypeDefs.get(name);
-        if (tr != null)
-            return tr;
-
+        TypeRef tr;
         tr = typeRef(findStructRef(name, libraryClassName));
         if (tr != null)
             return tr;
@@ -451,6 +451,10 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
         if (tr != null)
             return tr;
         
+        tr = manualTypeDefs.get(name);
+        if (tr != null)
+            return tr;
+
         return null;
     }
     boolean isResoluble(TypeRef tr, Identifier libraryClassName) {
