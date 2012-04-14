@@ -97,8 +97,9 @@ public class JNAeratorCommandLineArgs {
                             parsedArg.add(arg);
                             for (; iArg < opt.args.length; iArg++) {
                                 String param = args.get(++i);
-                                pa.params[iArg] = opt.args[iArg].convertArg(param, this);
-                                parsedArg.add(param);
+                                OptionDef.ArgDef argDef = opt.args[iArg];
+                                pa.params[iArg] = argDef.convertArg(param, this);
+                                parsedArg.add(argDef.normalize(param));
                             }
 
                             //int iParsedArg = parsedArgs.size();
@@ -301,6 +302,21 @@ public class JNAeratorCommandLineArgs {
 				this(type, name, null, pathType);
 			}
 
+            public String normalize(String arg) {
+                switch (type) {
+                    case ExistingDir:
+                    case ExistingFile:
+                    case ExistingFileOrDir:
+                    case File:
+                    case OutputDir:
+                    case OutputFile:
+                    case OptionalFile:
+                        if (arg != null)
+                            return new File(arg).getAbsolutePath();
+                    default:
+                        return arg;
+                }       
+            }
             public String format(Object arg) {
                 switch (type) {
                     case Enum:
