@@ -18,6 +18,7 @@
 package com.ochafik.lang.jnaerator;
 
 import static com.ochafik.lang.SyntaxUtils.as;
+import com.ochafik.lang.jnaerator.parser.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -26,22 +27,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
-import com.ochafik.lang.jnaerator.parser.Arg;
-import com.ochafik.lang.jnaerator.parser.DeclarationsHolder;
-import com.ochafik.lang.jnaerator.parser.Element;
-import com.ochafik.lang.jnaerator.parser.Enum;
-import com.ochafik.lang.jnaerator.parser.Function;
-import com.ochafik.lang.jnaerator.parser.Identifier;
-import com.ochafik.lang.jnaerator.parser.Modifier;
-import com.ochafik.lang.jnaerator.parser.ModifierType;
-import com.ochafik.lang.jnaerator.parser.Scanner;
-import com.ochafik.lang.jnaerator.parser.StoredDeclarations;
-import com.ochafik.lang.jnaerator.parser.Struct;
-import com.ochafik.lang.jnaerator.parser.TaggedTypeRefDeclaration;
-import com.ochafik.lang.jnaerator.parser.TypeRef;
-import com.ochafik.lang.jnaerator.parser.VariablesDeclaration;
 import com.ochafik.lang.jnaerator.parser.Declarator.DirectDeclarator;
-import com.ochafik.lang.jnaerator.parser.ModifierKind;
 import com.ochafik.lang.jnaerator.parser.StoredDeclarations.TypeDef;
 import com.ochafik.lang.jnaerator.parser.TypeRef.FunctionSignature;
 import com.ochafik.lang.jnaerator.parser.TypeRef.TaggedTypeRef;
@@ -49,6 +35,9 @@ import com.ochafik.util.listenable.Pair;
 import com.ochafik.util.string.StringUtils;
 
 import static com.ochafik.lang.jnaerator.parser.ElementsHelper.*;
+import com.ochafik.lang.jnaerator.parser.Enum;
+import com.ochafik.lang.jnaerator.parser.Scanner;
+import java.util.*;
 
 public class MissingNamesChooser extends Scanner {
 
@@ -60,7 +49,8 @@ public class MissingNamesChooser extends Scanner {
         Function f = fs.getFunction();
         return f != null && f.getName() != null;
     }
-	public enum NameGenerationStyle {
+
+    public enum NameGenerationStyle {
 		Java, PreserveCaseAndSeparateByUnderscores
 	}
 	NameGenerationStyle nameGenerationStyle = NameGenerationStyle.PreserveCaseAndSeparateByUnderscores;
@@ -174,6 +164,75 @@ public class MissingNamesChooser extends Scanner {
 	static boolean isUnnamed(TaggedTypeRefDeclaration d) {
 		return d != null && d.getTaggedTypeRef() != null && isNull(d.getTaggedTypeRef().getTag());
 	}
+
+    Set<Identifier> listChildIdentifiers(DeclarationsHolder h) {
+       List<Identifier> list = new ArrayList<Identifier>();
+       for (Declaration d : h.getDeclarations()) {
+           if (d instanceof Function)
+               list.add(((Function)d).getName());
+           else if (d instanceof TaggedTypeRefDeclaration) {
+               TaggedTypeRefDeclaration td = (TaggedTypeRefDeclaration)d;
+               TaggedTypeRef tr = td.getTaggedTypeRef();
+               if (tr != null)
+                   list.add(tr.getTag());
+           } else if (d instanceof VariablesDeclaration)
+               for (Declarator dc : ((VariablesDeclaration)d).getDeclarators())
+                   list.add(ident(dc.resolveName()));
+       }
+       Set<Identifier> ret = new HashSet<Identifier>();
+       for (Identifier i : list)
+           if (i != null)
+               ret.add(i);
+       return ret;
+    }
+    
+    List<TaggedTypeRefDeclaration> getUnnamedTaggedTypeRefs(List<Declaration> ds) {
+        List<TaggedTypeRefDeclaration> ret = new ArrayList<TaggedTypeRefDeclaration>();
+        for (Declaration d : ds) {
+            if (d instanceof TaggedTypeRefDeclaration) {
+                TaggedTypeRefDeclaration td = (TaggedTypeRefDeclaration)d;
+                TaggedTypeRef tr = td.getTaggedTypeRef();
+                if (tr != null && tr.getTag() == null) {
+                    ret.add(td);
+                }
+            }
+        }
+        return ret;
+    }
+    @Override
+    public void visitStruct(Struct struct) {
+        fixUnNamedChildren(struct);
+        super.visitStruct(struct);
+    }
+    
+    //http://stackoverflow.com/questions/2503183/jnaerator-unnamed-union-missing-in-structure
+    private void fixUnNamedChildren(Struct struct) {
+        List<TaggedTypeRefDeclaration> trs = getUnnamedTaggedTypeRefs(struct.getDeclarations());
+        if (trs.isEmpty())
+            return;
+        
+        Set<Identifier> ids = listChildIdentifiers(struct);
+        for (TaggedTypeRefDeclaration td : trs) {
+            TaggedTypeRef tr = td.getTaggedTypeRef();
+            if (!(tr instanceof Struct))
+                continue;
+            
+            Struct s = (Struct) tr;
+            switch (s.getType()) {
+                case CStruct:
+                case CUnion:
+                    String n = chooseNameSuffix(tr);
+                    int i = 1;
+                    Identifier fieldName;
+                    while (!ids.add(fieldName = ident("field" + i)))
+                        i++;
+
+                    //tr.setTag(idTag);
+                    td.replaceBy(new VariablesDeclaration(tr, new Declarator.DirectDeclarator(fieldName.toString())));
+                    break;
+            }
+        }
+    }
 	
 	@Override
 	public void visitTaggedTypeRef(TaggedTypeRef taggedTypeRef) {
@@ -184,7 +243,7 @@ public class MissingNamesChooser extends Scanner {
 		
 		Element parent = taggedTypeRef.getParentElement(); 
 		
-		if (!(parent instanceof TaggedTypeRefDeclaration) && !(parent instanceof TypeDef)) {
+        if (!(parent instanceof TaggedTypeRefDeclaration) && !(parent instanceof TypeDef)) {
 			DeclarationsHolder holder = taggedTypeRef.findParentOfType(DeclarationsHolder.class);
 			if (holder != null && holder != taggedTypeRef.getParentElement() && !(parent instanceof DeclarationsHolder)) {
 				TaggedTypeRefDeclaration td = new TaggedTypeRefDeclaration();
