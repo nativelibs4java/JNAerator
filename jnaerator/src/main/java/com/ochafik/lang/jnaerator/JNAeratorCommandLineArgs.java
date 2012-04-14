@@ -118,7 +118,9 @@ public class JNAeratorCommandLineArgs {
 					if (defaultOpt != null) {
 						ParsedArg pa = new ParsedArg();
 						pa.def = defaultOpt;
-						pa.params = new Object[] { defaultOpt.args[0].convertArg(arg, this) };
+                        OptionDef.ArgDef argDef = defaultOpt.args[0];
+                        arg = argDef.normalize(arg);
+						pa.params = new Object[] { argDef.convertArg(arg, this) };
                         //parsedArgs.add(Pair.create(defaultOpt, Arrays.asList(arg)));
 						args.addAll(i + 1, parsed(pa));
 					}
