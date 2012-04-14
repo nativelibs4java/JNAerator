@@ -395,9 +395,6 @@ public class JNAerator {
 					case JarOut:
 						config.outputJar = a.getFileParam(0);
 						break;
-					case NoMangling:
-						config.noMangling = true;
-						break;
                     case ScalaStructSetters:
                         config.scalaStructSetters = true;
                         break;

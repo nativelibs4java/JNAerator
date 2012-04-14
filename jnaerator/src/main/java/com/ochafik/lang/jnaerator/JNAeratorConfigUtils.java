@@ -36,8 +36,6 @@ import com.ochafik.admin.visualstudio.Configuration;
 import com.ochafik.admin.visualstudio.Project;
 import com.ochafik.admin.visualstudio.Solution;
 import com.ochafik.admin.visualstudio.VisualStudioUtils;
-import com.ochafik.lang.jnaerator.cplusplus.GCC4Mangler;
-import com.ochafik.lang.jnaerator.cplusplus.VC9Mangler;
 import com.ochafik.lang.jnaerator.parser.Function;
 import com.ochafik.lang.jnaerator.parser.Modifier;
 import com.ochafik.lang.jnaerator.parser.ModifierType;
@@ -251,8 +249,6 @@ public class JNAeratorConfigUtils {
 	{
 		if (config.runtime == JNAeratorConfig.Runtime.BridJ)
 			config.genCPlusPlus = true;
-		config.cPlusPlusManglers.add(new GCC4Mangler());
-		config.cPlusPlusManglers.add(new VC9Mangler());
 		
 		if (!config.noCPlusPlus)
 			addCPlusPlus(config.preprocessorConfig);

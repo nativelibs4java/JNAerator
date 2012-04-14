@@ -116,7 +116,7 @@ public class JNAeratorStudio extends JPanel {
 		reificationCb = new JCheckBox("Reification", false),
 		convertBodiesCb = new JCheckBox("Convert Statements (experimental, BridJ only)", false),
 		scalaSetters = new JCheckBox("Scala struct field setters", false),
-		noCommentNoManglingCb = new JCheckBox("No comment & no mangling", false);
+		noCommentCb = new JCheckBox("No comments", false);
 
     JComboBox runtimeCombo;
     JComboBox modeCombo;
@@ -245,7 +245,7 @@ public class JNAeratorStudio extends JPanel {
 			setPref("options.charPtrAsString", charPtrAsString.isSelected());
 			setPref("options.targetRuntime", ((JNAeratorConfig.Runtime)runtimeCombo.getSelectedItem()).name());
 			setPref("options.outputMode", ((JNAeratorConfig.OutputMode)modeCombo.getSelectedItem()).name());
-			setPref("options.noCommentNoMangling", noCommentNoManglingCb.isSelected());
+			setPref("options.noComments", noCommentCb.isSelected());
 			setPref("splitPane.orientation", sp.getOrientation());
 			setPref("splitPane.dividedLocation", getProportionalDividerLocation(sp));
 			prefNode().flush();
@@ -420,7 +420,7 @@ public class JNAeratorStudio extends JPanel {
         
 		JPanel optPanel = new JPanel(new GridLayout(3, 3));
 		optPanel.add(directCallingCb);
-		optPanel.add(noCommentNoManglingCb);
+		optPanel.add(noCommentCb);
 		optPanel.add(structsAsTopLevelClassesCb);
         optPanel.add(charPtrAsString);
         optPanel.add(scalaSetters);
@@ -531,7 +531,7 @@ public class JNAeratorStudio extends JPanel {
                 config.stringifyConstCStringReturnValues = config.charPtrAsString = charPtrAsString.isSelected();
                 config.runtime = (Runtime) runtimeCombo.getSelectedItem();
 				config.outputMode = (OutputMode) modeCombo.getSelectedItem();
-				config.noComments = config.noMangling = noCommentNoManglingCb.isSelected();
+				config.noComments = noCommentCb.isSelected();
 				config.defaultLibrary = libraryName.getText();
 				config.libraryForElementsInNullFile = libraryName.getText();
 //				config.addFile(getFile(), "");
@@ -741,7 +741,7 @@ public class JNAeratorStudio extends JPanel {
 			js.convertBodiesCb.setSelected(getPref("options.convertBodies", false));
             js.charPtrAsString.setSelected(getPref("options.charPtrAsString", false));
             js.scalaSetters.setSelected(getPref("options.scalaSetters", false));
-            js.noCommentNoManglingCb.setSelected(getPref("options.noCommentNoMangling", false));
+            js.noCommentCb.setSelected(getPref("options.noComments", false));
 			
 			js.sp.setOrientation(getPref("splitPane.orientation", JSplitPane.HORIZONTAL_SPLIT));
 			js.sp.setDividerLocation(getPref("splitPane.dividedLocation", 0.5));

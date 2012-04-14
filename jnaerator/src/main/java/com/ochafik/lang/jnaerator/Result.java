@@ -212,10 +212,10 @@ public class Result extends Scanner {
 			return lib;
 		name = getFakePointerName(name);
 		Set<String> set = fakePointersByLibrary.get(libraryToUseIfNotDefinedYet);
-		if (set == null)
+		if (set == null && libraryToUseIfNotDefinedYet != null)
 			fakePointersByLibrary.put(libraryToUseIfNotDefinedYet.toString(), set = new HashSet<String>());
 		set.add(name.toString());
-		Identifier id = ident(libraryToUseIfNotDefinedYet, name);
+		Identifier id = libraryToUseIfNotDefinedYet == null ? ident(name) : ident(libraryToUseIfNotDefinedYet, name);
         resolvedFakePointers.add(id);
         return id;
 	}

@@ -36,7 +36,6 @@ import java.util.Set;
 
 import org.bridj.ann.Array;
 import com.ochafik.lang.jnaerator.JNAeratorConfigUtils.FileExtensionFilter;
-import com.ochafik.lang.jnaerator.cplusplus.CPlusPlusMangler;
 import com.ochafik.lang.jnaerator.parser.Element;
 import com.ochafik.lang.jnaerator.parser.ElementsHelper;
 import com.ochafik.lang.jnaerator.parser.Function;
@@ -135,7 +134,6 @@ public class JNAeratorConfig {
             Bits, 
             FastCall, 
             StdCall, 
-            Mangling, 
             ObjCBlock, 
             This, 
             ThisCall, 
@@ -264,7 +262,6 @@ public class JNAeratorConfig {
 	public static final String DEFAULT_IMPLEMS_EXTENSIONS = "cpp:c:cxx:m:mm";
 	
 	public final EnumSet<GenFeatures> features = EnumSet.allOf(GenFeatures.class);
-	public final List<CPlusPlusMangler> cPlusPlusManglers = new ArrayList<CPlusPlusMangler>();
 
     public Runtime runtime = Runtime.DEFAULT;
     
@@ -466,7 +463,6 @@ public class JNAeratorConfig {
 	public File extractedSymbolsOut;
 	public boolean stringifyConstCStringReturnValues = true;
 	public File bridgesupportOutFile;
-	public boolean noMangling;
     public boolean scalaStructSetters;
 	public boolean noPrimitiveArrays;
 	public boolean synchronizedMethods;

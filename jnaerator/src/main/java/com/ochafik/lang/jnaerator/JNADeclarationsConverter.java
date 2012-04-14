@@ -27,7 +27,6 @@ import org.rococoa.AlreadyRetained;
 import org.rococoa.cocoa.foundation.NSObject;
 
 import com.ochafik.lang.jnaerator.JNAeratorConfig.GenFeatures;
-import com.ochafik.lang.jnaerator.cplusplus.CPlusPlusMangler;
 import com.ochafik.lang.jnaerator.parser.*;
 import com.ochafik.lang.jnaerator.parser.Enum;
 import com.ochafik.lang.jnaerator.parser.Scanner;
@@ -321,21 +320,10 @@ public class JNADeclarationsConverter extends DeclarationsConverter {
 			Set<String> names = new LinkedHashSet<String>();
 			//if (ns.isEmpty())
 
-			if (!result.config.noMangling)
-				if (!isCallback && !isObjectiveC && result.config.features.contains(JNAeratorConfig.GenFeatures.CPlusPlusMangling))
-					addCPlusPlusMangledNames(function, names);
-
 			if (function.getName() != null && !modifiedMethodName.equals(function.getName().toString()) && ns.isEmpty())
 				names.add(function.getName().toString());
 			if (function.getAsmName() != null)
 				names.add(function.getAsmName());
-
-			if (!isCallback && !names.isEmpty()) {
-                TypeRef mgc = result.config.runtime.typeRef(JNAeratorConfig.Runtime.Ann.Mangling);
-                if (mgc != null) {
-                    natFunc.addAnnotation(new Annotation(mgc, "({\"" + StringUtils.implode(names, "\", \"") + "\"})"));
-                }
-            }
 
 			if (!isCallback && !modifiedMethodName.equals(functionName))
 				natFunc.addAnnotation(new Annotation(result.config.runtime.typeRef(JNAeratorConfig.Runtime.Ann.Name), expr(functionName.toString())));
@@ -438,41 +426,6 @@ public class JNADeclarationsConverter extends DeclarationsConverter {
 				out.addDeclaration(new EmptyDeclaration(getFileCommentContent(function), ex.toString()));
 		}
     }
-
-	private void addCPlusPlusMangledNames(Function function, Set<String> names) {
-		if (function.getType() == Type.ObjCMethod)
-			return;
-		
-		String elementFile = result.resolveFile(function);
-		if (elementFile != null && (
-				elementFile.contains(".framework/") ||
-				elementFile.endsWith(".bridgesupport")))
-			return;
-		
-		ExternDeclarations externDeclarations = function.findParentOfType(ExternDeclarations.class);
-		if (externDeclarations != null && !"C++".equals(externDeclarations.getLanguage()))
-			return;
-		
-		if (!isCPlusPlusFileName(Element.getFileOfAscendency(function)))
-			return;
-		
-		/// Parse or infer name manglings
-		List<String[]> mats = function.getCommentBefore() == null ? null : com.ochafik.util.string.RegexUtils.find(function.getCommentBefore(), manglingCommentPattern);
-		if (mats != null && !mats.isEmpty()) {
-			for (String[] mat : mats)
-				names.add(mat[1]);
-		} else {
-			for (CPlusPlusMangler mangler : result.config.cPlusPlusManglers) {
-				try {
-					names.add(mangler.mangle(function, result));
-				} catch (Exception ex) {
-					System.err.println("Error in mangling of '" + function.computeSignature(true) + "' : " + ex);
-					ex.printStackTrace();
-				}
-			}
-		}
-		
-	}
 
     @Override
 	public Struct convertStruct(Struct struct, Signatures signatures, Identifier callerLibraryClass, String callerLibrary, boolean onlyFields) throws IOException {
