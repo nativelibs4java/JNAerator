@@ -454,9 +454,12 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
         return null;
     }
     boolean isResoluble(TypeRef tr, Identifier libraryClassName) {
-        if (tr instanceof Primitive)
+        if (tr instanceof Primitive ||
+            tr instanceof FunctionSignature ||
+            tr instanceof TaggedTypeRef) 
+        {
             return true;
-        else if (tr instanceof TargettedTypeRef) {
+        } else if (tr instanceof TargettedTypeRef) {
             return isResoluble(((TargettedTypeRef)tr).getTarget(), libraryClassName);
         } else if (tr instanceof SimpleTypeRef) {
             Identifier name = ((SimpleTypeRef)tr).getName();
