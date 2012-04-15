@@ -1474,7 +1474,6 @@ public abstract class Expression extends Element {
             switch (type) {
                 case Byte:
                 case Int:
-                case IntegerString:
                 case Long:
                 case LongString:
                 case Short:
@@ -1482,6 +1481,7 @@ public abstract class Expression extends Element {
                     break;
                 case UInt:
                 case ULong:
+                case IntegerString:
                     txt = null;
                     break;
             }
