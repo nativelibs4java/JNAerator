@@ -1,4 +1,8 @@
-Current development version (0.9.10-SNAPSHOT)
+Current development version (0.11-SNAPSHOT)
+
+...
+
+Version 0.10 (20120415)
 
 - Fixed generation of large long values
 - Fixed conditional parsing of __in modifier (and COM modifiers in general)
@@ -39,7 +43,6 @@ Current development version (0.9.10-SNAPSHOT)
 - Added support for command-line definition of macros with arguments : -Df(x)=whatever
 - Added conversion of `malloc(x * y * sizeof(whatever))`
 - Removed C++ name mangling feature for JNA target runtime (was simplistic anyway)
-
 
 Version 0.9.9 (20111107, 1cad7b05da2e89ce53246f30b181159ef8fce0c3)
 

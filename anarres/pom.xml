@@ -5,14 +5,14 @@
 	<artifactId>anarres-jnaerator</artifactId>
 	<name>Anarres JCPP (with JNAerator modifications)</name>
 	<url>http://www.anarres.org/projects/jcpp/</url>
-	<version>1.2.7-SNAPSHOT</version>
+	<version>1.2.7</version>
 	<packaging>jar</packaging>
 	<description></description>
 
 	<parent>
 		<groupId>com.nativelibs4java</groupId>
 		<artifactId>nativelibs4java-parent</artifactId>
-		<version>1.7-SNAPSHOT</version>
+		<version>1.7</version>
 		<relativePath>../..</relativePath>
 	</parent>
 	
@@ -39,12 +39,14 @@
 	</licenses>
 
 	<dependencies>
+		<!--
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<version>4.10</version>
 			<scope>test</scope>
 		</dependency>
+		-->
 		<dependency>
 			<groupId>gnu.getopt</groupId>
 			<artifactId>java-getopt</artifactId>
