@@ -2,7 +2,7 @@ Current development version (0.11-SNAPSHOT)
 
 ...
 
-Version 0.10 (20120415)
+Version 0.10 (20120415, commit 6bc061dfce06b941086a29f696195e82fbaffbdc)
 
 - Fixed generation of large long values
 - Fixed conditional parsing of __in modifier (and COM modifiers in general)
