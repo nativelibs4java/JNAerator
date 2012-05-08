@@ -1139,6 +1139,9 @@ public class JNAerator {
 					System.out.println("Scala code missing : " + file);
 					continue;
 				}
+                if (file.toLowerCase().contains("android"))
+                    continue;
+                
 				throw new FileNotFoundException(file);
 			}
 			ret.put(file, url);
