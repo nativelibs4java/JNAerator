@@ -1101,7 +1101,7 @@ public class Printer implements Visitor {
 
 	public void visitTemplate(Template template) {
 		append("template <").implode(template.getArgs(), ", ").append(" >\n");
-		append(template.getDeclaration());        
+		append(indent, template.getDeclaration());        
 	}
 
     @Override

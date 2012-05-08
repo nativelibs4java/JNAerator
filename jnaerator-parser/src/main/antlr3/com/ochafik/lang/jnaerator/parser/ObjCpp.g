@@ -16,7 +16,6 @@
 	You should have received a copy of the GNU Lesser General Public License
 	along with JNAerator.  If not, see <http://www.gnu.org/licenses/>.
 */
-
 /**
 	This grammar is by no mean complete.
 	It is able to parse preprocessed C & Objective-C files and can tolerate some amount of C++. 
@@ -870,6 +869,7 @@ scope ModContext;
 						$struct.addDeclaration(new FriendDeclaration(decl.declaration));
 					}
 				) |
+				tp=templatePrefix?
 				{ next(getCurrentClassName()) }? id=IDENTIFIER s=functionDeclarationSuffix {
 					Function f = new Function();
 					f.setName(getCurrentClassName());
@@ -878,7 +878,13 @@ scope ModContext;
 					f.addModifiers($s.postModifiers);
 					f.setInitializers($s.initializers);
 					f.setBody($s.body);
-					$struct.addDeclaration(f);
+					
+					if ($tp.template != null) {
+						$tp.template.setDeclaration(f);
+						$struct.addDeclaration($tp.template);
+					} else {
+						$struct.addDeclaration(f);
+					}
 				} |
 				decl=declaration {
 					$struct.addDeclaration($decl.declaration);
@@ -1208,7 +1214,7 @@ arrayTypeMutator returns [TypeMutator mutator]
 		']' 
 	;
 
-templateDef returns [Template template]
+templatePrefix returns [Template template]
 scope Symbols; 
 scope IsTypeDef;
 @init {
@@ -1230,6 +1236,19 @@ scope IsTypeDef;
 			)* 
 		)? 
 		'>'
+	;
+	
+templateDef returns [Template template]
+scope Symbols; 
+scope IsTypeDef;
+@init {
+	$IsTypeDef::isTypeDef = true;
+	$Symbols::typeIdentifiers = new HashSet<String>();
+}
+	:	
+		tp=templatePrefix {
+			$template = $tp.template;
+		}
 		declaration {
 			if ($declaration.declaration != null) {
 				Declaration decl = $declaration.declaration;
