@@ -569,6 +569,9 @@ scope ModContext;
 				{ next("extern") }?=> externDeclarations {
 					$declaration = $externDeclarations.declaration; 
 				} |
+				{ next("using") }?=> IDENTIFIER qualifiedIdentifier ';' {
+					// TODO
+				} |
 				varDecl ';' { 
 					$declaration = $varDecl.decl; 
 				} |
@@ -1690,7 +1693,9 @@ simpleIdentifier returns [SimpleIdentifier identifier]
 	;
 
 qualifiedIdentifier returns [Identifier identifier]
-	:	i1=simpleIdentifier { $identifier = $i1.identifier; }
+	:	
+		'::'?
+		i1=simpleIdentifier { $identifier = $i1.identifier; }
 		(
 			'::' ix=simpleIdentifier { $identifier = $identifier.derive(QualificationSeparator.Colons, $ix.identifier); }
 		)*

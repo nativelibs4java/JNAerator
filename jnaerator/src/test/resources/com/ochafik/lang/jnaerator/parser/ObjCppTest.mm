@@ -484,9 +484,12 @@ struct {
 	float f;
 } a;
 --
+namespace std  {
+  using ::mbstate_t;
+}
+--
 extern TestMe();
 --
-
 #pragma fail
 int[4] x;
 --
