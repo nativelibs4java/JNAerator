@@ -522,7 +522,7 @@ externDeclarations returns [ExternDeclarations declaration]
 		)
 	;
 
-declaration returns [Declaration declaration, List<Modifier> modifiers, String preComment, int startTokenIndex]
+declaration returns [Declaration declaration, List<Modifier> modifiers, String preComment, int startTokenIndex, Template template]
 scope IsTypeDef;
 scope ModContext;
 @before {
@@ -537,12 +537,24 @@ scope ModContext;
            		String s = (s2 == null ? "" : s2) + s1;
            		if (s.matches(".*\n\\s*\n"))
 				$declaration = new EmptyDeclaration();
-		}
+		}	
 	} catch (Exception ex) {
 		ex.printStackTrace();
 	}
+	if ($template != null) {
+		$template.setDeclaration($declaration);
+		if ($declaration instanceof TaggedTypeRefDeclaration) {
+			TaggedTypeRefDeclaration ttrd = (TaggedTypeRefDeclaration)$declaration;
+			TaggedTypeRef ttr = (TaggedTypeRef)ttrd.getTaggedTypeRef();
+			if (ttr != ttr)
+				defineTypeIdentifierInParentScope(ttr.getTag());
+		}
+		$declaration = $template;
+	}
 }
 	:	
+	
+		( tp=templatePrefix { $template = $tp.template; } )?
 		{
 		  $modifiers = new ArrayList<Modifier>();
 		  $startTokenIndex = getTokenStream().index();
@@ -551,9 +563,6 @@ scope ModContext;
 		(
 			(
 				{ next("__pragma") }?=> pragmaContent |
-				{ next("template") }?=> templateDef {
-					$declaration = $templateDef.template;
-				} |
 				functionDeclaration {
 					$declaration = $functionDeclaration.function;
 				} |
@@ -849,6 +858,10 @@ scope ModContext;
 
 structBody returns [Struct struct]
 scope ModContext;
+scope Symbols; 
+@init {
+	$Symbols::typeIdentifiers = new HashSet<String>();
+}
 	:
 		{ 
 			$struct = new Struct();
@@ -1215,11 +1228,9 @@ arrayTypeMutator returns [TypeMutator mutator]
 	;
 
 templatePrefix returns [Template template]
-scope Symbols; 
 scope IsTypeDef;
 @init {
 	$IsTypeDef::isTypeDef = true;
-	$Symbols::typeIdentifiers = new HashSet<String>();
 	$template = new Template();
 }
 	:	
@@ -1238,35 +1249,10 @@ scope IsTypeDef;
 		'>'
 	;
 	
-templateDef returns [Template template]
-scope Symbols; 
-scope IsTypeDef;
-@init {
-	$IsTypeDef::isTypeDef = true;
-	$Symbols::typeIdentifiers = new HashSet<String>();
-}
-	:	
-		tp=templatePrefix {
-			$template = $tp.template;
-		}
-		declaration {
-			if ($declaration.declaration != null) {
-				Declaration decl = $declaration.declaration;
-				$template.setDeclaration(decl);
-				if (decl instanceof TaggedTypeRefDeclaration) {
-					TaggedTypeRefDeclaration ttrd = (TaggedTypeRefDeclaration)decl;
-					TaggedTypeRef ttr = (TaggedTypeRef)ttrd.getTaggedTypeRef();
-					if (ttr instanceof Struct)
-						defineTypeIdentifierInParentScope(((Struct)ttr).getTag());
-				}	
-			}
-		}
-	;
-	
 templateArgDecl returns [Arg arg]
 	:	t=('class' | 'typename') n=IDENTIFIER {
 			$arg = new Arg($n.text, new SimpleTypeRef($t.text));
-			addTypeIdent($t.text);
+			addTypeIdent($n.text);
 		} 
 		( 
 			'=' tr=mutableTypeRef {
@@ -1526,6 +1512,7 @@ argList returns [List<Arg> args, boolean isObjC]
 			$isObjC = false; 
 			$args = new ArrayList<Arg>();
 		}
+		
 		op='(' 
 		(
 			a1=argDef {
@@ -1578,10 +1565,11 @@ scope ModifierKinds;
 		(
 			'typename' pn=typeName { $type = $pn.type; } |
 			{ 
+				next(2, "<") ||
 				isTypeIdentifier(next()) || 
 				(
-					parseModifier(next(1)) == null && 
-					!next(2, "=", ",", ";", ":", "[", "(", ")")
+					parseModifier(next(1)) == null &&
+					(isTypeDef() || !next(2, "=", ",", ";", ":", "[", "(", ")"))
 				) 
 			}?=> an=typeName { $type = $an.type; } |
 			structCore { $type = $structCore.struct; } |
