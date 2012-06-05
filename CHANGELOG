@@ -1,6 +1,9 @@
 Current development version (0.11-SNAPSHOT)
 
-...
+- Fixed infinite loops in simple typedefs (issue #288)
+- Fixed some -beautifyNames cases (issue #315)
+- Fixed parsing of some C++ templates (including template constructors)
+- Added parsing of 'using' C++ statements
 
 Version 0.10 (20120415, commit 6bc061dfce06b941086a29f696195e82fbaffbdc)
 
