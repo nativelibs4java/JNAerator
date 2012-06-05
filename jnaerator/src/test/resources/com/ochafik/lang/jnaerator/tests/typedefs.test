@@ -1,6 +1,10 @@
 typedef unsigned int cl_uint;
 typedef cl_uint cl_info;
 f(cl_info);
+
+struct ReSampleContext;
+typedef struct ReSampleContext ReSampleContext;
+void ff(ReSampleContext*);
 --
 #runtime(JNAerator)
 import test.*;
@@ -13,3 +17,5 @@ import test.*;
 import static test.TestLibrary.*;
 
 int i = f(10);
+
+ff((Pointer<ReSampleContext>)null);

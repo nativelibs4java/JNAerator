@@ -458,19 +458,22 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
         return null;
     }
     boolean isResoluble(TypeRef tr, Identifier libraryClassName) {
+        return isResoluble(tr, libraryClassName, new HashSet<Identifier>());
+    }
+    boolean isResoluble(TypeRef tr, Identifier libraryClassName, Set<Identifier> typeDefsEncountered) {
         if (tr instanceof Primitive ||
             tr instanceof FunctionSignature ||
             tr instanceof TaggedTypeRef) 
         {
             return true;
         } else if (tr instanceof TargettedTypeRef) {
-            return isResoluble(((TargettedTypeRef)tr).getTarget(), libraryClassName);
+            return isResoluble(((TargettedTypeRef)tr).getTarget(), libraryClassName, typeDefsEncountered);
         } else if (tr instanceof SimpleTypeRef) {
             Identifier name = ((SimpleTypeRef)tr).getName();
-            Pair<TypeDef, Declarator> p = getTypeDef(name);
+            Pair<TypeDef, Declarator> p = typeDefsEncountered.add(name) ? getTypeDef(name) : null;
             if (p != null) {
                 TypeRef d = p.getFirst().getValueType();
-                return isResoluble(d, libraryClassName);//as(p.getSecond().mutateType(p.getFirst().getValueType()), TypeRef.class);
+                return isResoluble(d, libraryClassName, typeDefsEncountered);//as(p.getSecond().mutateType(p.getFirst().getValueType()), TypeRef.class);
             } else {
                 TypeRef ft = findTypeRef(name, libraryClassName);
                 return ft != null;
@@ -479,6 +482,9 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
         return false;
     }
     public TypeRef resolveTypeDef(TypeRef valueType, final Identifier libraryClassName, final boolean convertToJavaRef, final boolean convertEnumToJavaRef) {
+        return resolveTypeDef(valueType, libraryClassName, convertToJavaRef, convertEnumToJavaRef, new HashSet<Identifier>());
+    }
+    public TypeRef resolveTypeDef(TypeRef valueType, final Identifier libraryClassName, final boolean convertToJavaRef, final boolean convertEnumToJavaRef, final Set<Identifier> typeDefsEncountered) {
         if (valueType == null) {
             return null;
         }
@@ -566,12 +572,12 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
                             }
 
                             if (fieldName != null && !fieldName.equals(name)) {
-                                simpleTypeRef.replaceBy(resolveTypeDef(new TypeRef.SimpleTypeRef(fieldName), libraryClassName, true /*convertToJavaRef*/, convertEnumToJavaRef));
+                                simpleTypeRef.replaceBy(resolveTypeDef(new TypeRef.SimpleTypeRef(fieldName), libraryClassName, true /*convertToJavaRef*/, convertEnumToJavaRef, typeDefsEncountered));
                                 return;
                             }
                         }
                         
-                        Pair<TypeDef, Declarator> p = getTypeDef(name);
+                        Pair<TypeDef, Declarator> p = typeDefsEncountered.add(name) ? getTypeDef(name) : null;
                         if (p != null) {
                             TypeRef tr = p.getFirst().getValueType();//as(p.getSecond().mutateType(p.getFirst().getValueType()), TypeRef.class);
                             if (!isResoluble(tr, libraryClassName)) {
