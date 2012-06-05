@@ -163,7 +163,7 @@ public class JNAeratorCommandLineArgs {
         GUI(				    "-gui",		 			"Show minimalist progression GUI"),
 		//NoRuntime(			"-noRuntime",		 	"Don't copy runtime classes to JAR output"),
 		Synchronized(	    "-synchronized",			"Generate synchronized native methods"),
-		BeanStructs(		    "-beanStructs",			"Generate getters and setters for struct fields"),
+		BeanStructs(		    "-beanStructs",			"Generate getters and setters for struct fields (JNA & JNAerator runtimes only)"),
 		BeautifyNames(		"-beautifyNames",		"Transform C names to Java-looking names : some_func() => someFunc()"),
 		ConvertBodies(       "-convertBodies",        "Experimental conversion of function bodies to equivalent Java code (BridJ only)."),
         JarOut(				"-jar",					"Jar file where all generated sources and the compiled classes go", new ArgDef(Type.OutputFile, "outFile")),

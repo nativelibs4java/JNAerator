@@ -485,6 +485,9 @@ public abstract class DeclarationsConverter {
         if (n.contains("<") || n.startsWith("~"))
             return;
                 
+        if (result.config.beautifyNames)
+            functionName = ident(result.typeConverter.beautify(n, false));
+        
 		functionName = result.typeConverter.getValidJavaMethodName(functionName);
 		if (functionName == null)
 			return;

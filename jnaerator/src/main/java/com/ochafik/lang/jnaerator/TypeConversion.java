@@ -1629,15 +1629,19 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
         
         if (newName == null) {
             newName = getValidJavaIdentifierString(name);
-        } else if (result.config.beautifyNames) {
-            newName = beautify(newName);
-        }
+        } 
+//        else if (result.config.beautifyNames) {
+//            newName = beautify(newName);
+//        }
 
         return ident(newName);
     }
 
-    String beautify(String name) {
-        String newName = StringUtils.uncapitalize(StringUtils.underscoredToCamel(name));
+    String beautify(String name, boolean isType) {
+        String newName = StringUtils.underscoredToCamel(name);
+        if (!isType)
+            newName = StringUtils.uncapitalize(newName);
+        
         if (name.endsWith("_")) {
             newName += "$";
         }
@@ -1661,9 +1665,9 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
             return name + "$";
         } else {
             String newName = name.toString().replace('-', '_').replaceAll("[^\\w]", "\\$");
-            if (result.config.beautifyNames) {
-                newName = beautify(newName);
-            }
+//            if (result.config.beautifyNames) {
+//                newName = beautify(newName);
+//            }
             return newName;
         }
     }

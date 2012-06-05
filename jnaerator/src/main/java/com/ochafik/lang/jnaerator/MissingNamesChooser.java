@@ -400,7 +400,7 @@ public class MissingNamesChooser extends Scanner {
 				List<String> ownerNames = JNAeratorUtils.guessOwnerName(function);
 				if (function.getName() != null)
 					ownerNames.add(function.getName().toString());
-				name = chooseName(functionSignature, ownerNames);
+				name = chooseName(functionSignature, ownerNames, true);
 			}
 			if (name != null) {
 				function.setName(ident(name));
@@ -428,7 +428,7 @@ public class MissingNamesChooser extends Scanner {
 			Identifier tag = result.declarationsConverter.getActualTaggedTypeName(taggedTypeRef);
 			if (isNull(tag)) {
 				List<String> ownerNames = JNAeratorUtils.guessOwnerName(taggedTypeRef);//.getParentElement() instanceof StructTypeRef ? struct.getParentElement() : struct);
-				tag = ident(chooseName(taggedTypeRef, ownerNames));
+				tag = ident(chooseName(taggedTypeRef, ownerNames, true));
 			}
 			
 			if (!isNull(tag)) {
@@ -454,26 +454,36 @@ public class MissingNamesChooser extends Scanner {
 	}
 
 	int nextAnonymous = 1;
-	public String chooseName(Element e, List<String> ownerNames) {
+	public String chooseName(Element e, List<String> ownerNames, boolean isType) {
 		String s = chooseNameSuffix(e);
 		if (s == null)
 			return null;
 		
+        String n;
+        
 		List<String> names = new ArrayList<String>();
 		if (ownerNames != null)
 			names.addAll(ownerNames);
 		if (ownerNames.isEmpty())
-			return s + (nextAnonymous++);
-		
-		names.add(s);
-		switch (nameGenerationStyle) {
-			case Java:
-				return StringUtils.capitalize(ownerNames, "");
-			case PreserveCaseAndSeparateByUnderscores:
-				return StringUtils.implode(names, "_");
-			default:
-				throw new UnsupportedOperationException("Unknown name generation style " + nameGenerationStyle);
-		}
+			n = s + (nextAnonymous++);
+        else {
+            names.add(s);
+            switch (nameGenerationStyle) {
+                case Java:
+                    n = StringUtils.capitalize(ownerNames, "");
+                    break;
+                case PreserveCaseAndSeparateByUnderscores:
+                    n = StringUtils.implode(names, "_");
+                    break;
+                default:
+                    throw new UnsupportedOperationException("Unknown name generation style " + nameGenerationStyle);
+            }
+        }
+        
+        if (result.config.beautifyNames) {
+            n = result.typeConverter.beautify(n, isType);
+        }
+        return n;
 	}
 	public String chooseNameSuffix(Element e) {
 		if (e instanceof Struct) {
