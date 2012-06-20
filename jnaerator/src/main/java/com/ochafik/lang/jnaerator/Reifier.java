@@ -7,6 +7,7 @@ package com.ochafik.lang.jnaerator;
 import com.ochafik.lang.jnaerator.parser.*;
 import static com.ochafik.lang.jnaerator.parser.ElementsHelper.*;
 import static com.ochafik.lang.jnaerator.TypeConversion.*;
+import com.ochafik.lang.jnaerator.parser.Function.SignatureType;
 import com.ochafik.util.listenable.Pair;
 import com.ochafik.util.string.StringUtils;
 import java.util.ArrayList;
@@ -126,7 +127,7 @@ public class Reifier {
                 privatize(fDirect);
                 if (signatures.addMethod(fDirect))
                     ((DeclarationsHolder)original.getParentElement()).addDeclaration(fDirect);
-                if (original.computeSignature(false).equals(fDirect.computeSignature(false))) {
+                if (original.computeSignature(SignatureType.JavaStyle).equals(fDirect.computeSignature(SignatureType.JavaStyle))) {
                     fDirect.setName(ident(original.getName() + "$direct"));
                 }
                 directFunctionName = fDirect.getName().toString();

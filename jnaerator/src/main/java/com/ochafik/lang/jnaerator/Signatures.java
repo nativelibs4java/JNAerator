@@ -24,6 +24,7 @@ import java.util.Set;
 import com.ochafik.lang.jnaerator.parser.Identifier;
 import static com.ochafik.lang.jnaerator.parser.ElementsHelper.*;
 import com.ochafik.lang.jnaerator.parser.Function;
+import com.ochafik.lang.jnaerator.parser.Function.SignatureType;
 
 public class Signatures {
 	private final Set<Identifier> 
@@ -37,7 +38,7 @@ public class Signatures {
         return classSignatures.add(sig);
     }
     public boolean addMethod(Function fun) {
-        return addMethod(fun.computeSignature(false));
+        return addMethod(fun.computeSignature(SignatureType.JavaStyle));
     }
 	public boolean addMethod(String sig) {
         return methodsSignatures.add(sig);

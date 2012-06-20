@@ -288,6 +288,7 @@ public class JNAeratorConfig {
 	public boolean limitComments, noComments;
 	public boolean putTopStructsInSeparateFiles = true;
 	//public boolean bundleRuntime = true;
+	public boolean genRawBindings = true;
 	public boolean beautifyNames;
     public boolean treatEmptyStructsAsForwardDecls;
     public String[] libraryNamingPrefixes;

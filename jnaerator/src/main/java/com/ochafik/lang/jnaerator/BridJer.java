@@ -369,7 +369,7 @@ public class BridJer {
                                 -1//bits
                             );
                             
-                            v.setValueType(conv.typeRef);
+                            v.setValueType(conv.getTypeRef(false));
                             
                             if (conv.arrayLengths != null && (mutatedType instanceof TargettedTypeRef) && decl.getDefaultValue() == null)
                                 v.setDeclarators(Arrays.asList((Declarator)new DirectDeclarator(decl.resolveName(), newAllocateArray(((TargettedTypeRef)mutatedType).getTarget(), conv.arrayLengths))));

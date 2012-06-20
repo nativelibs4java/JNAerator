@@ -173,6 +173,26 @@ public class ElementsHelper {
     public static FunctionCall methodCall(Expression x, MemberRefStyle style, String name, Expression... exprs) {
 		return new FunctionCall(memberRef(x, style, name), exprs);
 	}
+    // Given Pointer<T>, returns T
+    public static TypeRef getSingleTypeParameter(TypeRef tr) {
+        if (!(tr instanceof SimpleTypeRef))
+            return null;
+        
+        SimpleTypeRef str = (SimpleTypeRef) tr;
+        Identifier name = str.getName();
+        if (name == null)
+            return null;
+        
+        SimpleIdentifier id = name.resolveLastSimpleIdentifier();
+        List<Expression> templateArguments = id.getTemplateArguments();
+        if (templateArguments.size() != 1)
+            return null;
+        Expression x = templateArguments.get(0);
+        if (!(x instanceof TypeRefExpression))
+            return null;
+        
+        return ((TypeRefExpression)x).getType();
+    }
     public static FunctionCall methodCall(Expression x, String name, Expression... exprs) {
     	return methodCall(x, MemberRefStyle.Dot, name, exprs);
 	}
@@ -197,6 +217,9 @@ public class ElementsHelper {
 	public static SimpleTypeRef typeRef(Identifier name) {
 		return name == null ? null : new SimpleTypeRef(name);
 	}
+    public static TypeRef subType(SimpleTypeRef tr, Identifier name) {
+        return typeRef(ident(tr.getName(), name));
+    }
     public static Statement stat(Declaration d) {
         return d;//new Statement.DeclarationStatement(d);
     }

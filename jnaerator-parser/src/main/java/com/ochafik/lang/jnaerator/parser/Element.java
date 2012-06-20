@@ -537,6 +537,14 @@ public abstract class Element {
 		return false;
 	}
 	
+	public boolean replaceByAndVisit(Element element, Visitor visitor) {
+		if (!replaceBy(element))
+            return false;
+        
+        element.accept(visitor);
+        return true;
+	}
+	
 	@SuppressWarnings("unchecked")
 	public <T> T findParentOfType(Class<T> type) {
 		return (T)findParentOfTypes(type);

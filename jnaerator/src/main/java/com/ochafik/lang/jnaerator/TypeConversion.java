@@ -49,6 +49,7 @@ import com.ochafik.lang.jnaerator.JNAeratorConfig.GenFeatures;
 import com.ochafik.lang.jnaerator.parser.Enum;
 import com.ochafik.lang.jnaerator.parser.*;
 import com.ochafik.lang.jnaerator.parser.Declarator.ArrayDeclarator;
+import com.ochafik.lang.jnaerator.parser.Declarator.MutableByDeclarator;
 import com.ochafik.lang.jnaerator.parser.Enum.EnumItem;
 import com.ochafik.lang.jnaerator.parser.Expression.Constant;
 import com.ochafik.lang.jnaerator.parser.Expression.MemberRef;
@@ -119,14 +120,9 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
     public Map<JavaPrim, Class<? extends Global>> primToGlobal = new HashMap<JavaPrim, Class<? extends Global>>();
     public Map<JavaPrim, Class<? extends Buffer>> primToBuffer = new HashMap<JavaPrim, Class<? extends Buffer>>();
     public final Set<String> byReferenceClassesNames = new HashSet<String>();
-    Map<String, JavaPrim> javaPrims = new TreeMap<String, JavaPrim>();
-
-    protected void prim(String from, JavaPrim to) {
-        javaPrims.put(from, to);
-    }
-
+    
     public boolean isObjCppPrimitive(String s) {
-        return javaPrims.containsKey(s);
+        return result.isObjCppPrimitive(s);
     }
 
     public enum JavaPrim {
@@ -230,121 +226,121 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
     
     public void initTypes() {
 
-        prim("void", JavaPrim.Void);
+        result.prim("void", JavaPrim.Void);
 
-        prim("UTF32Char", JavaPrim.Char);
-        prim("unichar", JavaPrim.Char);
+        result.prim("UTF32Char", JavaPrim.Char);
+        result.prim("unichar", JavaPrim.Char);
 
-        prim("int64_t", JavaPrim.Long);
-        prim("uint64_t", JavaPrim.Long);
-        prim("u_int64_t", JavaPrim.Long);
-        prim("long long", JavaPrim.Long);
-        prim("long long int", JavaPrim.Long);
-        prim("long int", JavaPrim.Int);
-        prim("LONGLONG", JavaPrim.Long);
-        prim("ULONGLONG", JavaPrim.Long);
-        prim("INT", JavaPrim.Int);
-        prim("UINT", JavaPrim.Int);
-        prim("SHORT", JavaPrim.Short);
-        prim("USHORT", JavaPrim.Short);
-        prim("BYTE", JavaPrim.Byte);
-        prim("UBYTE", JavaPrim.Byte);
-        prim("DOUBLE", JavaPrim.Double);
-        prim("FLOAT", JavaPrim.Float);
-        prim("WORD", JavaPrim.Short);
-        prim("DWORD", JavaPrim.Int);
+        result.prim("int64_t", JavaPrim.Long);
+        result.prim("uint64_t", JavaPrim.Long);
+        result.prim("u_int64_t", JavaPrim.Long);
+        result.prim("long long", JavaPrim.Long);
+        result.prim("long long int", JavaPrim.Long);
+        result.prim("long int", JavaPrim.Int);
+        result.prim("LONGLONG", JavaPrim.Long);
+        result.prim("ULONGLONG", JavaPrim.Long);
+        result.prim("INT", JavaPrim.Int);
+        result.prim("UINT", JavaPrim.Int);
+        result.prim("SHORT", JavaPrim.Short);
+        result.prim("USHORT", JavaPrim.Short);
+        result.prim("BYTE", JavaPrim.Byte);
+        result.prim("UBYTE", JavaPrim.Byte);
+        result.prim("DOUBLE", JavaPrim.Double);
+        result.prim("FLOAT", JavaPrim.Float);
+        result.prim("WORD", JavaPrim.Short);
+        result.prim("DWORD", JavaPrim.Int);
         
         if (result.config.runtime == JNAeratorConfig.Runtime.BridJ)
-            prim("BOOL", JavaPrim.Int);
+            result.prim("BOOL", JavaPrim.Int);
         else
-            prim("BOOL", JavaPrim.Boolean);
+            result.prim("BOOL", JavaPrim.Boolean);
 
 
-        prim("DWORD64", JavaPrim.Long);
-        prim("LONG64", JavaPrim.Long);
-        prim("UInt64", JavaPrim.Long);
-        prim("SInt64", JavaPrim.Long);
-        prim("__int64", JavaPrim.Long);
-        prim("__int64_t", JavaPrim.Long);
+        result.prim("DWORD64", JavaPrim.Long);
+        result.prim("LONG64", JavaPrim.Long);
+        result.prim("UInt64", JavaPrim.Long);
+        result.prim("SInt64", JavaPrim.Long);
+        result.prim("__int64", JavaPrim.Long);
+        result.prim("__int64_t", JavaPrim.Long);
 
-        prim("int32_t", JavaPrim.Int);
-        prim("uint32_t", JavaPrim.Int);
-        prim("__int32_t", JavaPrim.Int);
-        prim("__uint32_t", JavaPrim.Int);
-        prim("u_int32_t", JavaPrim.Int);
-        prim("uint32", JavaPrim.Int);
-        prim("int32", JavaPrim.Int);
-        prim("int", JavaPrim.Int);
+        result.prim("int32_t", JavaPrim.Int);
+        result.prim("uint32_t", JavaPrim.Int);
+        result.prim("__int32_t", JavaPrim.Int);
+        result.prim("__uint32_t", JavaPrim.Int);
+        result.prim("u_int32_t", JavaPrim.Int);
+        result.prim("uint32", JavaPrim.Int);
+        result.prim("int32", JavaPrim.Int);
+        result.prim("int", JavaPrim.Int);
         //prim("NSUInteger", JavaPrim.NativeSize);
         //prim("NSInteger", JavaPrim.NativeSize);
-        prim("SInt32", JavaPrim.Int);
-        prim("UInt32", JavaPrim.Int);
-        prim("GLint", JavaPrim.Int);
-        prim("GLuint", JavaPrim.Int);
-        prim("GLenum", JavaPrim.Int);
-        prim("GLsizei", JavaPrim.Int);
-        prim("__darwin_size_t", JavaPrim.Int);
+        result.prim("SInt32", JavaPrim.Int);
+        result.prim("UInt32", JavaPrim.Int);
+        result.prim("GLint", JavaPrim.Int);
+        result.prim("GLuint", JavaPrim.Int);
+        result.prim("GLenum", JavaPrim.Int);
+        result.prim("GLsizei", JavaPrim.Int);
+        result.prim("__darwin_size_t", JavaPrim.Int);
 
-        prim("__int32", JavaPrim.Int);
+        result.prim("__int32", JavaPrim.Int);
 
-        prim("NSInteger", JavaPrim.NSInteger);
-        prim("NSUInteger", JavaPrim.NSUInteger);
-        prim("CGFloat", JavaPrim.CGFloat);
+        result.prim("NSInteger", JavaPrim.NSInteger);
+        result.prim("NSUInteger", JavaPrim.NSUInteger);
+        result.prim("CGFloat", JavaPrim.CGFloat);
 
         JavaPrim longPrim = result.config.gccLong ? JavaPrim.NativeSize : JavaPrim.NativeLong;
-        prim("long", longPrim);
-        prim("LONG", longPrim);
-        prim("ULONG", longPrim);
+        result.prim("long", longPrim);
+        result.prim("LONG", longPrim);
+        result.prim("ULONG", longPrim);
 
         JavaPrim sizePrim = result.config.sizeAsLong ? longPrim : JavaPrim.NativeSize;
-        prim("size_t", sizePrim);
-        prim("ptrdiff_t", sizePrim);
+        result.prim("size_t", sizePrim);
+        result.prim("ptrdiff_t", sizePrim);
 
-        prim("int16_t", JavaPrim.Short);
-        prim("uint16_t", JavaPrim.Short);
-        prim("__int16_t", JavaPrim.Short);
-        prim("__uint16_t", JavaPrim.Short);
-        prim("u_int16_t", JavaPrim.Short);
-        prim("uint16", JavaPrim.Short);
-        prim("int16", JavaPrim.Short);
-        prim("SInt16", JavaPrim.Short);
-        prim("UInt16", JavaPrim.Short);
-        prim("short", JavaPrim.Short);
-        prim("WCHAR", JavaPrim.Short);
-        prim("wchar_t", result.config.wcharAsShort ? JavaPrim.Short : JavaPrim.Char);
+        result.prim("int16_t", JavaPrim.Short);
+        result.prim("uint16_t", JavaPrim.Short);
+        result.prim("__int16_t", JavaPrim.Short);
+        result.prim("__uint16_t", JavaPrim.Short);
+        result.prim("u_int16_t", JavaPrim.Short);
+        result.prim("uint16", JavaPrim.Short);
+        result.prim("int16", JavaPrim.Short);
+        result.prim("SInt16", JavaPrim.Short);
+        result.prim("UInt16", JavaPrim.Short);
+        result.prim("short", JavaPrim.Short);
+        result.prim("WCHAR", JavaPrim.Short);
+        result.prim("wchar_t", result.config.wcharAsShort ? JavaPrim.Short : JavaPrim.Char);
 
-        prim("__int16", JavaPrim.Short);
+        result.prim("__int16", JavaPrim.Short);
 
 
-        prim("int8_t", JavaPrim.Byte);
-        prim("uint8_t", JavaPrim.Byte);
-        prim("u_int8_t", JavaPrim.Byte);
-        prim("__uint8_t", JavaPrim.Byte);
-        prim("__int8_t", JavaPrim.Byte);
-        prim("SInt8", JavaPrim.Byte);
-        prim("UInt8", JavaPrim.Byte);
-        prim("char", JavaPrim.Byte);
-        prim("unsigned char", JavaPrim.Byte);
-        prim("__unsigned char", JavaPrim.Byte);
-        prim("signed char", JavaPrim.Byte);
-        prim("__signed char", JavaPrim.Byte);
-        prim("SignedByte", JavaPrim.Byte);
+        result.prim("int8_t", JavaPrim.Byte);
+        result.prim("uint8_t", JavaPrim.Byte);
+        result.prim("u_int8_t", JavaPrim.Byte);
+        result.prim("__uint8_t", JavaPrim.Byte);
+        result.prim("__int8_t", JavaPrim.Byte);
+        result.prim("SInt8", JavaPrim.Byte);
+        result.prim("UInt8", JavaPrim.Byte);
+        result.prim("char", JavaPrim.Byte);
+        result.prim("unsigned char", JavaPrim.Byte);
+        result.prim("__unsigned char", JavaPrim.Byte);
+        result.prim("signed char", JavaPrim.Byte);
+        result.prim("__signed char", JavaPrim.Byte);
+        result.prim("SignedByte", JavaPrim.Byte);
 
-        prim("__int8", JavaPrim.Byte);
+        result.prim("__int8", JavaPrim.Byte);
 
-        prim("float", JavaPrim.Float);
-        prim("NSFloat", JavaPrim.Float);
-        prim("CGFloat", JavaPrim.Float);
+        result.prim("float", JavaPrim.Float);
+        result.prim("NSFloat", JavaPrim.Float);
+        result.prim("CGFloat", JavaPrim.Float);
 
-        prim("double_t", JavaPrim.Double);
-        prim("double", JavaPrim.Double);
-        prim("NSDouble", JavaPrim.Double);
-        prim("CGDouble", JavaPrim.Double);
+        result.prim("double_t", JavaPrim.Double);
+        result.prim("double", JavaPrim.Double);
+        result.prim("NSDouble", JavaPrim.Double);
+        result.prim("CGDouble", JavaPrim.Double);
 
         JavaPrim cppBoolType = getCppBoolMappingType();
-        prim("bool", cppBoolType);
-        prim("Boolean", cppBoolType);
-        prim("boolean_t", cppBoolType);
+        result.prim("bool", cppBoolType);
+        result.prim("Boolean", cppBoolType);
+        result.prim("boolean_t", cppBoolType);
 
 
 
@@ -390,52 +386,13 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
         //primToBuffer.put(JavaPrim.NativeLong, NativeLongByReference.class);
         
         TypeRef pInt = new TypeRef.Pointer(new Primitive("int"), Declarator.PointerStyle.Pointer);
-        manualTypeDefs.put("intptr_t", pInt);
-        manualTypeDefs.put("uintptr_t", pInt);
+        result.addManualTypeDef("intptr_t", pInt);
+        result.addManualTypeDef("uintptr_t", pInt);
     }
-    Map<String, TypeRef> manualTypeDefs = new HashMap<String, TypeRef>();
-
-    public Pair<TypeDef, Declarator> getTypeDef(Identifier name) {
-        if (name == null) {
-            return null;
-        }
-
-        Pair<TypeDef, Declarator> p = result.typeDefs.get(name);
-        if (p == null) {
-            return null;
-        }
-
-        Declarator value = p.getValue();
-        String rname = value == null ? null : value.resolveName();
-        if (rname != null) {
-            if (name.equals("id")) {
-                return null;
-            }
-
-            if (name.equals("SEL")) {
-                return null;
-            }
-
-            if (name.equals("IMP")) {
-                return null;
-            }
-
-            if (name.equals("Class")) {
-                return null;
-            }
-
-            if (name.equals("BOOL")) {
-                if (rname.equals("byte")) {
-                    return null;
-                }
-            }
-        }
-        return p;
-    }
-
+    
     protected TypeRef findTypeRef(Identifier name, Identifier libraryClassName) {
         TypeRef tr;
-        tr = typeRef(findStructRef(name, libraryClassName));
+        tr = findStructRef(name, libraryClassName);
         if (tr != null)
             return tr;
 
@@ -451,7 +408,7 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
         if (tr != null)
             return tr;
         
-        tr = manualTypeDefs.get(name);
+        tr = result.manualTypeDefs.get(name);
         if (tr != null)
             return tr;
 
@@ -470,10 +427,9 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
             return isResoluble(((TargettedTypeRef)tr).getTarget(), libraryClassName, typeDefsEncountered);
         } else if (tr instanceof SimpleTypeRef) {
             Identifier name = ((SimpleTypeRef)tr).getName();
-            Pair<TypeDef, Declarator> p = typeDefsEncountered.add(name) ? getTypeDef(name) : null;
-            if (p != null) {
-                TypeRef d = p.getFirst().getValueType();
-                return isResoluble(d, libraryClassName, typeDefsEncountered);//as(p.getSecond().mutateType(p.getFirst().getValueType()), TypeRef.class);
+            TypeRef tdt = typeDefsEncountered.add(name) ? result.getTypeDef(name) : null;
+            if (tdt != null) {
+                return isResoluble(tdt, libraryClassName, typeDefsEncountered);//as(p.getSecond().mutateType(p.getFirst().getValueType()), TypeRef.class);
             } else {
                 TypeRef ft = findTypeRef(name, libraryClassName);
                 return ft != null;
@@ -496,7 +452,7 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
             TaggedTypeRef ttr = (TaggedTypeRef) valueType;
             if (ttr.getTag() != null) {
 
-                TypeRef ref = ttr instanceof Struct ? typeRef(findStructRef(ttr.getTag(), libraryClassName))
+                TypeRef ref = ttr instanceof Struct ? findStructRef(ttr.getTag(), libraryClassName)
                         : ttr instanceof Enum && convertEnumToJavaRef ? findEnum(ttr.getTag(), libraryClassName) : null;
                 if (ref == null && convertEnumToJavaRef) {
                     return ref;
@@ -536,7 +492,7 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
                     names.push(nameStr);
 
                     try {
-                        if (resolvesToPrimitive(nameStr)) {
+                        if (result.resolvePrimitive(nameStr) != null) {
                             return;
                         }
 
@@ -550,12 +506,14 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
                         //						name.replaceBy(oc);
                         //					}
 
-                        TypeRef t = findTypeRef(name, libraryClassName);
-                        if (t != null) {
-                            if (!convertToJavaRef || (t instanceof Enum) && !convertEnumToJavaRef) {
-                                return;
+                        if (convertToJavaRef) {
+                            TypeRef t = findTypeRef(name, libraryClassName);
+                            if (t != null) {
+                                if (!convertToJavaRef || (t instanceof Enum) && !convertEnumToJavaRef) {
+                                    return;
+                                }
+                                simpleTypeRef.replaceBy(t);
                             }
-                            simpleTypeRef.replaceBy(t);
                         }
 
                         Define define = result.defines.get(name);
@@ -577,9 +535,8 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
                             }
                         }
                         
-                        Pair<TypeDef, Declarator> p = typeDefsEncountered.add(name) ? getTypeDef(name) : null;
-                        if (p != null) {
-                            TypeRef tr = p.getFirst().getValueType();//as(p.getSecond().mutateType(p.getFirst().getValueType()), TypeRef.class);
+                        TypeRef tr = typeDefsEncountered.add(name) ? result.getTypeDef(name) : null;
+                        if (tr != null) {
                             if (!isResoluble(tr, libraryClassName)) {
                                 simpleTypeRef.replaceBy(typeRef(result.getFakePointer(libraryClassName, name)));
                                 return;
@@ -639,10 +596,6 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
         TypeRef tr = holder.getValueType();
 //		tr.setParentElement(valueType.getParentElement());
         return tr;// == null ? null : tr.clone();
-    }
-
-    public boolean resolvesToPrimitive(String name) {
-        return javaPrims.containsKey(name);
     }
 //	TypeRef getPrimitiveRef(TypeRef valueType, String callerLibraryClass) {
 //		JavaPrim prim = getPrimitive(valueType, callerLibraryClass);
@@ -727,7 +680,7 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
             str = name.toString();
         }
 
-        JavaPrim type = javaPrims.get(str);
+        JavaPrim type = result.resolvePrimitive(str);
         if (type == JavaPrim.Int && longCount > 1) {
             return JavaPrim.Long;
         }
@@ -735,20 +688,13 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
         return type;
     }
 
-    public Identifier findStructRef(Identifier name, Identifier libraryClassName) {
-        return findStructRef(result.structsByName.get(name), name, libraryClassName);
+    public SimpleTypeRef findStructRef(Identifier name, Identifier libraryClassName) {
+        return findStructRef(result.resolveStruct(name), libraryClassName);
     }
 
-    public Identifier findStructRef(Struct s, Identifier name, Identifier libraryClassName) {
+    public SimpleTypeRef findStructRef(Struct s, Identifier name, Identifier libraryClassName) {
         if (s == null || s.isForwardDeclaration()) {
-            Pair<TypeDef, Declarator> pair = getTypeDef(name);
-            if (pair == null) {
-                return null;
-            }
-            if (pair.getFirst() == null || pair.getSecond() == null) {
-                return null;
-            }
-            Object td = pair.getSecond().mutateType(pair.getFirst().getValueType());
+            TypeRef td = result.getTypeDef(name);
             if (!(td instanceof Struct)) {
                 return null;
             }
@@ -765,9 +711,9 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
         		cl = org.bridj.cpp.com.RECT.class;
         	
         	if (cl != null)
-        		return ident(cl);
+        		return typeRef(ident(cl));
         }
-        return result.getTaggedTypeIdentifierInJava(s);
+        return typeRef(result.getTaggedTypeIdentifierInJava(s));
         /*
             name = result.declarationsConverter.getActualTaggedTypeName((TaggedTypeRef) pair.getFirst().getValueType());
 
@@ -778,11 +724,13 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
         }*/
     }
 
-    public Identifier findStructRef(Struct s, Identifier libraryClassName) {
+    public SimpleTypeRef findStructRef(Struct s, Identifier libraryClassName) {
+        if (s == null)
+            return null;
         switch (s.getType()) {
             case ObjCClass:
             case ObjCProtocol:
-                return result.objectiveCGenerator.getFullClassName(s);
+                return typeRef(result.objectiveCGenerator.getFullClassName(s));
             default:
                 return findStructRef(s, result.declarationsConverter.getActualTaggedTypeName(s), libraryClassName);
         }
@@ -823,17 +771,14 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
         }
         return libMember(result.getLibraryClassFullName(library), libraryClassName, name);
     }
-
     public SimpleTypeRef findEnum(Identifier name, Identifier libraryClassName) {
-        Enum s = result.enumsByName.get(name);
-        if (s == null) {
-            return null;
-        }
-        return findEnumRef(s, libraryClassName);
+        return findEnum(result.resolveEnum(name), libraryClassName);
     }
 
-    public SimpleTypeRef findEnumRef(Enum s, Identifier libraryClassName) {
-
+    public SimpleTypeRef findEnum(Enum s, Identifier libraryClassName) {
+        if (s == null)
+            return null;
+        
         if (result.config.runtime == JNAeratorConfig.Runtime.BridJ)
             return typeRef(result.getTaggedTypeIdentifierInJava(s));
         
@@ -885,9 +830,11 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
         boolean firstParent = true;
         while (parent != null) {
             if (parent instanceof Struct) {
-                parentIdent = findStructRef((Struct) parent, null);
+                SimpleTypeRef parentRef = findStructRef((Struct) parent, null);
+                parentIdent = parentRef.getName();
                 break;
-            } else if (firstParent) {
+            } 
+            if (firstParent) {
                 if (name == null && parent instanceof TypeDef) {
                     Declarator simpleSto = null;
                     for (Declarator sto : ((TypeDef) parent).getDeclarators()) {
@@ -954,7 +901,7 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
     }
 
     public TypeRef findCallbackRef(Identifier name, Identifier libraryClassName) {
-        FunctionSignature s = result.callbacksByName.get(name);
+        FunctionSignature s = result.resolveCallback(name);
         if (s == null) {
             return null;
         }
@@ -971,7 +918,7 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
     }
 
     public TypeRef findCallbackRef(FunctionSignature s, Identifier callerLibraryClass) {
-        String library = result.getLibrary(s);
+        String library = s == null ? null : result.getLibrary(s);
         if (library == null) {
             return null;
         }
@@ -1010,7 +957,7 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
 
     public enum ConvType {
 
-        Enum, Pointer, Primitive, Struct, NativeLong, NativeSize, Void, Callback
+        Enum, Pointer, Primitive, Struct, NativeLong, NativeSize, Void, Callback, Default
     }
     
     static Map<String, Pair<Integer, Class<?>>> buffersAndArityByType = new HashMap<String, Pair<Integer, Class<?>>>();
@@ -1156,7 +1103,7 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
 						return intRef;
 					}
 				} else if (valueType instanceof Struct) {
-					Identifier tr = findStructRef(name, libraryClassName);
+					SimpleTypeRef tr = findStructRef(name, libraryClassName);
 					if (tr != null) {
 						switch (conversionMode) {
 						case PointedValue:
@@ -1166,11 +1113,11 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
 						case ReturnType:
 						case PrimitiveReturnType:
 						case FieldType:
-							return typeRef(tr);
+							return tr;
 						case StaticallySizedArrayField:
 						case ExpressionType:
 						default:
-							return typeRef(ident(tr, ident("ByValue")));
+                            return subType(tr, ident("ByValue"));
 						}
 					}
 				}
@@ -1244,14 +1191,14 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
 					boolean isQualStruct = result.structsFullNames.contains(name);
 					if (convArgType == null || isQualStruct) {
 						/// Pointer to C structure
-						Identifier structRef = isQualStruct ? name : findStructRef(name, libraryClassName);
+						SimpleTypeRef structRef = isQualStruct ? typeRef(name) : findStructRef(name, libraryClassName);
 						if (structRef != null) {//result.cStructNames.contains(name)) {
 			 				switch (conversionMode) {
 								case ExpressionType:
 								case FieldType:
 									convArgType = valueType instanceof TypeRef.ArrayRef ?
-											typeRef(structRef) :
-											typeRef(ident(structRef, ident("ByReference")));
+											structRef :
+											subType(structRef, ident("ByReference"));
 									if (valueType instanceof Pointer)
 										return convArgType;
 									break;
@@ -1261,8 +1208,8 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
 												conversionMode == TypeConversionMode.NativeParameterWithStructsPtrPtrs ||
 												conversionMode == TypeConversionMode.PrimitiveOrBufferParameter
 											))
-										return arrayRef(typeRef(structRef));
-									convArgType = typeRef(structRef);
+										return arrayRef(structRef);
+									convArgType = structRef;
 									if (valueType instanceof Pointer)
 										return convArgType;
 									break;
@@ -1378,14 +1325,14 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
                     return tr;
                 }
             }
-            Identifier structRef = isQualStruct ? name : findStructRef(name, libraryClassName);
+            SimpleTypeRef structRef = isQualStruct ? typeRef(name) : findStructRef(name, libraryClassName);
             if (structRef != null) {
                 switch (conversionMode) {
                     case PointedValue:
                     case FieldType:
-                        return typeRef(structRef);
+                        return structRef;
                     default:
-                        return typeRef(ident(structRef, "ByValue"));
+                        return subType(structRef, ident("ByValue"));
                 }
             }
 
@@ -1452,7 +1399,7 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
             return ident(class1);
         }
 
-        Struct s = result.getObjcCClassOrProtocol(name);
+        Struct s = result.resolveObjCClass(name);
         if (s != null) {
             return result.objectiveCGenerator.getFullClassName(s);
         }

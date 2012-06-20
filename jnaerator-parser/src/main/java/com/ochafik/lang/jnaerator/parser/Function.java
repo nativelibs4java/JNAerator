@@ -232,7 +232,19 @@ public class Function extends Declaration implements Declarator.MutableByDeclara
         return e;
     }
     
-	public String computeSignature(boolean addReturnType) {
+    public enum SignatureType {
+        Full(true, true),
+        ArgsOnly(false, false),
+        ArgsAndRet(false, true),
+        JavaStyle(true, false);
+
+        public final boolean hasName, hasReturnType;
+        private SignatureType(boolean hasName, boolean hasReturnType) {
+            this.hasName = hasName;
+            this.hasReturnType = hasReturnType;
+        }
+    }
+	public String computeSignature(SignatureType signatureType) {
 		StringBuilder b = new StringBuilder();
 		
 		if (type == Type.ObjCMethod) {
@@ -273,14 +285,15 @@ public class Function extends Declaration implements Declarator.MutableByDeclara
 				firstArg = false;
 			}
 		} else {
-			if (addReturnType && getValueType() != null) {
+			if (signatureType.hasReturnType && getValueType() != null) {
 				TypeRef t = getValueType().clone();
                 erase(t);
 				t.stripDetails();
 				b.append(t);
 				b.append(' ');
 			}
-			b.append(getName());
+            if (signatureType.hasName)
+                b.append(getName());
 			boolean first = true;
 			b.append('(');
 			for (Arg arg : getArgs()) {

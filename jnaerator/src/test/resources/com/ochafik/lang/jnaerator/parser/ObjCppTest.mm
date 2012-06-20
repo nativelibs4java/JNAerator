@@ -494,3 +494,9 @@ extern TestMe();
 int[4] x;
 --
 bool (*test)(const void *buffer, unsigned int length) x;
+--
+class fpos;
+class fpos
+{
+	fpos() {}
+};

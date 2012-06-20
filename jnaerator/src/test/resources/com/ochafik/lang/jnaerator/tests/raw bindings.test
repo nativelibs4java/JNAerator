@@ -1,0 +1,22 @@
+enum E { A, B };
+typedef struct cl_event_ *cl_event;
+
+int* f1(cl_event, void*, E e);
+
+int f2(int);
+int* f3(int);
+int* f4(int*);
+int f5(int*);
+--
+#runtime(BridJ)
+import test.*;
+import static test.TestLibrary.*;
+
+Pointer<Integer> p;
+int i;
+
+p = f1((cl_event)null, (Pointer<?>)null, (IntValuedEnum<E>)null);
+i = f2(0);
+p = f3(0);
+p = f4((Pointer<Integer>)null);
+i = f5((Pointer<Integer>)null);

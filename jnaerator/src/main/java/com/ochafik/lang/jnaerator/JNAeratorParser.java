@@ -210,6 +210,7 @@ public class JNAeratorParser {
                     sourceFiles.add(fut.get(config.fullParsingTimeout, TimeUnit.MILLISECONDS));
                     return sourceFiles;
                 } catch (Throwable ex) {
+                	ex.printStackTrace();
                     System.err.println("Parsing failed : " + ex);
                     fut.cancel(true);
 //                    Thread.sleep(200);
@@ -241,6 +242,7 @@ public class JNAeratorParser {
 						firstFailure = false;
 					}
 					System.gc();
+                	ex.printStackTrace();
 					System.err.println("Parsing failed : " + ex);
 				}
 			}

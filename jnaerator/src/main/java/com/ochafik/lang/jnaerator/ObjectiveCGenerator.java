@@ -59,6 +59,7 @@ import com.ochafik.lang.jnaerator.parser.Expression.AssignmentOperator;
 import com.ochafik.lang.jnaerator.parser.Expression.BinaryOperator;
 import com.ochafik.lang.jnaerator.parser.Expression.Constant;
 import com.ochafik.lang.jnaerator.parser.Expression.MemberRefStyle;
+import com.ochafik.lang.jnaerator.parser.Function.SignatureType;
 import com.ochafik.lang.jnaerator.parser.Statement.Block;
 import com.ochafik.lang.jnaerator.parser.StoredDeclarations.TypeDef;
 import com.ochafik.lang.jnaerator.parser.Struct.Type;
@@ -134,7 +135,7 @@ public class ObjectiveCGenerator {
 		if (n != null && n.equals("NSObject"))// || n.equals("NSClass"))
 			return true;
 		
-		String sig = m.computeSignature(false);
+		String sig = m.computeSignature(SignatureType.JavaStyle);
 		if (DeclarationsConverter.getMethodsAndTheirSignatures(NSObject.class).getSecond().contains(sig))
 			return true;
 		
@@ -537,7 +538,7 @@ public class ObjectiveCGenerator {
 	
 	private boolean add(Struct classStruct, Declaration decl, Signatures signatures, Set<?>... additionalMethodSignatures) {
 		if (decl instanceof Function) {
-			String sig = ((Function)decl).computeSignature(false);
+			String sig = ((Function)decl).computeSignature(SignatureType.JavaStyle);
 			for (Set<?> sigs : additionalMethodSignatures)
 				if (sigs.contains(sig))
 					return false;
@@ -564,7 +565,7 @@ public class ObjectiveCGenerator {
 			
 		Function createCopy = meth.clone();
 		createCopy.setCommentBefore("Factory method");
-		createCopy.addToCommentBefore("@see #" + meth.computeSignature(false));
+		createCopy.addToCommentBefore("@see #" + meth.computeSignature(SignatureType.JavaStyle));
 		createCopy.setName(ident("create" + name.substring("init".length())));
 		createCopy.addModifiers(ModifierType.Public, ModifierType.Static);
 		createCopy.reorganizeModifiers();

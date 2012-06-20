@@ -115,7 +115,8 @@ public class JNAeratorStudio extends JPanel {
 		charPtrAsString = new JCheckBox("char*/wchar_t* as (W)String", false),
 		reificationCb = new JCheckBox("Reification", false),
 		convertBodiesCb = new JCheckBox("Convert Statements (experimental, BridJ only)", false),
-		scalaSettersCb = new JCheckBox("Scala struct field setters", false),
+		genRawBindingsCb = new JCheckBox("Generate raw bindings (BridJ only)", false),
+		//scalaSettersCb = new JCheckBox("Scala struct field setters", false),
 		beautifyNamesCb = new JCheckBox("Beautify names", false),
 		noCommentCb = new JCheckBox("No comments", false);
 
@@ -242,7 +243,8 @@ public class JNAeratorStudio extends JPanel {
 			setPref("options.topLevelStructs", structsAsTopLevelClassesCb.isSelected());
 			setPref("options.reification", reificationCb.isSelected());
 			setPref("options.convertBodies", convertBodiesCb.isSelected());
-			setPref("options.scalaSetters", scalaSettersCb.isSelected());
+            setPref("options.genRawBindings", genRawBindingsCb.isSelected());
+			//setPref("options.scalaSetters", scalaSettersCb.isSelected());
             setPref("options.beautifyNames", beautifyNamesCb.isSelected());
 			setPref("options.charPtrAsString", charPtrAsString.isSelected());
 			setPref("options.targetRuntime", ((JNAeratorConfig.Runtime)runtimeCombo.getSelectedItem()).name());
@@ -425,9 +427,10 @@ public class JNAeratorStudio extends JPanel {
 		optPanel.add(noCommentCb);
 		optPanel.add(structsAsTopLevelClassesCb);
         optPanel.add(charPtrAsString);
-        optPanel.add(scalaSettersCb);
+        //optPanel.add(scalaSettersCb);
         optPanel.add(reificationCb);
         optPanel.add(convertBodiesCb);
+        optPanel.add(genRawBindingsCb);
         optPanel.add(beautifyNamesCb);
         optBox.add(optPanel);
 		for (Component c : optBox.getComponents())
@@ -530,8 +533,9 @@ public class JNAeratorStudio extends JPanel {
 				config.putTopStructsInSeparateFiles = structsAsTopLevelClassesCb.isSelected();
 				config.reification = reificationCb.isSelected();
 				config.convertBodies = convertBodiesCb.isSelected();
+                config.genRawBindings = genRawBindingsCb.isSelected();
                 config.beautifyNames = beautifyNamesCb.isSelected();
-				config.scalaStructSetters = scalaSettersCb.isSelected();
+				//config.scalaStructSetters = scalaSettersCb.isSelected();
                 config.stringifyConstCStringReturnValues = config.charPtrAsString = charPtrAsString.isSelected();
                 config.runtime = (Runtime) runtimeCombo.getSelectedItem();
 				config.outputMode = (OutputMode) modeCombo.getSelectedItem();
@@ -743,9 +747,10 @@ public class JNAeratorStudio extends JPanel {
 			js.structsAsTopLevelClassesCb.setSelected(getPref("options.topLevelStructs", true));
 			js.reificationCb.setSelected(getPref("options.reification", false));
 			js.convertBodiesCb.setSelected(getPref("options.convertBodies", false));
+            js.genRawBindingsCb.setSelected(getPref("options.genRawBindings", false));
             js.beautifyNamesCb.setSelected(getPref("options.beautifyNames", false));
             js.charPtrAsString.setSelected(getPref("options.charPtrAsString", false));
-            js.scalaSettersCb.setSelected(getPref("options.scalaSetters", false));
+            //js.scalaSettersCb.setSelected(getPref("options.scalaSetters", false));
             js.noCommentCb.setSelected(getPref("options.noComments", false));
 			
 			js.sp.setOrientation(getPref("splitPane.orientation", JSplitPane.HORIZONTAL_SPLIT));

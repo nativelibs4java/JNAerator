@@ -38,6 +38,7 @@ import com.ochafik.lang.jnaerator.runtime.VirtualTablePointer;
 import com.ochafik.util.listenable.Pair;
 import static com.ochafik.lang.jnaerator.parser.ElementsHelper.*;
 import static com.ochafik.lang.jnaerator.TypeConversion.*;
+import com.ochafik.lang.jnaerator.parser.Function.SignatureType;
 import com.ochafik.util.string.StringUtils;
 import com.sun.jna.PointerType;
 import org.bridj.TypedPointer;
@@ -315,7 +316,7 @@ public abstract class DeclarationsConverter {
 			pair = new Pair<List<Pair<Function, String>>, Set<String>>(new ArrayList<Pair<Function, String>>(), new HashSet<String>());
 			for (Method m : originalLib.getDeclaredMethods()) {
 				Function f = Function.fromMethod(m);
-				String sig = f.computeSignature(false);
+				String sig = f.computeSignature(Function.SignatureType.JavaStyle);
 				//if (m.getDeclaringClass().equals(NSObject.class) && f.getName().equals("as")) {
 				//	Declaration
 				//}
@@ -495,7 +496,7 @@ public abstract class DeclarationsConverter {
         //if (functionName.equals("operator"))
         //    functionName
 
-		String sig = function.computeSignature(false);
+		String sig = function.computeSignature(SignatureType.JavaStyle);
 
         DeclarationsHolder objOut = 
             result.config.reification &&

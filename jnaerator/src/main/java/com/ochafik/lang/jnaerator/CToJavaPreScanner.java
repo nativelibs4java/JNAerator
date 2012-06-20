@@ -252,7 +252,8 @@ public class CToJavaPreScanner extends Scanner {
 		
 		/// Explode comma-separated variables declarations
         int nDecl = v.getDeclarators().size();
-		for (Declarator vs : v.getDeclarators()) {
+        
+        for (Declarator vs : v.getDeclarators()) {
 			if (vs == null || vs instanceof DirectDeclarator && nDecl == 1)
 				continue;
 			

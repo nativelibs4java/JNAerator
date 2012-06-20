@@ -26,7 +26,7 @@ import org.rococoa.cocoa.*;
 import com.ochafik.lang.jnaerator.runtime.*;
 
 test_cb1((Pointer<TestLibrary.foo_cb_t>)null);
-test_cb2((Pointer<Pointer<TestLibrary.foo_cb_t>>)null);
+test_cb2((Pointer<TestLibrary.foo_cb_t>)null);
 test_cb3((Pointer<TestLibrary.test_cb3_func_callback>)null);
 test_cb4((Pointer<TestLibrary.test_cb4_func_callback>)null);
 test_cb5((Pointer<TestLibrary.test_cb5_arg1_callback>)null);

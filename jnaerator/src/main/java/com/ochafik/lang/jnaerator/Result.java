@@ -39,6 +39,7 @@ import org.rococoa.cocoa.foundation.NSObject;
 //import org.rococoa.cocoa.foundation.NSString;
 
 import com.ochafik.lang.jnaerator.JNAerator.Feedback;
+import com.ochafik.lang.jnaerator.TypeConversion.JavaPrim;
 import com.ochafik.lang.jnaerator.parser.Define;
 import com.ochafik.lang.jnaerator.parser.Element;
 import com.ochafik.lang.jnaerator.parser.Enum;
@@ -56,7 +57,6 @@ import com.ochafik.lang.jnaerator.parser.Enum.EnumItem;
 import com.ochafik.lang.jnaerator.parser.Expression.MemberRefStyle;
 import com.ochafik.lang.jnaerator.parser.Printer;
 import com.ochafik.lang.jnaerator.parser.StoredDeclarations.TypeDef;
-import com.ochafik.lang.jnaerator.parser.Struct.Type;
 import com.ochafik.lang.jnaerator.parser.TypeRef.FunctionSignature;
 import com.ochafik.lang.jnaerator.parser.TypeRef.TaggedTypeRef;
 import com.ochafik.util.SystemUtils;
@@ -461,6 +461,8 @@ public class Result extends Scanner {
 	
 	public Identifier getTaggedTypeIdentifierInJava(TaggedTypeRef s) {
 		
+        Struct parentStruct = s.findParentOfType(Struct.class);
+		
 		Identifier tag = s.getTag();
         if (tag != null) {
             TaggedTypeRef rep = null;
@@ -482,7 +484,9 @@ public class Result extends Scanner {
 			return null;
 		
 		name = name.clone();
-		Struct parentStruct = s.findParentOfType(Struct.class);
+        if (parentStruct == null)
+            parentStruct = s.findParentOfType(Struct.class);
+		//Struct parentStruct = s.findParentOfType(Struct.class);
 		if (parentStruct != null && parentStruct != s)
 			return ident(getTaggedTypeIdentifierInJava(parentStruct), name);
 		else if ((s instanceof Struct) && (config.putTopStructsInSeparateFiles || config.runtime == JNAeratorConfig.Runtime.BridJ))
@@ -530,7 +534,7 @@ public class Result extends Scanner {
                     getList(structsByLibrary, getLibrary(struct)).add(struct);
                     Identifier identifier = getTaggedTypeIdentifierInJava(struct);
                     if (identifier != null) {
-                        if (struct.getType() == Type.CUnion)
+                        if (struct.getType() == Struct.Type.CUnion)
                             unionsFullNames.add(identifier);
                         structsFullNames.add(identifier);
                     }
@@ -621,16 +625,16 @@ public class Result extends Scanner {
 		javaPackages.addAll(javaPackageByLibrary.values());
 		
 	}
-	public Struct getObjcCClassOrProtocol(Identifier name) {
-		Struct s = getMap(classes, Type.ObjCClass).get(name);
+	public Struct resolveObjCClass(Identifier name) {
+        if (name == null)
+            return null;
+		Struct s = getMap(classes, Struct.Type.ObjCClass).get(name);
 		if (s == null)
-			s = getMap(classes, Type.ObjCProtocol).get(name);
+			s = getMap(classes, Struct.Type.ObjCProtocol).get(name);
 		if (s == null)
 			s = objCCategoriesByName.get(name.toString());
 		return s;
 	}
-	
-
 
 	Class<?>[] overwrittenClassesThatNeedToKeepAllTheirMethods = new Class[] {
 		NSObject.class, 
@@ -648,6 +652,15 @@ public class Result extends Scanner {
     }
 	public List<Pair<Identifier, Function>> getFunctionsReifiableInFakePointer(Identifier resolvedFakePointer) {
         return functionsReifiableInFakePointers.get(resolvedFakePointer);
+    }
+
+    public JavaPrim resolvePrimitive(String name) {
+        return name == null ? null : javaPrims.get(name);
+    }
+
+    private boolean isPrimitive(TypeRef tr) {
+        // TODO un-hack me
+        return javaPrims.containsKey(tr.toString());
     }
 
     public interface ClassWritingNotifiable {
@@ -738,4 +751,129 @@ public class Result extends Scanner {
 			}
 		}
 	}
+    
+    
+    Map<String, TypeRef> manualTypeDefs = new HashMap<String, TypeRef>();
+
+    public TypeRef getTypeDef(Identifier name) {
+        if (name == null) {
+            return null;
+        }
+
+        Pair<TypeDef, Declarator> p = typeDefs.get(name);
+        if (p == null) {
+            return manualTypeDefs.get(name.toString());
+        }
+
+        Declarator value = p.getValue();
+        String rname = value == null ? null : value.resolveName();
+        if (rname != null) {
+            if (name.equals("id")) {
+                return null;
+            }
+
+            if (name.equals("SEL")) {
+                return null;
+            }
+
+            if (name.equals("IMP")) {
+                return null;
+            }
+
+            if (name.equals("Class")) {
+                return null;
+            }
+
+            if (name.equals("BOOL")) {
+                if (rname.equals("byte")) {
+                    return null;
+                }
+            }
+        }
+        
+        Declarator.MutableByDeclarator mt = p.getValue().mutateType(p.getFirst().getValueType());
+        return mt instanceof TypeRef ? (TypeRef)mt : null;
+    }
+    public void addManualTypeDef(String name, TypeRef tr) {
+        manualTypeDefs.put(name, tr);
+	}
+
+    public TypeRef resolveType(TypeRef tr, boolean keepUnresolvedIdentifiers) {
+        return resolveType(tr, keepUnresolvedIdentifiers, new HashSet<Identifier>());
+    }
+    protected TypeRef resolveType(TypeRef tr, boolean keepUnresolvedIdentifiers, Set<Identifier> resolvedTypeDefs) {
+        if (tr instanceof TypeRef.TargettedTypeRef) {
+            TypeRef.TargettedTypeRef ttr = (TypeRef.TargettedTypeRef)tr;
+            TypeRef originalTarget = ttr.getTarget();
+            TypeRef resolvedTarget = resolveType(originalTarget, keepUnresolvedIdentifiers, resolvedTypeDefs);
+            if (resolvedTarget == null)
+                return null;
+            
+            ttr.setTarget(null);
+            TypeRef.TargettedTypeRef clone = (TypeRef.TargettedTypeRef)ttr.clone();
+            ttr.setTarget(originalTarget);
+            clone.setTarget(resolvedTarget);
+            
+            return clone;
+        } 
+        
+        if (isPrimitive(tr))
+            return tr;
+        if (tr instanceof SimpleTypeRef) {
+            TypeRef resolved = resolveType(((SimpleTypeRef)tr).getName(), keepUnresolvedIdentifiers, resolvedTypeDefs);
+            if (resolved != null || !keepUnresolvedIdentifiers)
+                return resolved;
+        }
+        
+        return tr;
+    }
+    protected TypeRef resolveType(Identifier name, boolean keepUnresolvedIdentifiers, Set<Identifier> resolvedTypeDefs) {
+        TypeRef res;
+        res = resolveStruct(name);
+        if (res != null)
+            return res;
+
+        res = resolveEnum(name);
+        if (res != null)
+            return res;
+        
+        res = resolveCallback(name);
+        if (res != null)
+            return res;
+        
+        res = resolveObjCClass(name);
+        if (res != null)
+            return res;
+        
+        if (resolvedTypeDefs.add(name)) {
+            res = getTypeDef(name);
+            if (res != null)
+                return resolveType(res, keepUnresolvedIdentifiers, resolvedTypeDefs);
+        }
+
+        return null;
+    }
+    
+    public FunctionSignature resolveCallback(Identifier name) {
+        return callbacksByName.get(name);
+    }
+
+    public Enum resolveEnum(Identifier name) {
+        return enumsByName.get(name);
+    }
+
+    public Struct resolveStruct(Identifier name) {
+        return structsByName.get(name);
+    }
+    
+ 
+    Map<String, TypeConversion.JavaPrim> javaPrims = new TreeMap<String, TypeConversion.JavaPrim>();
+
+    public boolean isObjCppPrimitive(String s) {
+        return javaPrims.containsKey(s);
+    }
+
+    protected void prim(String from, TypeConversion.JavaPrim to) {
+        javaPrims.put(from, to);
+    }
 }

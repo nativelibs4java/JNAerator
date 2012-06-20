@@ -4,7 +4,10 @@ f(cl_info);
 
 struct ReSampleContext;
 typedef struct ReSampleContext ReSampleContext;
-void ff(ReSampleContext*);
+void f2(ReSampleContext*);
+
+typedef void FC(int);
+void f3(FC a, FC* b);
 --
 #runtime(JNAerator)
 import test.*;
@@ -18,4 +21,8 @@ import static test.TestLibrary.*;
 
 int i = f(10);
 
-ff((Pointer<ReSampleContext>)null);
+f2((Pointer<ReSampleContext>)null);
+
+Callback cb = (FC)null;
+Pointer<FC> pfc = null;
+f3(pfc, pfc);

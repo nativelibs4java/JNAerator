@@ -113,6 +113,7 @@ import org.antlr.runtime.ANTLRReaderStream;
 import org.antlr.runtime.CommonTokenStream;
 import static com.ochafik.lang.jnaerator.parser.ElementsHelper.*;
 import static com.ochafik.lang.jnaerator.nativesupport.NativeExportUtils.*;
+import com.ochafik.lang.jnaerator.parser.Function.SignatureType;
 import java.io.*;
 /*
 //include com/ochafik/lang/jnaerator/parser/*.mm
@@ -413,6 +414,9 @@ public class JNAerator {
 					case SizeAsLong:
 						config.sizeAsLong = true;
 						break;
+                    case GenRawBindings:
+                        config.genRawBindings = true;
+                        break;
                     case Undefine:
 						config.undefines.add(a.getStringParam(0));
 						break;
@@ -1553,7 +1557,7 @@ public class JNAerator {
 			}
 			if (functions == null)
 				result.declarationsConverter.functionAlternativesByNativeSignature.put(
-					function.computeSignature(false),
+					function.computeSignature(SignatureType.JavaStyle),
 					new Pair<Function, List<Function>>(
 						function,
 						functions = new ArrayList<Function>()

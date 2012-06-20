@@ -46,6 +46,7 @@ import java.net.URLConnection;
 import java.text.MessageFormat;
 import static com.ochafik.lang.jnaerator.parser.ElementsHelper.*;
 import static com.ochafik.lang.jnaerator.TypeConversion.*;
+import com.ochafik.lang.jnaerator.parser.Function.SignatureType;
 import com.sun.jna.PointerType;
 import com.sun.jna.win32.StdCallLibrary;
 
@@ -180,7 +181,7 @@ public class JNADeclarationsConverter extends DeclarationsConverter {
 			pair = new Pair<List<Pair<Function, String>>, Set<String>>(new ArrayList<Pair<Function, String>>(), new HashSet<String>());
 			for (Method m : originalLib.getDeclaredMethods()) {
 				Function f = Function.fromMethod(m);
-				String sig = f.computeSignature(false);
+				String sig = f.computeSignature(SignatureType.JavaStyle);
 				//if (m.getDeclaringClass().equals(NSObject.class) && f.getName().equals("as")) {
 				//	Declaration
 				//}
@@ -390,9 +391,9 @@ public class JNADeclarationsConverter extends DeclarationsConverter {
 				iArg++;
 			}
 
-			String natSign = natFunc.computeSignature(false),
-				primOrBufSign = alternativeOutputs ? primOrBufFunc.computeSignature(false) : null,
-				bufSign = alternativeOutputs ? natStructFunc.computeSignature(false) : null;
+			String natSign = natFunc.computeSignature(SignatureType.JavaStyle),
+				primOrBufSign = alternativeOutputs ? primOrBufFunc.computeSignature(SignatureType.JavaStyle) : null,
+				bufSign = alternativeOutputs ? natStructFunc.computeSignature(SignatureType.JavaStyle) : null;
 
 			if (signatures == null || signatures.addMethod(natSign)) {
 				if (alternativeOutputs && !primOrBufSign.equals(natSign)) {
@@ -876,7 +877,7 @@ public class JNADeclarationsConverter extends DeclarationsConverter {
 					stat(methodCall("setType", result.typeConverter.getJavaClassLitteralExpression(tr)))
 				));
 				
-				if (signatures.add(unionValConstr.computeSignature(false))) {
+				if (signatures.add(unionValConstr.computeSignature(SignatureType.JavaStyle))) {
 					structJavaClass.addDeclaration(unionValConstr);
 //					byRef.addDeclaration(unionValConstr.clone().setName(byRef.getTag().clone()));
 //					byVal.addDeclaration(unionValConstr.clone().setName(byVal.getTag().clone()));
@@ -931,7 +932,7 @@ public class JNADeclarationsConverter extends DeclarationsConverter {
                     methodCall("setFieldOrder", new Expression.NewArray(typeRef(String.class), new Expression[0], orderedFieldNames.toArray(new Expression[orderedFieldNames.size()])))
                 )
             )).addModifiers(ModifierType.Protected);
-            if (signatures.add(initOrder.computeSignature(false))) {
+            if (signatures.add(initOrder.computeSignature(SignatureType.JavaStyle))) {
                     structJavaClass.addDeclaration(initOrder);
                     Statement callInitOrder = stat(methodCall(initOrderName));
                 emptyConstructor.getBody().addStatement(callInitOrder);
@@ -943,7 +944,7 @@ public class JNADeclarationsConverter extends DeclarationsConverter {
 				System.err.println("Struct with no field : " + structName);
 			
 			if (nArgs > 0 && nArgs < result.config.maxConstructedFields) {
-				if (signatures.add(fieldsConstr.computeSignature(false))) {
+				if (signatures.add(fieldsConstr.computeSignature(SignatureType.JavaStyle))) {
 					structJavaClass.addDeclaration(fieldsConstr);
 				}
 			}

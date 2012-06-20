@@ -46,6 +46,7 @@ import com.ochafik.util.listenable.Pair;
 import com.ochafik.util.string.StringUtils;
 
 import static com.ochafik.lang.jnaerator.parser.ElementsHelper.*;
+import com.ochafik.lang.jnaerator.parser.Function.SignatureType;
 import com.sun.jna.win32.StdCallLibrary;
 import org.bridj.*;
 import org.bridj.ann.Convention;
@@ -189,10 +190,6 @@ public class BridJDeclarationsConverter extends DeclarationsConverter {
             
         Function nativeMethod = new Function(Type.JavaMethod, ident(functionName), null);
         
-        nativeMethod.addModifiers(
-            isProtected ? ModifierType.Protected : ModifierType.Public, 
-            isStatic || !isCallback && !isInStruct ? ModifierType.Static : null
-        );
         if (result.config.synchronizedMethods && !isCallback)
 			nativeMethod.addModifiers(ModifierType.Synchronized);
 		
@@ -204,13 +201,8 @@ public class BridJDeclarationsConverter extends DeclarationsConverter {
 				nativeMethod.addAnnotation(new Annotation(mgc, "(\"" + function.getName() + "\")"));
 			}
 		}
-        if (!isConstructor) {
-            NL4JConversion retType = ((BridJTypeConversion)result.typeConverter).convertTypeToNL4J(function.getValueType(), libraryClassName, null, null, -1, -1);
-            retType.annotateTypedType(nativeMethod);//.getTypedTypeRef())));
-            nativeMethod.setValueType(retType.typeRef);
-        }
-
-        Map<String, NL4JConversion> argTypes = new LinkedHashMap<String, NL4JConversion>();
+        
+        //Map<String, NL4JConversion> argTypes = new LinkedHashMap<String, NL4JConversion>();
 
         boolean isObjectiveC = function.getType() == Type.ObjCMethod;
         int iArg = 1;
@@ -223,35 +215,34 @@ public class BridJDeclarationsConverter extends DeclarationsConverter {
             superConstructorArgs.add(expr(iConstructor));
         }
         
-        for (Arg arg : function.getArgs()) {
+        Identifier varArgType = null;
+        String varArgName = null;
+        NL4JConversion returnType = null;
+        List<NL4JConversion> paramTypes = new ArrayList<NL4JConversion>();
+        List<String> paramNames = new ArrayList<String>();
+        if (!isConstructor) {
+            returnType = ((BridJTypeConversion)result.typeConverter).convertTypeToNL4J(function.getValueType(), libraryClassName, null, null, -1, -1);
+        }
 
+        for (Arg arg : function.getArgs()) {
+            String paramName;
             if (arg.isVarArg()) {
-            		assert arg.getValueType() == null;
-                // TODO choose vaname dynamically !
-                Identifier vaType = ident(isObjectiveC ? NSObject.class : Object.class);
-                String argName = chooseJavaArgName("varargs", iArg, argNames);
-                nativeMethod.addArg(new Arg(argName, typeRef(vaType.clone()))).setVarArg(true);
+                assert arg.getValueType() == null;
+                paramName = varArgName = chooseJavaArgName("varargs", iArg, argNames);
+                varArgType = ident(isObjectiveC ? NSObject.class : Object.class);
             } else {
-                String argName = chooseJavaArgName(arg.getName(), iArg, argNames);
-                NL4JConversion argType = ((BridJTypeConversion)result.typeConverter).convertTypeToNL4J(arg.getValueType(), libraryClassName, null, null, -1, -1);
-                argTypes.put(argName, argType);
-                nativeMethod.addArg(argType.annotateTypedType(new Arg(argName, argType.typeRef)));//.getTypedTypeRef())));
-                
-                if (isConstructor) {
-                    superConstructorArgs.add(varRef(argName));
-                }
+                paramName = chooseJavaArgName(arg.getName(), iArg, argNames);
+                paramTypes.add(((BridJTypeConversion)result.typeConverter).convertTypeToNL4J(arg.getValueType(), libraryClassName, null, null, -1, -1));
+            }
+            paramNames.add(paramName);
+            if (isConstructor) {
+                superConstructorArgs.add(varRef(paramName));
             }
             iArg++;
         }
-        String natSig = nativeMethod.computeSignature(false);
-
-        Identifier javaMethodName = signatures == null ? functionName : signatures.findNextMethodName(natSig, functionName);
-        if (!javaMethodName.equals(functionName)) {
-            nativeMethod.setName(javaMethodName);
-        }
-        if (!isCallback && !javaMethodName.equals(functionName))
-            nativeMethod.addAnnotation(new Annotation(Name.class, expr(functionName.toString())));
-
+        
+        fillIn(signatures, functionName, nativeMethod, returnType, paramTypes, paramNames, varArgType, varArgName, isCallback, false);
+        
         Block convertedBody = null;
         if (isConstructor) {
             convertedBody = block(stat(methodCall("super", superConstructorArgs.toArray(new Expression[superConstructorArgs.size()]))));
@@ -268,17 +259,106 @@ public class BridJDeclarationsConverter extends DeclarationsConverter {
             }
         }
         
-        if (convertedBody == null)
-            nativeMethod.addModifiers(isCallback ? ModifierType.Abstract : ModifierType.Native);
-        else
-            nativeMethod.setBody(convertedBody);
-        
         if (!result.config.noComments)
             nativeMethod.importComments(function, isCallback ? null : getFileCommentContent(function));
         
         out.addDeclaration(nativeMethod);
+        
+        boolean generateStaticMethod = isStatic || !isCallback && !isInStruct;
+        if (convertedBody == null) {
+            boolean forwardedToRaw = false;
+            if (result.config.genRawBindings && !isCallback) {
+                Function rawMethod = nativeMethod.clone();
+                rawMethod.setArgs(Collections.EMPTY_LIST);
+                fillIn(signatures, functionName, rawMethod, returnType, paramTypes, paramNames, varArgType, varArgName, isCallback, true);
+                rawMethod.addModifiers(ModifierType.Protected, ModifierType.Native);
+                if (generateStaticMethod)
+                    rawMethod.addModifiers(ModifierType.Static);
+                
+                if (!nativeMethod.computeSignature(SignatureType.ArgsAndRet).equals(rawMethod.computeSignature(SignatureType.ArgsAndRet))) {
+                    out.addDeclaration(rawMethod);
+                    
+                    List<Expression> followedArgs = new ArrayList<Expression>();
+                    for (int i = 0, n = paramTypes.size(); i < n; i++) {
+                        NL4JConversion paramType = paramTypes.get(i);
+                        String paramName = paramNames.get(i);
+                        Expression followedArg;
+                        
+                        switch (paramType.type) {
+                            case Pointer:
+                                followedArg = methodCall(expr(typeRef(org.bridj.Pointer.class)), "getPeer", varRef(paramName));
+                                break;
+                            case Enum:
+                                followedArg = cast(typeRef(int.class), methodCall(varRef(paramName), "value"));
+                                break;
+//                            case NativeSize:
+//                            case NativeLong:
+//                                followedArg = methodCall(varRef(paramName), "longValue");
+//                                break;
+                            default:
+                                followedArg = varRef(paramName);
+                                break;
+                        }
+                        followedArgs.add(followedArg);
+                    }
+                    
+                    Expression followedCall = methodCall(rawMethod.getName().toString(), followedArgs.toArray(new Expression[followedArgs.size()]));
+                    boolean isVoid = "void".equals(String.valueOf(nativeMethod.getValueType()));
+                    if (isVoid)
+                        nativeMethod.setBody(block(stat(followedCall)));
+                    else {
+                        switch (returnType.type) {
+                            case Pointer:
+                                followedCall = methodCall(expr(typeRef(org.bridj.Pointer.class)), "pointerToAddress", followedCall, result.typeConverter.typeLiteral(getSingleTypeParameter(nativeMethod.getValueType())));
+                                break;
+                            case Enum:
+                                followedCall = methodCall(expr(typeRef(org.bridj.FlagSet.class)), "fromValue", followedCall, result.typeConverter.typeLiteral(getSingleTypeParameter(nativeMethod.getValueType())));
+                                break;
+                            case NativeLong:
+                            case NativeSize:
+                                followedCall = new New(nativeMethod.getValueType().clone(), followedCall);
+                            default:
+                                break;
+                        }
+                        nativeMethod.setBody(block(new Statement.Return(followedCall)));
+                    }
+                    forwardedToRaw = true;
+                }
+            }
+
+            if (!forwardedToRaw)
+                nativeMethod.addModifiers(isCallback ? ModifierType.Abstract : ModifierType.Native);
+        } else
+            nativeMethod.setBody(convertedBody);
+        
+        nativeMethod.addModifiers(
+            isProtected ? ModifierType.Protected : ModifierType.Public, 
+            generateStaticMethod ? ModifierType.Static : null
+        );
+        
     }
 	
+    private void fillIn(Signatures signatures, Identifier functionName, Function nativeMethod, NL4JConversion returnType, List<NL4JConversion> paramTypes, List<String> paramNames, Identifier varArgType, String varArgName, boolean isCallback, boolean useRawTypes) {
+        for (int i = 0, n = paramTypes.size(); i < n; i++) {
+            NL4JConversion paramType = paramTypes.get(i);
+            String paramName = paramNames.get(i);
+            nativeMethod.addArg(paramType.annotateTypedType(new Arg(paramName, paramType.getTypeRef(useRawTypes)), useRawTypes));//.getTypedTypeRef())));
+        }
+        if (varArgType != null)
+            nativeMethod.addArg(new Arg(varArgName, typeRef(varArgType.clone()))).setVarArg(true);
+        
+        returnType.annotateTypedType(nativeMethod, useRawTypes);//.getTypedTypeRef())));
+        nativeMethod.setValueType(returnType.getTypeRef(useRawTypes));
+        
+        String natSig = nativeMethod.computeSignature(SignatureType.JavaStyle);
+
+        Identifier javaMethodName = signatures == null ? functionName : signatures.findNextMethodName(natSig, functionName);
+        if (!javaMethodName.equals(functionName)) {
+            nativeMethod.setName(javaMethodName);
+        }
+        if (!isCallback && !javaMethodName.equals(functionName))
+            nativeMethod.addAnnotation(new Annotation(Name.class, expr(functionName.toString())));
+    }
     public Struct convertStruct(Struct struct, Signatures signatures, Identifier callerLibraryClass, String callerLibrary, boolean onlyFields) throws IOException {
 		Identifier structName = getActualTaggedTypeName(struct);
 		if (structName == null)
@@ -476,6 +556,7 @@ public class BridJDeclarationsConverter extends DeclarationsConverter {
 		name = result.typeConverter.getValidJavaArgumentName(ident(name)).toString();
 		//convertVariablesDeclaration(name, mutatedType, out, iChild, callerLibraryName);
 
+        final boolean useRawTypes = false;
 		//Expression initVal = null;
 		int fieldIndex = iChild[0];
 		//convertTypeToNL4J(TypeRef valueType, Identifier libraryClassName, Expression structPeerExpr, Expression structIOExpr, Expression valueExpr, int fieldIndex, int bits) throws UnsupportedConversionException {
@@ -491,13 +572,13 @@ public class BridJDeclarationsConverter extends DeclarationsConverter {
 
         if (conv == null) {
 			throw new UnsupportedConversionException(mutatedType, "failed to convert type to Java");
-		} else if ("void".equals(String.valueOf(conv.typeRef))) {
+		} else if ("void".equals(String.valueOf(conv.getTypeRef(useRawTypes)))) {
 			throw new UnsupportedConversionException(mutatedType, "void type !");
 			//out.add(new EmptyDeclaration("SKIPPED:", v.formatComments("", true, true, false), v.toString()));
 		}
 
         Function convDecl = new Function();
-        conv.annotateTypedType(convDecl);
+        conv.annotateTypedType(convDecl, useRawTypes);
         convDecl.setType(Type.JavaMethod);
 		convDecl.addModifiers(ModifierType.Public);
 
@@ -523,7 +604,7 @@ public class BridJDeclarationsConverter extends DeclarationsConverter {
 
         if (!isGlobal)
             convDecl.addAnnotation(new Annotation(result.config.runtime.typeRef(JNAeratorConfig.Runtime.Ann.Field), expr(fieldIndex)));
-        convDecl.setValueType(conv.typeRef);
+        convDecl.setValueType(conv.getTypeRef(useRawTypes));
 
         TypeRef javaType = convDecl.getValueType();
         String pointerGetSetMethodSuffix = StringUtils.capitalize(javaType.toString());
@@ -655,4 +736,5 @@ public class BridJDeclarationsConverter extends DeclarationsConverter {
         );
         return ptClass;
     }
+
 }
