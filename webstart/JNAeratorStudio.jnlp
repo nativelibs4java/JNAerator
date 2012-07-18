@@ -23,7 +23,7 @@
 </security>
 <resources>
   <j2se version="1.6+" />
-  		<jar href="http://nativelibs4java.sourceforge.net/webstart/jnaerator/jnaerator-0.10-shaded.jar"/>
+  		<jar href="http://nativelibs4java.sourceforge.net/webstart/jnaerator/jnaerator-0.11-SNAPSHOT-shaded.jar"/>
 </resources>
 <application-desc main-class="com.ochafik.lang.jnaerator.studio.JNAeratorStudio"/>
 </jnlp>
