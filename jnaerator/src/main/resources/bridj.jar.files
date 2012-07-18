@@ -1,7 +1,5 @@
 org/bridj/AbstractBridJRuntime.class
 org/bridj/AbstractIntegral.class
-org/bridj/AndroidClassDefiner.class
-org/bridj/AndroidSupport.class
 org/bridj/BitFields$1.class
 org/bridj/BitFields$2.class
 org/bridj/BitFields$3.class
@@ -70,6 +68,9 @@ org/bridj/FlagSet$IntFlagSet.class
 org/bridj/FlagSet.class
 org/bridj/GenericCallback.class
 org/bridj/HeadersReconstructor.class
+org/bridj/Init.c
+org/bridj/Init.leaveForLater.c
+org/bridj/Init.stringInutile.c
 org/bridj/IntValuedEnum.class
 org/bridj/JNI$1.class
 org/bridj/JNI.class
@@ -119,6 +120,8 @@ org/bridj/StructIO$FieldDesc.class
 org/bridj/StructIO$SolidRanges$Builder.class
 org/bridj/StructIO$SolidRanges.class
 org/bridj/StructIO.class
+org/bridj/StructIO.java.orig
+org/bridj/StructIO.java.rej
 org/bridj/StructObject.class
 org/bridj/TimeT$timeval.class
 org/bridj/TimeT$timeval_customizer.class
