@@ -1,0 +1,23 @@
+struct VeryComplex {
+  double _Complex first;
+  _Complex double second;
+  
+  double _Complex *pThird;
+  _Complex double *pFourth;
+  
+  double control;
+};
+
+--
+#runtime(BridJ)
+import test.*;
+import static test.TestLibrary.*;
+
+VeryComplex c = new Quaternion();
+c.first().real(1.0);
+double x = c.second().imag();
+c.control(2.0);
+
+Pointer<ComplexDouble> p;
+p = c.pThird();
+p = c.pFourth();

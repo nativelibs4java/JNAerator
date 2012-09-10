@@ -101,6 +101,7 @@ public class JNAeratorConfigUtils {
 		}
 		if (SystemUtils.isUnix()) {
 			DEFAULT_INCLUDE_PATH.add("/usr/include");
+			DEFAULT_INCLUDE_PATH.add("/usr/local/include");
 		
 			/*
 			 * /usr/include/c++ is likely to contain directories with versions such as 4.0.0, 4.4.0...

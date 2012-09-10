@@ -100,6 +100,9 @@ public enum ModifierType implements Modifier {
 	Long(of(NumericTypeQualifier, SizeModifier)),
 	Short(of(NumericTypeQualifier, SizeModifier)),
 	
+	_Complex(of(NumericTypeQualifier)),
+	//Complex(_Complex),
+	
 	Typename(of(ReferenceQualifier)),
 	Struct(of(ReferenceQualifier)),
 	Class(of(ReferenceQualifier)),

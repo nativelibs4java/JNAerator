@@ -69,13 +69,14 @@ public class BridJTypeConversion extends TypeConversion {
             if (type == ConvType.Void) {
                 return typeRef(ident("?"));
             }
-            if (result.config.runtime == JNAeratorConfig.Runtime.BridJ) {
-                if (type == ConvType.NativeSize) {
-                    return typeRef(SizeT.class);
-                }
-                if (type == ConvType.NativeLong) {
-                    return typeRef(org.bridj.CLong.class);
-                }
+            if (type == ConvType.NativeSize) {
+                return typeRef(SizeT.class);
+            }
+            if (type == ConvType.NativeLong) {
+                return typeRef(org.bridj.CLong.class);
+            }
+            if (type == ConvType.ComplexDouble) {
+                return typeRef(org.bridj.ComplexDouble.class);
             }
             TypeRef t = indirectType == null ? typeRef : indirectType;
             return t == null ? null : t.clone();
@@ -99,6 +100,7 @@ public class BridJTypeConversion extends TypeConversion {
                         element.addAnnotation(new Annotation(Ptr.class));
                         break;
                     case Struct:
+                    case ComplexDouble:
                         //throw new UnsupportedConversionException(typeRef, "Struct by value not supported yet");
                         break;
                     default:
@@ -171,12 +173,7 @@ public class BridJTypeConversion extends TypeConversion {
 					return conv;
                 }
 				TypeRef pointedTypeRef = targetConv.getIndirectTypeRef();
-				if (targetConv.type != ConvType.Void) {
-					if (targetConv.type == ConvType.NativeSize)
-						pointedTypeRef = typeRef(SizeT.class);
-					else if (targetConv.type == ConvType.NativeLong)
-						pointedTypeRef = typeRef(CLong.class);
-				}
+				
 				if (pointedTypeRef != null) {
 					conv.isPtr = true;
                     conv.type = ConvType.Pointer;
@@ -234,6 +231,11 @@ public class BridJTypeConversion extends TypeConversion {
                         conv.type = ConvType.Void;
                         conv.typeRef = primRef(prim);
                         radix = null;
+                        break;
+                    case ComplexDouble:
+                        conv.type = ConvType.ComplexDouble;
+                        conv.typeRef = typeRef(org.bridj.ComplexDouble.class);
+                        radix = "Struct";
                         break;
                     default:
                         conv.type = ConvType.Primitive;
