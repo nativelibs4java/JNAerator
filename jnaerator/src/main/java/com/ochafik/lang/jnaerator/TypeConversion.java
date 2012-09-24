@@ -127,7 +127,7 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
 
     public enum JavaPrim {
 
-        Void(null, null, ESize.Zero),
+        Void(java.lang.Void.TYPE, null, ESize.Zero),
         Char(Character.TYPE, Character.class, ESize.CharSize),
         Long(java.lang.Long.TYPE, java.lang.Long.class, ESize.Eight),
         Int(Integer.TYPE, Integer.class, ESize.Four),
@@ -195,9 +195,9 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
             this.type = type;
             this.wrapperType = wrapperType;
             this.size = size;
-            this.name = type == null ? "void" : type.getName();
+            this.name = type == null ? null : type.getName();
             this.isPrimitive = type == null || type.isPrimitive();
-            this.simpleName = type == null ? "void" : type.getSimpleName();
+            this.simpleName = type == null ? null : type.getSimpleName();
         }
     }
 
@@ -463,10 +463,10 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
                 }
             }
         }
-        final TypeRef valueTypeCl = valueType.clone();
+//        final TypeRef valueTypeCl = valueType.clone();
         Arg holder = new Arg();
-        holder.setValueType(valueTypeCl);
-        valueTypeCl.accept(new Scanner() {
+//        holder.setValueType(valueTypeCl);
+        valueType.accept(new Scanner() {
 
             java.util.Stack<String> names = new java.util.Stack<String>();
             int depth = 0;
@@ -678,12 +678,12 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
 
         boolean isLong = false;
         String str;
-        if ((isLong = valueType.hasModifier(ModifierType.Long)) || valueType.hasModifier(ModifierType.Short)) {
-        //if ((isLong = valueType.hasModifier(ModifierType.Long)) || valueType.hasModifier(ModifierType.Short)) {
-            str = (isLong ? "long " : "short ") + name;
-        } else {
+//        if ((isLong = valueType.hasModifier(ModifierType.Long)) || valueType.hasModifier(ModifierType.Short)) {
+//        //if ((isLong = valueType.hasModifier(ModifierType.Long)) || valueType.hasModifier(ModifierType.Short)) {
+//            str = (isLong ? "long " : "short ") + name;
+//        } else {
             str = name.toString();
-        }
+//        }
 
         JavaPrim type = result.resolvePrimitive(str);
         if (type == JavaPrim.Int && longCount > 1) {

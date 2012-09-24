@@ -34,3 +34,4 @@ S.ByReference sbr = new S(0, 0f, 0.0).byReference();
 
 S2 s2 = new S2();
 s2 = new S2(0, 0f, 0.0, 0L, (NativeLong)null);
+sc = s2;
