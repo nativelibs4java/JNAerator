@@ -37,7 +37,7 @@ public class JNAeratorMojo
     extends AbstractMojo
 {
     /**
-     * Output directory for JNAerated sources.
+     * Path to JNAerator configuration file.
      * @parameter expression="${project.basedir}/src/main/jnaerator/config.jnaerator"
      * @required
      */

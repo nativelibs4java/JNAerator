@@ -136,6 +136,7 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
         Boolean(java.lang.Boolean.TYPE, java.lang.Boolean.class, ESize.One),
         Float(java.lang.Float.TYPE, java.lang.Float.class, ESize.Four),
         Double(java.lang.Double.TYPE, java.lang.Double.class, ESize.Eight),
+        ComplexDouble(null, null, ESize.Sixteen),
         NativeLong(com.sun.jna.NativeLong.class, com.sun.jna.NativeLong.class, ESize.StaticSizeField),
         NativeSize(NativeSize.class, NativeSize.class, ESize.StaticSizeField),
         NSInteger(org.rococoa.cocoa.foundation.NSInteger.class, org.rococoa.cocoa.foundation.NSInteger.class, ESize.StaticSizeField),
@@ -151,6 +152,7 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
             Two(expr(2)),
             Four(expr(4)),
             Eight(expr(8)),
+            Sixteen(expr(16)),
             StaticSizeField(null) {
 
                 @Override
@@ -295,6 +297,8 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
         JavaPrim sizePrim = result.config.sizeAsLong ? longPrim : JavaPrim.NativeSize;
         result.prim("size_t", sizePrim);
         result.prim("ptrdiff_t", sizePrim);
+        
+        result.prim("complex double", JavaPrim.ComplexDouble);
 
         result.prim("int16_t", JavaPrim.Short);
         result.prim("uint16_t", JavaPrim.Short);
@@ -674,7 +678,8 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
 
         boolean isLong = false;
         String str;
-        if ((isLong = valueType.getModifiers().contains("long")) || valueType.getModifiers().contains("short")) {
+        if ((isLong = valueType.hasModifier(ModifierType.Long)) || valueType.hasModifier(ModifierType.Short)) {
+        //if ((isLong = valueType.hasModifier(ModifierType.Long)) || valueType.hasModifier(ModifierType.Short)) {
             str = (isLong ? "long " : "short ") + name;
         } else {
             str = name.toString();
@@ -685,6 +690,9 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
             return JavaPrim.Long;
         }
 
+        if (type == JavaPrim.Double && valueType.hasModifier(ModifierType._Complex)) {
+            return JavaPrim.ComplexDouble;
+        }
         return type;
     }
 
@@ -956,8 +964,16 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
     }
 
     public enum ConvType {
-
-        Enum, Pointer, Primitive, Struct, NativeLong, NativeSize, Void, Callback, Default
+        Enum, 
+        Pointer, 
+        Primitive, 
+        Struct, 
+        NativeLong,
+        NativeSize,
+        ComplexDouble,
+        Void,
+        Callback,
+        Default
     }
     
     static Map<String, Pair<Integer, Class<?>>> buffersAndArityByType = new HashMap<String, Pair<Integer, Class<?>>>();

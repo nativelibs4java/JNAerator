@@ -83,13 +83,14 @@ public class BridJTypeConversion extends TypeConversion {
             if (type == ConvType.Void) {
                 return typeRef(ident("?"));
             }
-            if (result.config.runtime == JNAeratorConfig.Runtime.BridJ) {
-                if (type == ConvType.NativeSize) {
-                    return typeRef(SizeT.class);
-                }
-                if (type == ConvType.NativeLong) {
-                    return typeRef(org.bridj.CLong.class);
-                }
+            if (type == ConvType.NativeSize) {
+                return typeRef(SizeT.class);
+            }
+            if (type == ConvType.NativeLong) {
+                return typeRef(org.bridj.CLong.class);
+            }
+            if (type == ConvType.ComplexDouble) {
+                return typeRef(org.bridj.ComplexDouble.class);
             }
             TypeRef t = indirectType == null ? typeRef : indirectType;
             return t == null ? null : t.clone();
@@ -113,6 +114,7 @@ public class BridJTypeConversion extends TypeConversion {
                         element.addAnnotation(new Annotation(Ptr.class));
                         break;
                     case Struct:
+                    case ComplexDouble:
                     case Default:
                         //throw new UnsupportedConversionException(typeRef, "Struct by value not supported yet");
                         break;
@@ -201,12 +203,7 @@ public class BridJTypeConversion extends TypeConversion {
 					return conv;
                 }
 				TypeRef pointedTypeRef = targetConv.getIndirectTypeRef();
-				if (targetConv.type != ConvType.Void) {
-					if (targetConv.type == ConvType.NativeSize)
-						pointedTypeRef = typeRef(SizeT.class);
-					else if (targetConv.type == ConvType.NativeLong)
-						pointedTypeRef = typeRef(CLong.class);
-				}
+				
 				if (pointedTypeRef != null) {
                     conv.type = ConvType.Pointer;
 //					conv.isPtr = true;
@@ -264,6 +261,11 @@ public class BridJTypeConversion extends TypeConversion {
                         conv.type = ConvType.Void;
                         conv.typeRef = primRef(prim);
                         radix = null;
+                        break;
+                    case ComplexDouble:
+                        conv.type = ConvType.ComplexDouble;
+                        conv.typeRef = typeRef(org.bridj.ComplexDouble.class);
+                        radix = "Struct";
                         break;
                     default:
                         conv.type = ConvType.Primitive;
@@ -343,10 +345,13 @@ public class BridJTypeConversion extends TypeConversion {
         }
 
         if (valueType instanceof TypeRef.SimpleTypeRef && allowFakePointers) {
-            conv.type = ConvType.Pointer;
-            conv.typeRef = typeRef(result.getUndefinedType(libraryClassName, ((TypeRef.SimpleTypeRef)valueType).getName().resolveLastSimpleIdentifier().clone()));
-            conv.isUndefined = true;
-            return conv;
+            Identifier name = ((TypeRef.SimpleTypeRef)valueType).getName();
+            if (name != null) {
+                conv.type = ConvType.Pointer;
+                conv.typeRef = typeRef(result.getUndefinedType(libraryClassName, name.resolveLastSimpleIdentifier().clone()));
+                conv.isUndefined = true;
+                return conv;
+            }
         }
         throw new UnsupportedConversionException(original, "Unsupported type");
     }

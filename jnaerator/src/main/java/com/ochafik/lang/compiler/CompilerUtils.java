@@ -169,17 +169,17 @@ public class CompilerUtils {
 	public static void compile(JavaCompiler compiler, MemoryFileManager fileManager, DiagnosticCollector<JavaFileObject> diagnostics, String sourceCompatibility, File cacheDirectory, Class<?>...classpathHints) throws MalformedURLException, IOException {
 		//JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
 		//System.out.println("compiler = " + (compiler == null ? "<none found>" : compiler.getClass().getName()));
-		Set<String> bootclasspaths = getClassPaths(cacheDirectory, classpathHints);
-		bootclasspaths.addAll(getClassPaths(cacheDirectory, String.class));
-		String bootclasspath = StringUtils.implode(bootclasspaths, File.pathSeparator);
-		//System.out.println("bootclasspath = " + bootclasspath);
+		String bootclasspath = StringUtils.implode(getClassPaths(cacheDirectory, String.class), File.pathSeparator);
+		
+		String classpath = StringUtils.implode(getClassPaths(cacheDirectory, classpathHints), File.pathSeparator);
+		System.out.println("bootclasspath = " + bootclasspath);
+		System.out.println("classpath = " + classpath);
 		Iterable<? extends JavaFileObject> fileObjects = fileManager.getJavaFileObjects();  
 		List<String> options = sourceCompatibility == null ? null : Arrays.asList(
 			"-target", sourceCompatibility, 
 			"-source", sourceCompatibility,
-			"-bootclasspath", bootclasspath, //"/System/Library/Frameworks/JavaVM.framework/Versions/1.6.0/Classes/classes.jar",//bootclasspath,
-			"-classpath", bootclasspath //"/Users/ochafik/Prog/Java/bin/jnaerator.jar"//
-				//"http://ochafik.com/Java/jnaerator.jar"//bootclasspath
+			"-bootclasspath", bootclasspath,
+			"-classpath", classpath
 		);  
 //		DebugUtils.println(fileManager.inputs.values());
 		compiler.getTask(null, fileManager, diagnostics, options, null, fileObjects).call();
