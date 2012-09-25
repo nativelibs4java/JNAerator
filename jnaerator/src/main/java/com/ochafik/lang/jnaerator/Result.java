@@ -65,6 +65,7 @@ import com.ochafik.util.string.StringUtils;
 import java.util.LinkedHashMap;
 
 import static com.ochafik.lang.jnaerator.parser.ElementsHelper.*;
+import com.ochafik.lang.jnaerator.parser.TaggedTypeRefDeclaration;
 
 public class Result extends Scanner {
 
@@ -331,8 +332,10 @@ public class Result extends Scanner {
         	else {
 			Enum oldEnum = enumsByName.get(name);
 	
-			if (oldEnum  == null || oldEnum.isForwardDeclaration() || (oldEnum.getParentElement() instanceof TypeDef)) {
+			if (declarativePower(e) > declarativePower(oldEnum)) {
 				enumsByName.put(name, e);
+                
+                taggedTypeRefIdentifiersInJava.put(e, computeTaggedTypeIdentifierInJava(e));
 	
 				//if (e.getTag() != null) {
 				//	enumsByName.put(e.getTag(), e);
@@ -346,6 +349,19 @@ public class Result extends Scanner {
 			}
 		}
 	}
+    
+    static int declarativePower(TaggedTypeRef e) {
+        if (e == null)
+            return 0;
+        Element p = e.getParentElement();
+        if (p instanceof TypeDef)
+            return 4;
+        if (p instanceof TaggedTypeRefDeclaration)
+            return 3;
+        if (e.isForwardDeclaration())
+            return 2;
+        return 1;
+    }
 	
 	@Override
 	public void visitEnumItem(EnumItem enumItem) {
@@ -459,11 +475,10 @@ public class Result extends Scanner {
 		return config.entryName == null ? null : ident(config.entryName.toLowerCase(), config.entryName);
 	}
 	
+    Map<TaggedTypeRef, Identifier>  taggedTypeRefIdentifiersInJava = new HashMap<TaggedTypeRef, Identifier>();
+    
 	public Identifier getTaggedTypeIdentifierInJava(TaggedTypeRef s) {
-		
-        Struct parentStruct = s.findParentOfType(Struct.class);
-		
-		Identifier tag = s.getTag();
+        Identifier tag = s.getTag();
         if (tag != null) {
             TaggedTypeRef rep = null;
             if (s instanceof Struct) {
@@ -471,29 +486,30 @@ public class Result extends Scanner {
             } else if (s instanceof Enum) {
                 rep = enumsByName.get(tag);
             }
-            if (rep != null)
+            if (rep != null && rep != s)
                 s = rep;
         }
-
+        return taggedTypeRefIdentifiersInJava.get(s);
+    }
+    public Identifier computeTaggedTypeIdentifierInJava(TaggedTypeRef s) {
         Identifier name = declarationsConverter.getActualTaggedTypeName(s);
-		if (name == null)
-			return null;
-
+        if (name == null)
+            return null;
+        
         String library = getLibrary(s);
-		if (library == null)
-			return null;
-		
-		name = name.clone();
-        if (parentStruct == null)
-            parentStruct = s.findParentOfType(Struct.class);
-		//Struct parentStruct = s.findParentOfType(Struct.class);
-		if (parentStruct != null && parentStruct != s)
-			return ident(getTaggedTypeIdentifierInJava(parentStruct), name);
-		else if ((s instanceof Struct) && (config.putTopStructsInSeparateFiles || config.runtime == JNAeratorConfig.Runtime.BridJ))
-			return ident(getLibraryPackage(library), name);
-		else
-			return typeConverter.libMember(getLibraryClassFullName(library), null, name);
-	}
+        if (library == null)
+            return null;
+        
+        name = name.clone();
+        Struct parentStruct = s.findParentOfType(Struct.class);
+        //Struct parentStruct = s.findParentOfType(Struct.class);
+        if (parentStruct != null && parentStruct != s)
+            return ident(getTaggedTypeIdentifierInJava(parentStruct), name);
+        else if ((s instanceof Struct) && (config.putTopStructsInSeparateFiles || config.runtime == JNAeratorConfig.Runtime.BridJ))
+            return ident(getLibraryPackage(library), name);
+        else
+            return typeConverter.libMember(getLibraryClassFullName(library), null, name);
+    }
 
 	@Override
 	public void visitStruct(Struct struct) {
@@ -528,8 +544,10 @@ public class Result extends Scanner {
 				}
 				Struct oldStruct = structsByName.get(name);
 				
-				if (oldStruct == null || oldStruct.isForwardDeclaration() || (!(oldStruct.getParentElement() instanceof TypeDef) && struct.getParentElement() instanceof TypeDef)) {
+				if (declarativePower(struct) > declarativePower(oldStruct)) {
 					structsByName.put(name, struct);
+
+                    taggedTypeRefIdentifiersInJava.put(struct, computeTaggedTypeIdentifierInJava(struct));
 				
                     getList(structsByLibrary, getLibrary(struct)).add(struct);
                     Identifier identifier = getTaggedTypeIdentifierInJava(struct);
