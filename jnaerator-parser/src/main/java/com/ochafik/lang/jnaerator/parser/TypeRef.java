@@ -29,6 +29,26 @@ import com.ochafik.lang.jnaerator.parser.ModifierKind;
 
 public abstract class TypeRef extends ModifiableElement implements Declarator.MutableByDeclarator {
 	
+    protected Identifier resolvedJavaIdentifier;
+
+    public void setResolvedJavaIdentifier(Identifier resolvedJavaIdentifier) {
+        this.resolvedJavaIdentifier = changeValue(this, this.resolvedJavaIdentifier, resolvedJavaIdentifier);
+    }
+
+    public Identifier getResolvedJavaIdentifier() {
+        return resolvedJavaIdentifier;
+    }
+    
+	@Override
+	public boolean replaceChild(Element child, Element by) {
+		if (getResolvedJavaIdentifier() == child) {
+            setResolvedJavaIdentifier((Identifier)by);
+            return true;
+        }
+			
+		return super.replaceChild(child, by);
+	}
+    
 	protected boolean markedAsResolved;
 	public TypeRef setMarkedAsResolved(boolean markedAsResolved) {
 		this.markedAsResolved = markedAsResolved;

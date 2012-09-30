@@ -196,8 +196,9 @@ public class Scanner implements Visitor {
 		visit(array.getDimensions());
 	}
 
-	protected void visitTypeRef(TypeRef array) {
-		visitModifiableElement(array);
+	protected void visitTypeRef(TypeRef typeRef) {
+		visitModifiableElement(typeRef);
+        visit(typeRef.getResolvedJavaIdentifier());
 	}
 
 	protected void visitTargettedTypeRef(TargettedTypeRef targettedTypeRef) {
