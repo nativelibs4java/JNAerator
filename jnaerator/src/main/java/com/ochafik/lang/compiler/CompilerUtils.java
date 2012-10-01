@@ -172,8 +172,8 @@ public class CompilerUtils {
 		String bootclasspath = StringUtils.implode(getClassPaths(cacheDirectory, String.class), File.pathSeparator);
 		
 		String classpath = StringUtils.implode(getClassPaths(cacheDirectory, classpathHints), File.pathSeparator);
-		System.out.println("bootclasspath = " + bootclasspath);
-		System.out.println("classpath = " + classpath);
+//		System.out.println("bootclasspath = " + bootclasspath);
+//		System.out.println("classpath = " + classpath);
 		Iterable<? extends JavaFileObject> fileObjects = fileManager.getJavaFileObjects();  
 		List<String> options = sourceCompatibility == null ? null : Arrays.asList(
 			"-target", sourceCompatibility, 
