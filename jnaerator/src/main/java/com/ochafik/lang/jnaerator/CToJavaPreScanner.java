@@ -280,8 +280,8 @@ public class CToJavaPreScanner extends Scanner {
                     }
                 }
                 if (decl == null) {
-                		TypeRef vt = v.getValueType();
-                		decl = new VariablesDeclaration(vt == null ? null : vt.clone(), vs.clone());
+                    TypeRef vt = v.getValueType();
+                    decl = new VariablesDeclaration(vt == null ? null : vt.clone(), vs.clone());
 					decl.importDetails(v, false);
 					decl.importDetails(vs, false);
 					decl.importDetails(v.getValueType(), true);
