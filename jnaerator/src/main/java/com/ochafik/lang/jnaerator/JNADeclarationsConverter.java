@@ -99,7 +99,7 @@ public class JNADeclarationsConverter extends DeclarationsConverter {
 					if (!(decl instanceof DirectDeclarator))
 						continue; // TODO provide a mapping of exported values
 					
-					TypeRef mutatedType = (TypeRef) decl.mutateType(v.getValueType());
+					TypeRef mutatedType = (TypeRef) decl.mutateTypeKeepingParent(v.getValueType());
 					if (mutatedType == null || 
 							!mutatedType.getModifiers().contains(ModifierType.Const) ||
 							mutatedType.getModifiers().contains(ModifierType.Extern) ||
@@ -710,7 +710,7 @@ public class JNADeclarationsConverter extends DeclarationsConverter {
 				TypeRef mutatedType = valueType;
 				if (!(vs instanceof DirectDeclarator))
 				{
-					mutatedType = (TypeRef)vs.mutateType(valueType);
+					mutatedType = (TypeRef)vs.mutateTypeKeepingParent(valueType);
 					vs = new DirectDeclarator(vs.resolveName());
 				}
 				VariablesDeclaration vd = convertVariablesDeclarationToJNA(name, mutatedType, iChild, callerLibraryClass, v, vs);

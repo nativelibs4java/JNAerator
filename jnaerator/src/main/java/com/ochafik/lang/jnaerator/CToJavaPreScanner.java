@@ -195,36 +195,6 @@ public class CToJavaPreScanner extends Scanner {
 		}
 		if (toAddAfter != v)
 			v.replaceBy(null);
-		
-		/*if (v.getDeclarators().size() == 1 && v.getDeclarators().get(0) instanceof DirectDeclarator)
-			return;
-		
-		EmptyDeclaration empty = new EmptyDeclaration();
-		v.replaceBy(empty);
-		
-		Element toAddAfter = empty;
-		
-		/// Explode comma-separated variables declarations
-		for (Declarator vs : v.getDeclarators()) {
-			if (vs == null)
-				continue;
-			
-			Declarator.MutableByDeclarator type = vs.mutateType(v.getValueType());
-			if (!(type instanceof TypeRef))
-				continue;
-			
-			TypeRef tr = (TypeRef)type;
-			StoredDeclarations.TypeDef decl = new StoredDeclarations.TypeDef(tr, new DirectDeclarator(vs.resolveName()));
-			decl.importDetails(v, false);
-			decl.importDetails(vs, false);
-			decl.importDetails(tr, true);
-			
-			toAddAfter.insertSibling(decl, false);
-			toAddAfter = decl;
-
-			decl.accept(this);
-		}
-		*/
 	}
 	
 	@Override

@@ -114,7 +114,8 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
         ReturnType,
         ExpressionType,
         StaticallySizedArrayField,
-        PrimitiveReturnType, PointedValue
+        PrimitiveReturnType,
+        PointedValue
     }
     public Map<JavaPrim, Class<? extends ByReference>> primToByReference = new HashMap<JavaPrim, Class<? extends ByReference>>();
     public Map<JavaPrim, Class<? extends Global>> primToGlobal = new HashMap<JavaPrim, Class<? extends Global>>();
@@ -433,7 +434,7 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
             Identifier name = ((SimpleTypeRef)tr).getName();
             TypeRef tdt = typeDefsEncountered.add(name) ? result.getTypeDef(name) : null;
             if (tdt != null) {
-                return isResoluble(tdt, libraryClassName, typeDefsEncountered);//as(p.getSecond().mutateType(p.getFirst().getValueType()), TypeRef.class);
+                return isResoluble(tdt, libraryClassName, typeDefsEncountered);
             } else {
                 TypeRef ft = findTypeRef(name, libraryClassName);
                 return ft != null;
@@ -463,10 +464,11 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
                 }
             }
         }
-//        final TypeRef valueTypeCl = valueType.clone();
+        final TypeRef valueTypeCl = valueType.clone();
         Arg holder = new Arg();
-//        holder.setValueType(valueTypeCl);
-        valueType.accept(new Scanner() {
+        holder.setValueType(valueTypeCl);
+        holder.setParentElement(valueType.getParentElement());
+        holder.accept(new Scanner() {
 
             java.util.Stack<String> names = new java.util.Stack<String>();
             int depth = 0;
@@ -599,7 +601,7 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
         });
         TypeRef tr = holder.getValueType();
 //		tr.setParentElement(valueType.getParentElement());
-        return tr;// == null ? null : tr.clone();
+        return tr == null ? null : tr == valueTypeCl ? valueType : tr.clone();
     }
 //	TypeRef getPrimitiveRef(TypeRef valueType, String callerLibraryClass) {
 //		JavaPrim prim = getPrimitive(valueType, callerLibraryClass);
@@ -638,8 +640,9 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
     }
 
     public JavaPrim getPrimitive(TypeRef valueType, Identifier libraryClassName) {
-
-        valueType = resolveTypeDef(valueType, libraryClassName, true, true);
+        if (!(valueType instanceof Primitive) && !(valueType instanceof JavaPrimitive)) {
+            valueType = resolveTypeDef(valueType, libraryClassName, true, true);
+        }
         if (valueType == null) {
             return null;
         }
@@ -839,8 +842,10 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
         while (parent != null) {
             if (parent instanceof Struct) {
                 SimpleTypeRef parentRef = findStructRef((Struct) parent, null);
-                parentIdent = parentRef.getName();
-                break;
+                if (parentRef != null) {
+                    parentIdent = parentRef.getName();
+                    break;
+                }
             } 
             if (firstParent) {
                 if (name == null && parent instanceof TypeDef) {
@@ -937,7 +942,10 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
 //			return
 //				typeRef(ident(structName, inferCallBackName(s, true, true)));
 //		}
-        return typeRef(inferCallBackName(s, true, true, callerLibraryClass));
+        Identifier identifier = s.getResolvedJavaIdentifier();
+        if (identifier == null)
+            throw new UnsupportedConversionException(s, null);
+        return typeRef(identifier);
 //		return typeRef(libMember(result.getLibraryClassFullName(library), callerLibraryClass, inferCallBackName(s, true, true)));
         //typeRef(ident(result.getLibraryClassFullName(library), inferCallBackName(s, true)));
     }
@@ -1047,8 +1055,9 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
 //			valueType.toString();
 
         TypeRef original = valueType;
-        valueType = resolveTypeDef(valueType, libraryClassName, true, false);
-
+        TypeRef resolvedTypeRef = resolveTypeDef(valueType, libraryClassName, true, false);
+        if (resolvedTypeRef != null)
+            valueType = resolvedTypeRef;
 
 //		if (String.valueOf(valueType).contains("MonoObject"))
 //			valueType.toString();
@@ -1232,7 +1241,19 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
 							}
 						} else {
 							try {
-								convArgType = convertTypeToJNA(target, conversionMode, libraryClassName);
+                                TypeConversionMode targettedConversionMode;
+                                switch (conversionMode) {
+                                    case NativeParameter:
+                                    case NativeParameterWithStructsPtrPtrs:
+                                    case PrimitiveOrBufferParameter:
+                                    case PrimitiveReturnType:
+                                        targettedConversionMode = TypeConversionMode.PointedValue;
+                                        break;
+                                    default:
+                                        targettedConversionMode = conversionMode;
+                                        break;
+                                }
+								convArgType = convertTypeToJNA(target, targettedConversionMode, libraryClassName);
                                 /*if (result.isUndefinedType(convArgType)) {
                                     if (allowFakePointers && original instanceof SimpleTypeRef)
                                         return typeRef(result.getFakePointer(libraryClassName, ((SimpleTypeRef)original).getName().clone()));

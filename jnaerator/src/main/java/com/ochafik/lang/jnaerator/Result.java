@@ -334,8 +334,7 @@ public class Result extends Scanner {
 	
 			if (declarativePower(e) > declarativePower(oldEnum)) {
 				enumsByName.put(name, e);
-                
-                taggedTypeRefIdentifiersInJava.put(e, computeTaggedTypeIdentifierInJava(e));
+                e.setResolvedJavaIdentifier(computeTaggedTypeIdentifierInJava(e));
 	
 				//if (e.getTag() != null) {
 				//	enumsByName.put(e.getTag(), e);
@@ -474,12 +473,10 @@ public class Result extends Scanner {
 	public Identifier getHubFullClassName() {
 		return config.entryName == null ? null : ident(config.entryName.toLowerCase(), config.entryName);
 	}
-	
-    Map<TaggedTypeRef, Identifier>  taggedTypeRefIdentifiersInJava = new HashMap<TaggedTypeRef, Identifier>();
     
 	public Identifier getTaggedTypeIdentifierInJava(TaggedTypeRef s) {
         Identifier tag = s.getTag();
-        if (tag != null) {
+        if (tag != null && s.getResolvedJavaIdentifier() == null) {
             TaggedTypeRef rep = null;
             if (s instanceof Struct) {
                 rep = structsByName.get(tag);
@@ -489,7 +486,7 @@ public class Result extends Scanner {
             if (rep != null && rep != s)
                 s = rep;
         }
-        return taggedTypeRefIdentifiersInJava.get(s);
+        return s.getResolvedJavaIdentifier();
     }
     public Identifier computeTaggedTypeIdentifierInJava(TaggedTypeRef s) {
         Identifier name = declarationsConverter.getActualTaggedTypeName(s);
@@ -513,8 +510,6 @@ public class Result extends Scanner {
 
 	@Override
 	public void visitStruct(Struct struct) {
-		super.visitStruct(struct);
-		
 		Identifier name = struct.getTag();
 		if (name != null) {
 			switch (struct.getType()) {
@@ -547,9 +542,11 @@ public class Result extends Scanner {
 				if (declarativePower(struct) > declarativePower(oldStruct)) {
 					structsByName.put(name, struct);
 
-                    taggedTypeRefIdentifiersInJava.put(struct, computeTaggedTypeIdentifierInJava(struct));
-				
-                    getList(structsByLibrary, getLibrary(struct)).add(struct);
+                    Identifier resolvedJavaIdentifier = computeTaggedTypeIdentifierInJava(struct);
+                    struct.setResolvedJavaIdentifier(resolvedJavaIdentifier);
+                    
+                    if (struct.findParentOfType(Struct.class) == null)
+                        getList(structsByLibrary, getLibrary(struct)).add(struct);
                     Identifier identifier = getTaggedTypeIdentifierInJava(struct);
                     if (identifier != null) {
                         if (struct.getType() == Struct.Type.CUnion)
@@ -578,24 +575,46 @@ public class Result extends Scanner {
 				struct = null;
 			}
 		}
+        super.visitStruct(struct);
 	}
 	
 	@Override
 	public void visitFunctionSignature(FunctionSignature functionSignature) {
 		super.visitFunctionSignature(functionSignature);
 		Function function = functionSignature.getFunction();
-		if (function != null) {
-			getList(callbacksByLibrary, getLibrary(functionSignature)).add(functionSignature);
-			Identifier name = typeConverter.inferCallBackName(functionSignature, false, false, null);
+		Identifier name = typeConverter.inferCallBackName(functionSignature, false, false, null);
+        Identifier identifier = computeCallbackIdentifierInJava(functionSignature);
+        functionSignature.setResolvedJavaIdentifier(identifier);
+        if (function != null) {
+            if (functionSignature.findParentOfType(Struct.class) == null) {
+                getList(callbacksByLibrary, getLibrary(functionSignature)).add(functionSignature);
+            }
 			if (name != null) {
 				callbacksByName.put(name, functionSignature);
-				Identifier identifier = typeConverter.inferCallBackName(functionSignature, true, true, null);
 				if (identifier != null)
 					callbacksFullNames.add(identifier);
 				
 			}
 		}
 	}
+    
+    public Identifier computeCallbackIdentifierInJava(FunctionSignature fs) {
+        Identifier name = typeConverter.inferCallBackName(fs, false, false, null);
+        if (name == null)
+            return null;
+        
+        String library = getLibrary(fs);
+        if (library == null)
+            return null;
+        
+        name = name.clone();
+        Struct parentStruct = fs.findParentOfType(Struct.class);
+        //Struct parentStruct = s.findParentOfType(Struct.class);
+        if (parentStruct != null)
+            return ident(getTaggedTypeIdentifierInJava(parentStruct), name);
+        else
+            return typeConverter.libMember(getLibraryClassFullName(library), null, name);
+    }
 
 	public Identifier getLibraryClassSimpleName(String library) {
 		return ident(StringUtils.capitalize(library) + "Library");
@@ -830,8 +849,9 @@ public class Result extends Scanner {
             ttr.setTarget(null);
             TypeRef.TargettedTypeRef clone = (TypeRef.TargettedTypeRef)ttr.clone();
             ttr.setTarget(originalTarget);
-            clone.setTarget(resolvedTarget);
+            clone.setTarget(resolvedTarget.clone());
             
+            clone.setParentElement(ttr.findParentOfType(Struct.class));
             return clone;
         } 
         

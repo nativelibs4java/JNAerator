@@ -102,11 +102,14 @@ public class MissingNamesChooser extends Scanner {
 				for (Pair<Arg, Integer> p : missing) {
 					i = 1;
 					String base;
-					try {
-						base = chooseArgNameFromType(p.getFirst().getValueType());
-					} catch (UnsupportedConversionException ex) {
-						base = "arg";
-					}
+                    if (p.getFirst().isVarArg())
+                        base = "varArgs";
+                    else
+                        try {
+                            base = chooseArgNameFromType(p.getFirst().getValueType());
+                        } catch (UnsupportedConversionException ex) {
+                            base = "arg";
+                        }
 //					if (p.getFirst().getValueType() instanceof TypeRef.SimpleTypeRef)
 //						base = ((TypeRef.SimpleTypeRef)p.getFirst().getValueType()).getName();
 //					else
@@ -263,7 +266,7 @@ public class MissingNamesChooser extends Scanner {
 				
 		 		td.setTaggedTypeRef(taggedTypeRef);
 		 		holder.addDeclaration(td);
-				td.accept(this);
+				//td.accept(this);
 			}
 		}
 //		

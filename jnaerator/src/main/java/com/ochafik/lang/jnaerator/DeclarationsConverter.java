@@ -216,7 +216,7 @@ public abstract class DeclarationsConverter {
 					if (!(decl instanceof DirectDeclarator))
 						continue; // TODO provide a mapping of exported values
 					
-					TypeRef mutatedType = (TypeRef) decl.mutateType(v.getValueType());
+					TypeRef mutatedType = (TypeRef) decl.mutateTypeKeepingParent(v.getValueType());
 					if (mutatedType == null || 
 							!mutatedType.getModifiers().contains(ModifierType.Const) ||
 							mutatedType.getModifiers().contains(ModifierType.Extern) ||
@@ -583,7 +583,7 @@ public abstract class DeclarationsConverter {
 	}
 
 	public Identifier getActualTaggedTypeName(TaggedTypeRef struct) {
-		Identifier structName = null;
+        Identifier structName = null;
 		Identifier tag = struct.getTag();
 		if (tag == null || tag.isPlain() && tag.toString().startsWith("_")) {
 			TypeDef parentDef = as(struct.getParentElement(), TypeDef.class);

@@ -71,6 +71,11 @@ public abstract class Declarator extends ModifiableElement {
 	}
 	public abstract MutableByDeclarator mutateType(MutableByDeclarator t);
 	
+    public final MutableByDeclarator mutateTypeKeepingParent(MutableByDeclarator type) {
+        MutableByDeclarator mutated = mutateType(type);
+        ((Element)mutated).setParentElement(((Element)type).getParentElement());
+        return mutated;
+    }
 	public static class DirectDeclarator extends Declarator {
 		public DirectDeclarator(String name, int bits, Expression defaultValue) {
 			setName(name);

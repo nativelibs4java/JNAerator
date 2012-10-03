@@ -679,7 +679,7 @@ public class BridJDeclarationsConverter extends DeclarationsConverter {
 				TypeRef mutatedType = valueType;
 				if (!(vs instanceof DirectDeclarator))
 				{
-					mutatedType = (TypeRef)vs.mutateType(valueType);
+					mutatedType = (TypeRef)vs.mutateTypeKeepingParent(valueType);
 					vs = new DirectDeclarator(vs.resolveName());
 				}
 				//Declarator d = v.getDeclarators().get(0);

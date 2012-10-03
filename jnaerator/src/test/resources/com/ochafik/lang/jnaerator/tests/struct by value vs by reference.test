@@ -57,8 +57,8 @@ simplestruct.ByReference s2 = o2.byref;
 outerstruct3 o3 = new outerstruct3(new simplestruct[0]);
 simplestruct[] s3 = o3.array;
 
-outerstruct4 o4 = new outerstruct4((PointerByReference)null);
-PointerByReference s4 = o4.ptr_array;
+outerstruct4 o4 = new outerstruct4((simplestruct.ByReference[])null);
+simplestruct.ByReference[] s4 = o4.ptr_array;
 
 simplestruct.ByValue fv = INSTANCE.myfuncV();
 

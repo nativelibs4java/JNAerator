@@ -148,11 +148,12 @@ public abstract class Element {
 	protected <T> List<T> unmodifiableList(List<T> list) {
 		return new SemiUnmodifiableList<T>(list);
 	}
-
+    
 	public static String getFileOfAscendency(Element decl) {
 		Element e = decl;
 		String file = null;
-		while (e != null && (file = e.getElementFile()) == null) {
+        Set<Integer> visitedIds = new TreeSet<Integer>();
+		while (e != null && (file = e.getElementFile()) == null && visitedIds.add(e.getId())) {
 			e = e.getParentElement();
 		}
 		return file;
@@ -236,15 +237,6 @@ public abstract class Element {
 	}
 	/// final so that it is easier to implement listeners
 	public final void setParentElement(Element parentElement) {
-//		if (this.parentElement != null && parentElement != null)
-//			this.parentElement = null;
-		
-//		if ("atexit_arg1_callback".equals(toString()))
-//			parentElement = parentElement;
-		
-		
-//		if ("lc_category_struct".equals(toString()))
-		
 		if (parentElement == null)
 			this.parentElement = null; // break here
 		else

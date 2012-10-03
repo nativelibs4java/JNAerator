@@ -47,7 +47,7 @@ public class JNAGlobalsGenerator extends GlobalsGenerator {
 		for (Declarator d : globals.getDeclarators()) {
 			try {
 				Identifier name = result.typeConverter.getValidJavaArgumentName(ident(d.resolveName()));
- 				TypeRef type = (TypeRef)d.mutateType(globals.getValueType());
+ 				TypeRef type = (TypeRef)d.mutateTypeKeepingParent(globals.getValueType());
 				if (type == null)
 					continue;
 				

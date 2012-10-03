@@ -27,6 +27,7 @@ public class UnsupportedConversionException extends RuntimeException {
 	Element element;
 	public UnsupportedConversionException(Element x, Object reason) {
 		super("Conversion Error : " + String.valueOf(x) + (reason == null ? "" : " (" + reason + ")"));
+        assert x != null;
 		this.element = x;
 	}
 	@Override

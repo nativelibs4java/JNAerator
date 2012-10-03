@@ -13,7 +13,7 @@ struct VeryComplex {
 import test.*;
 import static test.TestLibrary.*;
 
-VeryComplex c = new Quaternion();
+VeryComplex c = new VeryComplex();
 c.first().real(1.0);
 double x = c.second().imag();
 c.control(2.0);

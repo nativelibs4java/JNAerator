@@ -331,7 +331,7 @@ public class BridJer {
                     Declarator decl = v.getDeclarators().get(0);
                     //DirectDeclarator decl = (DirectDeclarator);
                     TypeRef vt = v.getValueType();
-                    MutableByDeclarator mt = decl instanceof DirectDeclarator ? vt : decl.mutateType(vt);
+                    MutableByDeclarator mt = decl instanceof DirectDeclarator ? vt : decl.mutateTypeKeepingParent(vt);
                     
                     if (mt instanceof TypeRef) {
                         TypeRef mutatedType = (TypeRef)mt;
