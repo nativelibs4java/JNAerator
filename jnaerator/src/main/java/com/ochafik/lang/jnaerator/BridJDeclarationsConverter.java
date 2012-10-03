@@ -72,7 +72,8 @@ public class BridJDeclarationsConverter extends DeclarationsConverter {
         return decl;
     }
     
-	public void convertEnum(Enum e, Signatures signatures, DeclarationsHolder out, Identifier libraryClassName) {
+	@Override
+    public void convertEnum(Enum e, Signatures signatures, DeclarationsHolder out, Identifier libraryClassName) {
 		if (e.isForwardDeclaration())
 			return;
 		
@@ -105,7 +106,7 @@ public class BridJDeclarationsConverter extends DeclarationsConverter {
                     out.addDeclaration(er.errorElement);
                     continue;
                 }
-                Enum.EnumItem item = new Enum.EnumItem(er.originalItem.getName(), er.value);
+                Enum.EnumItem item = new Enum.EnumItem(er.originalItem.getName(), er.convertedValue);
                 en.addItem(item);
                 hasValidItem = true;
                 if (!result.config.noComments)
@@ -359,6 +360,7 @@ public class BridJDeclarationsConverter extends DeclarationsConverter {
         if (!isCallback && !javaMethodName.equals(functionName))
             nativeMethod.addAnnotation(new Annotation(Name.class, expr(functionName.toString())));
     }
+    @Override
     public Struct convertStruct(Struct struct, Signatures signatures, Identifier callerLibraryClass, String callerLibrary, boolean onlyFields) throws IOException {
 		Identifier structName = getActualTaggedTypeName(struct);
 		if (structName == null)
@@ -389,7 +391,7 @@ public class BridJDeclarationsConverter extends DeclarationsConverter {
 			} catch (UnsupportedConversionException ex) {
 				preComments.add("Error: " + ex);
 			}
-			baseClass = result.getTaggedTypeIdentifierInJava(parent);
+			baseClass = result.typeConverter.getTaggedTypeIdentifierInJava(parent);
 			if (baseClass != null) {
 				inheritsFromStruct = true;
 				break; // TODO handle multiple and virtual inheritage
@@ -664,7 +666,8 @@ public class BridJDeclarationsConverter extends DeclarationsConverter {
         }
         return out;
     }
-	public void convertVariablesDeclaration(VariablesDeclaration v, Signatures signatures, DeclarationsHolder out, int[] iChild, boolean isGlobal, Identifier holderName, Identifier callerLibraryClass, String callerLibrary) {
+	@Override
+    public void convertVariablesDeclaration(VariablesDeclaration v, Signatures signatures, DeclarationsHolder out, int[] iChild, boolean isGlobal, Identifier holderName, Identifier callerLibraryClass, String callerLibrary) {
         try { 
 			TypeRef valueType = v.getValueType();
 			for (Declarator vs : v.getDeclarators()) {

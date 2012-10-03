@@ -205,23 +205,6 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
     public Expression typeLiteral(TypeRef c) {
         if (c != null && c.toString().equals("?"))
             return Constant.newNull();
-        
-        if (c instanceof SimpleTypeRef && result.config.runtime == JNAeratorConfig.Runtime.BridJ) {
-            Identifier id = ((SimpleTypeRef) c).getName();
-            SimpleIdentifier sid = id.resolveLastSimpleIdentifier();
-            if (!sid.getTemplateArguments().isEmpty()) {
-                Identifier erased = id.eraseTemplateArguments();
-
-                List<Expression> exprs = new ArrayList<Expression>();
-                exprs.add(typeLiteral(typeRef(erased.clone())));
-                for (Expression t : sid.getTemplateArguments()) {
-                    if (t instanceof Expression.TypeRefExpression) {
-                        exprs.add(typeLiteral(((Expression.TypeRefExpression) t).getType().clone()));
-                    }
-                }
-                return methodCall(expr(typeRef(DefaultParameterizedType.class)), "paramType", exprs.toArray(new Expression[exprs.size()]));
-            }
-        }
         return memberRef(expr(c), MemberRefStyle.Dot, "class");
     }
 
@@ -252,13 +235,6 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
         result.prim("FLOAT", JavaPrim.Float);
         result.prim("WORD", JavaPrim.Short);
         result.prim("DWORD", JavaPrim.Int);
-        
-        if (result.config.runtime == JNAeratorConfig.Runtime.BridJ)
-            result.prim("BOOL", JavaPrim.Int);
-        else
-            result.prim("BOOL", JavaPrim.Boolean);
-
-
         result.prim("DWORD64", JavaPrim.Long);
         result.prim("LONG64", JavaPrim.Long);
         result.prim("UInt64", JavaPrim.Long);
@@ -568,7 +544,7 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
 //									if (tr instanceof Enum) {
 //										tr = typeRef(s.getTag().clone());
 //									} else {
-                                    Identifier ident = result.getTaggedTypeIdentifierInJava(s);
+                                    Identifier ident = getTaggedTypeIdentifierInJava(s);
                                     if (ident != null) {
                                         tr = typeRef(ident);//findRef(name, s, libraryClassName));
                                     }//									}
@@ -603,19 +579,6 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
 //		tr.setParentElement(valueType.getParentElement());
         return tr == null ? null : tr == valueTypeCl ? valueType : tr.clone();
     }
-//	TypeRef getPrimitiveRef(TypeRef valueType, String callerLibraryClass) {
-//		JavaPrim prim = getPrimitive(valueType, callerLibraryClass);
-//		if (prim == null)
-//			return null;
-//		
-//		TypeRef tr = typeRef(prim);
-//		if (valueType.isUnsigned())
-//			tr.addAnnotation(new Annotation(Unsigned.class));
-//		if (valueType.isUnsigned())
-//			tr.addAnnotation(new Annotation(Unsigned.class));
-//		
-//		return tr;
-//	}
 
     public static class JavaPrimitive extends Primitive {
 
@@ -724,7 +687,7 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
         	if (cl != null)
         		return typeRef(ident(cl));
         }
-        return typeRef(result.getTaggedTypeIdentifierInJava(s));
+        return typeRef(getTaggedTypeIdentifierInJava(s));
         /*
             name = result.declarationsConverter.getActualTaggedTypeName((TaggedTypeRef) pair.getFirst().getValueType());
 
@@ -778,7 +741,7 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
                 return ident(result.getLibraryPackage(library), name);
             }
 
-            return ident(result.getTaggedTypeIdentifierInJava(parentStruct), name);
+            return ident(getTaggedTypeIdentifierInJava(parentStruct), name);
         }
         return libMember(result.getLibraryClassFullName(library), libraryClassName, name);
     }
@@ -791,7 +754,7 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
             return null;
         
         if (result.config.runtime == JNAeratorConfig.Runtime.BridJ)
-            return typeRef(result.getTaggedTypeIdentifierInJava(s));
+            return typeRef(getTaggedTypeIdentifierInJava(s));
         
         Identifier name = result.declarationsConverter.getActualTaggedTypeName(s);
 
@@ -800,17 +763,10 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
             return null;
         }
         Identifier libClass = result.getLibraryClassFullName(library);
-        //return new SimpleTypeRef(SyntaxUtils.equal(libClass, callerLibraryClass) ? name : libClass + "." + name);
-
-        /*if (result.config.runtime == JNAeratorConfig.Runtime.BridJ) {
-            return typeRef(findRef(name, s, libraryClassName, result.config.putTopStructsInSeparateFiles));
-        }*/
         SimpleTypeRef tr = new SimpleTypeRef("int");
         if (result.config.features.contains(JNAeratorConfig.GenFeatures.EnumTypeLocationComments)) {
             tr.setCommentBefore("@see " + (SyntaxUtils.equal(libClass, libraryClassName) ? name : libClass + "#" + name));
         }
-//		if (s.getTag() != null)
-//			tr.setCommentBefore("@see enums in " + s.getTag());
         return tr;
     }
 
@@ -1049,359 +1005,6 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
         }
     }
 
-    public TypeRef convertTypeToJNA(TypeRef valueType, TypeConversionMode conversionMode, Identifier libraryClassName) throws UnsupportedConversionException {
-
-//		if (String.valueOf(valueType).contains("MonoImageOpenStatus"))
-//			valueType.toString();
-
-        TypeRef original = valueType;
-        TypeRef resolvedTypeRef = resolveTypeDef(valueType, libraryClassName, true, false);
-        if (resolvedTypeRef != null)
-            valueType = resolvedTypeRef;
-
-//		if (String.valueOf(valueType).contains("MonoObject"))
-//			valueType.toString();
-        String valueTypeString = String.valueOf(valueType);
-
-        if (valueTypeString.matches("void\\s*\\*") || valueTypeString.matches("const\\s*void\\s*\\*")) {
-            //valueType = (TypeRef)valueType;
-            if (original instanceof Pointer && result.config.features.contains(GenFeatures.TypedPointersForForwardDeclarations) && allowFakePointers) {
-                Pointer p = (Pointer) original;
-                if (p.getTarget() instanceof SimpleTypeRef) {
-                    if (isResolved((SimpleTypeRef) p.getTarget())) {
-                        return p.getTarget();
-                    }
-
-                    Identifier name = ((SimpleTypeRef) p.getTarget()).getName();
-                    if (!"void".equals(name.toString()) && name.isPlain()) {
-//						int i = name.lastIndexOf('.');
-//						if (i >= 0)
-//							name = name.substring(i + 1);
-                        return typeRef(result.getFakePointer(libraryClassName, name));
-                    }
-                }
-            }
-        } else {
-            if (conversionMode == TypeConversionMode.ReturnType && result.config.stringifyConstCStringReturnValues) {
-                if (isString(valueTypeString, false)) {
-                    return typeRef(String.class);
-                } else if (isString(valueTypeString, true)) {
-                    return typeRef(WString.class);
-                }
-
-            } else if (conversionMode == TypeConversionMode.PrimitiveOrBufferParameter) {
-                if (isString(valueTypeString, false)) {
-                    return typeRef(String.class);
-                } else if (isString(valueTypeString, true)) {
-                    return typeRef(WString.class);
-                } else if (isStringPtrPtr(valueTypeString, false)) {
-                    return arrayRef(typeRef(String.class));
-                } else if (isStringPtrPtr(valueTypeString, true)) {
-                    return arrayRef(typeRef(WString.class));
-                }
-                /*else if (conversionMode == TypeConversionMode.PrimitiveOrBufferParameter) {
-                if (valueTypeString.matches("char\\*"))
-                return typeRef(StringPointer.ByValue.class);
-                else if (valueTypeString.matches("wchar_t\\*"))
-                return typeRef(WStringPointer.ByValue.class);
-                }*/
-            }
-        }
-
-        if (valueType instanceof Primitive) {
-            JavaPrim prim = getPrimitive(valueType, libraryClassName);
-            if (prim != null) {
-                return primRef(prim);
-            }
-
-//			if (!valueType.getModifiers().contains("long"))
-//				return valueType.toString();
-		} 
-		if (valueType instanceof TaggedTypeRef) {
-			Identifier name = result.declarationsConverter.getActualTaggedTypeName((TaggedTypeRef) valueType);
-			if (name != null) {
-				if (valueType instanceof Enum) {
-					TypeRef tr = findEnum(name, libraryClassName);
-					if (tr != null) {
-						TypeRef intRef = primRef(JavaPrim.Int);
-						intRef.setCommentBefore(tr.getCommentBefore());
-						return intRef;
-					}
-				} else if (valueType instanceof Struct) {
-					SimpleTypeRef tr = findStructRef(name, libraryClassName);
-					if (tr != null) {
-						switch (conversionMode) {
-						case PointedValue:
-						case NativeParameterWithStructsPtrPtrs:
-						case NativeParameter:
-						case PrimitiveOrBufferParameter:
-						case ReturnType:
-						case PrimitiveReturnType:
-						case FieldType:
-							return tr;
-						case StaticallySizedArrayField:
-						case ExpressionType:
-						default:
-                            return subType(tr, ident("ByValue"));
-						}
-					}
-				}
-			}
-		}
-		
-		if (valueType instanceof FunctionSignature) {
-			TypeRef tr = findCallbackRef((FunctionSignature)valueType, libraryClassName);
-			if (tr != null)
-				return tr;
-			else
-				return typeRef(((FunctionSignature)valueType).getFunction().getName().clone());
-		}
-		if (valueType instanceof TargettedTypeRef) {
-			//TypeRef target = resolveTypeDef(((TargettedTypeRef) valueType).getTarget(), callerLibraryClass);
-			TypeRef target = ((TargettedTypeRef) valueType).getTarget();
-			
-			boolean staticallySized = valueType instanceof ArrayRef && ((ArrayRef)valueType).hasStaticStorageSize();
-			
-			TypeRef convArgType = null;
-			JavaPrim prim = getPrimitive(target, libraryClassName);
-			if (prim != null) {
-				if (prim == JavaPrim.Void)
-					return typeRef(result.config.runtime.pointerClass);
-				else
-					convArgType = primRef(prim);
-			} else {
-				Identifier name = null;
-				if (target instanceof SimpleTypeRef)
-					name = ((SimpleTypeRef) target).getName();
-				else if (target instanceof Struct) {
-					Struct struct = (Struct)target;
-					if (struct == null) {
-						valueType =  resolveTypeDef(original, libraryClassName, true, false);
-						struct = null;
-					} else {
-						name = result.declarationsConverter.getActualTaggedTypeName(struct);
-					}
-				} else if (target instanceof FunctionSignature) {
-					TypeRef tr = findCallbackRef((FunctionSignature)target, libraryClassName);
-					if (tr != null) {
-						if (valueType instanceof TypeRef.ArrayRef) {
-							return new TypeRef.ArrayRef(tr);
-						} else {
-							return tr;
-						}
-					}
-					//else
-					//	return typeRef(((FunctionSignature)valueType).getFunction().getName());
-				} else if (target instanceof Pointer) {
-					if (conversionMode == TypeConversionMode.NativeParameter)
-						return typeRef(PointerByReference.class);
-					
-					Pointer pt = ((Pointer)target);
-					TypeRef ptarget = pt.getTarget();
-					if (ptarget instanceof SimpleTypeRef) {
-						SimpleTypeRef ptargett = (SimpleTypeRef) ptarget;
-						Identifier tname = ptargett.getName();
-						if (result.structsFullNames.contains(tname)) {
-							if (conversionMode == TypeConversionMode.FieldType)
-								return typeRef(PointerByReference.class);
-							else
-								return new ArrayRef(typeRef(ident(ptargett.getName(), "ByReference")));
-						} else if ((tname = result.findFakePointer(tname)) != null)
-							return new ArrayRef(typeRef(tname.clone()));
-					}
-				}
-				if (name != null) {
-					/// Pointer to Objective-C class ?
-					convArgType = findObjCClass(name);
-					boolean isQualStruct = result.structsFullNames.contains(name);
-					if (convArgType == null || isQualStruct) {
-						/// Pointer to C structure
-						SimpleTypeRef structRef = isQualStruct ? typeRef(name) : findStructRef(name, libraryClassName);
-						if (structRef != null) {//result.cStructNames.contains(name)) {
-			 				switch (conversionMode) {
-								case ExpressionType:
-								case FieldType:
-									convArgType = valueType instanceof TypeRef.ArrayRef ?
-											structRef :
-											subType(structRef, ident("ByReference"));
-									if (valueType instanceof Pointer)
-										return convArgType;
-									break;
-								default:
-									if (isQualStruct && 
-											(valueType instanceof ArrayRef) && (
-												conversionMode == TypeConversionMode.NativeParameterWithStructsPtrPtrs ||
-												conversionMode == TypeConversionMode.PrimitiveOrBufferParameter
-											))
-										return arrayRef(structRef);
-									convArgType = structRef;
-									if (valueType instanceof Pointer)
-										return convArgType;
-									break;
-							}
-						} else {
-							try {
-                                TypeConversionMode targettedConversionMode;
-                                switch (conversionMode) {
-                                    case NativeParameter:
-                                    case NativeParameterWithStructsPtrPtrs:
-                                    case PrimitiveOrBufferParameter:
-                                    case PrimitiveReturnType:
-                                        targettedConversionMode = TypeConversionMode.PointedValue;
-                                        break;
-                                    default:
-                                        targettedConversionMode = conversionMode;
-                                        break;
-                                }
-								convArgType = convertTypeToJNA(target, targettedConversionMode, libraryClassName);
-                                /*if (result.isUndefinedType(convArgType)) {
-                                    if (allowFakePointers && original instanceof SimpleTypeRef)
-                                        return typeRef(result.getFakePointer(libraryClassName, ((SimpleTypeRef)original).getName().clone()));
-                                    else
-                                        convArgType = typeRef(result.config.runtime.pointerClass);
-                                }*/
-
-								if (convArgType != null && result.callbacksFullNames.contains(ident(convArgType.toString())) && !(valueType instanceof ArrayRef)) {
-									TypeRef tr = typeRef(result.config.runtime.pointerClass);
-									if (!result.config.noComments)
-										tr.setCommentBefore("@see " + convArgType);
-									return tr;
-								}
-								prim = getPrimitive(convArgType, libraryClassName);
-							} catch (UnsupportedConversionException ex) {
-								//convArgType = null;//return typeRef(result.config.runtime.pointerClass);
-								if (valueType instanceof TypeRef.Pointer && 
-										target instanceof TypeRef.SimpleTypeRef &&
-										result.config.features.contains(JNAeratorConfig.GenFeatures.TypedPointersForForwardDeclarations) &&
-										allowFakePointers
-										) {
-
-                                    if (isResolved((SimpleTypeRef) target)) {
-                                        return target;
-                                    }
-//									int i = name.lastIndexOf('.');
-//									if (i >= 0) {
-//										name = name.substring(i + 1);
-//									}
-                                    return typeRef(result.getFakePointer(libraryClassName, name));
-                                } else {
-                                    return typeRef(result.config.runtime.pointerClass);
-                                }
-                            }
-                        }
-                    }
-                } else {
-                    try {
-                        convArgType = convertTypeToJNA(target, conversionMode, libraryClassName);
-                        prim = getPrimitive(convArgType, libraryClassName);
-                    } catch (UnsupportedConversionException ex) {
-                        //convArgType = null;//
-                        return typeRef(result.config.runtime.pointerClass);
-                    }
-                }
-            }
-            switch (conversionMode) {
-                case StaticallySizedArrayField:
-                    return new ArrayRef(convArgType);
-                case PrimitiveOrBufferParameter:
-                    if (!result.config.noPrimitiveArrays && (target.getModifiers().contains(ModifierType.Const)
-                            || valueType.getModifiers().contains(ModifierType.Const))) {
-                        return new ArrayRef(convArgType);
-                    }
-                    Class<? extends Buffer> bc = primToBuffer.get(prim);
-                    if (bc != null) {
-                        return typeRef(bc);
-                    }
-                case ReturnType:
-                case FieldType:
-                    if (staticallySized) {
-                        return arrayRef(convArgType);
-                    }
-                default:
-                    if (prim != null) {
-                        if (prim == JavaPrim.Byte) {
-                            return (TypeRef)typeRef(result.config.runtime.pointerClass).importComments(convArgType);
-                        }
-
-                        Class<? extends ByReference> byRefClass = primToByReference.get(prim);
-                        if (byRefClass != null) {
-                            return typeRef(byRefClass).importDetails(convArgType, false);
-                        }
-                    }
-                    if (convArgType != null && !convArgType.toString().equals(result.config.runtime.pointerClass.getName()) && valueType instanceof TypeRef.Pointer && target instanceof TypeRef.SimpleTypeRef) {
-                        return convArgType;
-                    }
-
-            }
-            if (target instanceof Pointer) {
-                return typeRef(PointerByReference.class);
-            }
-
-            if (allowUnknownPointers) {
-                return typeRef(result.config.runtime.pointerClass);
-            }
-        }
-        if (valueType instanceof SimpleTypeRef) {
-            Identifier name = ((SimpleTypeRef) valueType).getName();
-            if (name == null) {
-                throw new UnsupportedConversionException(valueType, null);
-            }
-
-            boolean isQualStruct = result.structsFullNames.contains(name);
-            //isQualCallback = result.callbacksFullNames.contains(name);
-            if (!isQualStruct && isResolved((SimpleTypeRef) valueType)) {
-                return valueType;
-            }
-
-            if (name instanceof SimpleIdentifier) {
-                TypeRef tr = findObjCClass(name);
-                if (tr == null) {
-                    tr = findObjCClass(new SimpleIdentifier(((SimpleIdentifier) name).getName()));
-                }
-                if (tr != null) {
-                    return tr;
-                }
-            }
-            SimpleTypeRef structRef = isQualStruct ? typeRef(name) : findStructRef(name, libraryClassName);
-            if (structRef != null) {
-                switch (conversionMode) {
-                    case PointedValue:
-                    case FieldType:
-                        return structRef;
-                    default:
-                        return subType(structRef, ident("ByValue"));
-                }
-            }
-
-            TypeRef callbackRef = findCallbackRef(name, libraryClassName);
-            if (callbackRef != null) {
-                return callbackRef;
-            }
-
-            SimpleTypeRef enumTypeRef = findEnum(name, libraryClassName);
-            //FieldRef enumQualifiedName = findEnum(name);
-            if (enumTypeRef != null) {
-                return enumTypeRef;
-            }
-
-            TypeRef objCClassRef = findObjCClass(name);
-            if (objCClassRef != null) {
-                return objCClassRef;
-            }
-        }
-
-        JavaPrim prim = getPrimitive(valueType, libraryClassName);
-        if (prim != null) {
-            return primRef(prim);
-        }
-
-        if (valueType instanceof SimpleTypeRef && allowFakePointers) {
-            //return typeRef(result.getUndefinedType(libraryClassName, ((SimpleTypeRef)valueType).getName().clone()));
-            return typeRef(result.getFakePointer(libraryClassName, ((SimpleTypeRef)valueType).getName().clone()));
-        }
-        unknownTypes.add(String.valueOf(valueType));
-        throw new UnsupportedConversionException(valueType, null);
-    }
     static Map<String, Class<?>> predefObjCClasses = new HashMap<String, Class<?>>();
 
     static {
@@ -1700,7 +1303,9 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
                     if (s1.equals(s2)) {
                         tr = t1;
                     } else {
-                        JavaPrim p1 = getPrimitive(t1, null), p2 = getPrimitive(t2, null);
+                        // t1 & t2 are already java primitives...
+                        JavaPrim p1 = "long".equals(t1.toString()) ? JavaPrim.Long : getPrimitive(t1, null), 
+                                p2 = "long".equals(t2.toString()) ? JavaPrim.Long : getPrimitive(t2, null);
                         if (p1 != null && p2 != null) {
                             switch (bop.getOperator()) {
                                 case LeftShift:
@@ -1775,66 +1380,30 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
             }
 
         } else if (x instanceof Expression.TypeRefExpression) {
-
+            // The parser might recognize enum items incorrectly as a TypeRefExpression...
             Expression.TypeRefExpression tre = (Expression.TypeRefExpression) x;
             TypeRef tr = tre.getType();
             if (tr instanceof TypeRef.SimpleTypeRef) {
                 TypeRef.SimpleTypeRef str = (TypeRef.SimpleTypeRef) tr;
-                Identifier ident = str.getName();
-                if (ident != null) {
-                    if (result.enumItemsFullName.contains(ident)) {
+                Identifier name = str.getName();
+                if (name != null) {
+                    if (result.enumItemsFullName.contains(name)) {
                         res = typed(tre, typeRef(Integer.TYPE));
                     }
+//                    res = convertVariableRefToJava(name, libraryClassName, promoteNativeLongToLong);
                 }
             }
             if (res == null) {
                 if (tr.isMarkedAsResolved()) {
                     res = typed(tre, tr);
-                } else {
-                    TypeRef conv = convertTypeToJNA(tr, TypeConversionMode.ExpressionType, libraryClassName);
-                    res = typed(new Expression.TypeRefExpression(conv), conv);
                 }
+//                } else {
+//                    TypeRef conv = convertTypeToJNA(tr, TypeConversionMode.ExpressionType, libraryClassName);
+//                    res = typed(new Expression.TypeRefExpression(conv), conv);
+//                }
             }
         } else if (x instanceof Expression.VariableRef) {
-            Expression.VariableRef fr = (Expression.VariableRef) x;
-            Identifier name = fr.getName();
-            if (name != null) {
-                Define define = result.defines.get(name);
-                if (define != null && define.getValue() != null) {
-                    if (x.toString().equals(define.getValue().toString())) {
-                        res = null; // avoid some nasty loops
-                    } else {
-                        Expression defineValue = define.getValue();
-                        if (defineValue instanceof Expression.Constant) {
-                            Expression.Constant constant = (Expression.Constant) defineValue;
-                            res = typed(findDefine(name), convertToJavaType(constant.getType()));
-                        }
-
-                        if (res == null) {
-                            res = convertExpressionToJava(defineValue, libraryClassName, promoteNativeLongToLong);
-                        }
-                    }
-                } else {
-                    String sname = name.toString();
-                    if (sname.equals("True") || sname.equals("true")) {
-                        res = typed(expr(Expression.Constant.Type.Bool, true), primRef(JavaPrim.Boolean));
-                    } else if (sname.equals("False") || sname.equals("false")) {
-                        res = typed(expr(Expression.Constant.Type.Bool, false), primRef(JavaPrim.Boolean));
-                    } else {
-                        Enum.EnumItem enumItem = result.enumItems.get(name);
-                        if (enumItem != null) {
-                            res = typed(getEnumItemValue(enumItem), typeRef(Long.TYPE));
-                        } else {
-                            VariablesDeclaration constant = result.globalVariablesByName.get(name);
-                            if (constant != null) {
-                                res = typed(varRef(findRef(name, constant, libraryClassName, true)), null);
-                            } else {
-                                res = typed(new Expression.VariableRef(name), null);
-                            }
-                        }
-                    }
-                }
-            }
+            res = convertVariableRefToJava(((Expression.VariableRef) x).getName(), libraryClassName, promoteNativeLongToLong);
         }
         if (res == null) {
 //			return convertExpressionToJava(x);
@@ -1845,5 +1414,86 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
         }
         res.getFirst().setParenthesis(x.getParenthesis());
         return (Pair<Expression, TypeRef>) res;
+    }
+    
+
+    private Pair<Expression, TypeRef> convertVariableRefToJava(Identifier name, Identifier libraryClassName, boolean promoteNativeLongToLong) {
+        
+        if (name != null) {
+            Define define = result.defines.get(name);
+            if (define != null && define.getValue() != null) {
+                if (name.toString().equals(define.getValue().toString())) {
+                    return null; // avoid some nasty loops
+                } else {
+                    Expression defineValue = define.getValue();
+                    if (defineValue instanceof Expression.Constant) {
+                        Expression.Constant constant = (Expression.Constant) defineValue;
+                        return typed(findDefine(name), convertToJavaType(constant.getType()));
+                    }
+
+                    return convertExpressionToJava(defineValue, libraryClassName, promoteNativeLongToLong);
+                }
+            } else {
+                String sname = name.toString();
+                if (sname.equals("True") || sname.equals("true")) {
+                    return typed(expr(Expression.Constant.Type.Bool, true), primRef(JavaPrim.Boolean));
+                } else if (sname.equals("False") || sname.equals("false")) {
+                    return typed(expr(Expression.Constant.Type.Bool, false), primRef(JavaPrim.Boolean));
+                } else {
+                    Enum.EnumItem enumItem = result.enumItems.get(name);
+                    if (enumItem != null) {
+                        return typed(getEnumItemValue(enumItem), typeRef(Integer.TYPE));
+                    } else {
+                        VariablesDeclaration constant = result.globalVariablesByName.get(name);
+                        if (constant != null) {
+                            return typed(varRef(findRef(name, constant, libraryClassName, true)), null);
+                        } else {
+                            return typed(new Expression.VariableRef(name), null);
+                        }
+                    }
+                }
+            }
+        }
+        return null;
+    }
+    
+    public Identifier getTaggedTypeIdentifierInJava(TaggedTypeRef s) {
+        return result.resolveFullTaggedTypeRef(s).getResolvedJavaIdentifier();
+    }
+    public Identifier computeTaggedTypeIdentifierInJava(TaggedTypeRef s) {
+        Identifier name = result.declarationsConverter.getActualTaggedTypeName(s);
+        if (name == null)
+            return null;
+        
+        String library = result.getLibrary(s);
+        if (library == null)
+            return null;
+        
+        name = name.clone();
+        Struct parentStruct = s.findParentOfType(Struct.class);
+        //Struct parentStruct = s.findParentOfType(Struct.class);
+        if (parentStruct != null && parentStruct != s)
+            return ident(getTaggedTypeIdentifierInJava(parentStruct), name);
+        else if ((s instanceof Struct) && (result.config.putTopStructsInSeparateFiles || result.config.runtime == JNAeratorConfig.Runtime.BridJ))
+            return ident(result.getLibraryPackage(library), name);
+        else
+            return libMember(result.getLibraryClassFullName(library), null, name);
+    }
+    public Identifier computeCallbackIdentifierInJava(FunctionSignature fs) {
+        Identifier name = inferCallBackName(fs, false, false, null);
+        if (name == null)
+            return null;
+        
+        String library = result.getLibrary(fs);
+        if (library == null)
+            return null;
+        
+        name = name.clone();
+        Struct parentStruct = fs.findParentOfType(Struct.class);
+        //Struct parentStruct = s.findParentOfType(Struct.class);
+        if (parentStruct != null)
+            return ident(getTaggedTypeIdentifierInJava(parentStruct), name);
+        else
+            return libMember(result.getLibraryClassFullName(library), null, name);
     }
 }

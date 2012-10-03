@@ -334,14 +334,14 @@ public class Result extends Scanner {
 	
 			if (declarativePower(e) > declarativePower(oldEnum)) {
 				enumsByName.put(name, e);
-                e.setResolvedJavaIdentifier(computeTaggedTypeIdentifierInJava(e));
+                e.setResolvedJavaIdentifier(typeConverter.computeTaggedTypeIdentifierInJava(e));
 	
 				//if (e.getTag() != null) {
 				//	enumsByName.put(e.getTag(), e);
 				//}
 				getList(enumsByLibrary, lib).add(e);
 	
-				Identifier identifier = getTaggedTypeIdentifierInJava(e);
+				Identifier identifier = typeConverter.getTaggedTypeIdentifierInJava(e);
 				if (identifier != null) {
 					enumsFullNames.add(identifier);
 				}
@@ -474,39 +474,7 @@ public class Result extends Scanner {
 		return config.entryName == null ? null : ident(config.entryName.toLowerCase(), config.entryName);
 	}
     
-	public Identifier getTaggedTypeIdentifierInJava(TaggedTypeRef s) {
-        Identifier tag = s.getTag();
-        if (tag != null && s.getResolvedJavaIdentifier() == null) {
-            TaggedTypeRef rep = null;
-            if (s instanceof Struct) {
-                rep = structsByName.get(tag);
-            } else if (s instanceof Enum) {
-                rep = enumsByName.get(tag);
-            }
-            if (rep != null && rep != s)
-                s = rep;
-        }
-        return s.getResolvedJavaIdentifier();
-    }
-    public Identifier computeTaggedTypeIdentifierInJava(TaggedTypeRef s) {
-        Identifier name = declarationsConverter.getActualTaggedTypeName(s);
-        if (name == null)
-            return null;
-        
-        String library = getLibrary(s);
-        if (library == null)
-            return null;
-        
-        name = name.clone();
-        Struct parentStruct = s.findParentOfType(Struct.class);
-        //Struct parentStruct = s.findParentOfType(Struct.class);
-        if (parentStruct != null && parentStruct != s)
-            return ident(getTaggedTypeIdentifierInJava(parentStruct), name);
-        else if ((s instanceof Struct) && (config.putTopStructsInSeparateFiles || config.runtime == JNAeratorConfig.Runtime.BridJ))
-            return ident(getLibraryPackage(library), name);
-        else
-            return typeConverter.libMember(getLibraryClassFullName(library), null, name);
-    }
+	
 
 	@Override
 	public void visitStruct(Struct struct) {
@@ -542,12 +510,12 @@ public class Result extends Scanner {
 				if (declarativePower(struct) > declarativePower(oldStruct)) {
 					structsByName.put(name, struct);
 
-                    Identifier resolvedJavaIdentifier = computeTaggedTypeIdentifierInJava(struct);
+                    Identifier resolvedJavaIdentifier = typeConverter.computeTaggedTypeIdentifierInJava(struct);
                     struct.setResolvedJavaIdentifier(resolvedJavaIdentifier);
                     
                     if (struct.findParentOfType(Struct.class) == null)
                         getList(structsByLibrary, getLibrary(struct)).add(struct);
-                    Identifier identifier = getTaggedTypeIdentifierInJava(struct);
+                    Identifier identifier = typeConverter.getTaggedTypeIdentifierInJava(struct);
                     if (identifier != null) {
                         if (struct.getType() == Struct.Type.CUnion)
                             unionsFullNames.add(identifier);
@@ -583,7 +551,7 @@ public class Result extends Scanner {
 		super.visitFunctionSignature(functionSignature);
 		Function function = functionSignature.getFunction();
 		Identifier name = typeConverter.inferCallBackName(functionSignature, false, false, null);
-        Identifier identifier = computeCallbackIdentifierInJava(functionSignature);
+        Identifier identifier = typeConverter.computeCallbackIdentifierInJava(functionSignature);
         functionSignature.setResolvedJavaIdentifier(identifier);
         if (function != null) {
             if (functionSignature.findParentOfType(Struct.class) == null) {
@@ -598,23 +566,7 @@ public class Result extends Scanner {
 		}
 	}
     
-    public Identifier computeCallbackIdentifierInJava(FunctionSignature fs) {
-        Identifier name = typeConverter.inferCallBackName(fs, false, false, null);
-        if (name == null)
-            return null;
-        
-        String library = getLibrary(fs);
-        if (library == null)
-            return null;
-        
-        name = name.clone();
-        Struct parentStruct = fs.findParentOfType(Struct.class);
-        //Struct parentStruct = s.findParentOfType(Struct.class);
-        if (parentStruct != null)
-            return ident(getTaggedTypeIdentifierInJava(parentStruct), name);
-        else
-            return typeConverter.libMember(getLibraryClassFullName(library), null, name);
-    }
+    
 
 	public Identifier getLibraryClassSimpleName(String library) {
 		return ident(StringUtils.capitalize(library) + "Library");
@@ -700,6 +652,21 @@ public class Result extends Scanner {
         return javaPrims.containsKey(tr.toString());
     }
 
+    public TaggedTypeRef resolveFullTaggedTypeRef(TaggedTypeRef s) {
+        Identifier tag = s.getTag();
+        if (tag != null && s.getResolvedJavaIdentifier() == null) {
+            TaggedTypeRef rep = null;
+            if (s instanceof Struct) {
+                rep = structsByName.get(tag);
+            } else if (s instanceof Enum) {
+                rep = enumsByName.get(tag);
+            }
+            if (rep != null && rep != s)
+                s = rep;
+        }
+        return s;
+    }
+
     public interface ClassWritingNotifiable {
 		Struct writingClass(Identifier fullClassName, Struct interf, Signatures signatures, String currentLibrary);
 	}
@@ -713,22 +680,6 @@ public class Result extends Scanner {
 		
 		if (fullClassName.resolveLastSimpleIdentifier().equals("char"))
 			return null;
-		
-		//if (fullClassName.equals(NSString.class)) {
-			/*
-		    @Override
-		    public String toString() {
-		        return Foundation.toString(id());
-		    }
-
-		    public static NSString getGlobalString(String libraryName, String globalVarName) {
-		        return Rococoa.wrap(ID.getGlobal(libraryName, globalVarName), NSString.class);
-		    }
-
-		    public static NSString getGlobalString(String globalVarName) {
-		        return getGlobalString("AppKit", globalVarName);
-		    }*/
-		//}
 		
 		String runtimeSpecificHelp = config.runtime == JNAeratorConfig.Runtime.BridJ ?
 			"or <a href=\"http://bridj.googlecode.com/\">BridJ</a> " :

@@ -41,8 +41,10 @@ public class JNAGlobalsGenerator extends GlobalsGenerator {
     public JNAGlobalsGenerator(Result result) {
         super(result);
     }
- 
-    
+    final JNATypeConversion typeConverter() {
+        return (JNATypeConversion)result.typeConverter;
+    };
+	
     public void convertGlobals(VariablesDeclaration globals, Signatures signatures, DeclarationsHolder out, Expression nativeLibFieldExpr, Identifier callerLibraryName, String callerLibrary) throws UnsupportedConversionException {
 		for (Declarator d : globals.getDeclarators()) {
 			try {
@@ -73,7 +75,7 @@ public class JNAGlobalsGenerator extends GlobalsGenerator {
 					boolean isPointer = type instanceof com.ochafik.lang.jnaerator.parser.TypeRef.Pointer;
 					TypeConversion.JavaPrim prim = result.typeConverter.getPrimitive(isPointer ? ((com.ochafik.lang.jnaerator.parser.TypeRef.Pointer)type).getTarget() : type, callerLibraryName);
 					type.setMarkedAsResolved(false);
-					TypeRef convertedType = result.typeConverter.convertTypeToJNA(type, TypeConversion.TypeConversionMode.NativeParameter, callerLibraryName);
+					TypeRef convertedType = typeConverter().convertTypeToJNA(type, TypeConversion.TypeConversionMode.NativeParameter, callerLibraryName);
 					String convTypStr = convertedType.toString();
 					if (convTypStr.endsWith(".ByValue"))
 						convTypStr = convTypStr.substring(0, convTypStr.length() - ".ByValue".length());
@@ -143,7 +145,7 @@ public class JNAGlobalsGenerator extends GlobalsGenerator {
 				
 				TypeRef pointerType = new TypeRef.Pointer(type, Declarator.PointerStyle.Pointer);
 				
-				TypeRef convPointerType = result.typeConverter.convertTypeToJNA(pointerType, TypeConversion.TypeConversionMode.FieldType, callerLibraryName);
+				TypeRef convPointerType = typeConverter().convertTypeToJNA(pointerType, TypeConversion.TypeConversionMode.FieldType, callerLibraryName);
 				TypeRef instType;
 				boolean hasOffset, isPtr = false, isByRef = false;
 				String convPointerTypeStr = convPointerType.toString();
@@ -156,7 +158,7 @@ public class JNAGlobalsGenerator extends GlobalsGenerator {
 					instType = convPointerType;
 					hasOffset = false;
 				} else if (convPointerTypeStr.endsWith(".ByReference") && result.structsByName.get(convPointerTypeStr.substring(0, convPointerTypeStr.length() - ".ByReference".length())) != null) {
-					instType = result.typeConverter.convertTypeToJNA(type, TypeConversion.TypeConversionMode.PointedValue, callerLibraryName);//convPointerType;
+					instType = typeConverter().convertTypeToJNA(type, TypeConversion.TypeConversionMode.PointedValue, callerLibraryName);//convPointerType;
 					hasOffset = true;
 				} else {
 					Identifier instTypeName = ident(name + "_holder");

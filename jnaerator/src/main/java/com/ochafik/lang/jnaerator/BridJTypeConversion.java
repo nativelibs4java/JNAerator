@@ -23,6 +23,7 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import org.bridj.IntValuedEnum;
+import org.bridj.util.DefaultParameterizedType;
 /**
  *
  * @author ochafik
@@ -32,7 +33,35 @@ public class BridJTypeConversion extends TypeConversion {
     public BridJTypeConversion(Result result) {
         super(result);
     }
+
+    @Override
+    public void initTypes() {
+        super.initTypes();
+        result.prim("BOOL", JavaPrim.Int);
+    }
+
+    @Override
+    public Expression typeLiteral(TypeRef c) {
+        if (c instanceof SimpleTypeRef && result.config.runtime == JNAeratorConfig.Runtime.BridJ) {
+            Identifier id = ((SimpleTypeRef) c).getName();
+            Identifier.SimpleIdentifier sid = id.resolveLastSimpleIdentifier();
+            if (!sid.getTemplateArguments().isEmpty()) {
+                Identifier erased = id.eraseTemplateArguments();
+
+                List<Expression> exprs = new ArrayList<Expression>();
+                exprs.add(typeLiteral(typeRef(erased.clone())));
+                for (Expression t : sid.getTemplateArguments()) {
+                    if (t instanceof Expression.TypeRefExpression) {
+                        exprs.add(typeLiteral(((Expression.TypeRefExpression) t).getType().clone()));
+                    }
+                }
+                return methodCall(expr(typeRef(DefaultParameterizedType.class)), "paramType", exprs.toArray(new Expression[exprs.size()]));
+            }
+        }
+        return super.typeLiteral(c);
+    }
  
+    @Override
     public Expression getEnumItemValue(Enum.EnumItem enumItem) { 
         Expression enumValue = findEnumItem(enumItem);
         if (((Enum)enumItem.getParentElement()).getTag() != null)
@@ -381,6 +410,7 @@ public class BridJTypeConversion extends TypeConversion {
         }
         return res;
     }
+    @Override
     public Pair<Expression, TypeRef> convertExpressionToJava(Expression x, Identifier libraryClassName, boolean promoteNativeLongToLong) throws UnsupportedConversionException {
         Pair<Expression, TypeRef> res = null;
         if (x instanceof Expression.Cast) {

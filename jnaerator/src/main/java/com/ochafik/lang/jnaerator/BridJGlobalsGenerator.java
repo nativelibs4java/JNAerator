@@ -42,6 +42,7 @@ public class BridJGlobalsGenerator extends GlobalsGenerator {
         super(result);
     }
     
+    @Override
     protected void convertGlobals(VariablesDeclaration globals, Signatures signatures, DeclarationsHolder out, Expression nativeLibFieldExpr, Identifier callerLibraryName, String callerLibrary) {
         int[] iChild = new int[1];
         result.declarationsConverter.convertVariablesDeclaration(globals, signatures, out, iChild, true, callerLibraryName, callerLibraryName, callerLibrary);//globals, out, null, true, null, null, callerLibraryName, callerLibrary);

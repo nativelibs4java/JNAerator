@@ -52,11 +52,13 @@ import com.sun.jna.win32.StdCallLibrary;
 
 public class JNADeclarationsConverter extends DeclarationsConverter {
 	private static final Pattern manglingCommentPattern = Pattern.compile("@mangling (.*)$", Pattern.MULTILINE);
-
-	public JNADeclarationsConverter(Result result) {
+    public JNADeclarationsConverter(Result result) {
 		super(result);
 	}
-    
+    final JNATypeConversion typeConverter() {
+        return (JNATypeConversion)result.typeConverter;
+    };
+	
     //protected abstract SimpleTypeRef getCallbackType(FunctionSignature functionSignature, Identifier name);
     @Override
     public Struct convertCallback(FunctionSignature functionSignature, Signatures signatures, Identifier callerLibraryName) {
@@ -71,104 +73,6 @@ public class JNADeclarationsConverter extends DeclarationsConverter {
         }
         return decl;
     }
-    
-	public void convertConstants(String library, List<Define> defines, Element sourcesRoot, final Signatures signatures, final DeclarationsHolder out, final Identifier libraryClassName) {
-		//final List<Define> defines = new ArrayList<Define>();
-		final Map<String, String> constants = Result.getMap(result.stringConstants, library);
-//		
-		sourcesRoot.accept(new Scanner() {
-//			@Override
-//			public void visitDefine(Define define) {
-//				super.visitDefine(define);
-//				if (elementsFilter.accept(define))
-//					defines.add(define);
-//			}
-			@Override
-			public void visitVariablesDeclaration(VariablesDeclaration v) {
-				super.visitVariablesDeclaration(v);
-				//if (!elementsFilter.accept(v))
-				//	return;
-				
-				if (v.findParentOfType(Struct.class) != null)
-					return;
-				
-				if (v.getValueType() instanceof FunctionSignature)
-					return;
-					
-				for (Declarator decl : v.getDeclarators()) {
-					if (!(decl instanceof DirectDeclarator))
-						continue; // TODO provide a mapping of exported values
-					
-					TypeRef mutatedType = (TypeRef) decl.mutateTypeKeepingParent(v.getValueType());
-					if (mutatedType == null || 
-							!mutatedType.getModifiers().contains(ModifierType.Const) ||
-							mutatedType.getModifiers().contains(ModifierType.Extern) ||
-							decl.getDefaultValue() == null)
-						continue;
-					
-					//TypeRef type = v.getValueType();
-					String name = decl.resolveName();
-					
-					JavaPrim prim = result.typeConverter.getPrimitive(mutatedType, libraryClassName);
-					if (prim == null) {
-						if (mutatedType.toString().contains("NSString")) {
-							String value = constants.get(name);
-							if (value != null)
-								outputNSString(name, value, out, signatures, v, decl);
-						}
-						continue;
-					}
-					
-					try {
-						
-						//DirectDeclarator dd = (DirectDeclarator)decl;
-						Pair<Expression, TypeRef> val = result.typeConverter.convertExpressionToJava(decl.getDefaultValue(), libraryClassName, true);
-						
-						if (!signatures.addVariable(name))
-							continue;
-						
-						TypeRef tr = prim == JavaPrim.NativeLong || prim == JavaPrim.NativeSize ?
-							typeRef("long") :
-							result.typeConverter.convertTypeToJNA(mutatedType, TypeConversion.TypeConversionMode.FieldType, libraryClassName)
-						;
-						VariablesDeclaration vd = new VariablesDeclaration(tr, new DirectDeclarator(name, val.getFirst()));
-						if (!result.config.noComments) {
-							vd.setCommentBefore(v.getCommentBefore());
-							vd.addToCommentBefore(decl.getCommentBefore());
-							vd.addToCommentBefore(decl.getCommentAfter());
-							vd.addToCommentBefore(v.getCommentAfter());
-						}
-
-//                        if (result.config.runtime == JNAeratorConfig.Runtime.BridJ)
-//                            vd.addModifiers(ModifierType.Public, ModifierType.Static, ModifierType.Final);
-						
-						out.addDeclaration(vd);
-					} catch (UnsupportedConversionException e) {
-						out.addDeclaration(skipDeclaration(v, e.toString()));
-					}
-					
-				}
-			}
-
-		});
-		
-		if (defines != null) {
-			for (Define define : reorderDefines(defines)) {
-				if (define.getValue() == null)
-					continue;
-				
-				try {
-					//System.out.println("Define " + define.getName() + " = " + define.getValue());
-					out.addDeclaration(outputConstant(define.getName(), define.getValue(), signatures, define.getValue(), "define", libraryClassName, true, false, false));
-				} catch (UnsupportedConversionException ex) {
-					out.addDeclaration(skipDeclaration(define, ex.toString()));
-				}
-			}
-		}
-		for (Map.Entry<String, String> e : constants.entrySet()) {
-			outputNSString(e.getKey(), e.getValue(), out, signatures);
-		}
-	}
 
 	static Map<Class<?>, Pair<List<Pair<Function, String>>, Set<String>>> cachedForcedMethodsAndTheirSignatures;
 	
@@ -330,7 +234,7 @@ public class JNADeclarationsConverter extends DeclarationsConverter {
 				natFunc.addAnnotation(new Annotation(result.config.runtime.typeRef(JNAeratorConfig.Runtime.Ann.Name), expr(functionName.toString())));
 
 			natFunc.setName(modifiedMethodName);
-			natFunc.setValueType(result.typeConverter.convertTypeToJNA(returnType, TypeConversionMode.ReturnType, libraryClassName));
+			natFunc.setValueType(typeConverter().convertTypeToJNA(returnType, TypeConversionMode.ReturnType, libraryClassName));
 			if (!result.config.noComments)
 				natFunc.importComments(function, isCallback ? null : getFileCommentContent(function));
 			
@@ -382,10 +286,10 @@ public class JNADeclarationsConverter extends DeclarationsConverter {
 					if (mutType.toString().contains("NSOpenGLContextParameter")) {
 						argName = argName.toString();
 					}
-					natFunc.addArg(new Arg(argName, result.typeConverter.convertTypeToJNA(mutType, TypeConversionMode.NativeParameter, libraryClassName)));
+					natFunc.addArg(new Arg(argName, typeConverter().convertTypeToJNA(mutType, TypeConversionMode.NativeParameter, libraryClassName)));
 					if (alternativeOutputs) {
-						primOrBufFunc.addArg(new Arg(argName, result.typeConverter.convertTypeToJNA(mutType, TypeConversionMode.PrimitiveOrBufferParameter, libraryClassName)));
-						natStructFunc.addArg(new Arg(argName, result.typeConverter.convertTypeToJNA(mutType, TypeConversionMode.NativeParameterWithStructsPtrPtrs, libraryClassName)));
+						primOrBufFunc.addArg(new Arg(argName, typeConverter().convertTypeToJNA(mutType, TypeConversionMode.PrimitiveOrBufferParameter, libraryClassName)));
+						natStructFunc.addArg(new Arg(argName, typeConverter().convertTypeToJNA(mutType, TypeConversionMode.NativeParameterWithStructsPtrPtrs, libraryClassName)));
 					}
 				}
 				iArg++;
@@ -454,7 +358,7 @@ public class JNADeclarationsConverter extends DeclarationsConverter {
 						// TODO report error
 						continue;
 					}
-					baseClass = result.getTaggedTypeIdentifierInJava(parent);
+					baseClass = result.typeConverter.getTaggedTypeIdentifierInJava(parent);
 					if (baseClass != null) {
 						inheritsFromStruct = true;
 						break; // TODO handle multiple and virtual inheritage
@@ -641,7 +545,7 @@ public class JNADeclarationsConverter extends DeclarationsConverter {
 		//convertVariablesDeclaration(name, mutatedType, out, iChild, callerLibraryName);
 
 		Expression initVal = null;
-		TypeRef  javaType = result.typeConverter.convertTypeToJNA(
+		TypeRef  javaType = typeConverter().convertTypeToJNA(
 			mutatedType, 
 			TypeConversion.TypeConversionMode.FieldType,
 			callerLibraryName
@@ -904,7 +808,7 @@ public class JNADeclarationsConverter extends DeclarationsConverter {
 			for (VariablesDeclaration vd : decls.getFirst()) {
 				String name = vd.getDeclarators().get(0).resolveName(), uname = namesById.get(vd.getId());
 				Struct parent = (Struct)vd.getParentElement();
-				Identifier parentTgName = result.getTaggedTypeIdentifierInJava(parent);
+				Identifier parentTgName = typeConverter().getTaggedTypeIdentifierInJava(parent);
 				if (!result.config.noComments)
 					fieldsConstr.addToCommentBefore("@param " + name + " @see " + parentTgName + "#" + vd.getDeclarators().get(0).resolveName());
 				superCall.addArgument(varRef(uname));

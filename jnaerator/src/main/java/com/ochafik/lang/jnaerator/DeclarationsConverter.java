@@ -118,7 +118,7 @@ public abstract class DeclarationsConverter {
 
     static class EnumItemResult {
         public Enum.EnumItem originalItem;
-        public Expression value;
+        public Expression convertedValue, unconvertedValue;
         public String comments;
         public String exceptionMessage;
         public Declaration errorElement;
@@ -137,13 +137,13 @@ public abstract class DeclarationsConverter {
 					if (lastRefValue == null) {
 						if (lastAdditiveValue != null) {
 							lastAdditiveValue++;
-							res.value = expr(lastAdditiveValue);
+							res.unconvertedValue = expr(lastAdditiveValue);
 						} else {
 							if (item == e.getItems().get(0)) {
 								lastAdditiveValue = 0;
-								res.value = expr(lastAdditiveValue);
+								res.unconvertedValue = expr(lastAdditiveValue);
 							} else
-								res.value = null;
+								res.unconvertedValue = null;
 						}
 					} else {
 						// has a last reference value
@@ -152,20 +152,18 @@ public abstract class DeclarationsConverter {
 						else
 							lastAdditiveValue = 1;
 
-						res.value = //result.typeConverter.convertExpressionToJava(
-							expr(
-								lastRefValue.clone(),
-								Expression.BinaryOperator.Plus,
-								expr(lastAdditiveValue)
-							//)
-						);
+                        res.unconvertedValue = expr(
+                            lastRefValue.clone(),
+                            Expression.BinaryOperator.Plus,
+                            expr(lastAdditiveValue)
+                        );
 					}
 				} else {
 					// has an explicit value
 					failedOnceForThisEnum = false;// reset skipping
 					lastAdditiveValue = null;
 					lastRefValue = item.getArguments().get(0);
-					res.value = lastRefValue;
+					res.unconvertedValue = lastRefValue;
 					if (lastRefValue instanceof Expression.Constant) {
 						try {
 							lastAdditiveValue = ((Expression.Constant)lastRefValue).asInteger();
@@ -174,8 +172,7 @@ public abstract class DeclarationsConverter {
 					}
 				}
 				
-				Expression convertedValue = result.typeConverter.convertExpressionToJava(res.value, libraryClassName, true).getFirst();
-				res.value = convertedValue;
+				res.convertedValue = result.typeConverter.convertExpressionToJava(res.unconvertedValue, libraryClassName, true).getFirst();
 			} catch (Exception ex) {
                 failedOnceForThisEnum = true;
                 res.exceptionMessage = ex.toString();
@@ -248,7 +245,8 @@ public abstract class DeclarationsConverter {
                         // TODO
 						TypeRef tr = prim == JavaPrim.NativeLong || prim == JavaPrim.NativeSize ?
 							typeRef("long") :
-							result.typeConverter.convertTypeToJNA(mutatedType, TypeConversion.TypeConversionMode.FieldType, libraryClassName)
+                            primRef(prim)
+							//result.typeConverter.convertTypeToJNA(mutatedType, TypeConversion.TypeConversionMode.FieldType, libraryClassName)
 						;
 						VariablesDeclaration vd = new VariablesDeclaration(tr, new DirectDeclarator(name, val.getFirst()));
 						if (!result.config.noComments) {
@@ -258,8 +256,8 @@ public abstract class DeclarationsConverter {
 							vd.addToCommentBefore(v.getCommentAfter());
 						}
 
-                        if (result.config.runtime == JNAeratorConfig.Runtime.BridJ)
-                            vd.addModifiers(ModifierType.Public, ModifierType.Static, ModifierType.Final);
+//                        if (result.config.runtime == JNAeratorConfig.Runtime.BridJ)
+                        vd.addModifiers(ModifierType.Public, ModifierType.Static, ModifierType.Final);
 						
 						out.addDeclaration(vd);
 					} catch (UnsupportedConversionException e) {
@@ -359,7 +357,7 @@ public abstract class DeclarationsConverter {
                 }
                 Declaration ct = outputConstant(
                     er.originalItem.getName(),
-                    result.typeConverter.convertExpressionToJava(er.value, libraryClassName, true),
+                    result.typeConverter.convertExpressionToJava(er.unconvertedValue, libraryClassName, true),
                     signatures,
                     er.originalItem,
                     "enum item",
@@ -418,8 +416,11 @@ public abstract class DeclarationsConverter {
                     //TypeRef tr = new TypeRef.SimpleTypeRef(result.typeConverter.typeToJNA(type, vs, TypeConversion.TypeConversionMode.FieldType, callerLibraryClass));
                     TypeRef tr = converted.getValue();
                     Expression value = converted.getFirst();
-                    if (result.config.castConstants)
+                    if (result.config.castConstants) {
+                        if (!(value instanceof Constant) && !(value instanceof VariableRef))
+                            value.setParenthesis(true);
                         value = new Cast(tr, value);
+                    }
                         
 
 					Declaration declaration = new VariablesDeclaration(tr, new DirectDeclarator(name, value));
