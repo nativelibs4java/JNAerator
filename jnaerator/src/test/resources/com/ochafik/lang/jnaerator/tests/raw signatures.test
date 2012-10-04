@@ -1,6 +1,9 @@
 int f(void*);
 int *g();
 int *h(int *);
+enum { OK, NO } e(enum { A, B = A * 2, C } x);
+struct S { int OK, NO; };
+S* ps(S *x);
 --
 #runtime(BridJ)
 import test.*;
@@ -10,9 +13,13 @@ Pointer<Integer> p;
 f((Pointer<?>)null);
 p = g();
 p = h(p);
+IntValuedEnum<e_enum > r = e((e_x_enum)null);
+Pointer<S> rps = ps((Pointer<S>)null);
 
 new TestLibrary() {{
 	long v = g$2();
 	v = h(v);
+	int r = e(10);
+	long rps = ps((long)0);
 }};
 
