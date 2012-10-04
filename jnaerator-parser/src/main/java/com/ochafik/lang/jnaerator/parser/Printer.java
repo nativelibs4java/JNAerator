@@ -190,7 +190,10 @@ public class Printer implements Visitor {
 
     public void visitEnum(Enum e) {
         modifiersStringPrefix(e);
-        append("enum ", e.getTag());
+        if (!e.getAnnotations().isEmpty())
+            implode(e.getAnnotations(), "\n" + indent).append("\n", indent);
+
+		append("enum ", e.getTag());
         if (e.getTag() != null)
             append(" ");
         if (!e.getInterfaces().isEmpty())

@@ -355,8 +355,9 @@ public abstract class DeclarationsConverter {
                     out.addDeclaration(er.errorElement);
                     continue;
                 }
+                String itemName = result.typeConverter.getValidJavaIdentifierString(ident(er.originalItem.getName()));
                 Declaration ct = outputConstant(
-                    er.originalItem.getName(),
+                    itemName,
                     result.typeConverter.convertExpressionToJava(er.unconvertedValue, libraryClassName, true),
                     signatures,
                     er.originalItem,

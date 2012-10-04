@@ -117,12 +117,13 @@ public class JNADeclarationsConverter extends DeclarationsConverter {
 		if (e.isForwardDeclaration())
 			return;
 		
-		Identifier enumName = getActualTaggedTypeName(e);
+		Identifier rawEnumName = getActualTaggedTypeName(e);
         List<EnumItemResult> results = getEnumValuesAndCommentsByName(e, signatures, libraryClassName);
 
 
         boolean hasEnumClass = false;
-        if (enumName != null && enumName.resolveLastSimpleIdentifier().getName() != null) {
+        if (rawEnumName != null && rawEnumName.resolveLastSimpleIdentifier().getName() != null) {
+            Identifier enumName = result.typeConverter.getValidJavaIdentifier(rawEnumName);
             if (!signatures.addClass(enumName))
                 return;
 
@@ -231,7 +232,7 @@ public class JNADeclarationsConverter extends DeclarationsConverter {
 				names.add(function.getAsmName());
 
 			if (!isCallback && !modifiedMethodName.equals(functionName))
-				natFunc.addAnnotation(new Annotation(result.config.runtime.typeRef(JNAeratorConfig.Runtime.Ann.Name), expr(functionName.toString())));
+				annotateActualName(natFunc, functionName);
 
 			natFunc.setName(modifiedMethodName);
 			natFunc.setValueType(typeConverter().convertTypeToJNA(returnType, TypeConversionMode.ReturnType, libraryClassName));
@@ -877,5 +878,9 @@ public class JNADeclarationsConverter extends DeclarationsConverter {
             block(stat(methodCall("super")))
         ));
         return ptClass;
+    }
+
+    private void annotateActualName(ModifiableElement e, Identifier name) {
+        e.addAnnotation(new Annotation(result.config.runtime.typeRef(JNAeratorConfig.Runtime.Ann.Name), expr(name.toString())));
     }
 }

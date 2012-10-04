@@ -57,6 +57,10 @@ public class BridJDeclarationsConverter extends DeclarationsConverter {
         super(result);
 	}
 
+    public void annotateActualName(ModifiableElement e, Identifier name) {
+        e.addAnnotation(new Annotation(Name.class, expr(name.toString())));
+    }
+    
     @Override
     public Struct convertCallback(FunctionSignature functionSignature, Signatures signatures, Identifier callerLibraryName) {
         Struct decl = super.convertCallback(functionSignature, signatures, callerLibraryName);
@@ -77,14 +81,15 @@ public class BridJDeclarationsConverter extends DeclarationsConverter {
 		if (e.isForwardDeclaration())
 			return;
 		
-		Identifier enumName = getActualTaggedTypeName(e);
+		Identifier rawEnumName = getActualTaggedTypeName(e);
         List<EnumItemResult> results = getEnumValuesAndCommentsByName(e, signatures, libraryClassName);
         
         boolean hasEnumClass = false;
         
-        if (enumName != null && enumName.resolveLastSimpleIdentifier().getName() != null) {
+        if (rawEnumName != null && rawEnumName.resolveLastSimpleIdentifier().getName() != null) {
             hasEnumClass = true;
             
+            Identifier enumName = result.typeConverter.getValidJavaIdentifier(rawEnumName);
             if (!signatures.addClass(enumName))
                 return;
 
@@ -94,6 +99,8 @@ public class BridJDeclarationsConverter extends DeclarationsConverter {
             if (!result.config.noComments)
                 en.importComments(e, "enum values", getFileCommentContent(e));
 
+            if (!rawEnumName.equals(enumName)) 
+                annotateActualName(en, rawEnumName);
             en.setType(Enum.Type.Java);
             en.setTag(enumName.clone());
             en.addModifiers(ModifierType.Public);
@@ -106,7 +113,8 @@ public class BridJDeclarationsConverter extends DeclarationsConverter {
                     out.addDeclaration(er.errorElement);
                     continue;
                 }
-                Enum.EnumItem item = new Enum.EnumItem(er.originalItem.getName(), er.convertedValue);
+                String itemName = result.typeConverter.getValidJavaIdentifierString(ident(er.originalItem.getName()));
+                Enum.EnumItem item = new Enum.EnumItem(itemName, er.convertedValue);
                 en.addItem(item);
                 hasValidItem = true;
                 if (!result.config.noComments)
@@ -358,7 +366,7 @@ public class BridJDeclarationsConverter extends DeclarationsConverter {
             nativeMethod.setName(javaMethodName);
         }
         if (!isCallback && !javaMethodName.equals(functionName))
-            nativeMethod.addAnnotation(new Annotation(Name.class, expr(functionName.toString())));
+            annotateActualName(nativeMethod, functionName);
     }
     @Override
     public Struct convertStruct(Struct struct, Signatures signatures, Identifier callerLibraryClass, String callerLibrary, boolean onlyFields) throws IOException {
