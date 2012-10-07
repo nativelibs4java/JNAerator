@@ -360,8 +360,10 @@ public class BridJDeclarationsConverter extends DeclarationsConverter {
         if (varArgType != null)
             nativeMethod.addArg(new Arg(varArgName, typeRef(varArgType.clone()))).setVarArg(true);
         
-        returnType.annotateTypedType(nativeMethod, useRawTypes);//.getTypedTypeRef())));
-        nativeMethod.setValueType(returnType.getTypeRef(useRawTypes));
+        if (returnType != null) {
+            returnType.annotateTypedType(nativeMethod, useRawTypes);
+            nativeMethod.setValueType(returnType.getTypeRef(useRawTypes));
+        }
         
         String natSig = nativeMethod.computeSignature(SignatureType.JavaStyle);
 

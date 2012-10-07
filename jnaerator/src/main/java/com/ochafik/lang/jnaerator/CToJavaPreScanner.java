@@ -121,8 +121,26 @@ public class CToJavaPreScanner extends Scanner {
         } 
         if (function.getValueType() != null) {
             moveModifiersOfType(ModifierKind.CallingConvention, function.getValueType(), function);
-        } else if (!(function.getParentElement() instanceof Struct) || !((Struct)function.getParentElement()).getType().isObjC()) {
-            function.setValueType(typeRef("int"));
+        } else {
+            Element parent = function.getParentElement();
+            boolean returnsInt = false;
+            if (parent instanceof Struct) {
+                Struct parentStruct = (Struct)parent;
+                switch (parentStruct.getType()) {
+                    case CPPClass:
+                    case CStruct:
+                        if (!function.getName().equals(parentStruct.getTag()))
+                            returnsInt = true;
+                        break;
+                    default:
+                        break;
+                }
+            } else {
+                returnsInt = true;
+            }
+            if (returnsInt) {
+                function.setValueType(typeRef("int"));
+            }
         }
         super.visitFunction(function);
     }
