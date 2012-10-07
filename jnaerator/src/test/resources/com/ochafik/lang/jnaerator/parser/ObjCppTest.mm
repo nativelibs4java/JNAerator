@@ -55,6 +55,10 @@ extern long int llrint(double);
 --
 extern long long int llrint(double);
 --
+long * f(long v, unsigned long* pv);
+--
+long long * fpll();
+--
 typedef int I;
 register I i;
 --

@@ -211,6 +211,8 @@ public class BridJDeclarationsConverter extends DeclarationsConverter {
 			}
 		}
         
+        Function rawMethod = nativeMethod.clone();
+        
         //Map<String, NL4JConversion> argTypes = new LinkedHashMap<String, NL4JConversion>();
 
         boolean isObjectiveC = function.getType() == Type.ObjCMethod;
@@ -277,7 +279,7 @@ public class BridJDeclarationsConverter extends DeclarationsConverter {
         if (convertedBody == null) {
             boolean forwardedToRaw = false;
             if (result.config.genRawBindings && !isCallback) {
-                Function rawMethod = nativeMethod.clone();
+//                Function rawMethod = nativeMethod.clone();
                 rawMethod.setArgs(Collections.EMPTY_LIST);
                 fillIn(signatures, functionName, rawMethod, returnType, paramTypes, paramNames, varArgType, varArgName, isCallback, true);
                 rawMethod.addModifiers(ModifierType.Protected, ModifierType.Native);
@@ -325,7 +327,9 @@ public class BridJDeclarationsConverter extends DeclarationsConverter {
                                 break;
                             case NativeLong:
                             case NativeSize:
-                                followedCall = new New(nativeMethod.getValueType().clone(), followedCall);
+                                if (!rawMethod.getValueType().toString().equals("long")) {
+                                    followedCall = new New(nativeMethod.getValueType().clone(), followedCall);
+                                }
                             default:
                                 break;
                         }

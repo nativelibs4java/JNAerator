@@ -124,6 +124,10 @@ public abstract class ModifiableElement extends Element {
 		for (Modifier m : modifiers)
 			this.modifiers.remove(m);
 	}
+	public void removeModifiers(List<Modifier> modifiers) {
+		for (Modifier m : modifiers)
+			this.modifiers.remove(m);
+	}
 	public void setModifiers(List<Modifier> modifiers) {
 		this.modifiers.clear();
 		if (modifiers != null)

@@ -649,7 +649,7 @@ public class Result extends Scanner {
 
     private boolean isPrimitive(TypeRef tr) {
         // TODO un-hack me
-        return javaPrims.containsKey(tr.toString());
+        return tr != null && javaPrims.containsKey(tr.toString());
     }
 
     public TaggedTypeRef resolveFullTaggedTypeRef(TaggedTypeRef s) {

@@ -1,0 +1,13 @@
+long fl(long l, long long ll, unsigned long* pl, unsigned long long *pll);
+long * fpl();
+long *** fpppl();
+long long * fpll();
+--
+#runtime(BridJ)
+import test.*;
+import static test.TestLibrary.*;
+
+long r = fl(1L, 1L, (Pointer<org.bridj.CLong>)null, (Pointer<Long>)null);
+Pointer<org.bridj.CLong> pl = fpl();
+Pointer<Pointer<Pointer<org.bridj.CLong>>> pppl = fpppl();
+Pointer<Long> pll = fpll();

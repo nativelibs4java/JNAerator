@@ -27,10 +27,13 @@ import com.ochafik.lang.jnaerator.parser.Declarator.FunctionDeclarator;
 import com.ochafik.lang.jnaerator.parser.Declarator.MutableByDeclarator;
 import com.ochafik.lang.jnaerator.parser.StoredDeclarations.TypeDef;
 import com.ochafik.lang.jnaerator.parser.TypeRef.FunctionSignature;
+import com.ochafik.lang.jnaerator.parser.TypeRef.SimpleTypeRef;
 import com.ochafik.lang.jnaerator.parser.TypeRef.TaggedTypeRef;
+import com.ochafik.lang.jnaerator.parser.TypeRef.TargettedTypeRef;
 import com.ochafik.util.string.StringUtils;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
 
@@ -73,24 +76,53 @@ public class CToJavaPreScanner extends Scanner {
         }
     }
 
+    static Modifier longAlias = ModifierType.Long.resolveAlias(), shortAlias = ModifierType.Short.resolveAlias();
+    static List<Modifier> getLongShortModifiers(ModifiableElement e) {
+        List<Modifier> ret = null;
+        for (Modifier mod : e.getModifiers()) {
+            Modifier res = mod.resolveAlias();
+            if (res.equals(longAlias) || res.equals(shortAlias)) {
+                if (ret == null)
+                    ret = new ArrayList<Modifier>();
+                ret.add(mod);
+            }
+        }
+        return ret;
+    }
+    
+    static TypeRef longShortModsToTypeRef(List<Modifier> mods) {
+        TypeRef tr = new Primitive();
+        tr.addModifiers(mods);
+        return tr;
+    }
+    static void attachLongOrShortModifiersToPointedType(TypeRef tr, List<Modifier> mods) {
+        while (tr instanceof TypeRef.TargettedTypeRef) {
+            TargettedTypeRef ttr = (TargettedTypeRef)tr;
+            if (ttr.getTarget() == null) {
+                ttr.setTarget(longShortModsToTypeRef(mods));
+                return;
+            } else {
+                tr = ttr.getTarget();
+            }
+        }
+        tr.addModifiers(mods);
+    }
     @Override
     public void visitFunction(Function function) {
-        List<Modifier> modifiers = function.getModifiers();
-            
-        if (function.getValueType() == null) {
-            for (ModifierType mod : new ModifierType[] { ModifierType.Long, ModifierType.Short }) {
-                if (mod.isContainedBy(modifiers)) {
-                    function.removeModifiers(mod);
-                    function.setValueType(typeRef(mod.toString()));
-                    break;
-                }
-            }
+        List<Modifier> mods = getLongShortModifiers(function);
+        if (mods != null) {
+            // long and short can be incorrectly attached as modifiers to the function instead of to its return type: fix this here.
             if (function.getValueType() == null) {
-                if (!(function.getParentElement() instanceof Struct) || !((Struct)function.getParentElement()).getType().isObjC())
-                    function.setValueType(typeRef("int"));
+                function.setValueType(longShortModsToTypeRef(mods));
+            } else {
+                attachLongOrShortModifiersToPointedType(function.getValueType(), mods);
             }
-        } else {
+            function.removeModifiers(mods);
+        } 
+        if (function.getValueType() != null) {
             moveModifiersOfType(ModifierKind.CallingConvention, function.getValueType(), function);
+        } else if (!(function.getParentElement() instanceof Struct) || !((Struct)function.getParentElement()).getType().isObjC()) {
+            function.setValueType(typeRef("int"));
         }
         super.visitFunction(function);
     }
