@@ -3,7 +3,20 @@ Current development version (0.11-SNAPSHOT)
 - Fixed infinite loops in simple typedefs (issue #288)
 - Fixed some -beautifyNames cases (issue #315)
 - Fixed parsing of some C++ templates (including template constructors)
+- Fixed "long long" regression
+- Fixed JNAeratorMojo.config documentation (issue #330)
+- Fixed long / long long / short pointer function return types
+- Fixed generation of BridJ C++ constructors
+- Fixed enum names that collide with Java identifiers (issue #334)
+- Added raw bindings generation for BridJ
 - Added parsing of 'using' C++ statements
+- Added TypeRef.resolvedJavaIdentifier
+- Added parser support for `complex double` (cf. complex.h)
+- Added test for BridJ raw signatures
+- Moved to ECJ 3.7.2
+- Moved to JNA 3.4.0
+- Refactored type resolution and conversion
+- Rationalized CompilerUtils classpath + bootclasspath
 
 Version 0.10 (20120415, commit 6bc061dfce06b941086a29f696195e82fbaffbdc)
 
