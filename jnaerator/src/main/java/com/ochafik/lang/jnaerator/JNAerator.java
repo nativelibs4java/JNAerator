@@ -1623,7 +1623,7 @@ public class JNAerator {
 		/// Build JavaDoc comments where applicable
 		sourceFiles.accept(new JavaDocCreator(result));
 		
-		assert checkNoCycles(sourceFiles);
+//        checkNoCycles(sourceFiles);
 
 		if (config.normalizedParsedSourcesOutFile != null) {
 			if (config.verbose)
@@ -1710,12 +1710,14 @@ public class JNAerator {
 		}
 	}
 	private boolean checkNoCycles(SourceFiles sourceFiles) {
-		final HashSet<Integer> ids = new HashSet<Integer>(new Arg().getId());
+		final HashMap<Integer, Throwable> ids = new HashMap<Integer, Throwable>(new Arg().getId());
 		sourceFiles.accept(new Scanner() {
 			@Override
 			protected void visitElement(Element d) {
-				if (d != null && !ids.add(d.getId()))
-					throw new RuntimeException("Cycle : " + d);
+				if (d != null && ids.put(d.getId(), new RuntimeException().fillInStackTrace()) != null) {
+                    Throwable previous = ids.get(d.getId());
+					throw new RuntimeException("Cycle : " + d, previous);
+                }
 				super.visitElement(d);
 			}
 		});

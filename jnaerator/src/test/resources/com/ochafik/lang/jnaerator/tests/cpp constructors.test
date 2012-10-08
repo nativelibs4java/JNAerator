@@ -1,0 +1,14 @@
+class A {
+public:
+	A(int*, double*);
+	A(short*, short);
+};
+
+--
+#runtime(BridJ)
+import test.*;
+import static test.TestLibrary.*;
+
+new A((Pointer<Integer>)null, (Pointer<Double>)null);
+new A((Pointer<Short>)null, (short)0);
+
