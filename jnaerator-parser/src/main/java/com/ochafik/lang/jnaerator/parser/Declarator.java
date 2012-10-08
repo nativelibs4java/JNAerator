@@ -72,7 +72,11 @@ public abstract class Declarator extends ModifiableElement {
 	public abstract MutableByDeclarator mutateType(MutableByDeclarator t);
 	
     public final MutableByDeclarator mutateTypeKeepingParent(MutableByDeclarator type) {
+        if (type == null)
+            return null;
         MutableByDeclarator mutated = mutateType(type);
+        if (mutated == null)
+            throw new RuntimeException("Mutation of " + type + " yielded NULL!");
         ((Element)mutated).setParentElement(((Element)type).getParentElement());
         return mutated;
     }
