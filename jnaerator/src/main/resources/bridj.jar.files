@@ -40,6 +40,7 @@ org/bridj/CommonPointerIOs$PointerPointerIO.class
 org/bridj/CommonPointerIOs$StructPointerIO.class
 org/bridj/CommonPointerIOs$TypedPointerPointerIO.class
 org/bridj/CommonPointerIOs.class
+org/bridj/ComplexDouble.class
 org/bridj/DefaultNativeList$1.class
 org/bridj/DefaultNativeList.class
 org/bridj/DefaultPointer.class
@@ -291,9 +292,9 @@ org/bridj/jawt/JawtLibrary$JNIEnv.class
 org/bridj/jawt/JawtLibrary.class
 org/bridj/lib/darwin_universal/libbridj.dylib
 org/bridj/lib/linux_arm32_arm/bridj.so
-org/bridj/lib/linux_x64/bridj.so
-org/bridj/lib/linux_x86/bridj.so
-org/bridj/lib/sunos_x86/bridj.so
+org/bridj/lib/linux_x64/libbridj.so
+org/bridj/lib/linux_x86/libbridj.so
+org/bridj/lib/sunos_x86/libbridj.so
 org/bridj/lib/win32/bridj.dll
 org/bridj/lib/win64/bridj.dll
 org/bridj/objc/FoundationLibrary.class
