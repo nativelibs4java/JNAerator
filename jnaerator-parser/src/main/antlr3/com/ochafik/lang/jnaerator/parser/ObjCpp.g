@@ -39,9 +39,6 @@ scope ModifierKinds {
 	EnumSet<ModifierKind> allowedKinds;
 	EnumSet<ModifierKind> forbiddenKinds;
 }
-scope IsTypeDef {
-	boolean isTypeDef;
-}
 scope ModContext {
 	boolean isObjCArgDef;
 	boolean isInExtMod;
@@ -219,12 +216,6 @@ import static com.ochafik.lang.jnaerator.parser.StoredDeclarations.*;
 			return false;
 		ModContext_scope scope = (ModContext_scope)ModContext_stack.get(ModContext_stack.size() - 1);
 		return scope.isInExtMod;
-	}
-	boolean isTypeDef() {
-		if (IsTypeDef_stack.isEmpty())
-			return false;
-		IsTypeDef_scope scope = (IsTypeDef_scope)IsTypeDef_stack.get(IsTypeDef_stack.size() - 1);
-		return scope.isTypeDef;
 	}
 	void defineTypeIdentifierInParentScope(Identifier i) {
 		if (i != null && i.isPlain())
@@ -523,7 +514,6 @@ externDeclarations returns [ExternDeclarations declaration]
 	;
 
 declaration returns [Declaration declaration, List<Modifier> modifiers, String preComment, int startTokenIndex, Template template]
-scope IsTypeDef;
 scope ModContext;
 @before {
 	checkInterrupt();
@@ -1231,9 +1221,7 @@ arrayTypeMutator returns [TypeMutator mutator]
 	;
 
 templatePrefix returns [Template template]
-scope IsTypeDef;
 @init {
-	$IsTypeDef::isTypeDef = true;
 	$template = new Template();
 }
 	:	
@@ -1295,8 +1283,6 @@ functionSignatureSuffix returns [FunctionSignature signature]
 		)?
 		(
 			ii=IDENTIFIER {
-				if (isTypeDef())
-					addTypeIdent($ii.text);
 				$signature.getFunction().setName(new SimpleIdentifier($IDENTIFIER.text));
 			}
 		)?
@@ -1404,9 +1390,13 @@ declarator  returns [Declarator decl]
 	;
 
 typeDef returns [TypeDef typeDef]
-scope IsTypeDef;
-@init {
-	$IsTypeDef::isTypeDef = true;
+@after {
+	for (Declarator d : $typeDef.getDeclarators()) {
+		String n = d.resolveName();
+		if (n != null) {
+			addTypeIdent(n);
+		}
+	}
 }
 	:	'typedef'
 	 	varDecl ';' {
@@ -1476,9 +1466,6 @@ directDeclarator returns [Declarator decl]
 		(
 			{ parseModifier(next()) == null }?=> IDENTIFIER {
 				$decl = mark(new DirectDeclarator($IDENTIFIER.text), getLine($IDENTIFIER));
-				if (isTypeDef()) {
-					addTypeIdent($IDENTIFIER.text);
-				}
 			} | 
 			'(' inner=declarator ')' {
 				$decl = $inner.decl;
@@ -1572,7 +1559,8 @@ scope ModifierKinds;
 				isTypeIdentifier(next()) || 
 				(
 					parseModifier(next(1)) == null &&
-					(isTypeDef() || !next(2, "=", ",", ";", ":", "[", "(", ")"))
+					//(isTypeDef() || !next(2, "=", ",", ";", ":", "[", "(", ")"))
+					!next(2, "=", ",", ";", ":", "[", "(", ")")
 				) 
 			}?=> an=typeName { $type = $an.type; } |
 			structCore { $type = $structCore.struct; } |
