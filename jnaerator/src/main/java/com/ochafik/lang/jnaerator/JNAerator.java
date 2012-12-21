@@ -359,6 +359,9 @@ public class JNAerator {
 					case DefineMacro:
 						config.preprocessorConfig.macros.put(a.getStringParam(0), a.getStringParam(1));
 						break;
+					case DefineType:
+						config.preprocessorConfig.forcedTypeDefs.put(a.getStringParam(0), a.getStringParam(1));
+						break;
 					case Direct:
 						config.useJNADirectCalls = true;
 						break;

@@ -44,13 +44,17 @@ import org.antlr.runtime.RecognitionException;
 
 import com.ochafik.io.WriteText;
 import com.ochafik.lang.jnaerator.PreprocessorUtils.MacroUseCallback;
+import com.ochafik.lang.jnaerator.parser.Declarator;
 import com.ochafik.lang.jnaerator.parser.ObjCppLexer;
 import com.ochafik.lang.jnaerator.parser.ObjCppParser;
+import com.ochafik.lang.jnaerator.parser.Scanner;
 import com.ochafik.lang.jnaerator.parser.SourceFile;
+import com.ochafik.lang.jnaerator.parser.StoredDeclarations.TypeDef;
 import com.ochafik.lang.reflect.DebugUtils;
 import com.ochafik.util.listenable.Pair;
 import com.ochafik.util.string.RegexUtils;
 import java.util.Collection;
+import java.util.Map;
 
 public class JNAeratorParser {
 
@@ -194,8 +198,37 @@ public class JNAeratorParser {
         });
         return replaced;
     }
-	public SourceFiles parse(JNAeratorConfig config, TypeConversion typeConverter, MacroUseCallback macrosDependenciesOut) throws IOException, LexerException {
+    private SourceFiles removeTypeDefsConflictingWithForcedTypeDefs(SourceFiles sourceFiles, final Set<String> forcedTypeDefs) {
+        sourceFiles.accept(new Scanner() {
+            Set<String> seenOnce = new HashSet<String>();
+            @Override
+            public void visitTypeDef(TypeDef typeDef) {
+                super.visitTypeDef(typeDef);
+                List<Declarator> declaratorsToRemove = null;
+                for (Declarator d : typeDef.getDeclarators()) {
+                    String n = d.resolveName();
+                    if (forcedTypeDefs.contains(n) && !seenOnce.add(n)) {
+                        if (declaratorsToRemove == null)
+                            declaratorsToRemove = new ArrayList<Declarator>();
+                        declaratorsToRemove.add(d);
+                    }
+                }
+                if (declaratorsToRemove != null) {
+                    for (Declarator d : declaratorsToRemove)
+                        d.replaceBy(null);
+                }
+            }
+        });
+        return sourceFiles;
+    }
+	public SourceFiles parse(final JNAeratorConfig config, TypeConversion typeConverter, MacroUseCallback macrosDependenciesOut) throws IOException, LexerException {
 		SourceFiles sourceFiles = new SourceFiles();
+        
+        StringBuilder syntheticTypeDefsBuilder = new StringBuilder();
+        for (Map.Entry<String, String> e : config.preprocessorConfig.forcedTypeDefs.entrySet()) {
+            syntheticTypeDefsBuilder.append("typedef ").append(e.getValue()).append(" ").append(e.getKey()).append(";");
+        }
+        config.preprocessorConfig.includeStrings.add(0, syntheticTypeDefsBuilder.toString());
         
         String sourceContent = PreprocessorUtils.preprocessSources(config, sourceFiles.defines, config.verbose, typeConverter, macrosDependenciesOut);
         
@@ -204,11 +237,13 @@ public class JNAeratorParser {
         
         ExecutorService executor = Executors.newSingleThreadExecutor();
         try {
+            final Set<String> topLevelTypeDefs = Collections.synchronizedSet(config.preprocessorConfig.forcedTypeDefs.keySet());
+			
             if (!config.parseInChunks) {
-                Future<SourceFile> fut = executor.submit(createParsingCallable(config, typeConverter, sourceContent, null, true));
+                Future<SourceFile> fut = executor.submit(createParsingCallable(config, typeConverter, sourceContent, topLevelTypeDefs, true));
                 try {
                     sourceFiles.add(fut.get(config.fullParsingTimeout, TimeUnit.MILLISECONDS));
-                    return sourceFiles;
+                    return removeTypeDefsConflictingWithForcedTypeDefs(sourceFiles, topLevelTypeDefs);
                 } catch (Throwable ex) {
                 	ex.printStackTrace();
                     System.err.println("Parsing failed : " + ex);
@@ -226,7 +261,6 @@ public class JNAeratorParser {
 			if (config.verbose)
 				System.out.println("Now parsing " + slices.size() + " slices");
 	
-			final Set<String> topLevelTypeDefs = Collections.synchronizedSet(new HashSet<String>());
 			boolean firstFailure = true;
 			for (Slice slice : slices) {
 				try {
@@ -246,7 +280,7 @@ public class JNAeratorParser {
 					System.err.println("Parsing failed : " + ex);
 				}
 			}
-			return sourceFiles;
+			return removeTypeDefsConflictingWithForcedTypeDefs(sourceFiles, topLevelTypeDefs);
 		} finally {
 			executor.shutdown();
 		}

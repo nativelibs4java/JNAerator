@@ -271,6 +271,7 @@ public class JNAeratorConfig {
 
 		public final List<String> includes = new ArrayList<String>();
 		public final Map<String, String> macros = new LinkedHashMap<String, String>();
+		public final Map<String, String> forcedTypeDefs = new LinkedHashMap<String, String>();
 		public final List<String> frameworksPath = new ArrayList<String>();
 
 		public List<String> includeStrings = new ArrayList<String>();
