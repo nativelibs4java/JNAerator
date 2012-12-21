@@ -5,14 +5,14 @@
 	<artifactId>anarres-jnaerator</artifactId>
 	<name>Anarres JCPP (with JNAerator modifications)</name>
 	<url>http://www.anarres.org/projects/jcpp/</url>
-	<version>1.2.8-SNAPSHOT</version>
+	<version>1.2.8</version>
 	<packaging>jar</packaging>
 	<description></description>
 
 	<parent>
 		<groupId>com.nativelibs4java</groupId>
 		<artifactId>nativelibs4java-parent</artifactId>
-		<version>1.8-SNAPSHOT</version>
+		<version>1.8</version>
 		<relativePath>../..</relativePath>
 	</parent>
 	
