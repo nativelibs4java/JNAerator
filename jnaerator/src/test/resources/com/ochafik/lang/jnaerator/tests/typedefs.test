@@ -20,7 +20,7 @@ typedef void (*flong3)(long);
 typedef void (*flong4)(long x);
 
 typedef void (fint1)(int x);
-typedef void (fshort2)(int);
+typedef void (fint2)(int);
 typedef void (*fint3)(int);
 typedef void (*fint4)(int x);
 --
