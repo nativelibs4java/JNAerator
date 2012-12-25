@@ -77,7 +77,7 @@ public class BridJTypeConversion extends TypeConversion {
         public List<Expression> arrayLengths;
         public Expression bits;
         public Expression getExpr, setExpr;
-        public boolean wideString, readOnly, byValue, nativeSize, cLong, isUndefined;
+        public boolean wideString, readOnly, byValue, nativeSize, cLong, isUndefined, isTypedPointer;
         public Charset charset;
         public final List<Annotation> annotations = new ArrayList<Annotation>();
         //public String structIOFieldGetterNameRadix;
@@ -215,19 +215,26 @@ public class BridJTypeConversion extends TypeConversion {
                     conv.arrayLengths = sizes;
             }
 
+            NL4JConversion targetConv = null;
             try {
-                NL4JConversion targetConv = convertTypeToNL4J(targetRef, libraryClassName, null, null, -1, -1);
-                //if (result.isFakePointer(libraryClassName))
-                if (targetConv.isUndefined && allowFakePointers && original instanceof TypeRef.SimpleTypeRef) {
-                    conv.type = ConvType.Pointer;
-                    conv.typeRef = typeRef(result.getFakePointer(libraryClassName, ((TypeRef.SimpleTypeRef)original).getName().clone()));
-					if (structIOExpr != null) {
-						if (conv.arrayLengths == null)
-							conv.setExpr = methodCall(structIOExpr.clone(), "setPointerField", thisRef(), expr(fieldIndex), valueExpr);
-						conv.getExpr = methodCall(structIOExpr.clone(), "getTypedPointerField", thisRef(), expr(fieldIndex));
-					}
-					return conv;
+                targetConv = convertTypeToNL4J(targetRef, libraryClassName, null, null, -1, -1);
+            } catch (UnsupportedConversionException ex) {}
+            
+            if ((targetConv == null || targetConv.isUndefined) && allowFakePointers && original instanceof TypeRef.SimpleTypeRef) {
+                conv.type = ConvType.Pointer;
+                conv.isTypedPointer = true;
+                conv.typeRef = typeRef(result.getFakePointer(libraryClassName, ((TypeRef.SimpleTypeRef)original).getName().clone()));
+                if (structIOExpr != null) {
+                    if (conv.arrayLengths == null)
+                        conv.setExpr = methodCall(structIOExpr.clone(), "setPointerField", thisRef(), expr(fieldIndex), valueExpr);
+                    conv.getExpr = methodCall(structIOExpr.clone(), "getTypedPointerField", thisRef(), expr(fieldIndex));
                 }
+                return conv;
+            } else if (targetConv == null) {
+                conv.type = ConvType.Pointer;
+                conv.typeRef = typeRef(result.config.runtime.pointerClass);
+                return conv;
+            } else {
 				TypeRef pointedTypeRef = targetConv.getIndirectTypeRef();
 				
 				if (pointedTypeRef != null) {
@@ -240,11 +247,7 @@ public class BridJTypeConversion extends TypeConversion {
 					}
 					return conv;
 				}
-	        } catch (UnsupportedConversionException ex) {
-                conv.type = ConvType.Pointer;
-                conv.typeRef = typeRef(result.config.runtime.pointerClass);
-                return conv;
-	        }
+            }
         } else if (valueType.getResolvedJavaIdentifier() != null) {
             conv.typeRef = typeRef(valueType.getResolvedJavaIdentifier().clone());
             if (valueType instanceof TypeRef.FunctionSignature) {

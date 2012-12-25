@@ -1,7 +1,8 @@
 struct OpaqueStruct;
-
 const OpaqueStruct* GetInterestingMessage(UnknownPtr*);
 
+typedef struct S *T;
+T f();
 --
 #runtime(JNAerator)
 
@@ -24,3 +25,9 @@ import static test.TestLibrary.*;
 new OpaqueStruct() {};
 new UnknownPtr() {};
 Pointer<OpaqueStruct> s = GetInterestingMessage((Pointer<UnknownPtr>)null);
+
+T p = f();
+Pointer pp = p;
+class X implements S {};
+
+

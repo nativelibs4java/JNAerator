@@ -520,7 +520,10 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
                         TypeRef tr = typeDefsEncountered.add(name) ? result.getTypeDef(name) : null;
                         if (tr != null) {
                             if (!isResoluble(tr, libraryClassName)) {
-                                simpleTypeRef.replaceBy(typeRef(result.getFakePointer(libraryClassName, name)));
+                                if (convertToJavaRef)
+                                    simpleTypeRef.replaceBy(typeRef(result.getFakePointer(libraryClassName, name)));
+                                else
+                                    simpleTypeRef.replaceBy(tr.clone());
                                 return;
                             }
                                 
