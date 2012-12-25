@@ -8,7 +8,7 @@ int* f3(int);
 int* f4(int*);
 int f5(int*);
 
-void* ff();
+void *ff();
 --
 #runtime(BridJ)
 import test.*;
@@ -23,5 +23,7 @@ p = f3(0);
 p = f4((Pointer<Integer>)null);
 i = f5((Pointer<Integer>)null);
 
-long pv = ff$2();
-Pointer<?> p = ff();
+new test.TestLibrary() {{
+    long fl = ff$2();
+    Pointer<?> fp = ff();
+}};
