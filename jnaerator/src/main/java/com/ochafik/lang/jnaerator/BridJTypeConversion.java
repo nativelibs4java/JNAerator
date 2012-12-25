@@ -73,6 +73,7 @@ public class BridJTypeConversion extends TypeConversion {
     public class NL4JConversion {
 
         public ConvType type = ConvType.Default;
+        public NL4JConversion targetTypeConversion;
         private TypeRef typeRef, indirectType;
         public List<Expression> arrayLengths;
         public Expression bits;
@@ -215,12 +216,11 @@ public class BridJTypeConversion extends TypeConversion {
                     conv.arrayLengths = sizes;
             }
 
-            NL4JConversion targetConv = null;
             try {
-                targetConv = convertTypeToNL4J(targetRef, libraryClassName, null, null, -1, -1);
+                conv.targetTypeConversion = convertTypeToNL4J(targetRef, libraryClassName, null, null, -1, -1);
             } catch (UnsupportedConversionException ex) {}
             
-            if ((targetConv == null || targetConv.isUndefined) && allowFakePointers && original instanceof TypeRef.SimpleTypeRef) {
+            if ((conv.targetTypeConversion == null || conv.targetTypeConversion.isUndefined) && allowFakePointers && original instanceof TypeRef.SimpleTypeRef) {
                 conv.type = ConvType.Pointer;
                 conv.isTypedPointer = true;
                 conv.typeRef = typeRef(result.getFakePointer(libraryClassName, ((TypeRef.SimpleTypeRef)original).getName().clone()));
@@ -230,12 +230,12 @@ public class BridJTypeConversion extends TypeConversion {
                     conv.getExpr = methodCall(structIOExpr.clone(), "getTypedPointerField", thisRef(), expr(fieldIndex));
                 }
                 return conv;
-            } else if (targetConv == null) {
+            } else if (conv.targetTypeConversion == null) {
                 conv.type = ConvType.Pointer;
                 conv.typeRef = typeRef(result.config.runtime.pointerClass);
                 return conv;
             } else {
-				TypeRef pointedTypeRef = targetConv.getIndirectTypeRef();
+				TypeRef pointedTypeRef = conv.targetTypeConversion.getIndirectTypeRef();
 				
 				if (pointedTypeRef != null) {
                     conv.type = ConvType.Pointer;

@@ -27,6 +27,7 @@ import org.bridj.cpp.CPPObject;
 import org.bridj.cpp.com.IUnknown;
 
 import com.ochafik.lang.jnaerator.BridJTypeConversion.NL4JConversion;
+import com.ochafik.lang.jnaerator.TypeConversion.ConvType;
 //import org.bridj.structs.StructIO;
 //import org.bridj.structs.Array;
 
@@ -323,12 +324,11 @@ public class BridJDeclarationsConverter extends DeclarationsConverter {
                                 if (returnType.isTypedPointer)
                                     followedCall = new New(nativeMethod.getValueType(), followedCall);
                                 else {
-                                    TypeRef pointedType = getSingleTypeParameter(nativeMethod.getValueType());
                                     Expression ptrExpr = expr(typeRef(org.bridj.Pointer.class));
-                                    if (pointedType == null)
+                                    if (returnType.targetTypeConversion == null || returnType.targetTypeConversion.type == ConvType.Void)
                                         followedCall = methodCall(ptrExpr, "pointerToAddress", followedCall);
                                     else
-                                        followedCall = methodCall(ptrExpr, "pointerToAddress", followedCall, result.typeConverter.typeLiteral(pointedType));
+                                        followedCall = methodCall(ptrExpr, "pointerToAddress", followedCall, result.typeConverter.typeLiteral(getSingleTypeParameter(nativeMethod.getValueType())));
                                 }
                                 break;
                             case Enum:
