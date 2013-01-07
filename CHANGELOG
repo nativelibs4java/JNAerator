@@ -1,4 +1,8 @@
-Current development version (0.11-SNAPSHOT)
+Current development version (0.12-SNAPSHOT)
+
+...
+
+Version 0.11 (20130107)
 
 - Fixed infinite loops in simple typedefs (issue #288)
 - Fixed some -beautifyNames cases (issue #315)
