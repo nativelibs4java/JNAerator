@@ -11,7 +11,7 @@
   <parent>
 	  <groupId>com.nativelibs4java</groupId>
 	  <artifactId>jnaerator-parent</artifactId>
-	  <version>0.11</version>
+	  <version>0.12-SNAPSHOT</version>
 	  <relativePath>..</relativePath>
   </parent>
   	
