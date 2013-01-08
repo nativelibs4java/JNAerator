@@ -12,6 +12,7 @@ Version 0.11 (20130107)
 - Fixed long / long long / short pointer function return types
 - Fixed generation of BridJ C++ constructors
 - Fixed enum names that collide with Java identifiers (issue #334)
+- Added a type definition override switch, useful force mismatching 32/64bits types to some predefined types (for instance, -TmyVal=intptr_t) 
 - Added raw bindings generation for BridJ
 - Added parsing of 'using' C++ statements
 - Added TypeRef.resolvedJavaIdentifier
