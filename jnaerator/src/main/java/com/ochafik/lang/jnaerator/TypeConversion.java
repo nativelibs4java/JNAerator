@@ -213,8 +213,9 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
     public void initTypes() {
 
         result.prim("void", JavaPrim.Void);
+        result.prim("VOID", JavaPrim.Void);
 
-        result.prim("UTF32Char", JavaPrim.Char);
+        result.prim("UTF32Char", JavaPrim.Int);
         result.prim("unichar", JavaPrim.Char);
 
         result.prim("int64_t", JavaPrim.Long);
@@ -229,6 +230,8 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
         result.prim("UINT", JavaPrim.Int);
         result.prim("SHORT", JavaPrim.Short);
         result.prim("USHORT", JavaPrim.Short);
+        result.prim("CHAR", JavaPrim.Byte);
+        result.prim("byte", JavaPrim.Byte);
         result.prim("BYTE", JavaPrim.Byte);
         result.prim("UBYTE", JavaPrim.Byte);
         result.prim("DOUBLE", JavaPrim.Double);
