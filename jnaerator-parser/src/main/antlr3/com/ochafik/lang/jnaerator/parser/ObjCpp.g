@@ -2304,11 +2304,18 @@ HexDigit
 
 fragment
 IntegerConstantSuffix
-	:	('u' | 'U') |
-		(
-			('l' | 'L')
-			('l' | 'L')?
-		)
+	:	UnsignedConstantSuffix LongConstantSuffix? |
+	    LongConstantSuffix
+	;
+
+fragment
+UnsignedConstantSuffix
+	:	('u' | 'U')
+	;
+
+fragment
+LongConstantSuffix
+	:	('l' | 'L')
 	;
 
 HEXADECIMAL_NUMBER

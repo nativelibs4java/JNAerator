@@ -19,6 +19,11 @@ const int unsignedValue = (UInt32)4294967288L;
 #if B == -206
 #define DEF3 1
 #endif
+
+const long long UL1 = 0x80000000UL;
+const long long UL2 = 1UL;
+const long long U = 1U;
+const long long L = 1L;
 --
 #runtime(JNAerator)
 import test.*;
@@ -28,3 +33,8 @@ int v = X / 2 + Y + Z + ZZ;
 int x = Expression;
 int u = unsignedValue;
 int s = A + B + DEF1 + DEF2 + DEF3; // are they all defined? (they should be)
+
+long l = UL1;
+l = UL2;
+l = U;
+l = L;
