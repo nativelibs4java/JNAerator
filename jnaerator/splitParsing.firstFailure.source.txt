@@ -1,4 +1,0 @@
-
-
-
-char some_paper[30][30+1]
