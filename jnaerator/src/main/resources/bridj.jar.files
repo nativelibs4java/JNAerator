@@ -74,6 +74,7 @@ org/bridj/NativeLibrary.class
 org/bridj/NativeList.class
 org/bridj/NativeObject.class
 org/bridj/NativeObjectInterface.class
+org/bridj/OSGiBundleActivator.class
 org/bridj/Platform$1.class
 org/bridj/Platform$2.class
 org/bridj/Platform$DeleteFiles.class
@@ -262,7 +263,7 @@ org/bridj/jawt/JAWT_Rectangle.class
 org/bridj/jawt/JawtLibrary$JNIEnv.class
 org/bridj/jawt/JawtLibrary.class
 org/bridj/lib/darwin_universal/libbridj.dylib
-org/bridj/lib/linux_arm32_arm/bridj.so
+org/bridj/lib/linux_arm32_arm/libbridj.so
 org/bridj/lib/linux_x64/libbridj.so
 org/bridj/lib/linux_x86/libbridj.so
 org/bridj/lib/sunos_x86/libbridj.so
