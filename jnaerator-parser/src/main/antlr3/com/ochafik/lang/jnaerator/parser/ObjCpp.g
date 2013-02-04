@@ -741,8 +741,6 @@ objCClassDef returns [Struct struct]
 			'{'
 			(
 				'@package' | // TODO keep in AST 
-				'@required' | // TODO keep in AST 
-				'@optional' | // TODO keep in AST 
 				'@public' { $struct.setNextMemberVisibility(Struct.MemberVisibility.Public); } | 
 				'@private' { $struct.setNextMemberVisibility(Struct.MemberVisibility.Private); } | 
 				'@protected' { $struct.setNextMemberVisibility(Struct.MemberVisibility.Protected); } |
@@ -757,6 +755,8 @@ objCClassDef returns [Struct struct]
 		)?
 		{ $struct.setNextMemberVisibility(Struct.MemberVisibility.Public); }
 		(
+		    '@required' | // TODO keep in AST 
+		    '@optional' | // TODO keep in AST
 			objCMethodDecl { 
 				$struct.addDeclaration($objCMethodDecl.function);
 			} |
@@ -783,11 +783,16 @@ functionPointerOrSimpleVarDecl returns [Declaration decl]
 			$decl = $functionPointerVarDecl.decl; 
 		}
 	;
-					
+
+// TODO parse modifiers : assign, nonatomic, readonly, copy...
+objCPropertyAttribute
+    :
+        IDENTIFIER ( '=' IDENTIFIER )?
+    ;
 objCPropertyDecl returns [Property property]
 	:
 		'@property' 
-		( '(' IDENTIFIER ( ',' IDENTIFIER ) * ) ? // TODO parse modifiers : assign, nonatomic, readonly, copy...
+		( '(' objCPropertyAttribute ( ',' objCPropertyAttribute ) * ) ? 
 		functionPointerOrSimpleVarDecl ';' {
 			$property = new Property($functionPointerOrSimpleVarDecl.decl);
 		}
