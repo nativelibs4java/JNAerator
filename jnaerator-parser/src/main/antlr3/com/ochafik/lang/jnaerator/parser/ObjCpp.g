@@ -766,7 +766,7 @@ objCClassDef returns [Struct struct]
 			typeDef {
 				$struct.addDeclaration($typeDef.typeDef); 
 			} |
-			vd=varDecl ';' { !($vd.decl instanceof VariablesDeclaration) }? {
+			vd=varDecl ';' {
 				$struct.addDeclaration($vd.decl);
 			} |
 			lineDirective

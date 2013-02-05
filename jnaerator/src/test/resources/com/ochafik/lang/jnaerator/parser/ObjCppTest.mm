@@ -442,7 +442,13 @@ typedef struct {
 
 @end
 --
-@interface NSObject (NSCoderMethods)
+@interface NSObject (NSCoderMethods) {
+}
+enum {
+    NSMachPortDeallocateNone = 0,
+    NSMachPortDeallocateSendRight = (1UL << 0),
+    NSMachPortDeallocateReceiveRight = (1UL << 1)
+};
 
 + (NSInteger)version;
 + (void)setVersion:(NSInteger)aVersion;
