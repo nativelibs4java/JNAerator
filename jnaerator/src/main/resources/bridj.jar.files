@@ -1,3 +1,4 @@
+lib/armeabi/libbridj.so
 org/bridj/AbstractBridJRuntime.class
 org/bridj/AbstractIntegral.class
 org/bridj/BridJ$1.class
@@ -263,7 +264,8 @@ org/bridj/jawt/JAWT_Rectangle.class
 org/bridj/jawt/JawtLibrary$JNIEnv.class
 org/bridj/jawt/JawtLibrary.class
 org/bridj/lib/darwin_universal/libbridj.dylib
-org/bridj/lib/linux_arm32_arm/libbridj.so
+org/bridj/lib/linux_armel/libbridj.so
+org/bridj/lib/linux_armhf/libbridj.so
 org/bridj/lib/linux_x64/libbridj.so
 org/bridj/lib/linux_x86/libbridj.so
 org/bridj/lib/sunos_x86/libbridj.so
