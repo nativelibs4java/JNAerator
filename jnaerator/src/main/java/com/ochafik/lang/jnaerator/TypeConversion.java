@@ -1135,6 +1135,9 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
         return expr(typeRef(ident).setMarkedAsResolved(true));
     }
     /// @see http://java.sun.com/docs/books/tutorial/java/nutsandbolts/_keywords.html
+    public static Set<String> JAVA_OBJECT_METHODS = new HashSet<String>(Arrays.asList(
+    		"notify", "notifyAll", "equals", "finalize", "getClass", "hashCode", "clone", "toString", "wait" // not allowed for function names
+	));
     public static Set<String> JAVA_KEYWORDS = new HashSet<String>(Arrays.asList(
             "null",
             "true",
@@ -1188,8 +1191,7 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
             "float",
             "native",
             "super",
-            "while",
-            "wait" // not allowed for function names
+            "while"
             ));
     //static String keywords = " true false double float wait new null boolean return class public protected private ";
 
@@ -1248,7 +1250,8 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
     }
 
     public boolean isJavaKeyword(String name) {
-        return JAVA_KEYWORDS.contains(name);
+        return JAVA_KEYWORDS.contains(name) || 
+        		JAVA_OBJECT_METHODS.contains(name); // not really keywords, but roughly same restrictions apply.
     }
 
     public Identifier getValidJavaIdentifier(Identifier name) {

@@ -1,14 +1,14 @@
-typedef enum {false=0, true=1} boolean;
+typedef enum {false=0, true=1, notify=2} boolean;
 --
 #runtime(JNAerator)
 import test.*;
 import static test.TestLibrary.*;
 
-int f = boolean$.false$, t = boolean$.true$;
+int f = boolean$.false$, t = boolean$.true$, n = boolean$.notify$;
 --
 #runtime(BridJ)
 import test.*;
 import static test.TestLibrary.*;
 
-boolean$ f = boolean$.false$, t = boolean$.true$;
+boolean$ f = boolean$.false$, t = boolean$.true$, n = boolean$.notify$;
 
