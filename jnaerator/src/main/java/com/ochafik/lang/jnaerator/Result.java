@@ -567,9 +567,17 @@ public class Result extends Scanner {
 	}
     
     
-
+	static String camelCase(String name) {
+		StringBuilder out = new StringBuilder();
+		for (String s : name.split("[^\\w]+")) {
+			String t = s.trim();
+			if (t.length() > 0)
+				out.append(StringUtils.capitalize(t));
+		}
+		return out.toString();
+	}
 	public Identifier getLibraryClassSimpleName(String library) {
-		return ident(StringUtils.capitalize(library) + "Library");
+		return ident(camelCase(library) + "Library");
 	}
 	public Identifier getLibraryClassFullName(String library) {
 		return ident(getLibraryPackage(library), getLibraryClassSimpleName(library));
