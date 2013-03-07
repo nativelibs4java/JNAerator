@@ -41,22 +41,22 @@ public class CToJavaPreScanner extends Scanner {
 	public CToJavaPreScanner() {
 	}
 	
-	@Override
-	public void visitStruct(Struct struct) {
-		super.visitStruct(struct);
-		if (struct.isForwardDeclaration() && struct.getTag() != null) {
-			Element parent = struct.getParentElement();
-			if (!(parent instanceof TaggedTypeRefDeclaration)) {
-				TypeRef tr = new TypeRef.SimpleTypeRef(struct.getTag());
-				for (Modifier mod : struct.getModifiers()) {
-					if (mod.isA(ModifierKind.StorageClassSpecifier))
-						tr.addModifiers(mod);
-				}
-				struct.replaceBy(tr);
-				tr.accept(this);
-			}
-		}
-	}
+    @Override
+    public void visitStruct(Struct struct) {
+    	super.visitStruct(struct);
+    	if (struct.isForwardDeclaration() && struct.getTag() != null) {
+    		Element parent = struct.getParentElement();
+    		if (!(parent instanceof TaggedTypeRefDeclaration)) {
+    			TypeRef tr = new TypeRef.SimpleTypeRef(struct.getTag());
+    			for (Modifier mod : struct.getModifiers()) {
+    				if (mod.isA(ModifierKind.StorageClassSpecifier))
+    					tr.addModifiers(mod);
+    			}
+    			struct.replaceBy(tr);
+    			tr.accept(this);
+    		}
+    	}
+    }
     
     void moveModifiersOfType(ModifierKind kind, ModifiableElement source, ModifiableElement destination) {
         List<Modifier> mods = null;
