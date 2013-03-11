@@ -313,6 +313,9 @@ public class BridJDeclarationsConverter extends DeclarationsConverter {
                         }
                         followedArgs.add(followedArg);
                     }
+                    if (varArgType != null) {
+                        followedArgs.add(varRef(varArgName));
+                    }
                     
                     Expression followedCall = methodCall(rawMethod.getName().toString(), followedArgs.toArray(new Expression[followedArgs.size()]));
                     boolean isVoid = "void".equals(String.valueOf(nativeMethod.getValueType()));
