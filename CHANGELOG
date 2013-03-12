@@ -1,5 +1,14 @@
 Current development version (0.12-SNAPSHOT)
 
+- Added support for JNA 3.5.1 (implement getFieldOrder in all structs, see issue #384)
+- Fixed parsing of unsigned long constants (issue #362, issue #374)
+- Fixed generation of raw bindings for callback return types (issue #386)
+- Fixed generation of raw bindings with varargs (issue #386, patch contributed by twitwi!)
+- Fixed handling of library names with hyphens (issue #260)
+- Fixed support of identifiers with Object method names (issue #375)
+- Fixed support of enums inside objc classes (issue #370)
+- Fixed parsing of `@optional` and `@required` objective-c annotations (issue #369)
+- Fixed UTF32Char, added VOID, CHAR and byte as predefined types (issue #363)
 ...
 
 Version 0.11 (20130107)
