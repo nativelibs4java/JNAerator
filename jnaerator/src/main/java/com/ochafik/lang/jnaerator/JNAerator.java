@@ -64,7 +64,6 @@ import com.ochafik.lang.compiler.MemoryJavaFile;
 import com.ochafik.lang.compiler.URLFileObject;
 import com.ochafik.lang.jnaerator.JNAeratorCommandLineArgs.OptionDef;
 import com.ochafik.lang.jnaerator.JNAeratorConfig.OutputMode;
-import com.ochafik.lang.jnaerator.nativesupport.DllExport;
 import com.ochafik.lang.jnaerator.parser.Annotation;
 import com.ochafik.lang.jnaerator.parser.Arg;
 import com.ochafik.lang.jnaerator.parser.Declaration;
@@ -112,7 +111,6 @@ import java.util.logging.Logger;
 import org.antlr.runtime.ANTLRReaderStream;
 import org.antlr.runtime.CommonTokenStream;
 import static com.ochafik.lang.jnaerator.parser.ElementsHelper.*;
-import static com.ochafik.lang.jnaerator.nativesupport.NativeExportUtils.*;
 import com.ochafik.lang.jnaerator.parser.Function.SignatureType;
 import java.io.*;
 /*
@@ -989,88 +987,6 @@ public class JNAerator {
 			fileOut = newFileOverwriter(config.extractedSymbolsOut);
 		}
 		
-		for (File libFile : config.libraryFiles) {
-			if (libFile.getName().toLowerCase().endsWith(".dll")) {
-				try {
-					result.feedback.setStatus("Extracting symbols from " + libFile.getName() + "...");
-					
-					SourceFile sf = new SourceFile();
-					sf.setElementFile(libFile.toString());
-					List<ParsedExport> dllExports = DllExport.parseDllExports(libFile);
-					Map<String, Struct> cppClasses = new HashMap<String, Struct>();
-					Pattern pubPat = Pattern.compile("(public|private|protected):(.*)");
-					for (ParsedExport dllExport : dllExports) {
-						//dllExport.mangling
-						String dem = dllExport.demangled;
-						Matcher m = pubPat.matcher(dem);
-						String pub = null;
-						if (m.matches()) {
-							dem = m.group(2);
-							pub = m.group(1);
-						}
-						String text = "// @mangling " + dllExport.mangling + "\n" + 
-							dem + ";";
-						ObjCppParser parser = new JNAeratorParser().newObjCppParser(result.typeConverter, text, false, null);//config.verbose);
-						parser.setupScopes();
-						Declaration decl = parser.declarationEOF();
-						if (decl == null)
-							continue;
-						
-						//for (Declaration decl : decls) {
-							if (decl instanceof VariablesDeclaration && decl.getValueType() != null)
-								decl.getValueType().addModifiers(ModifierType.Extern);
-							decl.addModifiers(ModifierType.parseModifier(pub));
-							if (decl instanceof Function) {
-								Function f = (Function)decl;
-								List<SimpleIdentifier> si = new ArrayList<SimpleIdentifier>(f.getName().resolveSimpleIdentifiers());
-								Identifier ci;
-								if (si.size() == 1) {
-									String name = si.get(0) == null ? null : si.get(0).toString();
-									String[] cm = name == null ? null : RegexUtils.match(name, classAndMethodNamePattern);
-									if (cm == null) {
-										sf.addDeclaration(decl);
-										continue;
-									}
-									ci = ident(cm[0]);
-									f.setName(ident(cm[1]));
-								} else {
-									si.remove(si.size() - 1);
-									ci = new QualifiedIdentifier(QualificationSeparator.Colons, si);
-								}
-								if (dem.contains("__thiscall"))
-									f.addModifiers(ModifierType.__thiscall);
-								if (dem.contains("__fastcall"))
-									f.addModifiers(ModifierType.__fastcall);
-								
-								Struct s = cppClasses.get(ci.toString());
-								if (s == null) {
-									s = new Struct();
-									cppClasses.put(ci.toString(), s);
-									s.setType(Struct.Type.CPPClass);
-									s.setTag(ci.clone());
-									sf.addDeclaration(decl(s));
-								}
-								Identifier n = f.getName().resolveLastSimpleIdentifier();
-//										String ns = n.toString();
-//										if (ns.startsWith("_"))
-//											n = ident(ns.substring(1));
-								f.setName(n);
-								s.addDeclaration(f);
-							} else
-								sf.addDeclaration(decl);
-						//}
-					}
-					if (!sf.getDeclarations().isEmpty()) {
-						sourceFiles.add(sf);
-						if (fileOut != null)
-							fileOut.println(sf);
-					}
-					
-				} catch (Throwable ex) {
-					ex.printStackTrace();
-				}
-			}
-		}
 		if (fileOut != null)
 			fileOut.close();
 	}
