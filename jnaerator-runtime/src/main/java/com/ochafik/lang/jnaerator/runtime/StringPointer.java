@@ -18,6 +18,8 @@
 */
 package com.ochafik.lang.jnaerator.runtime;
 
+import java.util.Arrays;
+import java.util.List;
 import com.sun.jna.Pointer;
 import com.sun.jna.PointerType;
 
@@ -41,6 +43,10 @@ public class StringPointer extends Structure<StringPointer, StringPointer.ByValu
 	public StringPointer(String value) {
 		super();
 		this.value = value;
+	}	
+	@Override
+	protected List<String> getFieldOrder() {
+		return Arrays.asList("value");
 	}
 	public static class ByValue extends StringPointer implements com.sun.jna.Structure.ByValue {}
 	public static class ByReference extends StringPointer implements com.sun.jna.Structure.ByReference {}

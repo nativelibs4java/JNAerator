@@ -29,7 +29,6 @@ com/ochafik/lang/SyntaxUtils.class
 com/ochafik/lang/Threads$Runner.class
 com/ochafik/lang/Threads$State.class
 com/ochafik/lang/Threads.class
-com/ochafik/lang/jnaerator/runtime/Bits.class
 com/ochafik/lang/jnaerator/runtime/CharByReference.class
 com/ochafik/lang/jnaerator/runtime/FastCall.class
 com/ochafik/lang/jnaerator/runtime/JNAeratorRuntime.class
@@ -161,19 +160,6 @@ com/ochafik/util/string/StringUtils.class
 com/ochafik/xml/XMLUtils.class
 com/ochafik/xml/XPathUtils.class
 com/sun/jna/AltCallingConvention.class
-com/sun/jna/BitFields$1.class
-com/sun/jna/BitFields$2.class
-com/sun/jna/BitFields$3.class
-com/sun/jna/BitFields$4.class
-com/sun/jna/BitFields$5.class
-com/sun/jna/BitFields$6.class
-com/sun/jna/BitFields$7.class
-com/sun/jna/BitFields$8.class
-com/sun/jna/BitFields$9.class
-com/sun/jna/BitFields$NonIntHandler.class
-com/sun/jna/BitFields$PrimHandler.class
-com/sun/jna/BitFields$StringHandler.class
-com/sun/jna/BitFields.class
 com/sun/jna/Callback$UncaughtExceptionHandler.class
 com/sun/jna/Callback.class
 com/sun/jna/CallbackParameterContext.class
@@ -244,7 +230,6 @@ com/sun/jna/Structure$FFIType$FFITypes.class
 com/sun/jna/Structure$FFIType$size_t.class
 com/sun/jna/Structure$FFIType.class
 com/sun/jna/Structure$LayoutInfo.class
-com/sun/jna/Structure$MemberOrder.class
 com/sun/jna/Structure$StructField.class
 com/sun/jna/Structure.class
 com/sun/jna/StructureReadContext.class

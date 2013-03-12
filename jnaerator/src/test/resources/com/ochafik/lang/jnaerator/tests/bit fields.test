@@ -11,12 +11,26 @@ struct BF {
 import test.*;
 import static test.TestLibrary.*;
 
+// Dropped support for bit fields in JNA(erator) runtime.
+//BF b = new BF();
+//b.i = b.j = b.k = 1;
+//b.f = 1f;
+//byte i8 = b.i8;
+//short i16 = b.i16;
+//int i32 = b.i32;
+//int l32 = b.l32;
+//b.l64 = (long)0;
+--
+#runtime(BridJ)
+import test.*;
+import static test.TestLibrary.*;
+
 BF b = new BF();
-b.i = b.j = b.k = 1;
-b.f = 1f;
-byte i8 = b.i8;
-short i16 = b.i16;
-int i32 = b.i32;
-int l32 = b.l32;
-b.l64 = (long)0;
+b.i(b.j(b.k(1)));
+b.f(1f);
+byte i8 = b.i8();
+short i16 = b.i16();
+int i32 = b.i32();
+int l32 = b.l32();
+b.l64((long)0);
 

@@ -178,12 +178,6 @@ public abstract class Structure<S extends Structure<S, V, R>, V extends S, R ext
 		return (S[])super.toArray(array);
 	}
 
-
-	//@Override
-	protected Integer getBitsAnnotation(Field field) {
-		Bits bits = field.getAnnotation(Bits.class);
-		return bits == null ? null : bits.value();
-	}
 	/** Simply does a memcmp between the two memory blocks of the two structures
      */
 	//@Override

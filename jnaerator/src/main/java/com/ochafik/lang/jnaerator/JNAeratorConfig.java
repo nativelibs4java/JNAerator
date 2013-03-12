@@ -78,7 +78,7 @@ public class JNAeratorConfig {
             com.sun.jna.Library.class,
             null,
             "jna-runtime.jar.files"),
-        JNAerator(false, true, true,
+        JNAerator(false, true, false,
             com.sun.jna.Callback.class,
             com.sun.jna.Pointer.class,
             com.sun.jna.Memory.class,
@@ -87,7 +87,7 @@ public class JNAeratorConfig {
             null,
             null,
             com.sun.jna.Library.class,
-            com.ochafik.lang.jnaerator.runtime.Bits.class,
+            null,
             "jnaerator-runtime.jar.files") {
 
             @Override
@@ -113,21 +113,7 @@ public class JNAeratorConfig {
                 return "BridJ (faster runtime that supports C++)";
             }
 
-        };//,
-//        IPhone(
-//            false,
-//            false,
-//            null,
-//            null,
-//            null,
-//            null,
-//            null,
-//            null,
-//            null,
-//            null,
-//            null,
-//            null
-//        );
+        };
 
         public static final Runtime DEFAULT = BridJ;//JNAerator;
         public enum Ann {
