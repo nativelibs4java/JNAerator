@@ -328,10 +328,11 @@ public class BridJDeclarationsConverter extends DeclarationsConverter {
                                     followedCall = new New(nativeMethod.getValueType(), followedCall);
                                 else {
                                     Expression ptrExpr = expr(typeRef(org.bridj.Pointer.class));
-                                    if (returnType.targetTypeConversion == null || returnType.targetTypeConversion.type == ConvType.Void)
+                                    Expression targetTypeExpr = result.typeConverter.typeLiteral(getSingleTypeParameter(nativeMethod.getValueType()));
+                                    if (targetTypeExpr == null || (returnType.targetTypeConversion != null && returnType.targetTypeConversion.type == ConvType.Void))
                                         followedCall = methodCall(ptrExpr, "pointerToAddress", followedCall);
                                     else
-                                        followedCall = methodCall(ptrExpr, "pointerToAddress", followedCall, result.typeConverter.typeLiteral(getSingleTypeParameter(nativeMethod.getValueType())));
+                                        followedCall = methodCall(ptrExpr, "pointerToAddress", followedCall, targetTypeExpr);
                                 }
                                 break;
                             case Enum:
