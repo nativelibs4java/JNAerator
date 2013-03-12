@@ -44,6 +44,8 @@ typedef const CHAR *LPCCH, *PCCH;
 long value = (int)(__u.__u >> 31);
 --
 long long l = 0x8000000000000000;
+long long ll = 10LL;
+unsigned long long ull = 10ULL;
 --
 void f(struct s i);
 --

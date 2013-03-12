@@ -20,9 +20,10 @@ const int unsignedValue = (UInt32)4294967288L;
 #define DEF3 1
 #endif
 
-const long long UL1 = 0x80000000UL;
-const long long UL2 = 1UL;
-const long long U = 1U;
+const unsigned long long UL1 = 0x80000000UL;
+const unsigned long long UL2 = 1UL;
+const unsigned long long ULL = 1ULL;
+const unsigned long long U = 1U;
 const long long L = 1L;
 --
 #runtime(JNAerator)
@@ -38,3 +39,19 @@ long l = UL1;
 l = UL2;
 l = U;
 l = L;
+l = ULL;
+--
+#runtime(BridJ)
+import test.*;
+import static test.TestLibrary.*;
+
+int v = X / 2 + Y + Z + ZZ;
+int x = Expression;
+int u = unsignedValue;
+int s = A + B + DEF1 + DEF2 + DEF3; // are they all defined? (they should be)
+
+long l = UL1;
+l = UL2;
+l = U;
+l = L;
+l = ULL;

@@ -1697,7 +1697,9 @@ qualifiedIdentifier returns [Identifier identifier]
 qualifiedCppFunctionName returns [Identifier identifier]
 	:	i1=simpleCppFunctionName { $identifier = $i1.identifier; }
 		(
-			'::' ix=simpleCppFunctionName { $identifier = $identifier.derive(QualificationSeparator.Colons, $ix.identifier); }
+			'::' ix=simpleCppFunctionName { 
+			    $identifier = $identifier.derive(QualificationSeparator.Colons, $ix.identifier); 
+            }
 		)*
 	;
 	
@@ -2320,7 +2322,7 @@ UnsignedConstantSuffix
 
 fragment
 LongConstantSuffix
-	:	('l' | 'L')
+	:	('l' | 'L') ('l' | 'L')?
 	;
 
 HEXADECIMAL_NUMBER
