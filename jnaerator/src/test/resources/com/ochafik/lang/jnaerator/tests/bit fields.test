@@ -26,11 +26,13 @@ import test.*;
 import static test.TestLibrary.*;
 
 BF b = new BF();
-b.i(b.j(b.k(1)));
+b.i(1);
+b.j(1);
+b.k(1);
 b.f(1f);
-byte i8 = b.i8();
-short i16 = b.i16();
+int i8 = b.i8(); // TODO demote to byte?
+int i16 = b.i16(); // TODO demote to short?
 int i32 = b.i32();
-int l32 = b.l32();
+long l32 = b.l32(); // TODO demote to int?
 b.l64((long)0);
 
