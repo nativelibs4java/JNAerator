@@ -1,6 +1,8 @@
 Current development version (0.12-SNAPSHOT)
 
 - Added support for JNA 3.5.1 (implement getFieldOrder in all structs, see issue #384)
+- Dropped support for bit fields in JNA structs (users should implement bit manipulation logic manually or use BridJ).
+- Dropped old shared library (DLL, Mach-O) scanning code, superseded by dyncall/dynload and BridJ's demanglers.
 - Fixed parsing of unsigned long constants (issue #362, issue #374)
 - Fixed generation of raw bindings for callback return types (issue #386)
 - Fixed generation of raw bindings with varargs (issue #386, patch contributed by twitwi!)
