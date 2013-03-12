@@ -259,14 +259,8 @@ com/sun/jna/WeakIdentityHashMap$1.class
 com/sun/jna/WeakIdentityHashMap$IdentityWeakReference.class
 com/sun/jna/WeakIdentityHashMap.class
 com/sun/jna/darwin/libjnidispatch.jnilib
-com/sun/jna/freebsd-amd64/libjnidispatch.so
-com/sun/jna/freebsd-i386/libjnidispatch.so
 com/sun/jna/linux-amd64/libjnidispatch.so
-com/sun/jna/linux-arm/libjnidispatch.so
 com/sun/jna/linux-i386/libjnidispatch.so
-com/sun/jna/linux-ia64/libjnidispatch.so
-com/sun/jna/linux-ppc/libjnidispatch.so
-com/sun/jna/linux-ppc64/libjnidispatch.so
 com/sun/jna/ptr/ByReference.class
 com/sun/jna/ptr/ByteByReference.class
 com/sun/jna/ptr/DoubleByReference.class
@@ -283,6 +277,7 @@ com/sun/jna/sunos-x86/libjnidispatch.so
 com/sun/jna/w32ce-arm/jnidispatch.dll
 com/sun/jna/win32-amd64/jnidispatch.dll
 com/sun/jna/win32-x86/jnidispatch.dll
+com/sun/jna/win32/DLLCallback.class
 com/sun/jna/win32/StdCall.class
 com/sun/jna/win32/StdCallFunctionMapper.class
 com/sun/jna/win32/StdCallLibrary$StdCallCallback.class

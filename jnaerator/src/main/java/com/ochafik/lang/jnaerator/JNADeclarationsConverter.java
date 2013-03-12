@@ -831,17 +831,35 @@ public class JNADeclarationsConverter extends DeclarationsConverter {
                 orderedFieldNames.add(expr(name));
 			}
             
-            String initOrderName = "initFieldOrder";
-            Function initOrder = new Function(Type.JavaMethod, ident(initOrderName), typeRef(Void.TYPE)).setBody(block(
-                stat(
-                    methodCall("setFieldOrder", new Expression.NewArray(typeRef(String.class), new Expression[0], orderedFieldNames.toArray(new Expression[orderedFieldNames.size()])))
-                )
-            )).addModifiers(ModifierType.Protected);
-            if (signatures.add(initOrder.computeSignature(SignatureType.JavaStyle))) {
-                    structJavaClass.addDeclaration(initOrder);
-                    Statement callInitOrder = stat(methodCall(initOrderName));
-                emptyConstructor.getBody().addStatement(callInitOrder);
-                fieldsConstr.getBody().addStatement(callInitOrder.clone());
+            String getFieldOrderName = "getFieldOrder";
+            Expression selfList = methodCall(
+                expr(typeRef(Arrays.class)), 
+                "asList",
+                orderedFieldNames.toArray(new Expression[orderedFieldNames.size()])
+            );
+            Block getFieldOrderImpl;
+            if (nativeStruct.getParents().isEmpty()) {
+                getFieldOrderImpl = block(new Statement.Return(selfList));
+            } else {
+                String fieldOrderName = "fieldOrder";
+                VariablesDeclaration vd = 
+                    new VariablesDeclaration(
+                        typeRef(List.class), 
+                        new DirectDeclarator(
+                            fieldOrderName, 
+                            new Expression.New(
+                                typeRef(ArrayList.class),
+                                (Expression)methodCall(varRef("super"), getFieldOrderName))));
+                getFieldOrderImpl = block(
+                    vd,
+                    stat(methodCall(varRef(fieldOrderName), "addAll", selfList)),
+                    new Statement.Return(varRef(fieldOrderName))
+                );
+            }
+            Function getFieldOrder = new Function(Type.JavaMethod, ident(getFieldOrderName), typeRef(List.class)).setBody(getFieldOrderImpl).addModifiers(ModifierType.Protected);
+            
+            if (signatures.add(getFieldOrder.computeSignature(SignatureType.JavaStyle))) {
+                structJavaClass.addDeclaration(getFieldOrder);
             }
             
 			int nArgs = fieldsConstr.getArgs().size();
