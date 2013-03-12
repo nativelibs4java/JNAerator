@@ -13,8 +13,8 @@
 			<artifactId>ochafik-util</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>com.nativelibs4java</groupId>
-			<artifactId>jna-jnaerator</artifactId>
+             <groupId>net.java.dev.jna</groupId>
+             <artifactId>jna</artifactId>
 		</dependency>
 
 	</dependencies>

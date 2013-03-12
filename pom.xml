@@ -24,7 +24,6 @@
 		<module>anarres</module>
 		<module>ochafik-util</module>
 		<module>ochafik-swing</module>
-		<module>jna-jnaerator</module>
 		<module>jnaerator-runtime</module>
 		<module>jnaerator-rococoa-runtime</module>
 		<module>jnaerator-parser</module>
