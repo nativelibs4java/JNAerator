@@ -456,28 +456,27 @@ public class JNADeclarationsConverter extends DeclarationsConverter {
 			}
 		}
 		
-		if (succeeded) {
-			if (!onlyFields) {
-				if (result.config.features.contains(GenFeatures.StructConstructors))
-					addStructConstructors(structName, structJavaClass/*, byRef, byVal*/, struct);
-				
-				Struct byRef = publicStaticClass(ident("ByReference"), structName, Struct.Type.JavaClass, null, ident(ident(result.config.runtime.structClass), "ByReference"));
-				Struct byVal = publicStaticClass(ident("ByValue"), structName, Struct.Type.JavaClass, null, ident(ident(result.config.runtime.structClass), "ByValue"));
-				
-				if (result.config.runtime != JNAeratorConfig.Runtime.JNA) {
-					if (!inheritsFromStruct) {
-						structJavaClass.addDeclaration(createNewStructMethod("newByReference", byRef));
-						structJavaClass.addDeclaration(createNewStructMethod("newByValue", byVal));
-					}
-					structJavaClass.addDeclaration(createNewStructMethod("newInstance", structJavaClass));
-		
-					structJavaClass.addDeclaration(createNewStructArrayMethod(structJavaClass, isUnion));
+		if (!onlyFields) {
+			if (result.config.features.contains(GenFeatures.StructConstructors))
+				addStructConstructors(structName, structJavaClass/*, byRef, byVal*/, struct);
+			
+			Struct byRef = publicStaticClass(ident("ByReference"), structName, Struct.Type.JavaClass, null, ident(ident(result.config.runtime.structClass), "ByReference"));
+			Struct byVal = publicStaticClass(ident("ByValue"), structName, Struct.Type.JavaClass, null, ident(ident(result.config.runtime.structClass), "ByValue"));
+			
+			if (result.config.runtime != JNAeratorConfig.Runtime.JNA) {
+				if (!inheritsFromStruct) {
+					structJavaClass.addDeclaration(createNewStructMethod("newByReference", byRef));
+					structJavaClass.addDeclaration(createNewStructMethod("newByValue", byVal));
 				}
+				structJavaClass.addDeclaration(createNewStructMethod("newInstance", structJavaClass));
 	
-				structJavaClass.addDeclaration(decl(byRef));
-				structJavaClass.addDeclaration(decl(byVal));
+				structJavaClass.addDeclaration(createNewStructArrayMethod(structJavaClass, isUnion));
 			}
-		} else {
+
+			structJavaClass.addDeclaration(decl(byRef));
+			structJavaClass.addDeclaration(decl(byVal));
+		}
+		if (!succeeded) {
 			structJavaClass.addModifiers(ModifierType.Abstract);
 		}
 		return structJavaClass;
