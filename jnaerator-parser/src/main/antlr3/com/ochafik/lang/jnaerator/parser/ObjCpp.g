@@ -543,7 +543,8 @@ scope ModContext;
 	}
 }
 	:	
-	
+	    // GCC extension.
+		( { next("__extension__") }? IDENTIFIER )?
 		( tp=templatePrefix { $template = $tp.template; } )?
 		{
 		  $modifiers = new ArrayList<Modifier>();
@@ -2038,7 +2039,9 @@ statement returns [Statement stat]
 			$stat = $b.statement; 
 		} |
 		// GCC inline asm (see http://ibiblio.org/gferg/ldp/GCC-Inline-Assembly-HOWTO.html)
-		{ next("__asm__") }?=> IDENTIFIER '('
+		 
+		{ next("__asm__", "asm") }?=> IDENTIFIER
+		( { next("__volatile__", "volatile") }?=> IDENTIFIER )? '('
 			STRING* ( ':' gccAsmInOuts )*
 		')' ';' ? |
 		// MSVC inline asm soup

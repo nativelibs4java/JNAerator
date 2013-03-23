@@ -351,6 +351,13 @@ struct Test {__
 --
 libvlc_instance_t* libvlc_new(char *const *);
 --
+__extension__ typedef long long __time64_t;
+--
+extern __inline__ __attribute__((__always_inline__,__gnu_inline__)) void __cdecl __debugbreak(void)
+{
+  __asm__ __volatile__("int $3");
+}
+--
 void f(struct x * const);
 --
 typedef __success(return >= 0) long HRESULT;

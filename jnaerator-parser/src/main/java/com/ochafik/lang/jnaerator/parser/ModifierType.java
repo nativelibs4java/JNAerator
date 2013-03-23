@@ -49,7 +49,6 @@ public enum ModifierType implements Modifier {
 	/// VC++ annotations 
 	/// @see http://msdn.microsoft.com/en-us/library/cc264104.aspx
 	
-    
 	__pre(of(VCAnnotationNoArg, VCParameterAnnotation)),
 	__valid(of(VCAnnotationNoArg, VCParameterAnnotation)),
 	__reserved(of(VCAnnotationNoArg, VCParameterAnnotation)),
@@ -144,7 +143,6 @@ public enum ModifierType implements Modifier {
 	DllImport(of(Declspec, StorageClassSpecifier)),
 	JITIntrinsic(of(Declspec)),
 	Naked(of(Declspec, StorageClassSpecifier, Attribute)),
-    __unused__(of(Attribute)),
 	NoAlias(of(Declspec, StorageClassSpecifier)),
 	NoInline(of(Declspec)),
 	NoReturn(of(Declspec)),
@@ -154,6 +152,7 @@ public enum ModifierType implements Modifier {
 	Property(of(Declspec, HasArguments, StorageClassSpecifier, COMSpecific)), //TODO handle args
 	Restrict(of(Declspec, StorageClassSpecifier)),
 	__restrict(Restrict),
+	__restrict__(Restrict),
 	
 	SelectAny(of(Declspec, StorageClassSpecifier, COMSpecific)),
 	Thread(of(Declspec)),
@@ -204,6 +203,29 @@ public enum ModifierType implements Modifier {
 	Visibility(of(Attribute)),
 	Warn_unused_result(of(Attribute)),
 	Weak(of(Attribute)), 
+	__gnu_inline(of(Attribute)),
+	gnu_inline(__gnu_inline, of(Attribute)),
+	__dllimport__(of(Attribute)),
+	__always_inline__(of(Attribute)),
+	__unused__(of(Attribute)),
+	__alignof__(of(Attribute)),
+	__format__(of(Attribute)),
+	__used__(of(Attribute)),
+	__deprecated__(of(Attribute)),
+	__noreturn__(of(Attribute)),
+	__const__(of(Attribute)),
+	__malloc__(of(Attribute)),
+	__optimize__(of(Attribute)),
+	__aligned__(of(Attribute)),
+	__pure__(of(Attribute)),
+	__nothrow__(of(Attribute)),
+	__visibility__(of(Attribute)),
+	mode(of(Attribute)),
+	__weakref__(of(Attribute)),
+	__returns_twice__(of(Attribute)),
+	unused(__unused__, of(Attribute)),
+	noinline(of(Attribute)),
+	regparm(of(Attribute)),
 	
     //Complex(of(OpenCL)),
     __kernel(of(OpenCL)),
@@ -239,6 +261,9 @@ public enum ModifierType implements Modifier {
 	}
 	ModifierType(EnumSet<ModifierKind> kinds) {
 		this.kinds = kinds;
+	}
+	ModifierType() {
+		this(EnumSet.noneOf(ModifierKind.class));
 	}
     ModifierType(Modifier alias, EnumSet<ModifierKind> kinds) {
 		this.alias = alias;
