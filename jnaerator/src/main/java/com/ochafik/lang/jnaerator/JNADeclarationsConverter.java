@@ -463,7 +463,12 @@ public class JNADeclarationsConverter extends DeclarationsConverter {
 			Struct byRef = publicStaticClass(ident("ByReference"), structName, Struct.Type.JavaClass, null, ident(ident(result.config.runtime.structClass), "ByReference"));
 			Struct byVal = publicStaticClass(ident("ByValue"), structName, Struct.Type.JavaClass, null, ident(ident(result.config.runtime.structClass), "ByValue"));
 			
-			if (result.config.runtime != JNAeratorConfig.Runtime.JNA) {
+			if (!succeeded) {
+				byRef.addModifiers(ModifierType.Abstract);
+				byVal.addModifiers(ModifierType.Abstract);
+			}
+			
+			if (succeeded && result.config.runtime != JNAeratorConfig.Runtime.JNA) {
 				if (!inheritsFromStruct) {
 					structJavaClass.addDeclaration(createNewStructMethod("newByReference", byRef));
 					structJavaClass.addDeclaration(createNewStructMethod("newByValue", byVal));
