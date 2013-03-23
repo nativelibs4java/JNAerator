@@ -1344,6 +1344,9 @@ mutableTypeRef returns [TypeRef type]
 					$type = $m1.mutator.mutateType($type);
 				}
 			) |
+			( { next(ModifierKind.StorageClassSpecifier) }? m=IDENTIFIER {
+			    $type.addModifiers(ModifierType.parseModifier($m.text));
+			}) |
 			(
 				f1=functionSignatureSuffix { 
 					assert $f1.signature != null && $f1.signature.getFunction() != null;
@@ -2042,7 +2045,7 @@ statement returns [Statement stat]
 		 
 		{ next("__asm__", "asm") }?=> IDENTIFIER
 		( { next("__volatile__", "volatile") }?=> IDENTIFIER )? '('
-			STRING* ( ':' gccAsmInOuts )*
+			STRING* ( ':' gccAsmInOuts? )*
 		')' ';' ? |
 		// MSVC inline asm soup
 		{ next("__asm") }?=> IDENTIFIER '{'
