@@ -20,6 +20,8 @@ typedef struct _S1
 typedef struct _S2
 {
     int a;
+    S1 s1_value;
+    S1* s1_ref;
 } K;
 
 --
@@ -34,3 +36,7 @@ i = G.E2A;
 Structure s;
 s = (S1)null;
 s = (K)null;
+
+K k = null;
+S1 s1_value = k.s1_value;
+S1.ByReference s1_ref = k.s1_ref;

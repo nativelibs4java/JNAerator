@@ -335,6 +335,9 @@ public class Result extends Scanner {
 			if (declarativePower(e) > declarativePower(oldEnum)) {
 				enumsByName.put(name, e);
                 e.setResolvedJavaIdentifier(typeConverter.computeTaggedTypeIdentifierInJava(e));
+                Identifier originalName = e.getOriginalTag();
+                if (originalName != null)
+                    enumsByName.put(originalName, e);
 	
 				//if (e.getTag() != null) {
 				//	enumsByName.put(e.getTag(), e);
@@ -509,6 +512,9 @@ public class Result extends Scanner {
 				
 				if (declarativePower(struct) > declarativePower(oldStruct)) {
 					structsByName.put(name, struct);
+                    Identifier originalName = struct.getOriginalTag();
+                    if (originalName != null)
+                        structsByName.put(originalName, struct);
 
                     Identifier resolvedJavaIdentifier = typeConverter.computeTaggedTypeIdentifierInJava(struct);
                     struct.setResolvedJavaIdentifier(resolvedJavaIdentifier);
