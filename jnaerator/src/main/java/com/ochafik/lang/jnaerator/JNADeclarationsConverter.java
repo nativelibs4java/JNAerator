@@ -397,9 +397,10 @@ public class JNADeclarationsConverter extends DeclarationsConverter {
 //		}
 		
 		//List<Declaration> children = new ArrayList<Declaration>();
+		boolean succeeded = true;
 		for (Declaration d : struct.getDeclarations()) {
 			if (d instanceof VariablesDeclaration) {
-				convertVariablesDeclaration((VariablesDeclaration)d, childSignatures, structJavaClass, iChild, false, structName, callerLibraryClass, callerLibrary);
+				succeeded = convertVariablesDeclaration((VariablesDeclaration)d, childSignatures, structJavaClass, iChild, false, structName, callerLibraryClass, callerLibrary) && succeeded;
 			} else if (!onlyFields) {
 				if (d instanceof TaggedTypeRefDeclaration) {
 					TaggedTypeRef tr = ((TaggedTypeRefDeclaration) d).getTaggedTypeRef();
@@ -455,25 +456,29 @@ public class JNADeclarationsConverter extends DeclarationsConverter {
 			}
 		}
 		
-		if (!onlyFields) {
-			if (result.config.features.contains(GenFeatures.StructConstructors))
-				addStructConstructors(structName, structJavaClass/*, byRef, byVal*/, struct);
-			
-			Struct byRef = publicStaticClass(ident("ByReference"), structName, Struct.Type.JavaClass, null, ident(ident(result.config.runtime.structClass), "ByReference"));
-			Struct byVal = publicStaticClass(ident("ByValue"), structName, Struct.Type.JavaClass, null, ident(ident(result.config.runtime.structClass), "ByValue"));
-			
-			if (result.config.runtime != JNAeratorConfig.Runtime.JNA) {
-				if (!inheritsFromStruct) {
-					structJavaClass.addDeclaration(createNewStructMethod("newByReference", byRef));
-					structJavaClass.addDeclaration(createNewStructMethod("newByValue", byVal));
+		if (succeeded) {
+			if (!onlyFields) {
+				if (result.config.features.contains(GenFeatures.StructConstructors))
+					addStructConstructors(structName, structJavaClass/*, byRef, byVal*/, struct);
+				
+				Struct byRef = publicStaticClass(ident("ByReference"), structName, Struct.Type.JavaClass, null, ident(ident(result.config.runtime.structClass), "ByReference"));
+				Struct byVal = publicStaticClass(ident("ByValue"), structName, Struct.Type.JavaClass, null, ident(ident(result.config.runtime.structClass), "ByValue"));
+				
+				if (result.config.runtime != JNAeratorConfig.Runtime.JNA) {
+					if (!inheritsFromStruct) {
+						structJavaClass.addDeclaration(createNewStructMethod("newByReference", byRef));
+						structJavaClass.addDeclaration(createNewStructMethod("newByValue", byVal));
+					}
+					structJavaClass.addDeclaration(createNewStructMethod("newInstance", structJavaClass));
+		
+					structJavaClass.addDeclaration(createNewStructArrayMethod(structJavaClass, isUnion));
 				}
-				structJavaClass.addDeclaration(createNewStructMethod("newInstance", structJavaClass));
 	
-				structJavaClass.addDeclaration(createNewStructArrayMethod(structJavaClass, isUnion));
+				structJavaClass.addDeclaration(decl(byRef));
+				structJavaClass.addDeclaration(decl(byVal));
 			}
-
-			structJavaClass.addDeclaration(decl(byRef));
-			structJavaClass.addDeclaration(decl(byVal));
+		} else {
+			structJavaClass.addModifiers(ModifierType.Abstract);
 		}
 		return structJavaClass;
 	}
@@ -602,7 +607,7 @@ public class JNADeclarationsConverter extends DeclarationsConverter {
 	}
     int nextAnonymousFieldId;
     @Override
-	public void convertVariablesDeclaration(VariablesDeclaration v, Signatures signatures, DeclarationsHolder out, int[] iChild, boolean isGlobal, Identifier holderName, Identifier callerLibraryClass, String callerLibrary) {
+	public boolean convertVariablesDeclaration(VariablesDeclaration v, Signatures signatures, DeclarationsHolder out, int[] iChild, boolean isGlobal, Identifier holderName, Identifier callerLibraryClass, String callerLibrary) {
 		//List<Declaration> out = new ArrayList<Declaration>();
 		try {
 			TypeRef valueType = v.getValueType();
@@ -660,9 +665,11 @@ public class JNADeclarationsConverter extends DeclarationsConverter {
 				}
 				iChild[0]++;
 			}
+            return true;
 		} catch (UnsupportedConversionException e) {
-			if (!result.config.limitComments)
+			//if (!result.config.limitComments)
 				out.addDeclaration(new EmptyDeclaration(e.toString()));
+            return false;
 		}
 	}
 	TaggedTypeRefDeclaration publicStaticClassDecl(Identifier name, Identifier parentName, Struct.Type type, Element toCloneCommentsFrom, Identifier... interfaces) {
