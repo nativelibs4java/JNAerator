@@ -1091,6 +1091,13 @@ public abstract class Expression extends Element {
 			setIntForm(intForm);
 			setValue(value);
             setOriginalTextualRepresentation(originalTextualRepresentation);
+            
+			checkType();
+		}
+		public Constant(Type type, Object value, String originalTextualRepresentation) {
+			setType(type);
+			setValue(value);
+            setOriginalTextualRepresentation(originalTextualRepresentation);
 			
 			checkType();
 		}
@@ -1138,13 +1145,6 @@ public abstract class Expression extends Element {
 		public static Constant newNull() {
             return new Constant(Constant.Type.Null, null, null);
         }
-		public Constant(Type type, Object value, String originalTextualRepresentation) {
-			setType(type);
-			setValue(value);
-            setOriginalTextualRepresentation(originalTextualRepresentation);
-			
-			checkType();
-		}
 		
 		public void setIntForm(IntForm intForm) {
 			this.intForm = intForm;
@@ -1359,13 +1359,13 @@ public abstract class Expression extends Element {
 		}
 
 		public static Constant parseDecimal(String string) {
-			return parseDecimal(string, 10, IntForm.Decimal, false);
+			return parseInteger(string, 10, IntForm.Decimal, false);
 		}
 		
-        public static Constant parseDecimal(final String string, int radix, IntForm form, boolean negate) {
-            return parseDecimal(string, radix, form, negate, string);
+        public static Constant parseInteger(final String string, int radix, IntForm form, boolean negate) {
+            return parseInteger(string, radix, form, negate, string);
         }
-		public static Constant parseDecimal(String string, int radix, IntForm form, boolean negate, final String orig) {
+		public static Constant parseInteger(String string, int radix, IntForm form, boolean negate, final String orig) {
             string = string.trim().toLowerCase();
 			if (string.startsWith("+"))
                 string = string.substring(1);
@@ -1459,7 +1459,7 @@ public abstract class Expression extends Element {
                     // TODO: handle UShort, UByte
                 }
             }
-			return new Constant(tpe, value, orig);
+			return new Constant(tpe, form, value, orig);
 		}
 
 		public static Constant parseHex(final String orig, boolean negate) {
@@ -1469,7 +1469,7 @@ public abstract class Expression extends Element {
 				throw new IllegalArgumentException("Expected hex literal, got " + string);
 			
 			try {
-				return parseDecimal(string.substring(2), 16, IntForm.Hex, negate, orig);
+				return parseInteger(string.substring(2), 16, IntForm.Hex, negate, orig);
 			} catch (NumberFormatException ex) {
 				throw new NumberFormatException("Parsing hex : \"" + string +"\"");
 			}
@@ -1480,7 +1480,7 @@ public abstract class Expression extends Element {
 			if (!string.startsWith("0"))
 				throw new IllegalArgumentException("Expected octal literal, got " + string);
 			
-			return parseDecimal(string.substring(1), 8, IntForm.Octal, negate);
+			return parseInteger(string.substring(1), 8, IntForm.Octal, negate);
 		}
 
 		public static Constant parseFloat(final String orig) {
@@ -1503,10 +1503,17 @@ public abstract class Expression extends Element {
             if (s == null)
                 return null;
             
-            String low = s.toLowerCase();
-            for (String end : trailingTypeInfos) {
-                if (low.endsWith(end))
-                    return s.substring(0, s.length() - end.length());
+            while (s.length() > 0) {
+                switch (Character.toLowerCase(s.charAt(s.length() - 1))) {
+                case 'u':
+                case 'l':
+                case 'i':
+                case 's':
+                    s = s.substring(0, s.length() - 1);
+                    break;
+                default:
+                    return s;
+                }
             }
             return s;
         }
@@ -1522,7 +1529,15 @@ public abstract class Expression extends Element {
                     txt = trimTrailingTypeInfo(txt);
                     break;
                 case UInt:
+                    if (intForm != IntForm.Hex && (getValue() instanceof Long) && ((Long)getValue()) > Integer.MAX_VALUE) {
+                        txt = null;
+                        break;
+                    }
                 case ULong:
+                    if (intForm == IntForm.Hex) {
+                        txt = trimTrailingTypeInfo(txt);
+                        break;
+                    }
                 case IntegerString:
                     txt = null;
                     break;
@@ -1537,8 +1552,6 @@ public abstract class Expression extends Element {
 				type = Type.Long;
 				break;
 			case UInt:
-                if ((getValue() instanceof Long) && ((Long)getValue()) > Integer.MAX_VALUE)
-                    txt = null;
             case IntegerString:
 			    type = Type.Int;
 				break;

@@ -55,7 +55,14 @@ public class GettersAndSettersHelper {
 				return true;
 			
 			Class<?>[] pts = setter.getParameterTypes();
-			return pts.length == 1 && pts[0].isAssignableFrom(getter.getReturnType());
+			if (pts.length != 1)
+				return false;
+			Class<?> pt = pts[0];
+			if (!pt.isAssignableFrom(getter.getReturnType())) {
+				//System.out.println("Setter with " + pt.getName() + " not consistent with getter returning " + getter.getReturnType().getName());
+				return false;
+			}
+			return true;
 		}
 	}
 	

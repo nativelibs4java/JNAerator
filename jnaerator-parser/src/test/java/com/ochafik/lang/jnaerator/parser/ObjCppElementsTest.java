@@ -104,9 +104,10 @@ public class ObjCppElementsTest {
 			String fieldName = e.getKey();
 			Type fieldType = helper.getFieldType(fieldName );
 			
-			assertNotNull("Field " + fieldName + " does not have a getter !", p.getter);
+			String className = element.getClass().getSimpleName();
+			assertNotNull("Field " + className + "." + fieldName + " does not have a getter !", p.getter);
 			if (!fieldsExcludedFromGetterSetterChecks.contains(fieldName))
-				assertNotNull("Field " + fieldName + " does not have a setter !", p.setter);
+				assertNotNull("Field " + className + "." + fieldName + " does not have a setter !", p.setter);
 			
 			if (p.setter == null)
 				continue;
