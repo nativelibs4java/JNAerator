@@ -5,11 +5,13 @@
 			<artifactId>jna</artifactId>
 			<version>${jna_version}</version>
 		</dependency>
+		<!-- Uncomment to use Rococoa:
 		<dependency>
 			<groupId>org.rococoa</groupId>
 			<artifactId>rococoa</artifactId>
 			<version>${rococoa_version}</version>
 		</dependency>
+		-->
 	
 #parse("main/velocity/com/ochafik/lang/jnaerator/tail.vm")
 

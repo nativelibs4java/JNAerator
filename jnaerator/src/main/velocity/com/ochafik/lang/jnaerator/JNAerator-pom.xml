@@ -5,11 +5,13 @@
 			<artifactId>jnaerator-runtime</artifactId>
 			<version>${jnaerator_version}</version>
 		</dependency>
+		<!-- Uncomment to use Rococoa:
 		<dependency>
 			<groupId>com.nativelibs4java</groupId>
 			<artifactId>jnaerator-rococoa-runtime</artifactId>
 			<version>${jnaerator_version}</version>
 		</dependency>
+		-->
 	
 #parse("main/velocity/com/ochafik/lang/jnaerator/tail.vm")
 
