@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2009-2011 Olivier Chafik, All Rights Reserved
+Copyright (c) 2009-2013 Olivier Chafik, All Rights Reserved
 
 This file is part of JNAerator (http://jnaerator.googlecode.com/).
 
