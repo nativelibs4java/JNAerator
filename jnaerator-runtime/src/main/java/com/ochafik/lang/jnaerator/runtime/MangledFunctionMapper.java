@@ -1,5 +1,5 @@
 /*
-	Copyright (c) 2009-2011 Olivier Chafik, All Rights Reserved
+	Copyright (c) 2009-2013 Olivier Chafik, All Rights Reserved
 	
 	This file is part of JNAerator (http://jnaerator.googlecode.com/).
 	
@@ -28,6 +28,7 @@ import java.util.Map;
 
 import com.sun.jna.FunctionMapper;
 import com.sun.jna.Library;
+import com.sun.jna.Platform;
 import com.sun.jna.NativeLibrary;
 import com.sun.jna.win32.StdCallFunctionMapper;
 
@@ -35,15 +36,19 @@ public class MangledFunctionMapper implements FunctionMapper {
 	public static final Map<Object, Object> DEFAULT_OPTIONS;
 	static {
 		Map<Object, Object> m = new HashMap<Object, Object>();
-		m.put(Library.OPTION_FUNCTION_MAPPER, new MangledFunctionMapper(
-			new StdCallFunctionMapper()
-		));
+		FunctionMapper[] mappers = 
+			Platform.isWindows() ?
+				new FunctionMapper[] { new StdCallFunctionMapper() } :
+				null;
+		m.put(Library.OPTION_FUNCTION_MAPPER, new MangledFunctionMapper(mappers));
 		
 		DEFAULT_OPTIONS = Collections.unmodifiableMap(m);
 	}
-	public List<FunctionMapper> linked = new ArrayList<FunctionMapper>();
-	public MangledFunctionMapper(FunctionMapper... linked ) {
-		this.linked.addAll(Arrays.asList(linked));
+	public List<FunctionMapper> mappers;
+	public MangledFunctionMapper(FunctionMapper... mappers) {
+		if (mappers != null) {
+			this.mappers = Arrays.asList(mappers);	
+		}
 	}
 	public String getFunctionName(NativeLibrary library, Method method) {
 		Mangling name = method.getAnnotation(Mangling.class);
@@ -62,9 +67,9 @@ public class MangledFunctionMapper implements FunctionMapper {
 				}
 			}
 		}
-		if (linked != null)
-			for (FunctionMapper fm : linked) {
-				String n = fm.getFunctionName(library, method);
+		if (mappers != null)
+			for (FunctionMapper mapper : mappers) {
+				String n = mapper.getFunctionName(library, method);
 				if (n != null && library.getGlobalVariableAddress(n) != null)
 					return n;
 			}
