@@ -561,6 +561,15 @@ public class Scanner implements Visitor {
         visitStatement(s);
 		visit(s.getValue());
     }
-    
+
+    public void visitInclude(Include aThis) {
+        visitDeclaration(aThis);
+    }
+
+    public void visitStatementDeclaration(StatementDeclaration aThis) {
+        visitStatement(aThis);
+        visitDeclaration(aThis);
+        visit(aThis.getStatement());
+    }
     
 }

@@ -78,14 +78,14 @@ public class ElementsHelper {
     public static Expression enumRef(java.lang.Enum e) {
         return memberRef(expr(typeRef(e.getDeclaringClass())), e.name());
     }
-	public static Identifier ident(String... others) {
-        if (others == null)
+    public static Identifier ident(QualificationSeparator separator, String... components) {
+        if (components == null)
             return null;
         
         List<SimpleIdentifier> list = new ArrayList<SimpleIdentifier>();
-        for (String o : others)
+        for (String o : components)
             if (o != null && (o = o.trim()).length() > 0)
-				for (String elt : o.split("\\."))
+				for (String elt : o.split("\\.|::"))
                 	list.add(new SimpleIdentifier(elt));
 
         if (list.isEmpty())
@@ -93,9 +93,12 @@ public class ElementsHelper {
         if (list.size() == 1)
             return list.get(0);
         
-        QualifiedIdentifier id = new QualifiedIdentifier(QualificationSeparator.Dot);
+        QualifiedIdentifier id = new QualifiedIdentifier(separator);
         id.setIdentifiers(list);
         return id;
+	}
+    public static Identifier ident(String... components) {
+        return ident(QualificationSeparator.Dot, components);
 	}
     public static List<SimpleIdentifier> getClassSimpleIdentifiers(String className) {
         List<SimpleIdentifier> elts = new ArrayList<SimpleIdentifier>();
@@ -114,6 +117,11 @@ public class ElementsHelper {
         id.setIdentifiers(getClassSimpleIdentifiers(cl.getName()));
         id.resolveLastSimpleIdentifier().setTemplateArguments(Arrays.asList(args));
         return id;
+	}
+	public static Identifier templateIdent(Identifier base, Expression... args) {
+            Identifier id = base.clone();
+            id.resolveLastSimpleIdentifier().setTemplateArguments(Arrays.asList(args));
+            return id;
 	}
 	public static Identifier ident(Identifier ident, String name) {
 		return ident(ident, ident(name));
@@ -154,7 +162,7 @@ public class ElementsHelper {
 		return new Constant(type, value, null);
 	}
 	public static Expression expr(UnaryOperator op, Expression b) {
-		return new UnaryOp(b, op);
+		return new UnaryOp(b, op).setParenthesis(true);
 	}
 	public static Expression expr(Expression a, BinaryOperator op, Expression b) {
 		return new BinaryOp(a, op, b);
@@ -196,8 +204,11 @@ public class ElementsHelper {
     public static FunctionCall methodCall(Expression x, String name, Expression... exprs) {
     	return methodCall(x, MemberRefStyle.Dot, name, exprs);
 	}
-	public static FunctionCall methodCall(String name, Expression... exprs) {
+	public static FunctionCall methodCall(Identifier name, Expression... exprs) {
 		return new FunctionCall(memberRef(null, null, name), exprs);
+	}
+	public static FunctionCall methodCall(String name, Expression... exprs) {
+            return methodCall(ident(name), exprs);
 	}
 	public static TypeRef typeRef(Class<?> cl) {
 		if (cl == null)
@@ -230,6 +241,9 @@ public class ElementsHelper {
 	public static Statement stat(Expression x) {
 		return new ExpressionStatement(x);
 	}
+        public static Declaration decl(Statement stat) {
+            return new StatementDeclaration(stat);
+        }
 	public static Statement stat(TypeRef tr, String varName, Expression ass) {
 		VariablesDeclaration vd = new VariablesDeclaration(tr, new Declarator.DirectDeclarator(varName, ass));
 		return vd;//new Statement.DeclarationStatement(vd);

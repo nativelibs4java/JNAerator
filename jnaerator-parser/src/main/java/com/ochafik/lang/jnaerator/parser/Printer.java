@@ -1165,6 +1165,27 @@ public class Printer implements Visitor {
         append(d.getValue());
         append(";");
     }
-    
+
+    public void visitInclude(Include inc) {
+        switch (inc.getType()) {
+            case CInclude:
+                append("#include \"" + inc.getPath() + "\"\n");
+                break;
+            case ObjCImport:
+                append("#import <" + inc.getPath() + ">\n");
+                break;
+            case JavaImport:
+                append("import " + inc.getPath() + ";\n");
+                break;
+            case JavaStaticImport:
+                append("import static " + inc.getPath() + ";\n");
+                break;
+        }
+    }
+
+    public void visitStatementDeclaration(StatementDeclaration d) {
+        if (d.getStatement() != null)
+            d.getStatement().accept(this);
+    }
     
 }

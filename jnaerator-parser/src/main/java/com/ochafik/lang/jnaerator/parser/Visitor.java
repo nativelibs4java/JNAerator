@@ -192,5 +192,9 @@ public interface Visitor {
     public void visitDelete(Delete aThis);
 
     public void visitExpressionsBlock(ExpressionsBlock aThis);
+
+    public void visitInclude(Include aThis);
+
+    public void visitStatementDeclaration(StatementDeclaration aThis);
 	
 }

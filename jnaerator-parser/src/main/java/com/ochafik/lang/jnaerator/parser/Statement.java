@@ -167,6 +167,9 @@ public abstract class Statement extends ModifiableElement { // HACK : statement 
     }
 	public static class If extends Statement {
 		public If() {}
+		public If(Expression condition, Statement thenBranch) {
+                    this(condition, thenBranch, null);
+                }
 		public If(Expression condition, Statement thenBranch, Statement elseBranch) {
 			setCondition(condition);
 			setThenBranch(thenBranch);
