@@ -258,10 +258,10 @@ public class CSlicer {
     static String preprocess(File source) throws IOException, LexerException {
         JNAeratorConfig config = new JNAeratorConfig();
         JNAeratorConfigUtils.autoConfigure(config);
-        config.preprocessorConfig.includes.add("C:\\program files\\Microsoft SDKs\\Windows\\v7.0A\\Include");
-        config.preprocessorConfig.includes.add("C:\\program files\\Microsoft Visual Studio 10.0\\VC\\include");
+        config.preprocessorConfig.implicitIncludes.add("C:\\program files\\Microsoft SDKs\\Windows\\v7.0A\\Include");
+        config.preprocessorConfig.implicitIncludes.add("C:\\program files\\Microsoft Visual Studio 10.0\\VC\\include");
         //config.preprocessorConfig.includeStrings.add(source);
-        config.addSourceFile(source, null, false, true);
+        config.addSourceFile(source, null, false, true, true);
         Result result = new Result(config, null, null);
         String pre = PreprocessorUtils.preprocessSources(config, Collections.EMPTY_LIST, false, result.typeConverter, null);
         return pre;

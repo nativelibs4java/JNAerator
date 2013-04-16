@@ -51,6 +51,7 @@ import com.ochafik.lang.jnaerator.parser.Function.SignatureType;
 import com.sun.jna.win32.StdCallLibrary;
 import org.bridj.*;
 import org.bridj.ann.Convention;
+import org.bridj.cpp.CPPRuntime;
 import org.bridj.objc.NSObject;
 
 public class BridJDeclarationsConverter extends DeclarationsConverter {
@@ -778,4 +779,58 @@ public class BridJDeclarationsConverter extends DeclarationsConverter {
         return ptClass;
     }
 
+    @Override
+    protected void fillLibraryMapping(Result result, SourceFiles sourceFiles, DeclarationsHolder interf, String library, Identifier javaPackage, Identifier fullLibraryClassName, Expression nativeLibFieldExpr) throws IOException {
+        super.fillLibraryMapping(result, sourceFiles, interf, library, javaPackage, fullLibraryClassName, nativeLibFieldExpr);
+        
+        if (interf instanceof ModifiableElement) {
+            ModifiableElement minterf = (ModifiableElement) interf;
+            minterf.addAnnotation(new Annotation(org.bridj.ann.Library.class, expr(library)));
+            minterf.addAnnotation(new Annotation(org.bridj.ann.Runtime.class, classLiteral(result.hasCPlusPlus ? CPPRuntime.class : CRuntime.class)));
+        }
+    }
+    @Override
+    public void generateLibraryFiles(SourceFiles sourceFiles, Result result, JNAeratorConfig config) throws IOException {
+        for (String library : result.libraries) {
+            if (library == null) {
+                continue; // to handle code defined in macro-expanded expressions
+            }
+
+            Identifier javaPackage = result.javaPackageByLibrary.get(library);
+            Identifier simpleLibraryClassName = result.getLibraryClassSimpleName(library);
+
+            Identifier fullLibraryClassName = result.getLibraryClassFullName(library);//ident(javaPackage, libraryClassName);
+            //if (!result.objCClasses.isEmpty())
+            //	out.println("import org.rococoa.ID;");
+
+
+            Struct interf = new Struct();
+            interf.setType(Struct.Type.JavaClass);
+            interf.addToCommentBefore("Wrapper for library <b>" + library + "</b>",
+                    result.declarationsConverter.getFileCommentContent(result.config.libraryProjectSources.get(library), null));
+            interf.addModifiers(ModifierType.Public);
+            interf.setTag(simpleLibraryClassName);
+            interf.addParent(ident(config.runtime.libraryClass, expr(typeRef(simpleLibraryClassName))));
+            interf.addDeclaration(new Function(Function.Type.StaticInit, null, null).setBody(block(
+                    stat(methodCall(
+                    expr(typeRef(BridJ.class)),
+                    Expression.MemberRefStyle.Dot,
+                    "register")))).addModifiers(ModifierType.Static));
+
+//            String libFileOrDirArgName = "libraryFileOrDirectory";
+//            Function constr = new Function(Function.Type.JavaMethod, fullLibraryClassName.resolveLastSimpleIdentifier().clone(), null, new Arg(libFileOrDirArgName, typeRef(File.class)));
+//            constr.addModifiers(ModifierType.Public);
+//            constr.setBody(block(stat(methodCall("super", varRef(libFileOrDirArgName)))));
+//            interf.addDeclaration(constr);
+//
+//            constr = new Function(Function.Type.JavaMethod, fullLibraryClassName.resolveLastSimpleIdentifier().clone(), null);
+//            constr.addModifiers(ModifierType.Public);
+//            constr.addThrown(typeRef(FileNotFoundException.class));
+//            constr.setBody(block(stat(methodCall("super", classLiteral(typeRef(fullLibraryClassName.clone()))))));
+//            interf.addDeclaration(constr);
+
+            fillLibraryMapping(result, sourceFiles, interf, library, javaPackage, fullLibraryClassName, varRef("this"));
+            writeLibraryInterface(result, sourceFiles, interf, library, javaPackage, fullLibraryClassName);
+        }
+    }
 }

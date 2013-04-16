@@ -47,8 +47,13 @@ import java.text.MessageFormat;
 import static com.ochafik.lang.jnaerator.parser.ElementsHelper.*;
 import static com.ochafik.lang.jnaerator.TypeConversion.*;
 import com.ochafik.lang.jnaerator.parser.Function.SignatureType;
+import com.ochafik.lang.jnaerator.runtime.LibraryExtractor;
+import com.ochafik.lang.jnaerator.runtime.MangledFunctionMapper;
+import com.sun.jna.Native;
+import com.sun.jna.NativeLibrary;
 import com.sun.jna.PointerType;
 import com.sun.jna.win32.StdCallLibrary;
+import java.io.PrintWriter;
 
 public class JNADeclarationsConverter extends DeclarationsConverter {
 	private static final Pattern manglingCommentPattern = Pattern.compile("@mangling (.*)$", Pattern.MULTILINE);
@@ -496,11 +501,11 @@ public class JNADeclarationsConverter extends DeclarationsConverter {
 		if (result.config.runtime != JNAeratorConfig.Runtime.JNA) {
 			f.setBody(block(
 				//new Statement.Return(methodCall("setupClone", new Expression.New(tr.clone(), methodCall(null))))
-					new Statement.Return(new Expression.New(tr.clone(), methodCall(null)))
+					new Statement.Return(new Expression.New(tr.clone(), methodCall((String)null)))
 			).setCompact(true));
 		} else {
 			f.setBody(block(
-				stat(tr.clone(), varName, new Expression.New(tr.clone(), methodCall(null))),
+				stat(tr.clone(), varName, new Expression.New(tr.clone(), methodCall((String)null))),
 				stat(methodCall(varRef(varName), MemberRefStyle.Dot, "useMemory", methodCall("getPointer"))),
 				stat(methodCall("write")),
 				stat(methodCall(varRef(varName), MemberRefStyle.Dot, "read")),
@@ -911,5 +916,146 @@ public class JNADeclarationsConverter extends DeclarationsConverter {
 
     private void annotateActualName(ModifiableElement e, Identifier name) {
         e.addAnnotation(new Annotation(result.config.runtime.typeRef(JNAeratorConfig.Runtime.Ann.Name), expr(name.toString())));
+    }
+    @Override
+    public void generateLibraryFiles(SourceFiles sourceFiles, Result result, JNAeratorConfig config) throws IOException {
+
+        Struct librariesHub = null;
+        PrintWriter hubOut = null;
+        if (result.config.entryName != null) {
+            librariesHub = new Struct();
+            librariesHub.addToCommentBefore("JNA Wrappers instances");
+            librariesHub.setType(Struct.Type.JavaClass);
+            librariesHub.addModifiers(ModifierType.Public, ModifierType.Abstract);
+            Identifier hubName = result.getHubFullClassName();
+            librariesHub.setTag(hubName.resolveLastSimpleIdentifier());
+            hubOut = result.classOutputter.getClassSourceWriter(hubName.toString());
+            hubOut.println("package " + hubName.resolveAllButLastIdentifier() + ";");
+            for (Identifier pn : result.javaPackages) {
+                if (!pn.equals("")) {
+                    hubOut.println("import " + pn + ".*;");
+                }
+            }
+        }
+        for (String library : result.libraries) {
+            if (library == null) {
+                continue; // to handle code defined in macro-expanded expressions
+            }//				library = "";
+
+            Identifier javaPackage = result.javaPackageByLibrary.get(library);
+            Identifier simpleLibraryClassName = result.getLibraryClassSimpleName(library);
+
+            Identifier fullLibraryClassName = result.getLibraryClassFullName(library);//ident(javaPackage, libraryClassName);
+            //if (!result.objCClasses.isEmpty())
+            //	out.println("import org.rococoa.ID;");
+
+
+            Struct interf = new Struct();
+            interf.addToCommentBefore("JNA Wrapper for library <b>" + library + "</b>",
+                    result.declarationsConverter.getFileCommentContent(result.config.libraryProjectSources.get(library), null));
+            if (hubOut != null) {
+                interf.addToCommentBefore("@see " + result.config.entryName + "." + library);
+            }
+
+            interf.addModifiers(ModifierType.Public);
+            interf.setTag(simpleLibraryClassName);
+
+            Expression nativeLibFieldExpr = null;
+            if (!result.config.skipLibraryInstanceDeclarations) {
+                Expression libNameExpr = opaqueExpr(result.getLibraryFileExpression(library));
+                TypeRef libTypeRef = typeRef(fullLibraryClassName);
+                Expression libClassLiteral = result.typeConverter.typeLiteral(libTypeRef);
+
+                boolean isJNAerator = result.config.runtime == JNAeratorConfig.Runtime.JNAerator;
+
+                Expression libraryPathGetterExpr;
+                if (isJNAerator) {
+                    libraryPathGetterExpr = methodCall(
+                            expr(typeRef(LibraryExtractor.class)),
+                            Expression.MemberRefStyle.Dot,
+                            "getLibraryPath",
+                            libNameExpr,
+                            expr(true),
+                            libClassLiteral);
+                } else {
+                    libraryPathGetterExpr = libNameExpr;
+                }
+
+                String libNameStringFieldName = "JNA_LIBRARY_NAME", nativeLibFieldName = "JNA_NATIVE_LIB";
+                interf.addDeclaration(new VariablesDeclaration(typeRef(String.class), new Declarator.DirectDeclarator(
+                        libNameStringFieldName,
+                        libraryPathGetterExpr)).addModifiers(ModifierType.Public, ModifierType.Static, ModifierType.Final));
+
+                Expression libraryNameFieldExpr = memberRef(expr(libTypeRef.clone()), Expression.MemberRefStyle.Dot, ident(libNameStringFieldName));
+                Expression optionsMapExpr = memberRef(expr(typeRef(MangledFunctionMapper.class)), Expression.MemberRefStyle.Dot, "DEFAULT_OPTIONS");
+                Expression[] getInstArgs = isJNAerator
+                        ? new Expression[]{libraryNameFieldExpr.clone(), optionsMapExpr.clone()}
+                        : new Expression[]{libraryNameFieldExpr.clone()};
+                interf.addDeclaration(new VariablesDeclaration(typeRef(NativeLibrary.class), new Declarator.DirectDeclarator(
+                        nativeLibFieldName,
+                        methodCall(
+                        expr(typeRef(NativeLibrary.class)),
+                        Expression.MemberRefStyle.Dot,
+                        "getInstance",
+                        getInstArgs))).addModifiers(ModifierType.Public, ModifierType.Static, ModifierType.Final));
+                nativeLibFieldExpr = memberRef(expr(libTypeRef.clone()), Expression.MemberRefStyle.Dot, ident(nativeLibFieldName));
+
+                if (result.config.useJNADirectCalls) {
+                    interf.addDeclaration(new Function(Function.Type.StaticInit, null, null).setBody(block(
+                            stat(methodCall(
+                            expr(typeRef(Native.class)),
+                            Expression.MemberRefStyle.Dot,
+                            "register",
+                            libraryNameFieldExpr.clone())))).addModifiers(ModifierType.Static));
+                } else {
+                    Expression[] loadLibArgs = isJNAerator
+                            ? new Expression[]{libraryNameFieldExpr.clone(), libClassLiteral, optionsMapExpr.clone()}
+                            : new Expression[]{libraryNameFieldExpr.clone(), libClassLiteral};
+                    VariablesDeclaration instanceDecl = new VariablesDeclaration(libTypeRef, new Declarator.DirectDeclarator(
+                            librariesHub == null ? "INSTANCE" : library,
+                            cast(
+                            libTypeRef,
+                            methodCall(
+                            expr(typeRef(Native.class)),
+                            Expression.MemberRefStyle.Dot,
+                            "loadLibrary",
+                            loadLibArgs)))).addModifiers(ModifierType.Public, ModifierType.Static, ModifierType.Final);
+                    if (librariesHub != null) {
+                        librariesHub.addDeclaration(instanceDecl);
+                        librariesHub.addProtocol(fullLibraryClassName.clone());
+                    } else {
+                        interf.addDeclaration(instanceDecl);
+                    }
+                }
+            }
+
+            boolean stdcall = false;
+            List<Function> functions = result.functionsByLibrary.get(library);
+            if (functions != null) {
+                for (Function function : functions) {
+                    if (function.hasModifier(ModifierType.__stdcall)) {
+                        stdcall = true;
+                        break;
+                    }
+                }
+            }
+
+            Identifier libSuperInter = ident(stdcall ? StdCallLibrary.class : config.runtime.libraryClass);
+
+            if (result.config.useJNADirectCalls) {
+                interf.addProtocol(libSuperInter);
+                interf.setType(Struct.Type.JavaClass);
+            } else {
+                interf.addParent(libSuperInter);
+                interf.setType(Struct.Type.JavaInterface);
+            }
+
+            fillLibraryMapping(result, sourceFiles, interf, library, javaPackage, fullLibraryClassName, nativeLibFieldExpr);
+            writeLibraryInterface(result, sourceFiles, interf, library, javaPackage, fullLibraryClassName);
+        }
+        if (hubOut != null) {
+            hubOut.println(librariesHub.toString());
+            hubOut.close();
+        }
     }
 }

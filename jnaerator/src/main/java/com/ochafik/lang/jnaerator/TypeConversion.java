@@ -329,16 +329,16 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
 
 
         primToByReference.put(JavaPrim.Int, IntByReference.class);
-        primToByReference.put(JavaPrim.Char, CharByReference.class);
+        primToByReference.put(JavaPrim.Char, (Class)CharByReference.class);
         primToByReference.put(JavaPrim.Short, ShortByReference.class);
         primToByReference.put(JavaPrim.Byte, ByteByReference.class);
         primToByReference.put(JavaPrim.Long, LongByReference.class);
         primToByReference.put(JavaPrim.Float, FloatByReference.class);
         primToByReference.put(JavaPrim.Double, DoubleByReference.class);
         primToByReference.put(JavaPrim.NativeLong, NativeLongByReference.class);
-        primToByReference.put(JavaPrim.NativeSize, NativeSizeByReference.class);
-        primToByReference.put(JavaPrim.NSInteger, NativeSizeByReference.class);
-        primToByReference.put(JavaPrim.NSUInteger, NativeSizeByReference.class);
+        primToByReference.put(JavaPrim.NativeSize, (Class)NativeSizeByReference.class);
+        primToByReference.put(JavaPrim.NSInteger, (Class)NativeSizeByReference.class);
+        primToByReference.put(JavaPrim.NSUInteger, (Class)NativeSizeByReference.class);
         primToByReference.put(JavaPrim.CGFloat, CGFloatByReference.class);
 
         //primsByReference.put(JavaPrim.Void, PointerByReference.class);

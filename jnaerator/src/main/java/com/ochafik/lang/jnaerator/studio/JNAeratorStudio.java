@@ -627,11 +627,11 @@ public class JNAeratorStudio extends JPanel {
 				};
 				try {
 					new JNAerator(config) {
-						public PrintWriter getClassSourceWriter(final ClassOutputter outputter, final String className) throws IOException {
-							ResultContent c = new ResultContent(className) {
+						public PrintWriter getSourceWriter(final ClassOutputter outputter, final String path) throws IOException {
+							ResultContent c = new ResultContent(path) {
 								protected void closed() {
 									try {
-										PrintWriter w = outputter.getClassSourceWriter(className);
+										PrintWriter w = outputter.getSourceWriter(path);
 										w.write(this.getContent());
 										w.close();
 									} catch (Exception ex) {

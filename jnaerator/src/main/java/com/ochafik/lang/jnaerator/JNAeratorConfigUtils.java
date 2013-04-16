@@ -148,100 +148,100 @@ public class JNAeratorConfigUtils {
 	}
 	
 	public static void addCPlusPlus(JNAeratorConfig.PreprocessorConfig config) {
-		config.macros.put("__cplusplus", null);
+		config.implicitMacros.put("__cplusplus", null);
 	}
 
 	public static void addGCCPredefinedMacros(JNAeratorConfig.PreprocessorConfig config) {
 		//gcc -dM -E - < /dev/null
-		config.macros.put("__DBL_MIN_EXP__", "(-1021)");
-		config.macros.put("__FLT_MIN__", "1.17549435e-38F");
-		config.macros.put("__CHAR_BIT__", "8");
-		config.macros.put("__WCHAR_MAX__", "2147483647");
-		config.macros.put("__DBL_DENORM_MIN__", "4.9406564584124654e-324");
-		config.macros.put("__FLT_EVAL_METHOD__", "0");
-		config.macros.put("__DBL_MIN_10_EXP__", "(-307)");
-		config.macros.put("__FINITE_MATH_ONLY__", "0");
-		config.macros.put("__SHRT_MAX__", "32767");
-		config.macros.put("__LDBL_MAX__", "1.18973149535723176502e+4932L");
+		config.implicitMacros.put("__DBL_MIN_EXP__", "(-1021)");
+		config.implicitMacros.put("__FLT_MIN__", "1.17549435e-38F");
+		config.implicitMacros.put("__CHAR_BIT__", "8");
+		config.implicitMacros.put("__WCHAR_MAX__", "2147483647");
+		config.implicitMacros.put("__DBL_DENORM_MIN__", "4.9406564584124654e-324");
+		config.implicitMacros.put("__FLT_EVAL_METHOD__", "0");
+		config.implicitMacros.put("__DBL_MIN_10_EXP__", "(-307)");
+		config.implicitMacros.put("__FINITE_MATH_ONLY__", "0");
+		config.implicitMacros.put("__SHRT_MAX__", "32767");
+		config.implicitMacros.put("__LDBL_MAX__", "1.18973149535723176502e+4932L");
 		if (com.sun.jna.Platform.isMac()) {
-			config.macros.put("__APPLE_CC__", "5484");
-			config.macros.put("__MACH__", "1");
-			config.macros.put("__APPLE__", "1");
+			config.implicitMacros.put("__APPLE_CC__", "5484");
+			config.implicitMacros.put("__MACH__", "1");
+			config.implicitMacros.put("__APPLE__", "1");
 		}
-		config.macros.put("__UINTMAX_TYPE__", "long long unsigned int");
-		config.macros.put("__SCHAR_MAX__", "127");
-		config.macros.put("__USER_LABEL_PREFIX__", "_");
-		config.macros.put("__STDC_HOSTED__", "1");
-		config.macros.put("__DBL_DIG__", "15");
-		config.macros.put("__FLT_EPSILON__", "1.19209290e-7F");
-		config.macros.put("__LDBL_MIN__", "3.36210314311209350626e-4932L");
-		config.macros.put("__strong", "");
-		config.macros.put("__DECIMAL_DIG__", "21");
-		config.macros.put("__LDBL_HAS_QUIET_NAN__", "1");
-		config.macros.put("__DYNAMIC__", "1");
-//		config.macros.put("__GNUC__", "4");
-//		config.macros.put("__MMX__", "1");
-		config.macros.put("__DBL_MAX__", "1.7976931348623157e+308");
-		config.macros.put("__DBL_HAS_INFINITY__", "1");
-		config.macros.put("OBJC_NEW_PROPERTIES", "1");
-		config.macros.put("__weak", "");
-		config.macros.put("__DBL_MAX_EXP__", "1024");
-//		config.macros.put("__SSE2_MATH__", "1");
-		config.macros.put("__LONG_LONG_MAX__", "9223372036854775807LL");
-		config.macros.put("__GXX_ABI_VERSION", "1002");
-		config.macros.put("__FLT_MIN_EXP__", "(-125)");
-		config.macros.put("__DBL_MIN__", "2.2250738585072014e-308");
-		config.macros.put("__DBL_HAS_QUIET_NAN__", "1");
-		config.macros.put("__REGISTER_PREFIX__", "");
-		config.macros.put("__NO_INLINE__", "1");
-//		config.macros.put("__i386", "1");
-		config.macros.put("__FLT_MANT_DIG__", "24");
-		config.macros.put("__VERSION__", "\"4.0.1 (Apple Inc. build 5484)\"");
-//		config.macros.put("i386", "1");
-//		config.macros.put("__i386__", "1");
-		config.macros.put("__ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__", "1055");
-		config.macros.put("__SIZE_TYPE__", "long unsigned int");
-		config.macros.put("__FLT_RADIX__", "2");
-		config.macros.put("__LDBL_EPSILON__", "1.08420217248550443401e-19L");
-//		config.macros.put("__SSE_MATH__", "1");
-		config.macros.put("__FLT_HAS_QUIET_NAN__", "1");
-		config.macros.put("__FLT_MAX_10_EXP__", "38");
-		config.macros.put("__LONG_MAX__", "2147483647L");
-		config.macros.put("__FLT_HAS_INFINITY__", "1");
+		config.implicitMacros.put("__UINTMAX_TYPE__", "long long unsigned int");
+		config.implicitMacros.put("__SCHAR_MAX__", "127");
+		config.implicitMacros.put("__USER_LABEL_PREFIX__", "_");
+		config.implicitMacros.put("__STDC_HOSTED__", "1");
+		config.implicitMacros.put("__DBL_DIG__", "15");
+		config.implicitMacros.put("__FLT_EPSILON__", "1.19209290e-7F");
+		config.implicitMacros.put("__LDBL_MIN__", "3.36210314311209350626e-4932L");
+		config.implicitMacros.put("__strong", "");
+		config.implicitMacros.put("__DECIMAL_DIG__", "21");
+		config.implicitMacros.put("__LDBL_HAS_QUIET_NAN__", "1");
+		config.implicitMacros.put("__DYNAMIC__", "1");
+//		config.implicitMacros.put("__GNUC__", "4");
+//		config.implicitMacros.put("__MMX__", "1");
+		config.implicitMacros.put("__DBL_MAX__", "1.7976931348623157e+308");
+		config.implicitMacros.put("__DBL_HAS_INFINITY__", "1");
+		config.implicitMacros.put("OBJC_NEW_PROPERTIES", "1");
+		config.implicitMacros.put("__weak", "");
+		config.implicitMacros.put("__DBL_MAX_EXP__", "1024");
+//		config.implicitMacros.put("__SSE2_MATH__", "1");
+		config.implicitMacros.put("__LONG_LONG_MAX__", "9223372036854775807LL");
+		config.implicitMacros.put("__GXX_ABI_VERSION", "1002");
+		config.implicitMacros.put("__FLT_MIN_EXP__", "(-125)");
+		config.implicitMacros.put("__DBL_MIN__", "2.2250738585072014e-308");
+		config.implicitMacros.put("__DBL_HAS_QUIET_NAN__", "1");
+		config.implicitMacros.put("__REGISTER_PREFIX__", "");
+		config.implicitMacros.put("__NO_INLINE__", "1");
+//		config.implicitMacros.put("__i386", "1");
+		config.implicitMacros.put("__FLT_MANT_DIG__", "24");
+		config.implicitMacros.put("__VERSION__", "\"4.0.1 (Apple Inc. build 5484)\"");
+//		config.implicitMacros.put("i386", "1");
+//		config.implicitMacros.put("__i386__", "1");
+		config.implicitMacros.put("__ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__", "1055");
+		config.implicitMacros.put("__SIZE_TYPE__", "long unsigned int");
+		config.implicitMacros.put("__FLT_RADIX__", "2");
+		config.implicitMacros.put("__LDBL_EPSILON__", "1.08420217248550443401e-19L");
+//		config.implicitMacros.put("__SSE_MATH__", "1");
+		config.implicitMacros.put("__FLT_HAS_QUIET_NAN__", "1");
+		config.implicitMacros.put("__FLT_MAX_10_EXP__", "38");
+		config.implicitMacros.put("__LONG_MAX__", "2147483647L");
+		config.implicitMacros.put("__FLT_HAS_INFINITY__", "1");
 		
-		config.macros.put("__LDBL_MANT_DIG__", "64");
-		config.macros.put("__CONSTANT_CFSTRINGS__", "1");
-		config.macros.put("__WCHAR_TYPE__", "int");
-		config.macros.put("__FLT_DIG__", "6");
-		config.macros.put("__INT_MAX__", "2147483647");
-		config.macros.put("__FLT_MAX_EXP__", "128");
-		config.macros.put("__DBL_MANT_DIG__", "53");
-		config.macros.put("__WINT_TYPE__", "int");
-//		config.macros.put("__SSE__", "1");
-		config.macros.put("__LDBL_MIN_EXP__", "(-16381)");
-		config.macros.put("__LDBL_MAX_EXP__", "16384");
-		config.macros.put("__LDBL_MAX_10_EXP__", "4932");
-		config.macros.put("__DBL_EPSILON__", "2.2204460492503131e-16");
-		config.macros.put("__LDBL_HAS_INFINITY__", "1");
-		config.macros.put("__INTMAX_MAX__", "9223372036854775807LL");
-		config.macros.put("__FLT_DENORM_MIN__", "1.40129846e-45F");
-		config.macros.put("__PIC__", "1");
-		config.macros.put("__FLT_MAX__", "3.40282347e+38F");
-//		config.macros.put("__SSE2__", "1");
-		config.macros.put("__FLT_MIN_10_EXP__", "(-37)");
-		config.macros.put("__INTMAX_TYPE__", "long long int");
-		config.macros.put("__GNUC_MINOR__", "0");
-		config.macros.put("__DBL_MAX_10_EXP__", "308");
-		config.macros.put("__LDBL_DENORM_MIN__", "3.64519953188247460253e-4951L");
-//		config.macros.put("__PTRDIFF_TYPE__", "int");
-		config.macros.put("__LDBL_MIN_10_EXP__", "(-4931)");
-		config.macros.put("__LDBL_DIG__", "18");
-//		config.macros.put("__GNUC_GNU_INLINE__", "1");
+		config.implicitMacros.put("__LDBL_MANT_DIG__", "64");
+		config.implicitMacros.put("__CONSTANT_CFSTRINGS__", "1");
+		config.implicitMacros.put("__WCHAR_TYPE__", "int");
+		config.implicitMacros.put("__FLT_DIG__", "6");
+		config.implicitMacros.put("__INT_MAX__", "2147483647");
+		config.implicitMacros.put("__FLT_MAX_EXP__", "128");
+		config.implicitMacros.put("__DBL_MANT_DIG__", "53");
+		config.implicitMacros.put("__WINT_TYPE__", "int");
+//		config.implicitMacros.put("__SSE__", "1");
+		config.implicitMacros.put("__LDBL_MIN_EXP__", "(-16381)");
+		config.implicitMacros.put("__LDBL_MAX_EXP__", "16384");
+		config.implicitMacros.put("__LDBL_MAX_10_EXP__", "4932");
+		config.implicitMacros.put("__DBL_EPSILON__", "2.2204460492503131e-16");
+		config.implicitMacros.put("__LDBL_HAS_INFINITY__", "1");
+		config.implicitMacros.put("__INTMAX_MAX__", "9223372036854775807LL");
+		config.implicitMacros.put("__FLT_DENORM_MIN__", "1.40129846e-45F");
+		config.implicitMacros.put("__PIC__", "1");
+		config.implicitMacros.put("__FLT_MAX__", "3.40282347e+38F");
+//		config.implicitMacros.put("__SSE2__", "1");
+		config.implicitMacros.put("__FLT_MIN_10_EXP__", "(-37)");
+		config.implicitMacros.put("__INTMAX_TYPE__", "long long int");
+		config.implicitMacros.put("__GNUC_MINOR__", "0");
+		config.implicitMacros.put("__DBL_MAX_10_EXP__", "308");
+		config.implicitMacros.put("__LDBL_DENORM_MIN__", "3.64519953188247460253e-4951L");
+//		config.implicitMacros.put("__PTRDIFF_TYPE__", "int");
+		config.implicitMacros.put("__LDBL_MIN_10_EXP__", "(-4931)");
+		config.implicitMacros.put("__LDBL_DIG__", "18");
+//		config.implicitMacros.put("__GNUC_GNU_INLINE__", "1");
 	}
 
 	static void defaultMacro(JNAeratorConfig config, String name, String value) {
-		if (!config.preprocessorConfig.macros.containsKey(name))
-			config.preprocessorConfig.macros.put(name, value);
+		if (!config.preprocessorConfig.implicitMacros.containsKey(name))
+			config.preprocessorConfig.implicitMacros.put(name, value);
 	}
 	/**
 	 * TODO move this to a .h resource file
@@ -262,13 +262,13 @@ public class JNAeratorConfigUtils {
 			defaultMacro(config, "G_BYTE_ORDER", "1234"); //glibc: #define G_LITTLE_ENDIAN 1234
 		}
 		//prevent a jcpp bug to happen when expanding assert(...) :
-		config.preprocessorConfig.macros.put("NDEBUG", null);
+		config.preprocessorConfig.implicitMacros.put("NDEBUG", null);
 
-		config.preprocessorConfig.macros.put("__STDC__", null);
-		config.preprocessorConfig.macros.put("HAVE_PROTOTYPES", null);
-		config.preprocessorConfig.macros.put("STDC_HEADERS", null);
+		config.preprocessorConfig.implicitMacros.put("__STDC__", null);
+		config.preprocessorConfig.implicitMacros.put("HAVE_PROTOTYPES", null);
+		config.preprocessorConfig.implicitMacros.put("STDC_HEADERS", null);
 
-		config.preprocessorConfig.includes.addAll(getDefaultIncludePath(config.verbose));//JNAeratorConfigUtils.DEFAULT_INCLUDE_PATH);
+		config.preprocessorConfig.implicitIncludes.addAll(getDefaultIncludePath(config.verbose));//JNAeratorConfigUtils.DEFAULT_INCLUDE_PATH);
 		config.preprocessorConfig.frameworksPath.addAll(getDefaultFrameworkPath(config.verbose));//JNAeratorConfigUtils.DEFAULT_FRAMEWORKS_PATH);
 		if (SystemUtils.isWindows()) {
 			//http://msdn.microsoft.com/en-us/library/b0084kay(VS.80).aspx
@@ -276,13 +276,13 @@ public class JNAeratorConfigUtils {
 			//config.preprocessorConfig.includeStrings.add("#define __declspec(x)\n");
 			
 			//http://support.microsoft.com/kb/65472
-			config.preprocessorConfig.macros.put("_CHAR_UNSIGNED", null);
+			config.preprocessorConfig.implicitMacros.put("_CHAR_UNSIGNED", null);
 			
-			config.preprocessorConfig.macros.put("WIN32_LEAN_AND_MEAN", null);
+			config.preprocessorConfig.implicitMacros.put("WIN32_LEAN_AND_MEAN", null);
 			
 			// http://msdn.microsoft.com/en-us/library/dh8che7s(VS.80).aspx
-			config.preprocessorConfig.macros.put("_WCHAR_T_DEFINED", null);
-			config.preprocessorConfig.macros.put("_NATIVE_WCHAR_T_DEFINED", null);
+			config.preprocessorConfig.implicitMacros.put("_WCHAR_T_DEFINED", null);
+			config.preprocessorConfig.implicitMacros.put("_NATIVE_WCHAR_T_DEFINED", null);
 			
 			defaultMacro(config, "_MSC_VER", "1100");
 			defaultMacro(config, "WINAPI", "__stdcall");
@@ -301,7 +301,7 @@ public class JNAeratorConfigUtils {
 				
 			};
 
-            //config.preprocessorConfig.macros.put("")
+            //config.preprocessorConfig.implicitMacros.put("")
 			//_CPPRTTI
 			//_DLL
 			//_M_IX86
@@ -309,15 +309,15 @@ public class JNAeratorConfigUtils {
 			//_CPPUNWIND
 			
 		} else {
-            config.preprocessorConfig.macros.put("__GNUC__", null);
+            config.preprocessorConfig.implicitMacros.put("__GNUC__", null);
 			
 			if (SystemUtils.isMacOSX()) {
-				config.preprocessorConfig.macros.put("TARGET_API_MAC_OSX", null);
-				config.preprocessorConfig.macros.put("__APPLE_CPP__", null);
-				config.preprocessorConfig.macros.put("__APPLE_CC__", null);
-//				config.preprocessorConfig.macros.put("FUNCTION_PASCAL", "0");
-//				config.preprocessorConfig.macros.put("FUNCTION_DECLSPEC", "1");
-//				config.preprocessorConfig.macros.put("FUNCTION_WIN32CC", "1");
+				config.preprocessorConfig.implicitMacros.put("TARGET_API_MAC_OSX", null);
+				config.preprocessorConfig.implicitMacros.put("__APPLE_CPP__", null);
+				config.preprocessorConfig.implicitMacros.put("__APPLE_CC__", null);
+//				config.preprocessorConfig.implicitMacros.put("FUNCTION_PASCAL", "0");
+//				config.preprocessorConfig.implicitMacros.put("FUNCTION_DECLSPEC", "1");
+//				config.preprocessorConfig.implicitMacros.put("FUNCTION_WIN32CC", "1");
 				
 			}
 			
@@ -356,37 +356,37 @@ public class JNAeratorConfigUtils {
 			System.out.println("os.arch = " + arch);
 		
 		//protect us from inline assembly in VC++:
-		//config.preprocessorConfig.macros.put("_M_CEE_PURE", null);
+		//config.preprocessorConfig.implicitMacros.put("_M_CEE_PURE", null);
 		
 		if (arch.equals("x86_64") || arch.equals("amd64")) {
-			config.preprocessorConfig.macros.put("TARGET_CPU_X86_64", null);
-			config.preprocessorConfig.macros.put("__i386__", null);
-			config.preprocessorConfig.macros.put("__x86_64__", null);
-			config.preprocessorConfig.macros.put("__amd64__", null);
-			config.preprocessorConfig.macros.put("__LITTLE_ENDIAN__", null);
-			config.preprocessorConfig.macros.put("M_I86", "1");
-			config.preprocessorConfig.macros.put("_M_I86", "1");
-			config.preprocessorConfig.macros.put("_WIN32", "1");
-//			config.preprocessorConfig.macros.put("M_X64", "1");
-//			config.preprocessorConfig.macros.put("_M_X64", "1");
-//			config.preprocessorConfig.macros.put("_WIN64", "1");
+			config.preprocessorConfig.implicitMacros.put("TARGET_CPU_X86_64", null);
+			config.preprocessorConfig.implicitMacros.put("__i386__", null);
+			config.preprocessorConfig.implicitMacros.put("__x86_64__", null);
+			config.preprocessorConfig.implicitMacros.put("__amd64__", null);
+			config.preprocessorConfig.implicitMacros.put("__LITTLE_ENDIAN__", null);
+			config.preprocessorConfig.implicitMacros.put("M_I86", "1");
+			config.preprocessorConfig.implicitMacros.put("_M_I86", "1");
+			config.preprocessorConfig.implicitMacros.put("_WIN32", "1");
+//			config.preprocessorConfig.implicitMacros.put("M_X64", "1");
+//			config.preprocessorConfig.implicitMacros.put("_M_X64", "1");
+//			config.preprocessorConfig.implicitMacros.put("_WIN64", "1");
 		} else if (arch.equals("i386") || arch.equals("x86")) {
-			config.preprocessorConfig.macros.put("TARGET_CPU_X86", null);
-			config.preprocessorConfig.macros.put("__i386__", null);
-			config.preprocessorConfig.macros.put("__LITTLE_ENDIAN__", null);
-			config.preprocessorConfig.macros.put("M_I86", "1");
-			config.preprocessorConfig.macros.put("_M_I86", "1");
-			config.preprocessorConfig.macros.put("_WIN32", "1");
+			config.preprocessorConfig.implicitMacros.put("TARGET_CPU_X86", null);
+			config.preprocessorConfig.implicitMacros.put("__i386__", null);
+			config.preprocessorConfig.implicitMacros.put("__LITTLE_ENDIAN__", null);
+			config.preprocessorConfig.implicitMacros.put("M_I86", "1");
+			config.preprocessorConfig.implicitMacros.put("_M_I86", "1");
+			config.preprocessorConfig.implicitMacros.put("_WIN32", "1");
 		} else if (arch.equals("ppc")) {
-			config.preprocessorConfig.macros.put("TARGET_CPU_PPC", null);
-			config.preprocessorConfig.macros.put("__PPC__", null);
-			config.preprocessorConfig.macros.put("__powerpc__", null);
-			config.preprocessorConfig.macros.put("__BIG_ENDIAN__", null);
+			config.preprocessorConfig.implicitMacros.put("TARGET_CPU_PPC", null);
+			config.preprocessorConfig.implicitMacros.put("__PPC__", null);
+			config.preprocessorConfig.implicitMacros.put("__powerpc__", null);
+			config.preprocessorConfig.implicitMacros.put("__BIG_ENDIAN__", null);
 		} else if (arch.equals("ppc64")) {
-			config.preprocessorConfig.macros.put("TARGET_CPU_PPC64", null);
-			config.preprocessorConfig.macros.put("__PPC_64__", null);
-//			config.preprocessorConfig.macros.put("__powerpc64__", null);
-			config.preprocessorConfig.macros.put("__BIG_ENDIAN__", null);
+			config.preprocessorConfig.implicitMacros.put("TARGET_CPU_PPC64", null);
+			config.preprocessorConfig.implicitMacros.put("__PPC_64__", null);
+//			config.preprocessorConfig.implicitMacros.put("__powerpc64__", null);
+			config.preprocessorConfig.implicitMacros.put("__BIG_ENDIAN__", null);
 		} 
 		
 	}
@@ -401,7 +401,7 @@ public class JNAeratorConfigUtils {
 			
 			for (String include : VisualStudioUtils.getMicrosoftIncludes()) {
 				include = new File(include).getCanonicalPath();
-				config.preprocessorConfig.includes.add(include);
+				config.preprocessorConfig.implicitIncludes.add(include);
 				if (!include.endsWith(File.separator))
 					include = include + File.separator;
 				config.rootDirectoriesPrefixesForSourceComments.add(include);
@@ -429,13 +429,13 @@ public class JNAeratorConfigUtils {
 				if (configuration != null) {
 					System.out.println("preprocessorDefinitions : " + configuration.preprocessorDefinitions);
 					for (String def : configuration.preprocessorDefinitions)
-						config.preprocessorConfig.macros.put(def, "");
+						config.preprocessorConfig.implicitMacros.put(def, "");
 				}
 				for (File file : project.files) {
 					try {
 						file = file.getCanonicalFile();
 						System.out.println(file + "\n\t-> " + libraryFile);
-						config.addSourceFile(file, libraryFile, false, true);
+						config.addSourceFile(file, libraryFile, false, true, true);
 						
 						//config.preprocessorConfig
 						//config.libraryByFile.put(file, libraryFile)
@@ -445,10 +445,10 @@ public class JNAeratorConfigUtils {
 				}
 			}
 			
-			if (config.preprocessorConfig.macros.containsKey("WIN32") || config.preprocessorConfig.macros.containsKey("_WIN32"))
-				config.preprocessorConfig.macros.put("_M_IX86", "");
-			else if (config.preprocessorConfig.macros.containsKey("WIN64") || config.preprocessorConfig.macros.containsKey("_WIN64"))
-				config.preprocessorConfig.macros.put("_M_AMD64", "");
+			if (config.preprocessorConfig.implicitMacros.containsKey("WIN32") || config.preprocessorConfig.implicitMacros.containsKey("_WIN32"))
+				config.preprocessorConfig.implicitMacros.put("_M_IX86", "");
+			else if (config.preprocessorConfig.implicitMacros.containsKey("WIN64") || config.preprocessorConfig.implicitMacros.containsKey("_WIN64"))
+				config.preprocessorConfig.implicitMacros.put("_M_AMD64", "");
 			
 		}
 	}
@@ -468,10 +468,12 @@ public class JNAeratorConfigUtils {
 		if (!file.exists())
 			throw new IOException("Could not find framework '" + framework + "' in path " + config.preprocessorConfig.frameworksPath);
 
+                config.frameworks.add(framework);
+		
 		File headers = new File(file, "Headers");
 		if (headers.exists()) {
-			config.preprocessorConfig.includes.add(headers.getAbsolutePath());
-			config.addSourceFile(headers, framework, true, true);
+			config.preprocessorConfig.implicitIncludes.add(headers.getAbsolutePath());
+			config.addSourceFile(headers, framework, true, true, false);
 		} else
 			new IOException("No Headers subdirectory in framework '" + framework + "' found here : " + file).printStackTrace();
 		
@@ -481,7 +483,7 @@ public class JNAeratorConfigUtils {
 		if (!f.exists())
 			f = new File(naturalDir, framework + "Full.bridgesupport");
 		
-		if (f.exists())
+                if (f.exists())
 			config.bridgeSupportFiles.add(f);
 	}
 

@@ -194,6 +194,7 @@ public class JNAeratorCommandLineArgs {
 		Runtime(            "-runtime",             "Choose target runtime library between " + StringUtils.implode(JNAeratorConfig.Runtime.values(), ", ") + " (default: " + JNAeratorConfig.Runtime.DEFAULT + ").", new ArgDef(Type.Enum, "enum", JNAeratorConfig.Runtime.class)),
         IfRegexMatch(		"-ifRegexMatch",		"Conditional evaluation of an argument if a java system property matches a regular expression", new ArgDef(Type.String, "javaProperty"), new ArgDef(Type.String, "regex"), new ArgDef(Type.String, "thenArg"), new ArgDef(Type.String, "elseArg")),
 		DefineMacro(		"-D([^=]*)(?:=(.*))?", 	"Define a macro symbol", new ArgDef(Type.String, "name"), new ArgDef(Type.String, "value")),
+		DefineImplicitMacro(    "-M([^=]*)(?:=(.*))?", 	"Define an implicit macro symbol, as if it were added by the system (won't count as an explicit macro when generating GYP files and other build artifacts)", new ArgDef(Type.String, "name"), new ArgDef(Type.String, "value")),
 		DefineType(         "-T([^=]*)(?:=(.*))?", 	"Define a type symbol", new ArgDef(Type.String, "name"), new ArgDef(Type.String, "value")),
 		NoAutoImports(      "-noAutoImport",        "Don't add import statements automatically to output java source files"),
         RootPackage(		"-root(?:Package)?", 	"Define the root package for all output classes", new ArgDef(Type.String, "package")),

@@ -18,9 +18,15 @@
 */
 package com.ochafik.lang.jnaerator;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 
-public interface ClassOutputter {
-	public PrintWriter getClassSourceWriter(String className) throws IOException;
+public abstract class ClassOutputter {
+        public PrintWriter getClassSourceWriter(String className) throws IOException {
+            String path = className.replace('.', '/') + ".java";
+            return getSourceWriter(path);
+        }
+
+	public abstract PrintWriter getSourceWriter(String path) throws IOException;
 }
