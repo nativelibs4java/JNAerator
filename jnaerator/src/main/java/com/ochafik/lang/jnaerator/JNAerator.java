@@ -518,7 +518,7 @@ public class JNAerator {
                             config.verbose = true;
                             break;
                         case Framework:
-                            config.frameworks.add(a.getStringParam(0));
+                            config.addFramework(a.getStringParam(0));
                             break;
                         case IncludeArgs:
                             return parsedArgsInclude(a);
@@ -565,7 +565,7 @@ public class JNAerator {
                         } else {
                             parsedArgs.add(Pair.create(OptionDef.File, Arrays.asList(a.getFileParam(0).toString())));
                             if (file.isDirectory() && fn.matches(".*\\.framework")) {
-                                config.frameworks.add(file.toString());
+                                config.addFramework(file.toString());
                             } else if (fn.matches(".*\\.bridgesupport")) {
                                 config.bridgeSupportFiles.add(file);
                             } else if (file.isFile() && isLibraryFile(file)) {
@@ -679,7 +679,7 @@ public class JNAerator {
                     config.parsedArgs = parsedArgs;
 
                     for (String framework : config.frameworks) {
-                        JNAeratorConfigUtils.addFramework(config, framework);
+                        
                     }
 
                     config.addRootDir(new File("."));

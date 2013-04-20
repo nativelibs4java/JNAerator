@@ -354,12 +354,13 @@ public class JNAeratorConfig {
         public final List<String> frameworksPath = new ArrayList<String>();
         public List<String> includeStrings = new ArrayList<String>();
         public boolean preprocess = true;
-        
+
         public List<String> getAllIncludes() {
             List<String> list = new ArrayList<String>(explicitIncludes);
             list.addAll(implicitIncludes);
             return Collections.unmodifiableList(list);
         }
+
         public Map<String, String> getAllMacros() {
             Map<String, String> macros = new LinkedHashMap<String, String>();
             macros.putAll(implicitMacros);
@@ -400,6 +401,34 @@ public class JNAeratorConfig {
     public final Map<File, String> libraryByDirectory = new HashMap<File, String>();
     public Map<File, String> libraryByFile = new LinkedHashMap<File, String>();
 
+    public void addFramework(String framework) throws IOException {
+        File file = JNAeratorConfigUtils.getFrameworkDirectory(framework, preprocessorConfig.frameworksPath);
+        frameworks.add(framework);
+
+        File headers = new File(file, "Headers");
+        if (headers.exists()) {
+            preprocessorConfig.implicitIncludes.add(headers.getAbsolutePath());
+            File mainHeader = new File(headers, framework + ".h");
+            if (mainHeader.exists())
+                addSourceFile(mainHeader, framework, true, true, false);
+            else
+                addSourceFile(headers, framework, true, true, false);
+        } else {
+            new IOException("No Headers subdirectory in framework '" + framework + "' found here : " + file).printStackTrace();
+        }
+
+        File naturalDir = new File(file, "Resources/BridgeSupport");
+        File f;
+        f = new File(naturalDir, framework + ".bridgesupport");
+        if (!f.exists()) {
+            f = new File(naturalDir, framework + "Full.bridgesupport");
+        }
+
+        if (f.exists()) {
+            bridgeSupportFiles.add(f);
+        }
+    }
+
     public void addLibraryFile(File file, NativePlatform arch) {
 
         List<File> others = libraryFilesByArch.get(arch);
@@ -438,8 +467,9 @@ public class JNAeratorConfig {
                 }
                 if (library != null && indexSourceFilesByLibrary) {
                     List<File> files = sourceFilesByLibrary.get(library);
-                    if (files == null)
+                    if (files == null) {
                         sourceFilesByLibrary.put(library, files = new ArrayList<File>());
+                    }
                     files.add(file);
                 }
             }

@@ -31,11 +31,13 @@ import com.ochafik.lang.jnaerator.parser.Element;
 import com.ochafik.lang.jnaerator.parser.ElementsHelper;
 import com.ochafik.lang.jnaerator.parser.Expression.BinaryOperator;
 import com.ochafik.lang.jnaerator.parser.Expression.UnaryOperator;
+import com.ochafik.lang.jnaerator.parser.Identifier.QualificationSeparator;
 import com.ochafik.lang.jnaerator.parser.Statement;
 import com.ochafik.lang.jnaerator.parser.Statement.Block;
 import com.ochafik.lang.jnaerator.parser.Statement.If;
 import com.ochafik.lang.jnaerator.parser.Statement.Return;
 import java.io.File;
+import org.bridj.demangling.Demangler;
 
 /**
  *
@@ -78,11 +80,14 @@ public class NodeJSDeclarationsConverter extends DeclarationsConverter {
     static Expression arrowMethodCall(Expression target, String name, Expression... args) {
         return methodCall(target, Expression.MemberRefStyle.Arrow, name, args);
     }
+    
+    static final String argsName = "_arguments_";
+    
     @Override
     protected void convertFunction(Function function, Signatures signatures, boolean callback, DeclarationsHolder objOut, Identifier libraryClassName, String sig, Identifier functionName, String library, int iConstructor) {
         String methodName = library + "_" + (function.getParentElement() instanceof Struct ? ((Struct)function.getParentElement()).getTag() + "_" : "") + function.getName();
         Function method = new Function(Function.Type.CppMethod, ident(methodName), typeRef(v8Ident("Handle", v8Ident("Value"))));
-        method.addArg(new Arg("args", new TypeRef.Pointer(typeRef(v8Ident("Arguments")), Declarator.PointerStyle.Reference).addModifiers(ModifierType.Const)));
+        method.addArg(new Arg(argsName, new TypeRef.Pointer(typeRef(v8Ident("Arguments")), Declarator.PointerStyle.Reference).addModifiers(ModifierType.Const)));
         Block body = new Block();
         
         //if (args.Length() != 4) {
@@ -91,7 +96,7 @@ public class NodeJSDeclarationsConverter extends DeclarationsConverter {
         int argCount = args.size();
         body.addStatement(
             new If(
-                expr(methodCall(varRef("args"), "Length"), BinaryOperator.IsDifferent, expr(argCount)),
+                expr(methodCall(varRef(argsName), "Length"), BinaryOperator.IsDifferent, expr(argCount)),
                 new Return(
                     methodCall(v8Ident("ThrowException"), 
                         newV8String(functionName + "() requires " + argCount + " arguments!")))
@@ -101,10 +106,13 @@ public class NodeJSDeclarationsConverter extends DeclarationsConverter {
         List<Expression> params = new ArrayList<Expression>();
         for (int iArg = 0; iArg < argCount; iArg++) {
             Arg arg = args.get(iArg);
+            if (arg.isVarArg())
+                throw new UnsupportedConversionException(function, "varargs not supported yet");
+            
             TypeRef tr = result.typeConverter.resolveTypeDef(arg.getValueType(), null, false, false);
             Expression typeTest = null;
             String typeErrorMessage = null;
-            Expression argExpr = new Expression.ArrayAccess(varRef("args"), expr(iArg));
+            Expression argExpr = new Expression.ArrayAccess(varRef(argsName), expr(iArg));
             Expression argDeclExpr = null;
             TypeRef argType = null;
             Expression argUsageExpr = null;
@@ -116,12 +124,17 @@ public class NodeJSDeclarationsConverter extends DeclarationsConverter {
                     typeErrorMessage = "expected a String";
                     argDeclExpr = arrowMethodCall(argExpr.clone(), "ToString");
                     argType = typeRef(v8Ident("Handle", v8Ident("String")));
-                    argUsageExpr = cast(arg.getValueType().clone(), 
+                    argUsageExpr = cast(transformTypeForCast(arg.getValueType()), 
                         expr(UnaryOperator.Dereference, 
                             methodCall(ident("v8", "String", "AsciiValue"),
                                 varRef(arg.getName()))));
                 } else {
-                    // TODO: use Buffer + ref module
+                    typeTest = methodCall(ident("node", "Buffer", "HasInstance"), argExpr);
+                    typeErrorMessage = "expected a Buffer";
+                    argDeclExpr = methodCall(ident("node", "Buffer", "Data"), 
+                        methodCall(argExpr.clone(), Expression.MemberRefStyle.Dot, templateIdent(ident("As"), varRef(v8Ident("Object")))));
+                    argType = new TypeRef.Pointer(typeRef(ident("char")), Declarator.PointerStyle.Pointer);
+                    argUsageExpr = cast(transformTypeForCast(arg.getValueType()), varRef(arg.getName()));
                 }
             } else if (tr instanceof TypeRef.Primitive) {
                 String t;
@@ -137,6 +150,9 @@ public class NodeJSDeclarationsConverter extends DeclarationsConverter {
                 argUsageExpr = cast(arg.getValueType().clone(), arrowMethodCall(expr(UnaryOperator.Dereference, varRef(arg.getName())), "Value"));
             } else if (tr instanceof TypeRef.SimpleTypeRef) {
                 // TODO
+                TypeRef.SimpleTypeRef str = (TypeRef.SimpleTypeRef) tr;
+                if (str.getName().toString().equals("va_list"))
+                    throw new UnsupportedConversionException(function, "va_list not supported yet");
             }
             
             if (typeTest != null) {
@@ -159,6 +175,7 @@ public class NodeJSDeclarationsConverter extends DeclarationsConverter {
         }
         Expression call = methodCall(function.getName(), params.toArray(new Expression[params.size()]));
         body.addStatement(stat(call));
+        body.addStatement(new Return(methodCall(v8Ident("Handle", v8Ident("Value")))));
         method.setBody(body);
         
         objOut.addDeclaration(method);
@@ -167,6 +184,13 @@ public class NodeJSDeclarationsConverter extends DeclarationsConverter {
         initBlock.addStatement(stat(methodCall("NODE_SET_METHOD", varRef("target"), expr(functionName.toString()), varRef(methodName))));
     }
 
+    private TypeRef transformTypeForCast(TypeRef tr) {
+        if (tr instanceof TypeRef.TargettedTypeRef) {
+            TypeRef.TargettedTypeRef ttr = (TypeRef.TargettedTypeRef) tr;
+            return new TypeRef.Pointer(transformTypeForCast(ttr.getTarget()), Declarator.PointerStyle.Pointer);
+        }
+        return tr.clone();
+    }
     @Override
     protected Struct createFakePointerClass(Identifier fakePointer) {
         return null;
@@ -216,11 +240,16 @@ public class NodeJSDeclarationsConverter extends DeclarationsConverter {
             //out.println("///\n/// This file was autogenerated by JNAerator (http://jnaerator.googlecode.com/), \n/// a tool written by Olivier Chafik (http://ochafik.com/).\n///");
             SourceFile sourceFile = new SourceFile();
             sourceFile.setElementFile(sourcePath);
-            sourceFile.addDeclaration(new Include(Include.Type.CInclude, "v8.h"));
-            sourceFile.addDeclaration(new Include(Include.Type.CInclude, "node.h"));
-            if (isFramework) {
-                sourceFile.addDeclaration(new Include(Include.Type.ObjCImport, library + "/" + library + ".h"));
-            } else {
+            for (String inc : new String[] { "v8.h", "node.h", "node_buffer.h" }) {
+                sourceFile.addDeclaration(new Include(Include.Type.CInclude, inc));
+            }
+            if (!isFramework) {
+//                File dir = JNAeratorConfigUtils.getFrameworkHeaderDirectory(library, config.preprocessorConfig.frameworksPath);
+//                for (File file : dir.listFiles()) {
+//                    if (file.getName().matches("(?i).*?\\.h(pp|xx)?"))
+//                        sourceFile.addDeclaration(new Include(Include.Type.ObjCImport, library + "/" + file.getName()));
+//                }
+//            } else {
                 List<File> librarySourceFiles = config.sourceFilesByLibrary.get(library);
                 if (librarySourceFiles != null) {
                     for (File file : librarySourceFiles) {
@@ -228,6 +257,13 @@ public class NodeJSDeclarationsConverter extends DeclarationsConverter {
                     }
                 }
             }
+            for (String otherFramework : config.frameworks) {
+//                if (library.equals(otherFramework)) {
+//                    continue;
+//                }
+                sourceFile.addDeclaration(new Include(Include.Type.ObjCImport, otherFramework + "/" + otherFramework + ".h"));
+            }
+            
             
             String initFunctionName = library + "_init";
             Function initMethod = new Function(Function.Type.CppMethod, ident(initFunctionName), typeRef(void.class));

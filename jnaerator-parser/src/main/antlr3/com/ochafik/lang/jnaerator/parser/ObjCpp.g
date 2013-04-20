@@ -1562,6 +1562,9 @@ scope ModifierKinds;
 			
 		} )?
 		(
+		  { next("va_list") }?=> i=IDENTIFIER {
+		    $type = new SimpleTypeRef($i.text); 
+      } |
 			'typename' pn=typeName { $type = $pn.type; } |
 			{ 
 				next(2, "<") ||
