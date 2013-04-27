@@ -82,7 +82,40 @@ public class NodeJSDeclarationsConverter extends DeclarationsConverter {
     }
     
     static final String argsName = "_arguments_";
+    static final String returnValueName = "_return_";
+    static final String scopeName = "_scope_";
     
+    private enum NodeType {
+        Pointer, String, Number, Boolean, VAList, Unknown, Void
+    };
+    private TypeRef resolveTypeDef(TypeRef typeRef) {
+        TypeRef tr = result.typeConverter.resolveTypeDef(typeRef, null, false, false);
+        return tr;
+    }
+    private NodeType getNodeType(TypeRef tr) {
+        if (tr instanceof TypeRef.TargettedTypeRef) {
+            TypeRef.TargettedTypeRef ttr = (TypeRef.TargettedTypeRef) tr;
+
+            if (ttr.getTarget().toString().matches("(const\\s+)?char")) {
+                return NodeType.String;
+            } else {
+                return NodeType.Pointer;
+            }
+        } else if (tr instanceof TypeRef.SimpleTypeRef) {
+            TypeRef.SimpleTypeRef str = (TypeRef.SimpleTypeRef) tr;
+            String n = str + "";//strstr.getName().toString();
+            if (n.matches("bool|BOOL")) {
+                return NodeType.Boolean;
+            } else if (n.matches("void")) {
+                return NodeType.Void;
+            } else if (n.equals("va_list")) {
+                return NodeType.VAList;
+            } else {
+                return NodeType.Number;
+            }
+        }
+        return NodeType.Unknown;
+    }
     @Override
     protected void convertFunction(Function function, Signatures signatures, boolean callback, DeclarationsHolder objOut, Identifier libraryClassName, String sig, Identifier functionName, String library, int iConstructor) {
         String methodName = library + "_" + (function.getParentElement() instanceof Struct ? ((Struct)function.getParentElement()).getTag() + "_" : "") + function.getName();
@@ -109,17 +142,16 @@ public class NodeJSDeclarationsConverter extends DeclarationsConverter {
             if (arg.isVarArg())
                 throw new UnsupportedConversionException(function, "varargs not supported yet");
             
-            TypeRef tr = result.typeConverter.resolveTypeDef(arg.getValueType(), null, false, false);
+            TypeRef tr = resolveTypeDef(arg.getValueType());
+            NodeType argNodeType = getNodeType(tr);
             Expression typeTest = null;
             String typeErrorMessage = null;
             Expression argExpr = new Expression.ArrayAccess(varRef(argsName), expr(iArg));
             Expression argDeclExpr = null;
             TypeRef argType = null;
             Expression argUsageExpr = null;
-            if (tr instanceof TypeRef.TargettedTypeRef) {
-                TypeRef.TargettedTypeRef ttr = (TypeRef.TargettedTypeRef) tr;
-                
-                if (ttr.getTarget().toString().matches("(const\\s+)?char")) {
+            switch (argNodeType) {
+                case String:
                     typeTest = arrowMethodCall(argExpr, "IsString");
                     typeErrorMessage = "expected a String";
                     argDeclExpr = arrowMethodCall(argExpr.clone(), "ToString");
@@ -128,31 +160,29 @@ public class NodeJSDeclarationsConverter extends DeclarationsConverter {
                         expr(UnaryOperator.Dereference, 
                             methodCall(ident("v8", "String", "AsciiValue"),
                                 varRef(arg.getName()))));
-                } else {
+                    break;
+                case Pointer:
                     typeTest = methodCall(ident("node", "Buffer", "HasInstance"), argExpr);
                     typeErrorMessage = "expected a Buffer";
                     argDeclExpr = methodCall(ident("node", "Buffer", "Data"), 
                         methodCall(argExpr.clone(), Expression.MemberRefStyle.Dot, templateIdent(ident("As"), varRef(v8Ident("Object")))));
                     argType = new TypeRef.Pointer(typeRef(ident("char")), Declarator.PointerStyle.Pointer);
                     argUsageExpr = cast(transformTypeForCast(arg.getValueType()), varRef(arg.getName()));
-                }
-            } else if (tr instanceof TypeRef.Primitive) {
-                String t;
-                if (tr.toString().matches("bool|BOOL")) {
-                    t = "Boolean";
-                } else {
-                    t = "Number";
-                }
-                typeTest = arrowMethodCall(argExpr, "Is" + t);
-                typeErrorMessage = "expected a " + t;
-                argDeclExpr = arrowMethodCall(argExpr.clone(), "To" + t);
-                argType = typeRef(v8Ident("Handle", v8Ident(t)));
-                argUsageExpr = cast(arg.getValueType().clone(), arrowMethodCall(expr(UnaryOperator.Dereference, varRef(arg.getName())), "Value"));
-            } else if (tr instanceof TypeRef.SimpleTypeRef) {
-                // TODO
-                TypeRef.SimpleTypeRef str = (TypeRef.SimpleTypeRef) tr;
-                if (str.getName().toString().equals("va_list"))
+                    break;
+                case Boolean:
+                case Number:
+                    String t = argNodeType.name();
+                    typeTest = arrowMethodCall(argExpr, "Is" + t);
+                    typeErrorMessage = "expected a " + t;
+                    argDeclExpr = arrowMethodCall(argExpr.clone(), "To" + t);
+                    argType = typeRef(v8Ident("Handle", v8Ident(t)));
+                    argUsageExpr = cast(arg.getValueType().clone(), arrowMethodCall(expr(UnaryOperator.Dereference, varRef(arg.getName())), "Value"));
+                    break;
+                case VAList:
                     throw new UnsupportedConversionException(function, "va_list not supported yet");
+                case Unknown:
+                case Void:
+                    throw new UnsupportedConversionException(arg, "Cannot convert arguments of type " + tr);
             }
             
             if (typeTest != null) {
@@ -164,8 +194,6 @@ public class NodeJSDeclarationsConverter extends DeclarationsConverter {
                                 methodCall(ident("v8", "Exception", "TypeError"),
                                     newV8String("Invalid value for argument '" + arg.getName() + "'" + (typeErrorMessage == null ? "" : ": " + typeErrorMessage)))))));
             }
-            if (argUsageExpr == null)
-                throw new UnsupportedConversionException(arg, "Cannot convert arguments of type " + tr);
             
             if (argDeclExpr != null)
                 body.addStatement(stat(new VariablesDeclaration(argType, new Declarator.DirectDeclarator(arg.getName(), argDeclExpr))));
@@ -173,9 +201,43 @@ public class NodeJSDeclarationsConverter extends DeclarationsConverter {
             if (argUsageExpr != null)
                 params.add(argUsageExpr);
         }
+        
+        TypeRef retTr = resolveTypeDef(function.getValueType());
+        NodeType retNodeType = getNodeType(retTr);
+        body.addStatement(new VariablesDeclaration(typeRef(v8Ident("HandleScope")), new Declarator.DirectDeclarator(scopeName)));
         Expression call = methodCall(function.getName(), params.toArray(new Expression[params.size()]));
-        body.addStatement(stat(call));
-        body.addStatement(new Return(methodCall(v8Ident("Handle", v8Ident("Value")))));
+        if (retNodeType == NodeType.Void) {
+            body.addStatement(stat(call));
+        } else {
+            VariablesDeclaration retDecl = new VariablesDeclaration(function.getValueType().clone(), new Declarator.DirectDeclarator(returnValueName, call));
+            body.addStatement(retDecl);
+        
+        }
+        Expression retExpr;
+        switch (retNodeType) {
+            case Number:
+                retExpr = methodCall(ident("v8", "Number", "New"), varRef(returnValueName));
+                break;
+            case Boolean:
+                retExpr = methodCall(ident("v8", "Boolean", "New"), varRef(returnValueName));
+                break;
+            case Pointer:
+                // TODO: add pointer validity info.
+                retExpr = 
+                    memberRef(
+                        methodCall(ident("node", "Buffer", "New"), 
+                            cast(new TypeRef.Pointer(typeRef("char"), Declarator.PointerStyle.Pointer), varRef(returnValueName)), 
+                            expr(0)),
+                        Expression.MemberRefStyle.Arrow,
+                        "handle_");
+                break;
+            case Void:
+                retExpr = methodCall(v8Ident("Undefined"));
+                break;
+            default:
+                throw new UnsupportedConversionException(function, "Return type not handled: " + retTr + " (" + retNodeType + ")");
+        }
+        body.addStatement(new Return(methodCall(varRef(scopeName), Expression.MemberRefStyle.Dot, "Close", retExpr)));
         method.setBody(body);
         
         objOut.addDeclaration(method);
@@ -244,12 +306,6 @@ public class NodeJSDeclarationsConverter extends DeclarationsConverter {
                 sourceFile.addDeclaration(new Include(Include.Type.CInclude, inc));
             }
             if (!isFramework) {
-//                File dir = JNAeratorConfigUtils.getFrameworkHeaderDirectory(library, config.preprocessorConfig.frameworksPath);
-//                for (File file : dir.listFiles()) {
-//                    if (file.getName().matches("(?i).*?\\.h(pp|xx)?"))
-//                        sourceFile.addDeclaration(new Include(Include.Type.ObjCImport, library + "/" + file.getName()));
-//                }
-//            } else {
                 List<File> librarySourceFiles = config.sourceFilesByLibrary.get(library);
                 if (librarySourceFiles != null) {
                     for (File file : librarySourceFiles) {
@@ -258,9 +314,6 @@ public class NodeJSDeclarationsConverter extends DeclarationsConverter {
                 }
             }
             for (String otherFramework : config.frameworks) {
-//                if (library.equals(otherFramework)) {
-//                    continue;
-//                }
                 sourceFile.addDeclaration(new Include(Include.Type.ObjCImport, otherFramework + "/" + otherFramework + ".h"));
             }
             
