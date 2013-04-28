@@ -217,7 +217,7 @@ public class ElementsHelper {
     }
 
     public static Expression expr(Expression a, AssignmentOperator op, Expression b) {
-        return new AssignmentOp(a, op, b).setParenthesis(true);
+        return new AssignmentOp(a, op, b);
     }
 
     @SuppressWarnings("unchecked")
