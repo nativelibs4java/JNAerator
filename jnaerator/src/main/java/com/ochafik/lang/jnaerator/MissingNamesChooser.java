@@ -41,6 +41,7 @@ import java.util.*;
 
 public class MissingNamesChooser extends Scanner {
 
+    final boolean renameFunctionSignatures;
     public static boolean isNamedFunctionType(TypeRef tr) {
         if (!(tr instanceof FunctionSignature))
             return false;
@@ -55,8 +56,9 @@ public class MissingNamesChooser extends Scanner {
 	}
 	NameGenerationStyle nameGenerationStyle = NameGenerationStyle.PreserveCaseAndSeparateByUnderscores;
 	Result result;
-	public MissingNamesChooser(Result result) {
+	public MissingNamesChooser(Result result, boolean renameFunctionSignatures) {
 		this.result = result;
+                this.renameFunctionSignatures = renameFunctionSignatures;
 	}
 
 	public void setNameGenerationStyle(NameGenerationStyle nameGenerationStyle) {
@@ -134,8 +136,21 @@ public class MissingNamesChooser extends Scanner {
 	
 	@Override
 	public void visitFunctionSignature(FunctionSignature functionSignature) {
-		Identifier origName = functionSignature.getFunction() == null ? null : functionSignature.getFunction().getName();
-		if (!chooseNameIfMissing(functionSignature))
+            Identifier origName = functionSignature.getFunction() == null ? null : functionSignature.getFunction().getName();
+		
+            if (!renameFunctionSignatures) {
+                super.visitFunctionSignature(functionSignature);
+                if (functionSignature.getParentElement() instanceof Arg) {
+                    Arg arg = (Arg) functionSignature.getParentElement();
+                    if (arg.getName() == null) {
+                        arg.setName(origName.toString());
+                        functionSignature.getFunction().setName(null);
+                    }
+                }
+                return;
+            }
+		
+                if (!chooseNameIfMissing(functionSignature))
 			super.visitFunctionSignature(functionSignature);
 		
 		DeclarationsHolder holder = functionSignature.findParentOfType(DeclarationsHolder.class);

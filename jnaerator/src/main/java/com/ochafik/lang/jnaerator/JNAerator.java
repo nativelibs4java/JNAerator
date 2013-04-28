@@ -1343,7 +1343,7 @@ public class JNAerator {
         sourceFiles.accept(new CToJavaPreScanner());
 
         /// Give sensible names to anonymous function signatures, structs, enums, unions, and move them up one level as typedefs
-        sourceFiles.accept(new MissingNamesChooser(result));
+        sourceFiles.accept(new MissingNamesChooser(result, config.runtime.renameFunctionSignatures()));
 
         /// Move storage modifiers up to the storage
         sourceFiles.accept(new Scanner() {

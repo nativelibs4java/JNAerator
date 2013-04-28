@@ -191,8 +191,17 @@ public class JNAeratorConfig {
             public String generateMavenProjectModel(String groupId, String artifactId, String version) throws IOException {
                 return "TODO"; // use antrun, or don't even bother?
             }
+
+            @Override
+            public boolean renameFunctionSignatures() {
+                return false;
+            }
         };
         public static final Runtime DEFAULT = BridJ;//JNAerator;
+
+        public boolean renameFunctionSignatures() {
+            return true;
+        }
 
         public enum Ann {
 

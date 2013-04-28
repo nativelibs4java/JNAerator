@@ -174,7 +174,8 @@ public class NodeJSDeclarationsConverter extends DeclarationsConverter {
             } else {
                 return NodeType.Number;
             }
-        }
+        } else if (tr instanceof TypeRef.FunctionSignature)
+            return NodeType.Pointer;
         return NodeType.Unknown;
     }
     @Override
