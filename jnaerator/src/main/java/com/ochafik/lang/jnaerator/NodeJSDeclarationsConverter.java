@@ -76,9 +76,12 @@ public class NodeJSDeclarationsConverter extends DeclarationsConverter {
 
     @Override
     protected void convertDefine(Define define, DeclarationsHolder out, Signatures signatures, Identifier libraryClassName) {
-        if (!(define.getValue() instanceof Expression.Constant))
+        Expression value = define.getValue();
+        if (value instanceof Expression.Cast)
+            value = ((Expression.Cast)value).getTarget();
+        if (!(value instanceof Expression.Constant))
             return;
-        convertConstant(define.getName(), (Expression.Constant)define.getValue(), out, signatures);
+        convertConstant(define.getName(), (Expression.Constant)value, out, signatures);
     }
 
     protected void convertConstant(String name, Expression.Constant value, DeclarationsHolder out, Signatures signatures) {
