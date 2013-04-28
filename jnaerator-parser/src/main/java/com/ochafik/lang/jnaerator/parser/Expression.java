@@ -768,6 +768,12 @@ public abstract class Expression extends Element {
 	public static class ConditionalExpression extends Expression {
 		Expression test, thenValue, elseValue;
 
+                public ConditionalExpression() {}
+                public ConditionalExpression(Expression test, Expression thenValue, Expression elseValue) {
+                    setTest(test);
+                    setThenValue(thenValue);
+                    setElseValue(elseValue);
+                }
 		public Expression getTest() {
 			return test;
 		}

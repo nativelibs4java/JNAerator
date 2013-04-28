@@ -242,36 +242,7 @@ public abstract class DeclarationsConverter {
                         continue;
                     }
 
-                    try {
-
-                        //DirectDeclarator dd = (DirectDeclarator)decl;
-                        Pair<Expression, TypeRef> val = result.typeConverter.convertExpressionToJava(decl.getDefaultValue(), libraryClassName, true);
-
-                        if (!signatures.addVariable(name)) {
-                            continue;
-                        }
-
-
-                        // TODO
-                        TypeRef tr = prim == JavaPrim.NativeLong || prim == JavaPrim.NativeSize
-                                ? typeRef("long")
-                                : primRef(prim) //result.typeConverter.convertTypeToJNA(mutatedType, TypeConversion.TypeConversionMode.FieldType, libraryClassName)
-                                ;
-                        VariablesDeclaration vd = new VariablesDeclaration(tr, new DirectDeclarator(name, val.getFirst()));
-                        if (!result.config.noComments) {
-                            vd.setCommentBefore(v.getCommentBefore());
-                            vd.addToCommentBefore(decl.getCommentBefore());
-                            vd.addToCommentBefore(decl.getCommentAfter());
-                            vd.addToCommentBefore(v.getCommentAfter());
-                        }
-
-//                        if (result.config.runtime == JNAeratorConfig.Runtime.BridJ)
-                        vd.addModifiers(ModifierType.Public, ModifierType.Static, ModifierType.Final);
-
-                        out.addDeclaration(vd);
-                    } catch (UnsupportedConversionException e) {
-                        out.addDeclaration(skipDeclaration(v, e.toString()));
-                    }
+                    convertConstant(name, prim, mutatedType, decl.getDefaultValue(), v, decl, out, signatures, libraryClassName);
 
                 }
             }
@@ -282,13 +253,7 @@ public abstract class DeclarationsConverter {
                 if (define.getValue() == null) {
                     continue;
                 }
-
-                try {
-                    //System.out.println("Define " + define.getName() + " = " + define.getValue());
-                    out.addDeclaration(outputConstant(define.getName(), define.getValue(), signatures, define.getValue(), "define", libraryClassName, true, false, false));
-                } catch (UnsupportedConversionException ex) {
-                    out.addDeclaration(skipDeclaration(define, ex.toString()));
-                }
+                convertDefine(define, out, signatures, libraryClassName);
             }
         }
         for (Map.Entry<String, String> e : constants.entrySet()) {
@@ -296,6 +261,49 @@ public abstract class DeclarationsConverter {
         }
     }
 
+    protected void convertConstant(String name, JavaPrim prim, TypeRef mutatedType, Expression defaultValue, VariablesDeclaration v, Declarator decl, DeclarationsHolder out, Signatures signatures, Identifier libraryClassName) {
+        try {
+
+            //DirectDeclarator dd = (DirectDeclarator)decl;
+            Pair<Expression, TypeRef> val = result.typeConverter.convertExpressionToJava(defaultValue, libraryClassName, true);
+
+            if (!signatures.addVariable(name)) {
+                return;
+            }
+
+
+            // TODO
+            TypeRef tr = prim == JavaPrim.NativeLong || prim == JavaPrim.NativeSize
+                    ? typeRef("long")
+                    : primRef(prim) //result.typeConverter.convertTypeToJNA(mutatedType, TypeConversion.TypeConversionMode.FieldType, libraryClassName)
+                    ;
+            VariablesDeclaration vd = new VariablesDeclaration(tr, new DirectDeclarator(name, val.getFirst()));
+            if (!result.config.noComments) {
+                vd.setCommentBefore(v.getCommentBefore());
+                vd.addToCommentBefore(decl.getCommentBefore());
+                vd.addToCommentBefore(decl.getCommentAfter());
+                vd.addToCommentBefore(v.getCommentAfter());
+            }
+
+//                        if (result.config.runtime == JNAeratorConfig.Runtime.BridJ)
+            vd.addModifiers(ModifierType.Public, ModifierType.Static, ModifierType.Final);
+
+            out.addDeclaration(vd);
+        } catch (UnsupportedConversionException e) {
+            out.addDeclaration(skipDeclaration(v, e.toString()));
+        }
+    }
+
+    protected void convertDefine(Define define, DeclarationsHolder out, Signatures signatures, Identifier libraryClassName) {
+        
+        try {
+            //System.out.println("Define " + define.getName() + " = " + define.getValue());
+            out.addDeclaration(outputConstant(define.getName(), define.getValue(), signatures, define.getValue(), "define", libraryClassName, true, false, false));
+        } catch (UnsupportedConversionException ex) {
+            out.addDeclaration(skipDeclaration(define, ex.toString()));
+        }
+    }
+    
     protected void outputNSString(String name, String value, DeclarationsHolder out, Signatures signatures, Element... elementsToTakeCommentsFrom) {
 
         if (!signatures.addVariable(name)) {

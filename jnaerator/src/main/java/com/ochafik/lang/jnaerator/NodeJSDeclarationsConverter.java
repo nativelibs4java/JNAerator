@@ -25,17 +25,20 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import static com.ochafik.lang.jnaerator.GYPUtils.*;
+import com.ochafik.lang.jnaerator.TypeConversion.JavaPrim;
 import com.ochafik.lang.jnaerator.parser.Declaration;
 import com.ochafik.lang.jnaerator.parser.Define;
 import com.ochafik.lang.jnaerator.parser.Element;
 import com.ochafik.lang.jnaerator.parser.ElementsHelper;
 import com.ochafik.lang.jnaerator.parser.Expression.BinaryOperator;
+import com.ochafik.lang.jnaerator.parser.Expression.MemberRefStyle;
 import com.ochafik.lang.jnaerator.parser.Expression.UnaryOperator;
 import com.ochafik.lang.jnaerator.parser.Identifier.QualificationSeparator;
 import com.ochafik.lang.jnaerator.parser.Statement;
 import com.ochafik.lang.jnaerator.parser.Statement.Block;
 import com.ochafik.lang.jnaerator.parser.Statement.If;
 import com.ochafik.lang.jnaerator.parser.Statement.Return;
+import com.ochafik.util.listenable.Pair;
 import java.io.File;
 import org.bridj.demangling.Demangler;
 
@@ -57,9 +60,63 @@ public class NodeJSDeclarationsConverter extends DeclarationsConverter {
     public void convertCallback(TypeRef.FunctionSignature functionSignature, Signatures signatures, DeclarationsHolder out, Identifier callerLibraryName) {
         
     }
-    public void convertConstants(String library, List<Define> defines, Element sourcesRoot, final Signatures signatures, final DeclarationsHolder out, final Identifier libraryClassName) {
-        
+//    public void convertConstants(String library, List<Define> defines, Element sourcesRoot, final Signatures signatures, final DeclarationsHolder out, final Identifier libraryClassName) {
+//    }
+
+    @Override
+    protected void outputNSString(String name, String value, DeclarationsHolder out, Signatures signatures, Element... elementsToTakeCommentsFrom) {
     }
+
+    @Override
+    protected void convertConstant(String name, JavaPrim prim, TypeRef mutatedType, Expression defaultValue, VariablesDeclaration v, Declarator decl, DeclarationsHolder out, Signatures signatures, Identifier libraryClassName) {
+        if (!(defaultValue instanceof Expression.Constant))
+            return;
+        convertConstant(name, (Expression.Constant)defaultValue, out, signatures);
+    }
+
+    @Override
+    protected void convertDefine(Define define, DeclarationsHolder out, Signatures signatures, Identifier libraryClassName) {
+        if (!(define.getValue() instanceof Expression.Constant))
+            return;
+        convertConstant(define.getName(), (Expression.Constant)define.getValue(), out, signatures);
+    }
+
+    protected void convertConstant(String name, Expression.Constant value, DeclarationsHolder out, Signatures signatures) {
+        Block initBlock = getInitMethodBody(out);
+        Expression expr;
+        switch (value.getType()) {
+            case Int:
+            case UInt:
+            case IntegerString:
+            case Long:
+            case ULong:
+            case LongString:
+            case Short:
+            case Byte:
+                expr = methodCall(ident("v8", "Integer", "New"), value.clone());
+                break;
+            case Double:
+            case Float:
+                expr = methodCall(ident("v8", "Number", "New"), value.clone());
+                break;
+            case Bool:
+                expr = methodCall(ident("v8", "Boolean", "New"), value.clone());
+                break;
+            case Char:
+            case String:
+                expr = methodCall(ident("v8", "String", "New"), new Expression.Constant(value.getType(), value.getValue() + "", null));
+                break;
+            case Null:
+                expr = methodCall(ident("v8", "Null"));
+                break;
+            default:
+                throw new UnsupportedConversionException(value, "Constant type not supported yet");
+        }
+        initBlock.addStatement(stat(methodCall(varRef(initTarget), MemberRefStyle.Arrow, "Set",
+            methodCall(ident("v8", "String", "NewSymbol"), expr(name)),
+            expr)));
+    }
+    
     
     Block getInitMethodBody(DeclarationsHolder decls) {
         for (Declaration decl : decls.getDeclarations()) {
@@ -84,6 +141,7 @@ public class NodeJSDeclarationsConverter extends DeclarationsConverter {
     static final String argsName = "_arguments_";
     static final String returnValueName = "_return_";
     static final String scopeName = "_scope_";
+    static final String initTarget = "_target_";
     
     private enum NodeType {
         Pointer, String, Number, Boolean, VAList, Unknown, Void
@@ -162,10 +220,17 @@ public class NodeJSDeclarationsConverter extends DeclarationsConverter {
                                 varRef(arg.getName()))));
                     break;
                 case Pointer:
-                    typeTest = methodCall(ident("node", "Buffer", "HasInstance"), argExpr);
+                    typeTest = expr(
+                        methodCall(argExpr.clone(), MemberRefStyle.Arrow, "IsNull"),
+                        BinaryOperator.Or,
+                        methodCall(ident("node", "Buffer", "HasInstance"), argExpr));
                     typeErrorMessage = "expected a Buffer";
-                    argDeclExpr = methodCall(ident("node", "Buffer", "Data"), 
-                        methodCall(argExpr.clone(), Expression.MemberRefStyle.Dot, templateIdent(ident("As"), varRef(v8Ident("Object")))));
+                    argDeclExpr = 
+                        new Expression.ConditionalExpression(
+                            methodCall(argExpr.clone(), MemberRefStyle.Arrow, "IsNull"),
+                            varRef("NULL"),
+                            methodCall(ident("node", "Buffer", "Data"), 
+                                methodCall(argExpr.clone(), Expression.MemberRefStyle.Dot, templateIdent(ident("As"), varRef(v8Ident("Object"))))));
                     argType = new TypeRef.Pointer(typeRef(ident("char")), Declarator.PointerStyle.Pointer);
                     argUsageExpr = cast(transformTypeForCast(arg.getValueType()), varRef(arg.getName()));
                     break;
@@ -192,7 +257,7 @@ public class NodeJSDeclarationsConverter extends DeclarationsConverter {
                         new Return(
                             methodCall(v8Ident("ThrowException"),
                                 methodCall(ident("v8", "Exception", "TypeError"),
-                                    newV8String("Invalid value for argument '" + arg.getName() + "'" + (typeErrorMessage == null ? "" : ": " + typeErrorMessage)))))));
+                                    newV8String("Invalid value for argument '" + arg.getName() + "' at index " + iArg + (typeErrorMessage == null ? "" : ": " + typeErrorMessage)))))));
             }
             
             if (argDeclExpr != null)
@@ -243,7 +308,7 @@ public class NodeJSDeclarationsConverter extends DeclarationsConverter {
         objOut.addDeclaration(method);
         
         Block initBlock = getInitMethodBody(objOut);
-        initBlock.addStatement(stat(methodCall("NODE_SET_METHOD", varRef("target"), expr(functionName.toString()), varRef(methodName))));
+        initBlock.addStatement(stat(methodCall("NODE_SET_METHOD", varRef(initTarget), expr(functionName.toString()), varRef(methodName))));
     }
 
     private TypeRef transformTypeForCast(TypeRef tr) {
@@ -320,7 +385,7 @@ public class NodeJSDeclarationsConverter extends DeclarationsConverter {
             
             String initFunctionName = library + "_init";
             Function initMethod = new Function(Function.Type.CppMethod, ident(initFunctionName), typeRef(void.class));
-            initMethod.addArg(new Arg("target", typeRef(v8Ident("Handle", v8Ident("Object")))));
+            initMethod.addArg(new Arg(initTarget, typeRef(v8Ident("Handle", v8Ident("Object")))));
             initMethod.setBody(new Block());
             // Hack: add init method here so that convertFunction finds it, then (re)move it to the end.
             sourceFile.addDeclaration(initMethod);

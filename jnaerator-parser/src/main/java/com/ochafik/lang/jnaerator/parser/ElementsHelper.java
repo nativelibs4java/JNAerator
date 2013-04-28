@@ -213,11 +213,11 @@ public class ElementsHelper {
     }
 
     public static Expression expr(Expression a, BinaryOperator op, Expression b) {
-        return new BinaryOp(a, op, b);
+        return new BinaryOp(a, op, b).setParenthesis(true);
     }
 
     public static Expression expr(Expression a, AssignmentOperator op, Expression b) {
-        return new AssignmentOp(a, op, b);
+        return new AssignmentOp(a, op, b).setParenthesis(true);
     }
 
     @SuppressWarnings("unchecked")
