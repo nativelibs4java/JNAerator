@@ -424,7 +424,7 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
     public TypeRef resolveTypeDef(TypeRef valueType, final Identifier libraryClassName, final boolean convertToJavaRef, final boolean convertEnumToJavaRef) {
         return resolveTypeDef(valueType, libraryClassName, convertToJavaRef, convertEnumToJavaRef, new HashSet<Identifier>());
     }
-    public TypeRef resolveTypeDef(TypeRef valueType, final Identifier libraryClassName, final boolean convertToJavaRef, final boolean convertEnumToJavaRef, final Set<Identifier> typeDefsEncountered) {
+    protected TypeRef resolveTypeDef(TypeRef valueType, final Identifier libraryClassName, final boolean convertToJavaRef, final boolean convertEnumToJavaRef, final Set<Identifier> typeDefsEncountered) {
         if (valueType == null) {
             return null;
         }
@@ -526,7 +526,7 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
                                 if (convertToJavaRef)
                                     simpleTypeRef.replaceBy(typeRef(result.getFakePointer(libraryClassName, name)));
                                 else
-                                    simpleTypeRef.replaceBy(tr.clone());
+                                    simpleTypeRef.replaceBy(resolveTypeDef(tr.clone(), libraryClassName, convertToJavaRef, convertEnumToJavaRef, typeDefsEncountered));
                                 return;
                             }
                                 
