@@ -285,34 +285,42 @@ public class NodeJSDeclarationsConverter extends DeclarationsConverter {
         Expression retExpr;
         switch (retNodeType) {
             case Number:
-                retExpr = methodCall(ident("v8", "Number", "New"), varRef(returnValueName));
+                body.addStatement(new Return(scopeClose(methodCall(ident("v8", "Number", "New"), varRef(returnValueName)))));
                 break;
             case Boolean:
-                retExpr = methodCall(ident("v8", "Boolean", "New"), varRef(returnValueName));
+                body.addStatement(new Return(scopeClose(methodCall(ident("v8", "Boolean", "New"), varRef(returnValueName)))));
                 break;
             case Pointer:
                 // TODO: add pointer validity info.
-                retExpr = 
-                    memberRef(
-                        methodCall(ident("node", "Buffer", "New"), 
-                            cast(new TypeRef.Pointer(typeRef("char"), Declarator.PointerStyle.Pointer), varRef(returnValueName)), 
-                            expr(0)),
-                        Expression.MemberRefStyle.Arrow,
-                        "handle_");
+                body.addStatement(
+                    new If(
+                        varRef(returnValueName),
+                        new Return(
+                            scopeClose(
+                                memberRef(
+                                    methodCall(ident("node", "Buffer", "New"), 
+                                        cast(new TypeRef.Pointer(typeRef("char"), Declarator.PointerStyle.Pointer), varRef(returnValueName)), 
+                                        expr(1)),
+                                    Expression.MemberRefStyle.Arrow,
+                                    "handle_"))),
+                        new Return(scopeClose(methodCall(ident("v8", "Null"))))));
                 break;
             case Void:
-                retExpr = methodCall(v8Ident("Undefined"));
+                body.addStatement(new Return(scopeClose(methodCall(v8Ident("Undefined")))));
                 break;
             default:
                 throw new UnsupportedConversionException(function, "Return type not handled: " + retTr + " (" + retNodeType + ")");
         }
-        body.addStatement(new Return(methodCall(varRef(scopeName), Expression.MemberRefStyle.Dot, "Close", retExpr)));
         method.setBody(body);
         
         objOut.addDeclaration(method);
         
         Block initBlock = getInitMethodBody(objOut);
         initBlock.addStatement(stat(methodCall("NODE_SET_METHOD", varRef(initTarget), expr(functionName.toString()), varRef(methodName))));
+    }
+    
+    private Expression scopeClose(Expression content) {
+        return methodCall(varRef(scopeName), Expression.MemberRefStyle.Dot, "Close", content);
     }
 
     private TypeRef transformTypeForCast(TypeRef tr) {
