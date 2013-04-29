@@ -145,6 +145,7 @@ public class NodeJSDeclarationsConverter extends DeclarationsConverter {
     static final String returnValueName = "_return_";
     static final String scopeName = "_scope_";
     static final String initTarget = "_target_";
+    static final String dummyNodeBufferFreeCallbackName = "_dummy_node_buffer_free_callback_";
     
     private enum NodeType {
         Pointer, String, Number, Boolean, VAList, Unknown, Void
@@ -300,7 +301,9 @@ public class NodeJSDeclarationsConverter extends DeclarationsConverter {
                                 memberRef(
                                     methodCall(ident("node", "Buffer", "New"), 
                                         cast(new TypeRef.Pointer(typeRef("char"), Declarator.PointerStyle.Pointer), varRef(returnValueName)), 
-                                        expr(1)),
+                                        expr(1),
+                                        varRef(dummyNodeBufferFreeCallbackName),
+                                        varRef("NULL")),
                                     Expression.MemberRefStyle.Arrow,
                                     "handle_"))),
                         new Return(scopeClose(methodCall(ident("v8", "Null"))))));
@@ -401,6 +404,16 @@ public class NodeJSDeclarationsConverter extends DeclarationsConverter {
             initMethod.setBody(new Block());
             // Hack: add init method here so that convertFunction finds it, then (re)move it to the end.
             sourceFile.addDeclaration(initMethod);
+            
+            Function dummyNodeBufferFreeCallback = 
+                new Function(
+                    Function.Type.CFunction, 
+                    ident(dummyNodeBufferFreeCallbackName), 
+                    typeRef(void.class), 
+                    new Arg("data", new TypeRef.Pointer(typeRef("char"), Declarator.PointerStyle.Pointer)), 
+                    new Arg("hint", new TypeRef.Pointer(typeRef("void"), Declarator.PointerStyle.Pointer)));
+            dummyNodeBufferFreeCallback.setBody(new Block());
+            sourceFile.addDeclaration(dummyNodeBufferFreeCallback);
             
             fillLibraryMapping(result, sourceFiles, sourceFile, library, null, null, null);
             initMethod.replaceBy(null);
