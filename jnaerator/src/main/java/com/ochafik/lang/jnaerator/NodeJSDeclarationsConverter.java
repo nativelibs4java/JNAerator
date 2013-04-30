@@ -69,25 +69,30 @@ public class NodeJSDeclarationsConverter extends DeclarationsConverter {
 
     @Override
     protected void convertConstant(String name, JavaPrim prim, TypeRef mutatedType, Expression defaultValue, VariablesDeclaration v, Declarator decl, DeclarationsHolder out, Signatures signatures, Identifier libraryClassName) {
-        if (!(defaultValue instanceof Expression.Constant))
-            return;
-        convertConstant(name, (Expression.Constant)defaultValue, out, signatures);
+        convertConstant(name, defaultValue, out, signatures);
     }
 
+    Expression.Constant.Type getValueConstantType(Expression value) {
+        if (value instanceof Expression.Cast)
+            return getValueConstantType(((Expression.Cast)value).getTarget());
+        if (value instanceof Expression.BinaryOp)
+            return getValueConstantType(((Expression.BinaryOp)value).getFirstOperand());
+        if (value instanceof Expression.Constant)
+            return ((Expression.Constant)value).getType();
+        throw new UnsupportedConversionException(value, "Unknown value type");
+    }
+    
     @Override
     protected void convertDefine(Define define, DeclarationsHolder out, Signatures signatures, Identifier libraryClassName) {
         Expression value = define.getValue();
-        if (value instanceof Expression.Cast)
-            value = ((Expression.Cast)value).getTarget();
-        if (!(value instanceof Expression.Constant))
-            return;
-        convertConstant(define.getName(), (Expression.Constant)value, out, signatures);
+        convertConstant(define.getName(), value, out, signatures);
     }
 
-    protected void convertConstant(String name, Expression.Constant value, DeclarationsHolder out, Signatures signatures) {
+    protected void convertConstant(String name, Expression value, DeclarationsHolder out, Signatures signatures) {
         Block initBlock = getInitMethodBody(out);
         Expression expr;
-        switch (value.getType()) {
+        Expression.Constant.Type valueType = getValueConstantType(value);
+        switch (valueType) {
             case Int:
             case UInt:
             case IntegerString:
@@ -107,7 +112,7 @@ public class NodeJSDeclarationsConverter extends DeclarationsConverter {
                 break;
             case Char:
             case String:
-                expr = methodCall(ident("v8", "String", "New"), new Expression.Constant(value.getType(), value.getValue() + "", null));
+                expr = methodCall(ident("v8", "String", "New"), new Expression.Constant(valueType, value + "", null));
                 break;
             case Null:
                 expr = methodCall(ident("v8", "Null"));

@@ -242,8 +242,11 @@ public abstract class DeclarationsConverter {
                         continue;
                     }
 
-                    convertConstant(name, prim, mutatedType, decl.getDefaultValue(), v, decl, out, signatures, libraryClassName);
-
+                    try {
+                        convertConstant(name, prim, mutatedType, decl.getDefaultValue(), v, decl, out, signatures, libraryClassName);
+                    } catch (UnsupportedConversionException ex) {
+                        out.addDeclaration(skipDeclaration(decl, ex.getMessage()));
+                    }
                 }
             }
         });
@@ -253,7 +256,12 @@ public abstract class DeclarationsConverter {
                 if (define.getValue() == null) {
                     continue;
                 }
-                convertDefine(define, out, signatures, libraryClassName);
+                
+                try {
+                    convertDefine(define, out, signatures, libraryClassName);
+                } catch (UnsupportedConversionException ex) {
+                    out.addDeclaration(skipDeclaration(define, ex.toString()));
+                }
             }
         }
         for (Map.Entry<String, String> e : constants.entrySet()) {
@@ -295,13 +303,7 @@ public abstract class DeclarationsConverter {
     }
 
     protected void convertDefine(Define define, DeclarationsHolder out, Signatures signatures, Identifier libraryClassName) {
-        
-        try {
-            //System.out.println("Define " + define.getName() + " = " + define.getValue());
-            out.addDeclaration(outputConstant(define.getName(), define.getValue(), signatures, define.getValue(), "define", libraryClassName, true, false, false));
-        } catch (UnsupportedConversionException ex) {
-            out.addDeclaration(skipDeclaration(define, ex.toString()));
-        }
+        out.addDeclaration(outputConstant(define.getName(), define.getValue(), signatures, define.getValue(), "define", libraryClassName, true, false, false));
     }
     
     protected void outputNSString(String name, String value, DeclarationsHolder out, Signatures signatures, Element... elementsToTakeCommentsFrom) {

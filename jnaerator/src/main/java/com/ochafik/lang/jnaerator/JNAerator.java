@@ -731,6 +731,7 @@ public class JNAerator {
 
                             @Override
                             public void setFinished(Throwable e) {
+                                e.printStackTrace();
                                 e.fillInStackTrace();
                                 throw new ExitException(1, e);
                             }
