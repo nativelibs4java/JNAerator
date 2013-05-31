@@ -1414,7 +1414,7 @@ public abstract class Expression extends Element {
                         value = (boolean)(longValue != 0);
                         break;
                     case Byte:
-                        if (longValue > Byte.MAX_VALUE) {
+                        if (longValue > Byte.MAX_VALUE || longValue < 2 * Byte.MIN_VALUE) {
                             tpe = Type.Short;
                             value = (short)(negate ? -longValue : longValue);
                         } else {
@@ -1427,7 +1427,7 @@ public abstract class Expression extends Element {
                         value = (char)(longValue & 0xffff);
                         break;
                     case Short:
-                        if (longValue > 2 * Short.MAX_VALUE) {
+                        if (longValue > 2 * Short.MAX_VALUE || longValue < 2 * Short.MIN_VALUE) {
                             tpe = Type.Int;
                             value = (int)(negate ? -longValue : longValue);
                         } else {
@@ -1436,11 +1436,11 @@ public abstract class Expression extends Element {
                         }
                         break;
                     case Int:
-                        if (longValue > 2L * Integer.MAX_VALUE) {
+                        if (longValue > 2L * Integer.MAX_VALUE || longValue < 2L * Integer.MIN_VALUE) {
                             tpe = Type.Long;
                             value = negate ? -longValue : longValue;
                         } else {
-                            if (longValue > Integer.MAX_VALUE)
+                            if (longValue > Integer.MAX_VALUE || longValue < Integer.MIN_VALUE)
                                 tpe = Type.UInt;
                             int v = (int)(longValue & 0xffffffff);
                             value = negate ? -v : v;

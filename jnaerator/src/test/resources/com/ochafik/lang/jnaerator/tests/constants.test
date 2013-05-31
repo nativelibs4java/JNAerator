@@ -5,6 +5,9 @@
 #define A (200)
 #define B (-(A + 6))
 
+#define CONST64(c) c##I64
+#define MIN_INT64  (CONST64(0x8000000000000000))
+
 const int Expression = X + (1 + 2) * 4;
 const int unsignedValue = (UInt32)4294967288L;
 
