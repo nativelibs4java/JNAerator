@@ -872,7 +872,10 @@ public class JNADeclarationsConverter extends DeclarationsConverter {
                     new Statement.Return(varRef(fieldOrderName))
                 );
             }
-            Function getFieldOrder = new Function(Type.JavaMethod, ident(getFieldOrderName), typeRef(List.class)).setBody(getFieldOrderImpl).addModifiers(ModifierType.Protected);
+            TypeRef listRef = typeRef(ident(List.class, expr(typeRef("?"))));
+            Function getFieldOrder = new Function(
+                Type.JavaMethod, ident(getFieldOrderName), listRef)
+                    .setBody(getFieldOrderImpl).addModifiers(ModifierType.Protected);
             
             if (signatures.add(getFieldOrder.computeSignature(SignatureType.JavaStyle))) {
                 structJavaClass.addDeclaration(getFieldOrder);
