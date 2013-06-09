@@ -96,6 +96,7 @@ org/bridj/Pointer$OrderedPointer.class
 org/bridj/Pointer$Releaser.class
 org/bridj/Pointer$StringType.class
 org/bridj/Pointer.class
+org/bridj/PointerGC.class
 org/bridj/PointerIO.class
 org/bridj/SignalConstants.class
 org/bridj/SignalError.class
@@ -162,7 +163,12 @@ org/bridj/cpp/com/COMCallableWrapper.class
 org/bridj/cpp/com/COMRuntime$1$1.class
 org/bridj/cpp/com/COMRuntime$1.class
 org/bridj/cpp/com/COMRuntime$2.class
+org/bridj/cpp/com/COMRuntime$3.class
+org/bridj/cpp/com/COMRuntime$4.class
+org/bridj/cpp/com/COMRuntime$5.class
 org/bridj/cpp/com/COMRuntime$COINIT.class
+org/bridj/cpp/com/COMRuntime$VARIANTTypeInfo$1.class
+org/bridj/cpp/com/COMRuntime$VARIANTTypeInfo.class
 org/bridj/cpp/com/COMRuntime.class
 org/bridj/cpp/com/CY.class
 org/bridj/cpp/com/DECIMAL.class
@@ -195,6 +201,7 @@ org/bridj/cpp/com/OLEAutomationLibrary$SYSKIND.class
 org/bridj/cpp/com/OLEAutomationLibrary$SYSTEMTIME.class
 org/bridj/cpp/com/OLEAutomationLibrary$UDATE.class
 org/bridj/cpp/com/OLEAutomationLibrary.class
+org/bridj/cpp/com/OLELibrary.class
 org/bridj/cpp/com/RECT.class
 org/bridj/cpp/com/SAFEARRAY.class
 org/bridj/cpp/com/SAFEARRAYBOUND.class
