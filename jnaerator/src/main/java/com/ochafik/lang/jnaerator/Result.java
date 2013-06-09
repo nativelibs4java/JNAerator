@@ -634,8 +634,8 @@ public class Result extends Scanner {
             return null;
         }
         return config.packageName == null
-                ? ident(ident(config.rootPackageName), library.toLowerCase())
-                : ident(config.packageName);
+                ? ident(ident(config.rootPackageName), library.toLowerCase().replaceAll("[^\\w.]", ""))
+                : ident(config.packageName.replaceAll("[^\\w.]", ""));
     }
 
     public void chooseLibraryClasses(String packageName, String rootPackageName) {
