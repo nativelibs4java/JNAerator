@@ -2,7 +2,6 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package com.ochafik.lang.jnaerator.parser;
 
 import com.ochafik.lang.jnaerator.parser.Statement.Delete;
@@ -97,11 +96,13 @@ public class Printer implements Visitor {
         indent = indentStack.isEmpty() ? "" : indentStack.lastElement();
     }
 
-    public Printer() {}
+    public Printer() {
+    }
+
     public Printer(String initialIdent) {
         indent = initialIdent == null ? "" : initialIdent;
     }
-    
+
     @Override
     public String toString() {
         return out.toString();
@@ -110,9 +111,11 @@ public class Printer implements Visitor {
     protected void expressionPre(Expression x) {
         append(x.getParenthesis() ? "(" : "");
     }
+
     protected void expressionPost(Expression x) {
         append(x.getParenthesis() ? ")" : "");
     }
+
     public void visitConstant(Constant e) {
         expressionPre(e);
         String txt = e.getOriginalTextualRepresentation();
@@ -120,55 +123,54 @@ public class Printer implements Visitor {
             append(txt);
         } else {
             Object value = e.getValue();
-            if (e.getIntForm() == IntForm.Hex)
-                append("0x", Long.toHexString(value instanceof Long ? ((Long)value).longValue() : ((Integer)value).longValue()).toUpperCase());
-            else if (e.getIntForm() == IntForm.Octal)
-                append(Long.toOctalString(value instanceof Long ? ((Long)value).longValue() : ((Integer)value).longValue()).toUpperCase());
-            else if (e.getType() == null)
+            if (e.getIntForm() == IntForm.Hex) {
+                append("0x", Long.toHexString(value instanceof Long ? ((Long) value).longValue() : ((Integer) value).longValue()).toUpperCase());
+            } else if (e.getIntForm() == IntForm.Octal) {
+                append(Long.toOctalString(value instanceof Long ? ((Long) value).longValue() : ((Integer) value).longValue()).toUpperCase());
+            } else if (e.getType() == null) {
                 append("");
-            else {
+            } else {
                 switch (e.getType()) {
-                case Null:
-                    append("null");
-                    break;
-                case Byte:
-                case Double:
-                case Int:
-                case Short:
-                case UInt:
-                    append(value);
-                    break;
-                case Float:
-                    append(value, 'F');
-                    break;
-                case ULong:
-                case Long:
-                    append(value, 'L');
-                    break;
-                case String:
-                    append('"', StringUtils.javaEscape((String)value), '"');
-                    break;
-                case Char:
-                    append('\'', StringUtils.javaEscape(((Character)value).toString()), '\'');
-                    break;
-                case IntegerString:
-                    int intVal = ((Integer)value).intValue();
-                    append('\'', Constant.intStr(intVal), '\'');
-                    break;
-                case LongString:
-                    long longVal = ((Long)value).intValue();
-                    append(
-                        '\'',
-                        Constant.intStr((int)(longVal & 0xffffffffL)),
-                        Constant.intStr((int)((longVal >>> 32) & 0xffffffffL)),
-                        '\''
-                    );
-                    break;
-                case Bool:
-                    append(((Boolean)value).toString());
-                    break;
-                default:
-                    throw new UnsupportedOperationException("visitConstant not implemented for constqnt type " + e.getType());
+                    case Null:
+                        append("null");
+                        break;
+                    case Byte:
+                    case Double:
+                    case Int:
+                    case Short:
+                    case UInt:
+                        append(value);
+                        break;
+                    case Float:
+                        append(value, 'F');
+                        break;
+                    case ULong:
+                    case Long:
+                        append(value, 'L');
+                        break;
+                    case String:
+                        append('"', StringUtils.javaEscape((String) value), '"');
+                        break;
+                    case Char:
+                        append('\'', StringUtils.javaEscape(((Character) value).toString()), '\'');
+                        break;
+                    case IntegerString:
+                        int intVal = ((Integer) value).intValue();
+                        append('\'', Constant.intStr(intVal), '\'');
+                        break;
+                    case LongString:
+                        long longVal = ((Long) value).intValue();
+                        append(
+                                '\'',
+                                Constant.intStr((int) (longVal & 0xffffffffL)),
+                                Constant.intStr((int) ((longVal >>> 32) & 0xffffffffL)),
+                                '\'');
+                        break;
+                    case Bool:
+                        append(((Boolean) value).toString());
+                        break;
+                    default:
+                        throw new UnsupportedOperationException("visitConstant not implemented for constqnt type " + e.getType());
                 }
             }
         }
@@ -180,24 +182,30 @@ public class Printer implements Visitor {
         if (e.getValueType() != null) {
             if (e.getName() != null) {
                 variableDeclarationToString(e.getValueType(), e.getName(), e.isVarArg());
-                if (e.getDefaultValue() != null)
+                if (e.getDefaultValue() != null) {
                     append(" = ").append(e.getDefaultValue());
-            } else
+                }
+            } else {
                 append(e.getValueType()).append(e.isVarArg() ? "..." : null);
-		} else
-			append("...");
+            }
+        } else {
+            append("...");
+        }
     }
 
     public void visitEnum(Enum e) {
         modifiersStringPrefix(e);
-        if (!e.getAnnotations().isEmpty())
+        if (!e.getAnnotations().isEmpty()) {
             implode(e.getAnnotations(), "\n" + indent).append("\n", indent);
+        }
 
-		append("enum ", e.getTag());
-        if (e.getTag() != null)
+        append("enum ", e.getTag());
+        if (e.getTag() != null) {
             append(" ");
-        if (!e.getInterfaces().isEmpty())
+        }
+        if (!e.getInterfaces().isEmpty()) {
             append("implements ").implode(e.getInterfaces(), ", ").append(" ");
+        }
 
         append("{\n");
         indent();
@@ -207,7 +215,7 @@ public class Printer implements Visitor {
             append(indent, item, i < len - 1 ? "," : (e.getBody() == null ? "" : ";"), "\n");
         }
         if (e.getBody() != null) {
-        	append(indent);
+            append(indent);
             implode(e.getBody().getDeclarations(), "\n" + indent);
             append("\n");
         }
@@ -217,94 +225,103 @@ public class Printer implements Visitor {
 
     public void visitFunction(Function e) {
         TypeRef valueType = e.getValueType();
-		Identifier name = e.getName();
-		List<Modifier> modifiers = e.getModifiers();
+        Identifier name = e.getName();
+        List<Modifier> modifiers = e.getModifiers();
 
-		if (e.getType() == null) {
-			append("<no function type>");
+        if (e.getType() == null) {
+            append("<no function type>");
             return;
         }
 
-		formatComments(e, false, true, true);
-		if (!e.getAnnotations().isEmpty())
-			implode(e.getAnnotations(), "\n" + indent).append("\n", indent);
+        formatComments(e, false, true, true);
+        if (!e.getAnnotations().isEmpty()) {
+            implode(e.getAnnotations(), "\n" + indent).append("\n", indent);
+        }
 
-		switch (e.getType()) {
-		case StaticInit:
-			implode(modifiers, " ");
-            space(!modifiers.isEmpty());
-            append(e.getBody() == null ? ";" : e.getBody());
-            break;
-		case CFunction:
-		case CppMethod:
-		case JavaMethod:
-			if (name != null && name.equals("operator") && e.getType() == Function.Type.CppMethod) {
-            	append(name);
-            	space();
-            	implode(modifiers, " ");
+        switch (e.getType()) {
+            case StaticInit:
+                implode(modifiers, " ");
                 space(!modifiers.isEmpty());
-                append(valueType);
-            } else {
-            	implode(modifiers, " ");
-                space(!modifiers.isEmpty());
-            	append(valueType);
-	            space(valueType != null);
-	            append(name);
-            }
-            append("(").implode(e.getArgs(), ", ").append(")");
+                append(e.getBody() == null ? ";" : e.getBody());
+                break;
+            case CFunction:
+            case CppMethod:
+            case JavaMethod:
+                if (name != null && name.equals("operator") && e.getType() == Function.Type.CppMethod) {
+                    append(name);
+                    space();
+                    implode(modifiers, " ");
+                    space(!modifiers.isEmpty());
+                    append(valueType);
+                } else {
+                    implode(modifiers, " ");
+                    space(!modifiers.isEmpty());
+                    append(valueType);
+                    space(valueType != null);
+                    append(name);
+                }
+                append("(").implode(e.getArgs(), ", ").append(")");
 
-            switch (e.getType()) {
-                case JavaMethod:
-                    if (!e.getThrown().isEmpty())
-                        append(" throws ").implode(e.getThrown(), ", ");
-                    break;
-                default:
-                    if (e.getThrows()) {
-                        append(" throw(");
-                        implode(e.getThrown(), ", ");
-                        append(")");
+                switch (e.getType()) {
+                    case JavaMethod:
+                        if (!e.getThrown().isEmpty()) {
+                            append(" throws ").implode(e.getThrown(), ", ");
+                        }
+                        break;
+                    default:
+                        if (e.getThrows()) {
+                            append(" throw(");
+                            implode(e.getThrown(), ", ");
+                            append(")");
+                        }
+                }
+
+                if (!e.getInitializers().isEmpty()) {
+                    append(" : ").implode(e.getInitializers(), ", ");
+                }
+
+                if (e.getBody() == null) {
+                    append(";");
+                } else {
+                    append(" ", e.getBody());
+                }
+                break;
+            case ObjCMethod:
+                append(modifiers.contains(ModifierType.Static) ? "+" : "-");
+                space();
+                if (valueType != null) {
+                    append("(", valueType, ")");
+                }
+                append(name);
+                boolean firstArg = true;
+                for (Arg arg : e.getArgs()) {
+                    if (arg.isVarArg()) {
+                        if (!firstArg) {
+                            append(", ");
+                        }
+                        append("...");
+                    } else {
+                        if (!firstArg) {
+                            append(' ', arg.getSelector());
+                        }
+
+                        append(":(", arg.createMutatedType(), ')', arg.getName());
                     }
-            }
-            
-            if (!e.getInitializers().isEmpty())
-                append(" : ").implode(e.getInitializers(), ", ");
-
-            if (e.getBody() == null)
+                    firstArg = false;
+                }
                 append(";");
-            else
-                append(" ", e.getBody());
-            break;
-		case ObjCMethod:
-			append(modifiers.contains(ModifierType.Static) ? "+" : "-");
-			space();
-            if (valueType != null)
-                append("(", valueType, ")");
-            append(name);
-            boolean firstArg = true;
-            for (Arg arg : e.getArgs()) {
-				if (arg.isVarArg()) {
-                    if (!firstArg)
-                        append(", ");
-					append("...");
-				} else {
-					if (!firstArg)
-						append(' ', arg.getSelector());
-					
-					append(":(", arg.createMutatedType(), ')', arg.getName());
-				}
-                firstArg = false;
-			}
-            append(";");
-            break;
-		default:
-			throw new RuntimeException(e.getType().toString());
-		}
+                break;
+            default:
+                throw new RuntimeException(e.getType().toString());
+        }
 
-        if (e.getAsmName() != null)
+        if (e.getAsmName() != null) {
             append("__asm(\"", e.getAsmName(), "\") ");
+        }
 
-        if (e.getCommentAfter() != null)
+        if (e.getCommentAfter() != null) {
             append(" ", e.getCommentAfter());
+        }
 
 
     }
@@ -312,58 +329,66 @@ public class Printer implements Visitor {
     public void visitFunctionPointerDeclaration(FunctionPointerDeclaration e) {
         modifiersStringPrefix(e);
         append(e.getValueType());
-        if (e.getDefaultValue() != null)
+        if (e.getDefaultValue() != null) {
             append(" = ", e.getDefaultValue());
+        }
         append(";");
     }
 
     public void visitStruct(Struct e) {
 
-		formatComments(e, false, true, true);
-		if (!e.getAnnotations().isEmpty())
+        formatComments(e, false, true, true);
+        if (!e.getAnnotations().isEmpty()) {
             implode(e.getAnnotations(), "\n" + indent).append("\n", indent);
+        }
 
-		if (e.getType() != null)
-		switch (e.getType()) {
-			case CPPClass:
-                modifiersStringPrefix(e);
-				append("class ", e.getTag());
-                if (!e.getParents().isEmpty())
-                    append(" : ").implode(e.getParents(), ", ");
-                break;
-			case CUnion:
-                modifiersStringPrefix(e);
-				append("union ", e.getTag() == null ? null : " ", e.getTag());
-                break;
-			case JavaClass:
-            case JavaInterface:
-                modifiersStringPrefix(e);
-				append(e.getType() == Struct.Type.JavaClass ? "class " : "interface ", e.getTag());
-                if (!e.getParents().isEmpty())
-                    append(" extends ").implode(e.getParents(), ", ");
-                if (!e.getProtocols().isEmpty())
-                    append(" implements ").implode(e.getProtocols(), ", ");
+        if (e.getType() != null) {
+            switch (e.getType()) {
+                case CPPClass:
+                    modifiersStringPrefix(e);
+                    append("class ", e.getTag());
+                    if (!e.getParents().isEmpty()) {
+                        append(" : ").implode(e.getParents(), ", ");
+                    }
+                    break;
+                case CUnion:
+                    modifiersStringPrefix(e);
+                    append("union ", e.getTag() == null ? null : " ", e.getTag());
+                    break;
+                case JavaClass:
+                case JavaInterface:
+                    modifiersStringPrefix(e);
+                    append(e.getType() == Struct.Type.JavaClass ? "class " : "interface ", e.getTag());
+                    if (!e.getParents().isEmpty()) {
+                        append(" extends ").implode(e.getParents(), ", ");
+                    }
+                    if (!e.getProtocols().isEmpty()) {
+                        append(" implements ").implode(e.getProtocols(), ", ");
+                    }
 
-                break;
-			case ObjCClass:
-                modifiersStringPrefix(e);
-				append(e.isForwardDeclaration() ? "@class " : "@interface ", e.getTag());
-                if (e.getCategoryName() != null)
-                    append(" (", e.getCategoryName(), ")");
-                break;
-			case ObjCProtocol:
-                modifiersStringPrefix(e);
-				append("@protocol ", e.getTag());
-                break;
-			case CStruct:
-			default:
-				append("struct ");
-                modifiersStringPrefix(e);
-                append(e.getTag());
-                if (!e.getParents().isEmpty())
-                    append(" : ").implode(e.getParents(), ", ");
-                break;
-		}
+                    break;
+                case ObjCClass:
+                    modifiersStringPrefix(e);
+                    append(e.isForwardDeclaration() ? "@class " : "@interface ", e.getTag());
+                    if (e.getCategoryName() != null) {
+                        append(" (", e.getCategoryName(), ")");
+                    }
+                    break;
+                case ObjCProtocol:
+                    modifiersStringPrefix(e);
+                    append("@protocol ", e.getTag());
+                    break;
+                case CStruct:
+                default:
+                    append("struct ");
+                    modifiersStringPrefix(e);
+                    append(e.getTag());
+                    if (!e.getParents().isEmpty()) {
+                        append(" : ").implode(e.getParents(), ", ");
+                    }
+                    break;
+            }
+        }
 
         if (!e.isForwardDeclaration()) {
             space(e.getTag() != null).append("{\n");
@@ -381,8 +406,9 @@ public class Printer implements Visitor {
         append("typedef ");
         valueTypeAndStorageSuffix(e);
         append(";");
-        if (e.getCommentAfter() != null)
+        if (e.getCommentAfter() != null) {
             append(" ", e.getCommentAfter().trim());
+        }
 
     }
 
@@ -391,8 +417,9 @@ public class Printer implements Visitor {
     }
 
     public void visitFunctionSignature(FunctionSignature e) {
-        if (e.getFunction() == null)
-				return;
+        if (e.getFunction() == null) {
+            return;
+        }
 
         assert e.getFunction().getBody() == null;
         modifiersStringPrefix(e);
@@ -422,7 +449,7 @@ public class Printer implements Visitor {
 
     public void visitPointer(Pointer e) {
         modifiersStringPrefix(e);
-		append(e.getTarget());
+        append(e.getTarget());
         append(e.getPointerStyle());
     }
 
@@ -436,15 +463,13 @@ public class Printer implements Visitor {
         implode(e.getDeclarations(), "\n" + indent);
     }
 
-
-
     public void visitEnumItem(EnumItem e) {
         formatComments(e, false, true, true);
         append(e.getName());
         if (!e.getArguments().isEmpty()) {
-            if (e.getType() == Type.C)
+            if (e.getType() == Type.C) {
                 append(" = ", e.getArguments().get(0));
-            else {
+            } else {
                 append("(");
                 implode(e.getArguments(), ", ");
                 append(")");
@@ -479,23 +504,24 @@ public class Printer implements Visitor {
     }
 
     protected Printer targetPrefix(MemberRef e) {
-        if (e.getTarget() == null || e.getMemberRefStyle() == null)
+        if (e.getTarget() == null || e.getMemberRefStyle() == null) {
             return this;
+        }
 
         String sep;
         switch (e.getMemberRefStyle()) {
-        case Arrow:
-            sep = "->";
-            break;
-        case Dot:
-            sep = ".";
-            break;
-        case Colons:
-            sep = "::";
-            break;
-        default:
-            assert false;
-            sep = null;
+            case Arrow:
+                sep = "->";
+                break;
+            case Dot:
+                sep = ".";
+                break;
+            case Colons:
+                sep = "::";
+                break;
+            default:
+                assert false;
+                sep = null;
         }
         if (sep != null) {
             append(e.getTarget());
@@ -503,6 +529,7 @@ public class Printer implements Visitor {
         }
         return this;
     }
+
     public void visitFunctionCall(FunctionCall e) {
         expressionPre(e);
         if (e.getMemberRefStyle() == MemberRefStyle.SquareBrackets) {
@@ -526,15 +553,14 @@ public class Printer implements Visitor {
             append(']');
         } else {
             targetPrefix(e);
-            if (e.getFunction() != null)
+            if (e.getFunction() != null) {
                 append(e.getFunction());
+            }
             append("(");
             implode(ListenableCollections.adapt(e.getArguments(), new Adapter<Pair<String, Expression>, Expression>() {
-
                 public Expression adapt(Pair<String, Expression> value) {
                     return value.getValue();
                 }
-
             }), ", ");
             append(")");
         }
@@ -548,55 +574,63 @@ public class Printer implements Visitor {
     }
 
     public void visitDeclarator(Declarator e) {
-        if (e.isParenthesized())
-			append('(');
+        if (e.isParenthesized()) {
+            append('(');
+        }
 
         implode(e.getModifiers(), " ").space(!e.getModifiers().isEmpty());
-        
-		if (e instanceof DirectDeclarator)
-            append(((DirectDeclarator)e).getName());
-        else if (e instanceof PointerDeclarator) {
-            PointerDeclarator d = (PointerDeclarator)e;
+
+        if (e instanceof DirectDeclarator) {
+            append(((DirectDeclarator) e).getName());
+        } else if (e instanceof PointerDeclarator) {
+            PointerDeclarator d = (PointerDeclarator) e;
             append(d.getPointerStyle(), d.getTarget());
         } else if (e instanceof FunctionDeclarator) {
-            FunctionDeclarator d = (FunctionDeclarator)e;
+            FunctionDeclarator d = (FunctionDeclarator) e;
             append(d.getTarget(), '(').implode(d.getArgs(), ", ").append(")");
         } else if (e instanceof ArrayDeclarator) {
-            ArrayDeclarator d = (ArrayDeclarator)e;
+            ArrayDeclarator d = (ArrayDeclarator) e;
             append(d.getTarget(), '[').implode(d.getDimensions(), "][").append("]");
         }
-        
-		if (e.isParenthesized())
-			append(')');
-		if (e.getBits() >= 0)
-			append(":", e.getBits());
-		if (e.getDefaultValue() != null)
-			append(" = ", e.getDefaultValue());
-	}
+
+        if (e.isParenthesized()) {
+            append(')');
+        }
+        if (e.getBits() >= 0) {
+            append(":", e.getBits());
+        }
+        if (e.getDefaultValue() != null) {
+            append(" = ", e.getDefaultValue());
+        }
+    }
 
     public void visitVariablesDeclaration(VariablesDeclaration e) {
         formatComments(e, false, true, true);
-		if (!e.getAnnotations().isEmpty())
+        if (!e.getAnnotations().isEmpty()) {
             implode(e.getAnnotations(), "\n" + indent).append("\n", indent);
+        }
 
         modifiersStringPrefix(e);
         valueTypeAndStorageSuffix(e);
-        if (!(e.getParentElement() instanceof Catch))
+        if (!(e.getParentElement() instanceof Catch)) {
             append(";");
-        
-        if (e.getCommentAfter() != null)
+        }
+
+        if (e.getCommentAfter() != null) {
             space().append(e.getCommentAfter());
+        }
     }
 
     public void visitTaggedTypeRefDeclaration(TaggedTypeRefDeclaration e) {
-        if (e.getTaggedTypeRef() == null)
-			return;
+        if (e.getTaggedTypeRef() == null) {
+            return;
+        }
 
         TaggedTypeRef tr = e.getTaggedTypeRef();
-		formatComments(e, false, true, true);
+        formatComments(e, false, true, true);
         formatComments(tr, false, true, true);
         //append(tr, tr.isForwardDeclaration() ? ";" : null, e.getCommentAfter());
-		append(tr, ";", e.getCommentAfter());
+        append(tr, ";", e.getCommentAfter());
     }
 
     public void visitTaggedTypeRef(TaggedTypeRef e) {
@@ -622,19 +656,21 @@ public class Printer implements Visitor {
     public void visitNew(New e) {
         expressionPre(e);
         append("new ").append(e.getType());
-        if (e.getConstruction() == null)
+        if (e.getConstruction() == null) {
             append("()");
-        else
+        } else {
             append(e.getConstruction());
+        }
         expressionPost(e);
     }
 
     public void visitAnnotation(Annotation e) {
         append("@", e.getAnnotationClass());
-        if (e.getArgument() != null)
+        if (e.getArgument() != null) {
             append(e.getArgument());
-        else if (!e.getArguments().isEmpty())
+        } else if (!e.getArguments().isEmpty()) {
             append("(").implode(e.getArguments(), ", ").append(")");
+        }
         space();
     }
 
@@ -647,13 +683,15 @@ public class Printer implements Visitor {
         boolean noDims = e.getDimensions().isEmpty();
         boolean noVals = e.getInitialValues().isEmpty();
         append("new ").append(e.getType()).append("[");
-        if (noDims && noVals)
+        if (noDims && noVals) {
             append("0");
-        else
+        } else {
             implode(e.getDimensions(), "][");
+        }
         append("]");
-        if (noDims && !noVals)
+        if (noDims && !noVals) {
             append("{").implode(e.getInitialValues(), ", ").append("}");
+        }
         expressionPost(e);
     }
 
@@ -701,19 +739,21 @@ public class Printer implements Visitor {
 
     public void visitIf(If e) {
         append("if (", e.getCondition(), ") ");
-        if (e.getThenBranch() == null)
+        if (e.getThenBranch() == null) {
             append("<null>");
-        else {
+        } else {
             if (e.getThenBranch() instanceof Block) {
                 append(e.getThenBranch());
-                if (e.getElseBranch() != null)
+                if (e.getElseBranch() != null) {
                     append(" ");
+                }
             } else {
                 indent();
                 append("\n", indent, e.getThenBranch());
                 deindent();
-                if (e.getElseBranch() != null)
+                if (e.getElseBranch() != null) {
                     append("\n", indent);
+                }
             }
         }
 
@@ -810,18 +850,18 @@ public class Printer implements Visitor {
     }
 
     /*public void visitDeclarationStatement(DeclarationStatement e) {
-        append(e.getDeclaration());
-    }*/
-
+     append(e.getDeclaration());
+     }*/
     public void visitThrow(Throw e) {
         append("throw ", e.getExpression(), ";");
     }
 
     public void visitProperty(Property e) {
         append("@property");
-        if (!e.getModifiers().isEmpty())
+        if (!e.getModifiers().isEmpty()) {
             append("(").implode(e.getModifiers(), " ").append(")");
-		append(" ", e.getDeclaration());
+        }
+        append(" ", e.getDeclaration());
     }
 
     public void visitFriendDeclaration(FriendDeclaration e) {
@@ -858,24 +898,27 @@ public class Printer implements Visitor {
     protected Printer space() {
         return space(true);
     }
+
     protected Printer space(boolean doIt) {
-        if (doIt)
+        if (doIt) {
             append(" ");
+        }
         return this;
     }
+
     public Printer append(Object... os) {
         for (Object e : os) {
             if (e instanceof Element) {
-                Element ee = (Element)e;
+                Element ee = (Element) e;
                 ee.accept(this);
                 ee.setElementLine(currentLine);
-            }
-            else if (e != null) {
+            } else if (e != null) {
                 String s = String.valueOf(e);
                 out.append(s);
                 int i = -1;
-                while ((i = s.indexOf("\n", i + 1)) >= 0)
+                while ((i = s.indexOf("\n", i + 1)) >= 0) {
                     currentLine++;
+                }
             }
         }
         return this;
@@ -886,114 +929,126 @@ public class Printer implements Visitor {
             String sepStr = separator.toString();
             boolean first = true;
             for (Object s : elements) {
-                if (s == null)
+                if (s == null) {
                     continue;
+                }
 
-                if (first)
+                if (first) {
                     first = false;
-                else
+                } else {
                     append(sepStr);
+                }
 
                 append(s);
             }
         }
         return this;
-	}
+    }
 
     public static String formatComments(CharSequence indent, String commentBefore, String commentAfter, boolean mergeCommentsAfter, boolean allowLineComments, boolean skipLineAfter, String... otherComments) {
-        if (indent == null)
+        if (indent == null) {
             indent = "";
-		List<String> nakedComments = new ArrayList<String>();
-		List<String> src = new ArrayList<String>();
-		if (commentBefore != null)
-			src.add(commentBefore);
-		if (mergeCommentsAfter && commentAfter != null)
-			src.add(commentAfter);
-		src.addAll(Arrays.asList(otherComments));
+        }
+        List<String> nakedComments = new ArrayList<String>();
+        List<String> src = new ArrayList<String>();
+        if (commentBefore != null) {
+            src.add(commentBefore);
+        }
+        if (mergeCommentsAfter && commentAfter != null) {
+            src.add(commentAfter);
+        }
+        src.addAll(Arrays.asList(otherComments));
 
-		if (src.isEmpty())
-			return null;
+        if (src.isEmpty()) {
+            return null;
+        }
 
-		for (String c : src) {
-			if (c == null)
-				continue;
+        for (String c : src) {
+            if (c == null) {
+                continue;
+            }
 
-			c = Element.cleanComment(c).trim();
-			nakedComments.add(c);
-		}
+            c = Element.cleanComment(c).trim();
+            nakedComments.add(c);
+        }
 
-		String uniqueLine = null;
-		if (nakedComments.size() == 1 && !nakedComments.get(0).contains("\n"))
-			uniqueLine = nakedComments.get(0);
+        String uniqueLine = null;
+        if (nakedComments.size() == 1 && !nakedComments.get(0).contains("\n")) {
+            uniqueLine = nakedComments.get(0);
+        }
 
-		String suffix = skipLineAfter ? "\n" + indent : "";
-		if (uniqueLine != null && allowLineComments)
-			return "/// " + uniqueLine.replace("\\u", "\\\\u") + suffix;
+        String suffix = skipLineAfter ? "\n" + indent : "";
+        if (uniqueLine != null && allowLineComments) {
+            return "/// " + uniqueLine.replace("\\u", "\\\\u") + suffix;
+        }
 
 
-		String content = beginEachCommentLineWithStar ?
-			" * " + StringUtils.implode(nakedComments, "\n").replaceAll("\n", "<br>\n" + indent + " * ") + "\n" + indent :
-			"\t" + StringUtils.implode(nakedComments, "\n").replaceAll("\n", "<br>" + LINE_SEPARATOR + indent + "\t");
+        String content = beginEachCommentLineWithStar
+                ? " * " + StringUtils.implode(nakedComments, "\n").replaceAll("\n", "<br>\n" + indent + " * ") + "\n" + indent
+                : "\t" + StringUtils.implode(nakedComments, "\n").replaceAll("\n", "<br>" + LINE_SEPARATOR + indent + "\t");
 
-		return "/**" + LINE_SEPARATOR + indent + content.replace("\\u", "\\\\u") + " */" + suffix;
-	}
+        return "/**" + LINE_SEPARATOR + indent + content.replace("\\u", "\\\\u") + " */" + suffix;
+    }
 
     public Printer formatComments(Element e, boolean mergeCommentsAfter, boolean allowLineComments, boolean skipLineAfter, String... otherComments) {
         String cb = e.getCommentBefore(), ca = e.getCommentAfter();
-        if (cb != null || ca != null || otherComments.length > 0)
-    		append(formatComments(indent, cb, ca, mergeCommentsAfter, allowLineComments, skipLineAfter, otherComments));
+        if (cb != null || ca != null || otherComments.length > 0) {
+            append(formatComments(indent, cb, ca, mergeCommentsAfter, allowLineComments, skipLineAfter, otherComments));
+        }
         return this;
-	}
+    }
 
-	protected Printer modifiersStringPrefix(ModifiableElement e) {
+    protected Printer modifiersStringPrefix(ModifiableElement e) {
         return modifiersStringPrefix(e, true);
     }
+
     protected Printer modifiersStringPrefix(ModifiableElement e, boolean addSpace) {
         List<Modifier> modifiers = e.getModifiers();
         if (modifiers != null && !modifiers.isEmpty()) {
             implode(modifiers, " ");
-            if (addSpace)
+            if (addSpace) {
                 space();
+            }
         }
         return this;
-	}
+    }
 
     protected void variableDeclarationToString(TypeRef e, String varName, boolean isVarArg) {
         if (e instanceof FunctionSignature) {
-            FunctionSignature fs = (FunctionSignature)e;
+            FunctionSignature fs = (FunctionSignature) e;
             if (!isVarArg && fs.getFunction() != null && fs.getFunction().getName() != null) {
-				append(indent);
+                append(indent);
                 return;
             }
         } else if (e instanceof ArrayRef) {
-            ArrayRef ar = (ArrayRef)e;
+            ArrayRef ar = (ArrayRef) e;
             append(ar.getTarget(), isVarArg ? "... " : " ", varName);
             bracketsToString(ar);
             return;
         }
         append(e).append(isVarArg ? "... " : " ").append(varName);
-	}
+    }
 
     protected void bracketsToString(ArrayRef e) {
         append("[").implode(e.getDimensions(), "][").append("]");
     }
 
     protected void valueTypeAndStorageSuffix(StoredDeclarations e) {
-		if (e.getValueType() instanceof FunctionSignature) {
-			FunctionSignature sig = (FunctionSignature) e.getValueType();
-			if (sig.getFunction() != null) {
-				Identifier name = sig.getFunction().getName();
-				if (name != null && e.declarators.size() == 1) {
-					String stoName = e.declarators.get(0).resolveName();
-					if (name.equals(stoName) || stoName == null) {
-						append(sig);
+        if (e.getValueType() instanceof FunctionSignature) {
+            FunctionSignature sig = (FunctionSignature) e.getValueType();
+            if (sig.getFunction() != null) {
+                Identifier name = sig.getFunction().getName();
+                if (name != null && e.declarators.size() == 1) {
+                    String stoName = e.declarators.get(0).resolveName();
+                    if (name.equals(stoName) || stoName == null) {
+                        append(sig);
                         return;
                     }
-				}
-			}
-		}
-		append(e.getValueType()).space(!e.getDeclarators().isEmpty()).implode(e.getDeclarators(), ", ");
-	}
+                }
+            }
+        }
+        append(e.getValueType()).space(!e.getDeclarators().isEmpty()).implode(e.getDeclarators(), ", ");
+    }
 
     public static void printJava(Identifier packageName, Identifier className, Element rootElement, PrintWriter out) {
         final Map<String, Set<Identifier>> identifiersBySimpleName = new HashMap<String, Set<Identifier>>();
@@ -1001,27 +1056,29 @@ public class Printer implements Visitor {
         final String outputClassPrefix = className + ".";
 
         rootElement.accept(new Scanner() {
-
             @SuppressWarnings("unchecked")
-			@Override
+            @Override
             public void visitIdentifier(Identifier e) {
                 super.visitIdentifier(e);
-                
-                if (e.getParentElement() instanceof QualifiedIdentifier)
+
+                if (e.getParentElement() instanceof QualifiedIdentifier) {
                     return;
+                }
 
                 Element parent = e.getParentElement();
-                if (!(parent instanceof TypeRef))
+                if (!(parent instanceof TypeRef)) {
                     return;
+                }
 
                 e = e.clone();
                 SimpleIdentifier si = e.resolveLastSimpleIdentifier();
                 si.setTemplateArguments(Collections.EMPTY_LIST);
-                
+
                 String name = si.getName();
                 Set<Identifier> ids = identifiersBySimpleName.get(name);
-                if (ids == null)
+                if (ids == null) {
                     identifiersBySimpleName.put(name, ids = new HashSet<Identifier>());
+                }
 
                 ids.add(e);
             }
@@ -1030,82 +1087,86 @@ public class Printer implements Visitor {
         final Map<Identifier, String> resolvedIds = new HashMap<Identifier, String>();
         final Set<String> importedClassesStrings = new HashSet<String>(50);
         importedClassesStrings.add(className.toString());
-        
+
         String packagePrefix = packageName + ".";
-        
+
         Set<String> importStatements = new TreeSet<String>();
         for (Map.Entry<String, Set<Identifier>> kv : identifiersBySimpleName.entrySet()) {
             if (kv.getValue().size() == 1) {
                 Identifier id = kv.getValue().iterator().next();
                 String ids = id.toString();
-                if (ids.indexOf(".") < 0)
+                if (ids.indexOf(".") < 0) {
                     continue;
+                }
 
                 SimpleIdentifier si = id.resolveLastSimpleIdentifier();
                 String name = si.getName();
                 resolvedIds.put(id, name);
                 Identifier pack = id.resolveAllButLastIdentifier();
-                if (pack == null)
+                if (pack == null) {
                     continue;
+                }
 
                 String ps = pack.toString();
                 importedClassesStrings.add(ids);
-                
-                if (ps.equals("java.lang") || ps.equals(outputPackage) || ids.startsWith(outputClassPrefix))
+
+                if (ps.equals("java.lang") || ps.equals(outputPackage) || ids.startsWith(outputClassPrefix)) {
                     continue;
+                }
 
                 importStatements.add("import " + ids + ";");
             }
         }
 
-        for (String imp : importStatements)
+        for (String imp : importStatements) {
             out.println(imp);
+        }
 
         out.println(new Printer() {
-            
             @SuppressWarnings("unchecked")
-			@Override
+            @Override
             public void visitQualifiedIdentifier(QualifiedIdentifier e) {
 
                 if (e.getParentElement() instanceof TypeRef) {
                     QualifiedIdentifier c = e.clone();
                     SimpleIdentifier si = c.resolveLastSimpleIdentifier();
-					
+
                     List<Expression> targs = new ArrayList<Expression>(si.getTemplateArguments());
                     si.setTemplateArguments(Collections.EMPTY_LIST);
 
                     List<SimpleIdentifier> sis = new ArrayList<SimpleIdentifier>(c.resolveSimpleIdentifiers());
                     //for (String importedClassStr : importedClassesStrings) {
-                        Printer pt = new Printer();
-                        for (int i = 0, n = sis.size(); i < n; i++) {
-                            if (i != 0)
-                                pt.append(".");
-                            pt.append(sis.get(i));
-
-                            String str = pt.toString();
-                            if (importedClassesStrings.contains(str)) {
-                                for (int j = i; j-- != 0;)
-                                    sis.remove(j);
-
-                                c.setIdentifiers(sis);
-                                c.resolveLastSimpleIdentifier().setTemplateArguments(targs);//clones(e.resolveLastSimpleIdentifier().getTemplateArguments()));
-                                append(c);
-                                return;
-                            }
+                    Printer pt = new Printer();
+                    for (int i = 0, n = sis.size(); i < n; i++) {
+                        if (i != 0) {
+                            pt.append(".");
                         }
+                        pt.append(sis.get(i));
+
+                        String str = pt.toString();
+                        if (importedClassesStrings.contains(str)) {
+                            for (int j = i; j-- != 0;) {
+                                sis.remove(j);
+                            }
+
+                            c.setIdentifiers(sis);
+                            c.resolveLastSimpleIdentifier().setTemplateArguments(targs);//clones(e.resolveLastSimpleIdentifier().getTemplateArguments()));
+                            append(c);
+                            return;
+                        }
+                    }
                     //}
                 }
 
                 super.visitQualifiedIdentifier(e);
             }
-
         }.append(rootElement));
     }
 
-	public void visitTemplate(Template template) {
-		append("template <").implode(template.getArgs(), ", ").append(" >\n");
-		append(indent, template.getDeclaration());        
-	}
+    public void visitTemplate(Template template) {
+        append("template <").implode(template.getArgs(), ", ").append(" >\n");
+        append(indent, template.getDeclaration());
+    }
 
     @Override
     public void visitWhile(While whileStat) {
@@ -1114,9 +1175,7 @@ public class Printer implements Visitor {
         append(whileStat.getBody());
         deindent();
         append("\n", indent, "}");
-	}
-
-    
+    }
 
     @Override
     public void visitDoWhile(DoWhile doWhileStat) {
@@ -1125,9 +1184,8 @@ public class Printer implements Visitor {
         append(doWhileStat.getBody());
         deindent();
         append("\n", indent, "} while (").append(doWhileStat.getCondition()).append(");");
-	}
-    
-    
+    }
+
     @Override
     public void visitNamespace(Namespace ns) {
         append("namespace ").append(ns.getName()).append(" {\n");
@@ -1141,11 +1199,11 @@ public class Printer implements Visitor {
     public void visitDeclarations(Declarations decls) {
         implode(decls.getDeclarations(), "\n" + indent);
     }
-    
+
     @Override
     public void visitFor(For aFor) {
-    		append("for (").implode(aFor.getInitStatements(), ", ").append(";").append(aFor.getCondition()).append(";").implode(aFor.getPostStatements(), ", ").append(") {\n");
-    		indent();
+        append("for (").implode(aFor.getInitStatements(), ", ").append(";").append(aFor.getCondition()).append(";").implode(aFor.getPostStatements(), ", ").append(") {\n");
+        indent();
         append(aFor.getBody());
         deindent();
         append("\n", indent, "}");
@@ -1158,9 +1216,10 @@ public class Printer implements Visitor {
 
     public void visitDelete(Delete d) {
         append("delete");
-        if (d.isArray())
+        if (d.isArray()) {
             append("[]");
-        
+        }
+
         append(" ");
         append(d.getValue());
         append(";");
@@ -1184,8 +1243,8 @@ public class Printer implements Visitor {
     }
 
     public void visitStatementDeclaration(StatementDeclaration d) {
-        if (d.getStatement() != null)
+        if (d.getStatement() != null) {
             d.getStatement().accept(this);
+        }
     }
-    
 }
