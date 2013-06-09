@@ -28,6 +28,7 @@ import org.bridj.cpp.com.IUnknown;
 
 import com.ochafik.lang.jnaerator.BridJTypeConversion.NL4JConversion;
 import com.ochafik.lang.jnaerator.TypeConversion.ConvType;
+import com.ochafik.lang.jnaerator.TypeConversion.EnumItemResult;
 //import org.bridj.structs.StructIO;
 //import org.bridj.structs.Array;
 
@@ -84,7 +85,7 @@ public class BridJDeclarationsConverter extends DeclarationsConverter {
 			return;
 		
 		Identifier rawEnumName = getActualTaggedTypeName(e);
-        List<EnumItemResult> results = getEnumValuesAndCommentsByName(e, signatures, libraryClassName);
+        Map<String, EnumItemResult> results = result.typeConverter.getEnumValuesAndCommentsByName(e, libraryClassName);
         
         boolean hasEnumClass = false;
         
@@ -110,7 +111,7 @@ public class BridJDeclarationsConverter extends DeclarationsConverter {
             Struct body = new Struct();
             en.setBody(body);
             boolean hasValidItem = false;
-            for (EnumItemResult er : results) {
+            for (EnumItemResult er : results.values()) {
                 if (er.errorElement != null) {
                     out.addDeclaration(er.errorElement);
                     continue;

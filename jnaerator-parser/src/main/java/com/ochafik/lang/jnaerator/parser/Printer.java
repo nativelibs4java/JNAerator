@@ -574,7 +574,11 @@ public class Printer implements Visitor {
 
     public void visitCast(Cast e) {
         expressionPre(e);
-        append("(").append(e.getType()).append(")").append(e.getTarget());
+//        append("(");
+        append("(").append(e.getType()).append(")");
+        append(e.getTarget());
+//        append("(").append(e.getTarget()).append(")");
+//        append(")");
         expressionPost(e);
     }
 
@@ -1104,6 +1108,8 @@ public class Printer implements Visitor {
                 }
 
                 SimpleIdentifier si = id.resolveLastSimpleIdentifier();
+                if (si.isJavaStaticImportable())
+                    continue;
                 String name = si.getName();
                 resolvedIds.put(id, name);
                 Identifier pack = id.resolveAllButLastIdentifier();

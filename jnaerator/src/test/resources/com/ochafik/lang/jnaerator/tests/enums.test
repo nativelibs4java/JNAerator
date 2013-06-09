@@ -2,10 +2,21 @@
 enum { A, B = A * 2, C };
 enum { A2, B2, C2 = (UInt32)0xFCE00000 };
 
+#define SOME_CONSTANT 100
+
 enum E {
 	Item1,
-	Item2 = Item1 + 10
+	Item2 = 10,
+	Item3 = SOME_CONSTANT * 2,
+	Item4 = Item3 + 10
 };
+
+struct {
+  int x[Item2];
+  int y[Item3];
+  int z[Item4];
+} S;
+
 --
 #runtime(JNAerator)
 import test.*;
@@ -20,6 +31,8 @@ i = B2;
 i = C2;
 i = E.Item1;
 i = E.Item2;
+i = E.Item3;
+i = E.Item4;
 
 --
 #runtime(BridJ)
@@ -36,3 +49,5 @@ i = C2;
 E e;
 e = E.Item1;
 e = E.Item2;
+e = E.Item3;
+e = E.Item4;

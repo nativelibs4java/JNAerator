@@ -15,6 +15,7 @@ import com.sun.jna.WString;
 import com.sun.jna.ptr.ByReference;
 import com.sun.jna.ptr.PointerByReference;
 import java.nio.Buffer;
+import java.util.Map;
 /**
  *
  * @author ochafik
@@ -31,7 +32,15 @@ public class JNATypeConversion extends TypeConversion {
         result.prim("BOOL", JavaPrim.Boolean);
     }
  
-    public Expression getEnumItemValue(com.ochafik.lang.jnaerator.parser.Enum.EnumItem enumItem) { 
+    public Expression getEnumItemValue(com.ochafik.lang.jnaerator.parser.Enum.EnumItem enumItem, boolean forceConstants) { 
+//        Enum e = (Enum)enumItem.getParentElement();
+//        if (forceConstants) {
+//            Map<String, EnumItemResult> values = getEnumValuesAndCommentsByName(e, null);
+//            EnumItemResult enumResult = values.get(enumItem.getName());
+//            if (enumResult != null) {
+//                return enumResult.constantValue;
+//            }
+//        }
         return cast(typeRef(int.class), findEnumItem(enumItem));
     }
 
@@ -394,10 +403,11 @@ public class JNATypeConversion extends TypeConversion {
         throw new UnsupportedConversionException(valueType, null);
     }
     
-    public Pair<Expression, TypeRef> convertExpressionToJava(Expression x, Identifier libraryClassName, boolean promoteNativeLongToLong) throws UnsupportedConversionException {
+    @Override
+    public Pair<Expression, TypeRef> convertExpressionToJava(Expression x, Identifier libraryClassName, boolean promoteNativeLongToLong, boolean forceConstant, Map<String, Pair<Expression, TypeRef>> mappings) throws UnsupportedConversionException {
         if (x instanceof Expression.Cast) {
             TypeRef tpe = ((Expression.Cast) x).getType();
-            Pair<Expression, TypeRef> casted = convertExpressionToJava(((Expression.Cast) x).getTarget(), libraryClassName, promoteNativeLongToLong);
+            Pair<Expression, TypeRef> casted = convertExpressionToJava(((Expression.Cast) x).getTarget(), libraryClassName, promoteNativeLongToLong, forceConstant, mappings);
             
             TypeRef tr = convertTypeToJNA(tpe, TypeConversionMode.ExpressionType, libraryClassName);
             Expression val = casted.getFirst();
@@ -422,6 +432,6 @@ public class JNATypeConversion extends TypeConversion {
                 return typed(new Expression.TypeRefExpression(conv), conv);
             }
         }
-        return super.convertExpressionToJava(x, libraryClassName, promoteNativeLongToLong);
+        return super.convertExpressionToJava(x, libraryClassName, promoteNativeLongToLong, forceConstant, mappings);
     }
 }

@@ -47,6 +47,7 @@ public abstract class Identifier extends Element implements Comparable<Object> {
 	
 	public static class SimpleIdentifier extends Identifier {
 		private String name;
+                private boolean javaStaticImportable;
 		protected List<Expression> templateArguments = new ArrayList<Expression>();
 		
 		public SimpleIdentifier() {}
@@ -54,6 +55,16 @@ public abstract class Identifier extends Element implements Comparable<Object> {
 			setName(name);
 			setTemplateArguments(Arrays.asList(args));
 		}
+
+                public SimpleIdentifier setJavaStaticImportable(boolean javaStaticImportable) {
+                    this.javaStaticImportable = javaStaticImportable;
+                    return this;
+                }
+
+                public boolean isJavaStaticImportable() {
+                    return javaStaticImportable;
+                }
+
 		public void addTemplateArgument(Expression x) {
 			if (x == null)
 				return;

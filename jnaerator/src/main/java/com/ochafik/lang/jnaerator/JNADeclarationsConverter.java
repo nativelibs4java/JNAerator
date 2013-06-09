@@ -123,7 +123,7 @@ public class JNADeclarationsConverter extends DeclarationsConverter {
 			return;
 		
 		Identifier rawEnumName = getActualTaggedTypeName(e);
-        List<EnumItemResult> results = getEnumValuesAndCommentsByName(e, signatures, libraryClassName);
+        Map<String, EnumItemResult> results = result.typeConverter.getEnumValuesAndCommentsByName(e, libraryClassName);
 
 
         boolean hasEnumClass = false;
@@ -582,7 +582,7 @@ public class JNADeclarationsConverter extends DeclarationsConverter {
 					javaType = jr = new ArrayRef(typeRef(Pointer.class));
 					break;
 				} else {
-					Pair<Expression, TypeRef> c = result.typeConverter.convertExpressionToJava(x, callerLibraryName, false);
+					Pair<Expression, TypeRef> c = result.typeConverter.convertExpressionToJava(x, callerLibraryName, false, true, null);
 					c.getFirst().setParenthesis(dims.size() != 1);
 					if (mul == null)
 						mul = c.getFirst();

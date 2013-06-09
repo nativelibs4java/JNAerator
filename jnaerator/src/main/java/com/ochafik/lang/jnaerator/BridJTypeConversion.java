@@ -22,6 +22,7 @@ import com.ochafik.util.string.StringUtils;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import org.bridj.IntValuedEnum;
 import org.bridj.util.DefaultParameterizedType;
 /**
@@ -62,12 +63,21 @@ public class BridJTypeConversion extends TypeConversion {
     }
  
     @Override
-    public Expression getEnumItemValue(Enum.EnumItem enumItem) { 
+    public Expression getEnumItemValue(Enum.EnumItem enumItem, boolean forceConstants) { 
+        Enum e = (Enum)enumItem.getParentElement();
+        if (forceConstants) {
+            Map<String, EnumItemResult> values = getEnumValuesAndCommentsByName(e, null);
+            EnumItemResult enumResult = values.get(enumItem.getName());
+            if (enumResult != null) {
+                return enumResult.constantValue;
+            }
+        }
         Expression enumValue = findEnumItem(enumItem);
-        if (((Enum)enumItem.getParentElement()).getTag() != null)
-                enumValue = methodCall(enumValue, "value");
+        if (e.getTag() != null) {
+            enumValue = methodCall(enumValue, "value");
+        }
 		
-        return cast(typeRef(int.class), enumValue);
+        return cast(typeRef(int.class), enumValue.setParenthesis(true));
     }
     
     public class NL4JConversion {
@@ -208,7 +218,7 @@ public class BridJTypeConversion extends TypeConversion {
                     if (dim == null || dim instanceof Expression.EmptyArraySize)
                         continue;
                 
-                    Expression m = convertExpressionToJava(dim, libraryClassName, false).getFirst();
+                    Expression m = convertExpressionToJava(dim, libraryClassName, false, true, null).getFirst();
                     m.setParenthesis(false);
                     sizes.add(m);
                 }
@@ -340,7 +350,7 @@ public class BridJTypeConversion extends TypeConversion {
                 //javaType = jr = new ArrayRef(typeRef(Pointer.class));
                 //break;
             } else {
-                Pair<Expression, TypeRef> c = convertExpressionToJava(x, callerLibraryName, false);
+                Pair<Expression, TypeRef> c = convertExpressionToJava(x, callerLibraryName, false, true, null);
                 c.getFirst().setParenthesis(dims.size() > 1);
                 if (mul == null) {
                     mul = c.getFirst();
@@ -367,7 +377,7 @@ public class BridJTypeConversion extends TypeConversion {
 
             TypeRef.ArrayRef ar = (TypeRef.ArrayRef) type;
             for (Expression x : ar.getDimensions()) {
-                Expression c = convertExpressionToJava(x, libraryClassName, false).getFirst();
+                Expression c = convertExpressionToJava(x, libraryClassName, false, true, null).getFirst();
                 res = expr(res, Expression.BinaryOperator.Multiply, c);
             }
         } else if (type instanceof TypeRef.SimpleTypeRef || type instanceof TypeRef.Primitive) {
@@ -414,11 +424,11 @@ public class BridJTypeConversion extends TypeConversion {
         return res;
     }
     @Override
-    public Pair<Expression, TypeRef> convertExpressionToJava(Expression x, Identifier libraryClassName, boolean promoteNativeLongToLong) throws UnsupportedConversionException {
+    public Pair<Expression, TypeRef> convertExpressionToJava(Expression x, Identifier libraryClassName, boolean promoteNativeLongToLong, boolean forceConstants, Map<String, Pair<Expression, TypeRef>> mappings) throws UnsupportedConversionException {
         Pair<Expression, TypeRef> res = null;
         if (x instanceof Expression.Cast) {
             TypeRef tpe = ((Expression.Cast) x).getType();
-            Pair<Expression, TypeRef> casted = convertExpressionToJava(((Expression.Cast) x).getTarget(), libraryClassName, promoteNativeLongToLong);
+            Pair<Expression, TypeRef> casted = convertExpressionToJava(((Expression.Cast) x).getTarget(), libraryClassName, promoteNativeLongToLong, forceConstants, mappings);
             
             NL4JConversion conv = convertTypeToNL4J(tpe, libraryClassName, null, null, -1, -1);
             TypeRef tr = conv.typeRef;
@@ -440,7 +450,7 @@ public class BridJTypeConversion extends TypeConversion {
             }
         }
         if (res == null) {
-            return super.convertExpressionToJava(x, libraryClassName, promoteNativeLongToLong);
+            return super.convertExpressionToJava(x, libraryClassName, promoteNativeLongToLong, forceConstants, mappings);
         }
         if (res.getFirst() == null) {
             return null;

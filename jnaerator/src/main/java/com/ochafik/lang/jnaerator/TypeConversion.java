@@ -92,6 +92,7 @@ import com.sun.jna.ptr.LongByReference;
 import com.sun.jna.ptr.NativeLongByReference;
 import com.sun.jna.ptr.PointerByReference;
 import com.sun.jna.ptr.ShortByReference;
+import java.util.LinkedHashMap;
 
 public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
 
@@ -1086,7 +1087,7 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
     		return ((Constant)expr).getType();
     }
 
-    public abstract Expression getEnumItemValue(EnumItem enumItem);
+    public abstract Expression getEnumItemValue(EnumItem enumItem, boolean forceConstant);
     
     public TypeRef convertToJavaType(Constant.Type type) {
         switch (type) {
@@ -1131,7 +1132,9 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
         }
 
         Enum e = (Enum) parent;
-        Identifier ident = ident(result.getLibraryClassFullName(library), result.declarationsConverter.getActualTaggedTypeName(e), ident(enumItem.getName()));
+        Identifier enumItemName = ident(enumItem.getName());
+        enumItemName.resolveLastSimpleIdentifier().setJavaStaticImportable(true);
+        Identifier ident = ident(result.getLibraryClassFullName(library), result.declarationsConverter.getActualTaggedTypeName(e), enumItemName);
         return expr(typeRef(ident).setMarkedAsResolved(true));
     }
     /// @see http://java.sun.com/docs/books/tutorial/java/nutsandbolts/_keywords.html
@@ -1288,17 +1291,17 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
     }
     
     
-    public Pair<Expression, TypeRef> convertExpressionToJava(Expression x, Identifier libraryClassName, boolean promoteNativeLongToLong) throws UnsupportedConversionException {
+    public Pair<Expression, TypeRef> convertExpressionToJava(Expression x, Identifier libraryClassName, boolean promoteNativeLongToLong, boolean forceConstants, Map<String, Pair<Expression, TypeRef>> mappings) throws UnsupportedConversionException {
         Pair<Expression, TypeRef> res = null;
         if (x instanceof Expression.AssignmentOp) {
-            Pair<Expression, TypeRef> convTarget = convertExpressionToJava(((Expression.AssignmentOp) x).getTarget(), libraryClassName, promoteNativeLongToLong),
-                    convValue = convertExpressionToJava(((Expression.AssignmentOp) x).getValue(), libraryClassName, promoteNativeLongToLong);
+            Pair<Expression, TypeRef> convTarget = convertExpressionToJava(((Expression.AssignmentOp) x).getTarget(), libraryClassName, promoteNativeLongToLong, forceConstants, mappings),
+                    convValue = convertExpressionToJava(((Expression.AssignmentOp) x).getValue(), libraryClassName, promoteNativeLongToLong, forceConstants, mappings);
 
             res = typed(expr(convTarget.getFirst(), Expression.AssignmentOperator.Equal, convValue.getFirst()), convTarget.getSecond());
         } else if (x instanceof Expression.BinaryOp) {
             Expression.BinaryOp bop = (Expression.BinaryOp) x;
-            Pair<Expression, TypeRef> conv1 = convertExpressionToJava(bop.getFirstOperand(), libraryClassName, promoteNativeLongToLong),
-                    conv2 = convertExpressionToJava(bop.getSecondOperand(), libraryClassName, promoteNativeLongToLong);
+            Pair<Expression, TypeRef> conv1 = convertExpressionToJava(bop.getFirstOperand(), libraryClassName, promoteNativeLongToLong, forceConstants, mappings),
+                    conv2 = convertExpressionToJava(bop.getSecondOperand(), libraryClassName, promoteNativeLongToLong, forceConstants, mappings);
 
             if (conv1 != null && conv2 != null) {
                 TypeRef t1 = conv1.getSecond(), t2 = conv2.getSecond();
@@ -1348,7 +1351,7 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
             if (op == Expression.UnaryOperator.Not) {
                 throw new UnsupportedConversionException(x, null); // TODO handle this properly ?
             }
-            Pair<Expression, TypeRef> conv = convertExpressionToJava(((Expression.UnaryOp) x).getOperand(), libraryClassName, promoteNativeLongToLong);
+            Pair<Expression, TypeRef> conv = convertExpressionToJava(((Expression.UnaryOp) x).getOperand(), libraryClassName, promoteNativeLongToLong, forceConstants, mappings);
 
             res = typed(expr(op, conv.getFirst()), conv.getSecond());
         } else if (x instanceof Expression.Constant) {
@@ -1412,7 +1415,13 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
 //                }
             }
         } else if (x instanceof Expression.VariableRef) {
-            res = convertVariableRefToJava(((Expression.VariableRef) x).getName(), libraryClassName, promoteNativeLongToLong);
+            Identifier name = ((Expression.VariableRef) x).getName();
+            Pair<Expression, TypeRef> mapping = mappings == null ? null : mappings.get(name.toString());
+            if (mapping != null) {
+                res = mapping;
+            } else {
+                res = convertVariableRefToJava(name, libraryClassName, promoteNativeLongToLong, forceConstants);
+            }
         }
         if (res == null) {
 //			return convertExpressionToJava(x);
@@ -1425,8 +1434,84 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
         return (Pair<Expression, TypeRef>) res;
     }
     
+    static class EnumItemResult {
 
-    private Pair<Expression, TypeRef> convertVariableRefToJava(Identifier name, Identifier libraryClassName, boolean promoteNativeLongToLong) {
+        public Enum.EnumItem originalItem;
+        public Expression convertedValue, unconvertedValue, constantValue;
+        public String comments;
+        public String exceptionMessage;
+        public Declaration errorElement;
+    }
+    
+    protected Map<String, EnumItemResult> getEnumValuesAndCommentsByName(Enum e, Identifier libraryClassName) {
+        Map<String, EnumItemResult> ret = new LinkedHashMap<String, EnumItemResult>();
+        Integer lastAdditiveValue = null;
+        Expression lastRefValue = null;
+        boolean failedOnceForThisEnum = false;
+        Map<String, Pair<Expression, TypeRef>> mappings = new HashMap<String, Pair<Expression, TypeRef>>();
+        for (com.ochafik.lang.jnaerator.parser.Enum.EnumItem item : e.getItems()) {
+            EnumItemResult res = new EnumItemResult();
+            res.originalItem = item;
+            try {
+                if (item.getArguments().isEmpty()) {
+                    // no explicit value
+                    if (lastRefValue == null) {
+                        if (lastAdditiveValue != null) {
+                            lastAdditiveValue++;
+                            res.unconvertedValue = expr(lastAdditiveValue);
+                        } else {
+                            if (item == e.getItems().get(0)) {
+                                lastAdditiveValue = 0;
+                                res.unconvertedValue = expr(lastAdditiveValue);
+                            } else {
+                                res.unconvertedValue = null;
+                            }
+                        }
+                    } else {
+                        // has a last reference value
+                        if (lastAdditiveValue != null) {
+                            lastAdditiveValue++;
+                        } else {
+                            lastAdditiveValue = 1;
+                        }
+
+                        res.unconvertedValue = expr(
+                                lastRefValue.clone(),
+                                Expression.BinaryOperator.Plus,
+                                expr(lastAdditiveValue));
+                    }
+                } else {
+                    // has an explicit value
+                    failedOnceForThisEnum = false;// reset skipping
+                    lastAdditiveValue = null;
+                    lastRefValue = item.getArguments().get(0);
+                    res.unconvertedValue = lastRefValue;
+                    if (lastRefValue instanceof Expression.Constant) {
+                        try {
+                            lastAdditiveValue = ((Expression.Constant) lastRefValue).asInteger();
+                            lastRefValue = null;
+                        } catch (Exception ex) {
+                        }
+                    }
+                }
+                res.convertedValue = result.typeConverter.convertExpressionToJava(res.unconvertedValue, libraryClassName, true, false, mappings).getFirst();
+                res.constantValue = result.typeConverter.convertExpressionToJava(res.unconvertedValue, libraryClassName, true, true, mappings).getFirst();
+                mappings.put(item.getName(), typed(res.constantValue, typeRef(int.class)));
+            } catch (Exception ex) {
+                failedOnceForThisEnum = true;
+                res.exceptionMessage = ex.toString();
+            }
+            failedOnceForThisEnum = failedOnceForThisEnum || res.errorElement != null;
+            if (failedOnceForThisEnum) {
+                res.errorElement = result.declarationsConverter.skipDeclaration(item);
+            }
+
+            ret.put(item.getName(), res);
+        }
+        return ret;
+    }
+    
+    private Pair<Expression, TypeRef> convertVariableRefToJava(Identifier name, Identifier libraryClassName, boolean promoteNativeLongToLong, boolean forceConstants) {
         
         if (name != null) {
             Define define = result.defines.get(name);
@@ -1440,7 +1525,7 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
                         return typed(findDefine(name), convertToJavaType(constant.getType()));
                     }
 
-                    return convertExpressionToJava(defineValue, libraryClassName, promoteNativeLongToLong);
+                    return convertExpressionToJava(defineValue, libraryClassName, promoteNativeLongToLong, forceConstants, null);
                 }
             } else {
                 String sname = name.toString();
@@ -1451,7 +1536,7 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
                 } else {
                     Enum.EnumItem enumItem = result.enumItems.get(name);
                     if (enumItem != null) {
-                        return typed(getEnumItemValue(enumItem), typeRef(Integer.TYPE));
+                        return typed(getEnumItemValue(enumItem, forceConstants), typeRef(Integer.TYPE));
                     } else {
                         VariablesDeclaration constant = result.globalVariablesByName.get(name);
                         if (constant != null) {

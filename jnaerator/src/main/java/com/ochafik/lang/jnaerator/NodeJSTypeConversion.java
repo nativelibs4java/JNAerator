@@ -25,7 +25,7 @@ public class NodeJSTypeConversion extends TypeConversion {
     }
 
     @Override
-    public Expression getEnumItemValue(EnumItem enumItem) {
+    public Expression getEnumItemValue(EnumItem enumItem, boolean forceConstants) {
         return varRef(enumItem.getName());
     }
     
