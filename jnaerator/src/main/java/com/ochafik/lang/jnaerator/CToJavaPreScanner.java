@@ -145,19 +145,19 @@ public class CToJavaPreScanner extends Scanner {
         super.visitFunction(function);
     }
     
-    
-	
-	@Override
-	public void visitTaggedTypeRefDeclaration(TaggedTypeRefDeclaration taggedTypeRefDeclaration) {
-		super.visitTaggedTypeRefDeclaration(taggedTypeRefDeclaration);
-		TaggedTypeRef tr = taggedTypeRefDeclaration.getTaggedTypeRef();
-		if (tr != null) {
-			String before = tr.getCommentBefore();
-			tr.setCommentBefore(taggedTypeRefDeclaration.getCommentBefore());
-			tr.addToCommentBefore(before);
-			taggedTypeRefDeclaration.setCommentBefore(null);
-		}
-	}
+
+
+    @Override
+    public void visitTaggedTypeRefDeclaration(TaggedTypeRefDeclaration taggedTypeRefDeclaration) {
+        TaggedTypeRef tr = taggedTypeRefDeclaration.getTaggedTypeRef();
+        if (tr != null) {
+            String before = tr.getCommentBefore();
+            tr.setCommentBefore(taggedTypeRefDeclaration.getCommentBefore());
+            tr.addToCommentBefore(before);
+            taggedTypeRefDeclaration.setCommentBefore(null);
+        }
+        super.visitTaggedTypeRefDeclaration(taggedTypeRefDeclaration);
+    }
 
     @Override
     protected void visitStoredDeclarations(StoredDeclarations d) {

@@ -182,7 +182,7 @@ template <typename _CharT, typename _Traits = char_traits<_CharT >, typename _Al
 class basic_string;
 template < > struct char_traits<char >;
 --
-/// Struct comment
+/** Struct comment */
 struct ParamBlockRec {
 	int ok; // comment after ok
 };
@@ -195,12 +195,12 @@ static inline int isascii(int _c) {
 	return (_c & ~0x7F) == 0;
 }
 --
-/// these are comments...
+/** these are comments... */
 void* CreateHandle(int size);
 --
 void** ResizeHandle(void** h, int size);
 --
-/// typedef bool BOOL;
+/** typedef bool BOOL; */
 class NSMapTable;
 BOOL (*isEqual)(NSMapTable* table, const void*, const void*);
 --
@@ -301,7 +301,7 @@ struct VolumeParam;
 struct CntrlParam;
 struct SlotDevParam;
 struct MultiDevParam;
-/// Test of comments before
+/** Test of comments before */
 union ParamBlockRec {
 	IOParam ioParam;
 	FileParam fileParam;

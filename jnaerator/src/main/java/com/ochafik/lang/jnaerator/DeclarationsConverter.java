@@ -392,13 +392,13 @@ public abstract class DeclarationsConverter {
                         true,
                         true,
                         true);
-                if (!result.config.noComments) {
-                    if (ct != null && hasEnumClass) {
-                        String c = ct.getCommentBefore();
-                        ct.setCommentBefore(er.originalItem.getCommentBefore());
-                        ct.addToCommentBefore(c);
-                    }
-                }
+//                if (!result.config.noComments) {
+//                    if (ct != null && hasEnumClass) {
+//                        String c = ct.getCommentBefore();
+//                        ct.setCommentBefore(er.originalItem.getCommentBefore());
+//                        ct.addToCommentBefore(c);
+//                    }
+//                }
                 out.addDeclaration(ct);
             } catch (Exception ex) {
                 out.addDeclaration(skipDeclaration(er.originalItem, ex.toString()));
