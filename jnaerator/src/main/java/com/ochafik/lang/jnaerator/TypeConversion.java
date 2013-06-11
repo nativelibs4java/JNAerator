@@ -430,15 +430,14 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
             return null;
         }
 
-//		if (valueType.toString().equals("CGFunctionEvaluateCallback"))
-//			valueType = valueType;
-
         if (valueType instanceof TaggedTypeRef && convertToJavaRef) {
             TaggedTypeRef ttr = (TaggedTypeRef) valueType;
             if (ttr.getTag() != null) {
-
-                TypeRef ref = ttr instanceof Struct ? findStructRef(ttr.getTag(), libraryClassName)
-                        : ttr instanceof Enum && convertEnumToJavaRef ? findEnum(ttr.getTag(), libraryClassName) : null;
+                TypeRef ref = ttr instanceof Struct ? 
+                    findStructRef(ttr.getTag(), libraryClassName) : 
+                    ttr instanceof Enum && convertEnumToJavaRef ? 
+                        findEnum(ttr.getTag(), libraryClassName) : 
+                        null;
                 if (ref == null && convertEnumToJavaRef) {
                     return ref;
                 }
@@ -524,7 +523,7 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
                         TypeRef tr = typeDefsEncountered.add(name) ? result.getTypeDef(name) : null;
                         if (tr != null) {
                             if (!isResoluble(tr, libraryClassName)) {
-                                if (convertToJavaRef)
+                                if (convertToJavaRef)// && !(tr instanceof TargettedTypeRef))
                                     simpleTypeRef.replaceBy(typeRef(result.getFakePointer(libraryClassName, name)));
                                 else
                                     simpleTypeRef.replaceBy(resolveTypeDef(tr.clone(), libraryClassName, convertToJavaRef, convertEnumToJavaRef, typeDefsEncountered));
@@ -584,7 +583,7 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
         });
         TypeRef tr = holder.getValueType();
 //		tr.setParentElement(valueType.getParentElement());
-        return tr == null ? null : tr == valueTypeCl ? valueType : tr.clone();
+        return tr == null ? null : tr == valueTypeCl || convertToJavaRef ? valueType : tr.clone();
     }
 
     public static class JavaPrimitive extends Primitive {
