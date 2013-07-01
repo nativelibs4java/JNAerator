@@ -115,7 +115,8 @@ public enum ModifierType implements Modifier {
 	Public(of(Publicity)),
 	Abstract(of(Publicity)),
 	Final(of(Publicity)),
-	Private(of(Publicity)), 
+        __private(of(Publicity)), // or of(OpenCL)
+	Private(__private), 
 	Protected(of(Publicity)),
 	Explicit(of(Publicity, StorageClassSpecifier)), 
 	
@@ -234,8 +235,15 @@ public enum ModifierType implements Modifier {
     __write_only(of(OpenCL)),
     __local(of(OpenCL)),
     __constant(of(OpenCL)),
-    __private(of(OpenCL)),
-
+//    __private(of(OpenCL)),
+    
+    kernel(__kernel),
+    global(__global),
+    read_only(__read_only),
+    write_only(__write_only),
+    local(__local),
+    constant(__constant),
+    
     Synchronized(of(Java)),
 	Native(of(Java));
 	
