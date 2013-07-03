@@ -85,7 +85,7 @@ public class Result extends Scanner {
             enumsFullNames = new HashSet<Identifier>(),
             unionsFullNames = new HashSet<Identifier>(),
             callbacksFullNames = new HashSet<Identifier>();
-    
+
     /**
      * @param config
      * @param classOutputter

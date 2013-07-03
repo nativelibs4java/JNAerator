@@ -14,7 +14,7 @@ import java.util.logging.Logger;
 import org.anarres.cpp.LexerException;
 
 /**
-mvn compile exec:java -Dexec.mainClass=com.ochafik.lang.jnaerator.CSlicer
+ * mvn compile exec:java -Dexec.mainClass=com.ochafik.lang.jnaerator.CSlicer
  */
 public class CSlicer {
 
@@ -23,10 +23,12 @@ public class CSlicer {
     }
 
     private void pop(BlockType blockType) {
-        if (blocks.isEmpty())
+        if (blocks.isEmpty()) {
             throw new RuntimeException("Empty blocks, got closing " + blockType);
-        if (blocks.pop() != blockType)
+        }
+        if (blocks.pop() != blockType) {
             System.out.println("bad pop");
+        }
     }
 
     enum BlockType {
@@ -43,6 +45,7 @@ public class CSlicer {
     Stack<BlockType> blocks = new Stack<BlockType>();
     StringBuilder content = new StringBuilder();
     int semiColonCount;
+
     void appendLine(String s) {
         for (char c : s.toCharArray()) {
             append(c);
@@ -92,20 +95,22 @@ public class CSlicer {
                 state = State.String;
                 break;
             case SingleLineComment:
-                if (c == '\n')
+                if (c == '\n') {
                     state = State.Normal;
+                }
                 break;
             case MultilineComment:
-                if (c == '*')
+                if (c == '*') {
                     state = State.StarInMultilineComment;
+                }
                 break;
             case StarInMultilineComment:
                 if (c == '/') {
                     state = State.Normal;
                     return;
-                }
-                else
+                } else {
                     state = State.MultilineComment;
+                }
                 break;
             case Normal:
                 switch (c) {
@@ -162,7 +167,7 @@ public class CSlicer {
     public int getSemiColonCount() {
         return semiColonCount;
     }
-    
+
     public static String removeComments(String s) {
         CSlicer tester = new CSlicer();
         tester.appendLine(s);
@@ -180,20 +185,25 @@ public class CSlicer {
 //        }
 //        return ret;
 //    }
+
     public static String[] getLines(String source) {
         String[] lines = source.split("\n");
         List<String> ret = new ArrayList<String>(lines.length);
         for (String line : lines) {
             String s = line.trim();
-            if (s.length() != 0)
+            if (s.length() != 0) {
                 ret.add(s);
+            }
         }
         return ret.toArray(new String[ret.size()]);
-            
+
     }
+
     interface Callback {
+
         boolean apply(CharSequence content, int semiColonCount);
     }
+
     public static void getParseableIncrements(String source, Callback cb) {
         String[] lines = getLines(source);
         CSlicer tester = new CSlicer();
@@ -201,27 +211,31 @@ public class CSlicer {
             //System.out.print('.');
             tester.appendLine(line);
             if (tester.isParsable()) {
-                if (!cb.apply(tester.getContent(), tester.getSemiColonCount()))
+                if (!cb.apply(tester.getContent(), tester.getSemiColonCount())) {
                     break;
+                }
             } else {
                 //System.err.println("Not parseable : state = " + tester.state + ", blocks = " + StringUtils.implode(tester.blocks, ","));
             }
         }
     }
+
     public static void main(String[] args) throws IOException, LexerException {
         String source = preprocess(new File("test.h"));
         source = removeComments(source);
-        
+
         getParseableIncrements(source, new Callback() {
             int lastDeclCount, lastSemiCount, lastContentLength;
             int nErr;
+
             @Override
             public boolean apply(CharSequence content, int semiColonCount) {
                 try {
                     //System.out.print('c');
-                    if (semiColonCount == lastSemiCount) 
+                    if (semiColonCount == lastSemiCount) {
                         return true;
-                    
+                    }
+
                     String source = content.toString() + ";";
                     List<Declaration> decls = parseDeclarations(source);
                     int nDecls = decls.size();
@@ -255,6 +269,7 @@ public class CSlicer {
             }
         });
     }
+
     static String preprocess(File source) throws IOException, LexerException {
         JNAeratorConfig config = new JNAeratorConfig();
         JNAeratorConfigUtils.autoConfigure(config);
@@ -266,6 +281,7 @@ public class CSlicer {
         String pre = PreprocessorUtils.preprocessSources(config, Collections.EMPTY_LIST, false, result.typeConverter, null);
         return pre;
     }
+
     static List<Declaration> parseDeclarations(String source) throws IOException, LexerException, InterruptedException {
         JNAeratorConfig config = new JNAeratorConfig();
         JNAeratorConfigUtils.autoConfigure(config);
@@ -273,22 +289,24 @@ public class CSlicer {
         config.preprocessorConfig.includeStrings.add(source);
         Result result = new Result(config, null, null);
         SourceFiles parse = new JNAeratorParser().parse(config, result.typeConverter, null);
-        
+
         List<Declaration> ret = new ArrayList<Declaration>();
         flatten(parse, ret);
         return ret;
     }
+
     static void flatten(Element element, List<Declaration> out) {
         if (element instanceof SourceFiles) {
-            for (SourceFile f : ((SourceFiles)element).getSourceFiles())
+            for (SourceFile f : ((SourceFiles) element).getSourceFiles()) {
                 flatten(f, out);
+            }
         }
         if (element instanceof DeclarationsHolder) {
-            for (Declaration d : ((DeclarationsHolder)element).getDeclarations())
+            for (Declaration d : ((DeclarationsHolder) element).getDeclarations()) {
                 flatten(d, out);
+            }
         } else if (element instanceof Declaration) {
-            out.add((Declaration)element);
+            out.add((Declaration) element);
         }
     }
-    
 }

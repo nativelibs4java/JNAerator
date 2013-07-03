@@ -23,5 +23,4 @@ public class NodeJSGlobalsGenerator extends GlobalsGenerator {
     protected void convertGlobals(VariablesDeclaration globals, Signatures signatures, DeclarationsHolder out, Expression nativeLibFieldExpr, Identifier callerLibraryName, String callerLibrary) throws UnsupportedConversionException {
 //        throw new UnsupportedOperationException("Not supported yet.");
     }
-    
 }

@@ -56,9 +56,8 @@ public class NodeJSDeclarationsConverter extends DeclarationsConverter {
     protected void configureCallbackStruct(Struct callbackStruct) {
         //throw new UnsupportedOperationException("Not supported yet.");
     }
-    
+
     public void convertCallback(TypeRef.FunctionSignature functionSignature, Signatures signatures, DeclarationsHolder out, Identifier callerLibraryName) {
-        
     }
 //    public void convertConstants(String library, List<Define> defines, Element sourcesRoot, final Signatures signatures, final DeclarationsHolder out, final Identifier libraryClassName) {
 //    }
@@ -73,15 +72,18 @@ public class NodeJSDeclarationsConverter extends DeclarationsConverter {
     }
 
     Expression.Constant.Type getValueConstantType(Expression value) {
-        if (value instanceof Expression.Cast)
-            return getValueConstantType(((Expression.Cast)value).getTarget());
-        if (value instanceof Expression.BinaryOp)
-            return getValueConstantType(((Expression.BinaryOp)value).getFirstOperand());
-        if (value instanceof Expression.Constant)
-            return ((Expression.Constant)value).getType();
+        if (value instanceof Expression.Cast) {
+            return getValueConstantType(((Expression.Cast) value).getTarget());
+        }
+        if (value instanceof Expression.BinaryOp) {
+            return getValueConstantType(((Expression.BinaryOp) value).getFirstOperand());
+        }
+        if (value instanceof Expression.Constant) {
+            return ((Expression.Constant) value).getType();
+        }
         throw new UnsupportedConversionException(value, "Unknown value type");
     }
-    
+
     @Override
     protected void convertDefine(Define define, DeclarationsHolder out, Signatures signatures, Identifier libraryClassName) {
         Expression value = define.getValue();
@@ -121,44 +123,47 @@ public class NodeJSDeclarationsConverter extends DeclarationsConverter {
                 throw new UnsupportedConversionException(value, "Constant type not supported yet");
         }
         initBlock.addStatement(stat(methodCall(varRef(initTarget), MemberRefStyle.Arrow, "Set",
-            methodCall(ident("v8", "String", "NewSymbol"), expr(name)),
-            expr)));
+                methodCall(ident("v8", "String", "NewSymbol"), expr(name)),
+                expr)));
     }
-    
-    
+
     Block getInitMethodBody(DeclarationsHolder decls) {
         for (Declaration decl : decls.getDeclarations()) {
             if (decl instanceof Function) {
-                return ((Function)decl).getBody();
+                return ((Function) decl).getBody();
             }
         }
         throw new RuntimeException("Init method not found in " + decls);
-        
+
     }
 
     static Identifier ident(String... components) {
         return ElementsHelper.ident(Identifier.QualificationSeparator.Colons, components);
     }
+
     static Expression newV8String(String s) {
         return methodCall(ident("v8", "String", "New"), expr(s));
     }
+
     static Expression arrowMethodCall(Expression target, String name, Expression... args) {
         return methodCall(target, Expression.MemberRefStyle.Arrow, name, args);
     }
-    
     static final String argsName = "_arguments_";
     static final String returnValueName = "_return_";
     static final String scopeName = "_scope_";
     static final String initTarget = "_target_";
     static final String dummyNodeBufferFreeCallbackName = "_dummy_node_buffer_free_callback_";
-    
+
     private enum NodeType {
+
         Pointer, String, Number, Boolean, VAList, Unknown, Void
     };
+
     private TypeRef resolveTypeDef(TypeRef typeRef) {
         TypeRef tr = result.typeConverter.resolveTypeDef(typeRef, null, false, false);
         return tr;
     }
+
     private NodeType getNodeType(TypeRef tr) {
         if (tr instanceof TypeRef.TargettedTypeRef) {
             TypeRef.TargettedTypeRef ttr = (TypeRef.TargettedTypeRef) tr;
@@ -180,36 +185,37 @@ public class NodeJSDeclarationsConverter extends DeclarationsConverter {
             } else {
                 return NodeType.Number;
             }
-        } else if (tr instanceof TypeRef.FunctionSignature)
+        } else if (tr instanceof TypeRef.FunctionSignature) {
             return NodeType.Pointer;
+        }
         return NodeType.Unknown;
     }
+
     @Override
     protected void convertFunction(Function function, Signatures signatures, boolean callback, DeclarationsHolder objOut, Identifier libraryClassName, String sig, Identifier functionName, String library, int iConstructor) {
-        String methodName = library + "_" + (function.getParentElement() instanceof Struct ? ((Struct)function.getParentElement()).getTag() + "_" : "") + function.getName();
+        String methodName = library + "_" + (function.getParentElement() instanceof Struct ? ((Struct) function.getParentElement()).getTag() + "_" : "") + function.getName();
         Function method = new Function(Function.Type.CppMethod, ident(methodName), typeRef(v8Ident("Handle", v8Ident("Value"))));
         method.addArg(new Arg(argsName, new TypeRef.Pointer(typeRef(v8Ident("Arguments")), Declarator.PointerStyle.Reference).addModifiers(ModifierType.Const)));
         Block body = new Block();
-        
+
         //if (args.Length() != 4) {
         //return THROW_ERROR_EXCEPTION("ffi_call() requires 4 arguments!");
         List<Arg> args = function.getArgs();
         int argCount = args.size();
         body.addStatement(
-            new If(
+                new If(
                 expr(methodCall(varRef(argsName), "Length"), BinaryOperator.IsDifferent, expr(argCount)),
                 new Return(
-                    methodCall(v8Ident("ThrowException"), 
-                        newV8String(functionName + "() requires " + argCount + " arguments!")))
-            )
-        );
-        
+                methodCall(v8Ident("ThrowException"),
+                newV8String(functionName + "() requires " + argCount + " arguments!")))));
+
         List<Expression> params = new ArrayList<Expression>();
         for (int iArg = 0; iArg < argCount; iArg++) {
             Arg arg = args.get(iArg);
-            if (arg.isVarArg())
+            if (arg.isVarArg()) {
                 throw new UnsupportedConversionException(function, "varargs not supported yet");
-            
+            }
+
             TypeRef tr = resolveTypeDef(arg.getValueType());
             NodeType argNodeType = getNodeType(tr);
             Expression typeTest = null;
@@ -224,23 +230,23 @@ public class NodeJSDeclarationsConverter extends DeclarationsConverter {
                     typeErrorMessage = "expected a String";
                     argDeclExpr = arrowMethodCall(argExpr.clone(), "ToString");
                     argType = typeRef(v8Ident("Handle", v8Ident("String")));
-                    argUsageExpr = cast(transformTypeForCast(arg.getValueType()), 
-                        expr(UnaryOperator.Dereference, 
+                    argUsageExpr = cast(transformTypeForCast(arg.getValueType()),
+                            expr(UnaryOperator.Dereference,
                             methodCall(ident("v8", "String", "AsciiValue"),
-                                varRef(arg.getName()))));
+                            varRef(arg.getName()))));
                     break;
                 case Pointer:
                     typeTest = expr(
-                        methodCall(argExpr.clone(), MemberRefStyle.Arrow, "IsNull"),
-                        BinaryOperator.Or,
-                        methodCall(ident("node", "Buffer", "HasInstance"), argExpr));
+                            methodCall(argExpr.clone(), MemberRefStyle.Arrow, "IsNull"),
+                            BinaryOperator.Or,
+                            methodCall(ident("node", "Buffer", "HasInstance"), argExpr));
                     typeErrorMessage = "expected a Buffer";
-                    argDeclExpr = 
-                        new Expression.ConditionalExpression(
+                    argDeclExpr =
+                            new Expression.ConditionalExpression(
                             methodCall(argExpr.clone(), MemberRefStyle.Arrow, "IsNull"),
                             varRef("NULL"),
-                            methodCall(ident("node", "Buffer", "Data"), 
-                                methodCall(argExpr.clone(), Expression.MemberRefStyle.Dot, templateIdent(ident("As"), varRef(v8Ident("Object"))))));
+                            methodCall(ident("node", "Buffer", "Data"),
+                            methodCall(argExpr.clone(), Expression.MemberRefStyle.Dot, templateIdent(ident("As"), varRef(v8Ident("Object"))))));
                     argType = new TypeRef.Pointer(typeRef(ident("char")), Declarator.PointerStyle.Pointer);
                     argUsageExpr = cast(transformTypeForCast(arg.getValueType()), varRef(arg.getName()));
                     break;
@@ -259,24 +265,26 @@ public class NodeJSDeclarationsConverter extends DeclarationsConverter {
                 case Void:
                     throw new UnsupportedConversionException(arg, "Cannot convert arguments of type " + tr);
             }
-            
+
             if (typeTest != null) {
                 body.addStatement(
-                    new If(
+                        new If(
                         expr(UnaryOperator.Not, typeTest),
                         new Return(
-                            methodCall(v8Ident("ThrowException"),
-                                methodCall(ident("v8", "Exception", "TypeError"),
-                                    newV8String("Invalid value for argument '" + arg.getName() + "' at index " + iArg + (typeErrorMessage == null ? "" : ": " + typeErrorMessage)))))));
+                        methodCall(v8Ident("ThrowException"),
+                        methodCall(ident("v8", "Exception", "TypeError"),
+                        newV8String("Invalid value for argument '" + arg.getName() + "' at index " + iArg + (typeErrorMessage == null ? "" : ": " + typeErrorMessage)))))));
             }
-            
-            if (argDeclExpr != null)
+
+            if (argDeclExpr != null) {
                 body.addStatement(stat(new VariablesDeclaration(argType, new Declarator.DirectDeclarator(arg.getName(), argDeclExpr))));
-            
-            if (argUsageExpr != null)
+            }
+
+            if (argUsageExpr != null) {
                 params.add(argUsageExpr);
+            }
         }
-        
+
         TypeRef retTr = resolveTypeDef(function.getValueType());
         NodeType retNodeType = getNodeType(retTr);
         body.addStatement(new VariablesDeclaration(typeRef(v8Ident("HandleScope")), new Declarator.DirectDeclarator(scopeName)));
@@ -286,7 +294,7 @@ public class NodeJSDeclarationsConverter extends DeclarationsConverter {
         } else {
             VariablesDeclaration retDecl = new VariablesDeclaration(function.getValueType().clone(), new Declarator.DirectDeclarator(returnValueName, call));
             body.addStatement(retDecl);
-        
+
         }
         Expression retExpr;
         switch (retNodeType) {
@@ -299,18 +307,18 @@ public class NodeJSDeclarationsConverter extends DeclarationsConverter {
             case Pointer:
                 // TODO: add pointer validity info.
                 body.addStatement(
-                    new If(
+                        new If(
                         varRef(returnValueName),
                         new Return(
-                            scopeClose(
-                                memberRef(
-                                    methodCall(ident("node", "Buffer", "New"), 
-                                        cast(new TypeRef.Pointer(typeRef("char"), Declarator.PointerStyle.Pointer), varRef(returnValueName)), 
-                                        expr(1),
-                                        varRef(dummyNodeBufferFreeCallbackName),
-                                        varRef("NULL")),
-                                    Expression.MemberRefStyle.Arrow,
-                                    "handle_"))),
+                        scopeClose(
+                        memberRef(
+                        methodCall(ident("node", "Buffer", "New"),
+                        cast(new TypeRef.Pointer(typeRef("char"), Declarator.PointerStyle.Pointer), varRef(returnValueName)),
+                        expr(1),
+                        varRef(dummyNodeBufferFreeCallbackName),
+                        varRef("NULL")),
+                        Expression.MemberRefStyle.Arrow,
+                        "handle_"))),
                         new Return(scopeClose(methodCall(ident("v8", "Null"))))));
                 break;
             case Void:
@@ -320,13 +328,13 @@ public class NodeJSDeclarationsConverter extends DeclarationsConverter {
                 throw new UnsupportedConversionException(function, "Return type not handled: " + retTr + " (" + retNodeType + ")");
         }
         method.setBody(body);
-        
+
         objOut.addDeclaration(method);
-        
+
         Block initBlock = getInitMethodBody(objOut);
         initBlock.addStatement(stat(methodCall("NODE_SET_METHOD", varRef(initTarget), expr(functionName.toString()), varRef(methodName))));
     }
-    
+
     private Expression scopeClose(Expression content) {
         return methodCall(varRef(scopeName), Expression.MemberRefStyle.Dot, "Close", content);
     }
@@ -338,6 +346,7 @@ public class NodeJSDeclarationsConverter extends DeclarationsConverter {
         }
         return tr.clone();
     }
+
     @Override
     protected Struct createFakePointerClass(Identifier fakePointer) {
         return null;
@@ -359,14 +368,15 @@ public class NodeJSDeclarationsConverter extends DeclarationsConverter {
     public boolean convertVariablesDeclaration(VariablesDeclaration v, Signatures signatures, DeclarationsHolder out, int[] iChild, boolean isGlobal, Identifier holderName, Identifier callerLibraryClass, String callerLibrary) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
-    
+
     public static Identifier v8Ident(String name, Identifier... args) {
         Expression[] exprArgs = new Expression[args.length];
-        for (int i = 0; i < args.length; i++)
+        for (int i = 0; i < args.length; i++) {
             exprArgs[i] = expr(typeRef(args[i]));
+        }
         return templateIdent(ident("v8", name), exprArgs);
     }
-    
+
     @Override
     public void generateLibraryFiles(SourceFiles sourceFiles, Result result, JNAeratorConfig config) throws IOException {
         List<Object> gypTargets = new ArrayList();
@@ -378,16 +388,16 @@ public class NodeJSDeclarationsConverter extends DeclarationsConverter {
 
             String moduleName = library;
             String sourcePath = "src/" + library + "_module.cc";
-            final List<String> sources = new ArrayList<String>(), 
+            final List<String> sources = new ArrayList<String>(),
                     dependencies = new ArrayList<String>();
-            
+
             // TODO: list sources in fillLibraryMapping
             sources.add(sourcePath);
-            
+
             //out.println("///\n/// This file was autogenerated by JNAerator (http://jnaerator.googlecode.com/), \n/// a tool written by Olivier Chafik (http://ochafik.com/).\n///");
             SourceFile sourceFile = new SourceFile();
             sourceFile.setElementFile(sourcePath);
-            for (String inc : new String[] { "v8.h", "node.h", "node_buffer.h" }) {
+            for (String inc : new String[]{"v8.h", "node.h", "node_buffer.h"}) {
                 sourceFile.addDeclaration(new Include(Include.Type.CInclude, inc));
             }
             if (!isFramework) {
@@ -401,31 +411,31 @@ public class NodeJSDeclarationsConverter extends DeclarationsConverter {
             for (String otherFramework : config.frameworks) {
                 sourceFile.addDeclaration(new Include(Include.Type.ObjCImport, otherFramework + "/" + otherFramework + ".h"));
             }
-            
-            
+
+
             String initFunctionName = library + "_init";
             Function initMethod = new Function(Function.Type.CppMethod, ident(initFunctionName), typeRef(void.class));
             initMethod.addArg(new Arg(initTarget, typeRef(v8Ident("Handle", v8Ident("Object")))));
             initMethod.setBody(new Block());
             // Hack: add init method here so that convertFunction finds it, then (re)move it to the end.
             sourceFile.addDeclaration(initMethod);
-            
-            Function dummyNodeBufferFreeCallback = 
-                new Function(
-                    Function.Type.CFunction, 
-                    ident(dummyNodeBufferFreeCallbackName), 
-                    typeRef(void.class), 
-                    new Arg("data", new TypeRef.Pointer(typeRef("char"), Declarator.PointerStyle.Pointer)), 
+
+            Function dummyNodeBufferFreeCallback =
+                    new Function(
+                    Function.Type.CFunction,
+                    ident(dummyNodeBufferFreeCallbackName),
+                    typeRef(void.class),
+                    new Arg("data", new TypeRef.Pointer(typeRef("char"), Declarator.PointerStyle.Pointer)),
                     new Arg("hint", new TypeRef.Pointer(typeRef("void"), Declarator.PointerStyle.Pointer)));
             dummyNodeBufferFreeCallback.setBody(new Block());
             sourceFile.addDeclaration(dummyNodeBufferFreeCallback);
-            
+
             fillLibraryMapping(result, sourceFiles, sourceFile, library, null, null, null);
             initMethod.replaceBy(null);
             sourceFile.addDeclaration(initMethod);
             sourceFile.addDeclaration(decl(stat(methodCall("NODE_MODULE", varRef(ident(library)), varRef(ident(initFunctionName))))));
             writeLibraryInterface(result, sourceFiles, sourceFile, library, null, null);
-            
+
             Map<String, Object> gypTarget = map();
             gypTarget.put("target_name", library);
             gypTarget.put("sources", sources);
@@ -433,9 +443,9 @@ public class NodeJSDeclarationsConverter extends DeclarationsConverter {
             gypTarget.put("dependencies", dependencies);
             Map<String, Object> linkSettings = map();
             linkSettings.put("libraries",
-                isFramework ?
-                    Arrays.asList("-framework", library) :
-                    Arrays.asList("-l" + library));
+                    isFramework
+                    ? Arrays.asList("-framework", library)
+                    : Arrays.asList("-l" + library));
             List<Object> defines = new ArrayList<Object>();
             for (Map.Entry<String, String> e : config.preprocessorConfig.explicitMacros.entrySet()) {
                 String k = e.getKey(), v = e.getValue();
@@ -449,7 +459,6 @@ public class NodeJSDeclarationsConverter extends DeclarationsConverter {
         gypContents.put("targets", gypTargets);
         final PrintWriter gypOut = result.classOutputter.getSourceWriter("binding.gyp");
         gypOut.print(toGYP(gypContents));
-        gypOut.close();    
+        gypOut.close();
     }
-    
 }

@@ -17,71 +17,72 @@ import javax.tools.FileObject;
 import com.ochafik.io.ReadText;
 
 public class URLFileObject implements FileObject {
-	URL url;
 
-	public URLFileObject(URL url) {
-		this.url = url;
-	}
-	
-	public String getPath() {
-		return url.getFile();
-	}
+    URL url;
 
-	@Override
-	public boolean delete() {
-		return false;
-	}
+    public URLFileObject(URL url) {
+        this.url = url;
+    }
 
-	@Override
-	public CharSequence getCharContent(boolean ignoreEncodingErrors) throws IOException {
-		return ReadText.readText(url);
-	}
+    public String getPath() {
+        return url.getFile();
+    }
 
-	@Override
-	public long getLastModified() {
-		try {
-			URLConnection con = url.openConnection();
-			long lastModified = con.getLastModified();
-			con.getInputStream().close();
-			return lastModified;
-		} catch (Exception ex) {
-			ex.printStackTrace();
-			return -1;
-		}
-	}
+    @Override
+    public boolean delete() {
+        return false;
+    }
 
-	@Override
-	public String getName() {
-		return new File(url.getFile()).getName();
-	}
+    @Override
+    public CharSequence getCharContent(boolean ignoreEncodingErrors) throws IOException {
+        return ReadText.readText(url);
+    }
 
-	@Override
-	public InputStream openInputStream() throws IOException {
-		return url.openStream();
-	}
+    @Override
+    public long getLastModified() {
+        try {
+            URLConnection con = url.openConnection();
+            long lastModified = con.getLastModified();
+            con.getInputStream().close();
+            return lastModified;
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return -1;
+        }
+    }
 
-	@Override
-	public OutputStream openOutputStream() throws IOException {
-		return null;
-	}
+    @Override
+    public String getName() {
+        return new File(url.getFile()).getName();
+    }
 
-	@Override
-	public Reader openReader(boolean arg0) throws IOException {
-		return new InputStreamReader(openInputStream());
-	}
+    @Override
+    public InputStream openInputStream() throws IOException {
+        return url.openStream();
+    }
 
-	@Override
-	public Writer openWriter() throws IOException {
-		return null;
-	}
+    @Override
+    public OutputStream openOutputStream() throws IOException {
+        return null;
+    }
 
-	@Override
-	public URI toUri() {
-		try {
-			return url.toURI();
-		} catch (URISyntaxException e) {
-			e.printStackTrace();
-			return null;
-		}
-	}
+    @Override
+    public Reader openReader(boolean arg0) throws IOException {
+        return new InputStreamReader(openInputStream());
+    }
+
+    @Override
+    public Writer openWriter() throws IOException {
+        return null;
+    }
+
+    @Override
+    public URI toUri() {
+        try {
+            return url.toURI();
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 }

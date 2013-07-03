@@ -18,7 +18,6 @@ public class NodeJSTypeConversion extends TypeConversion {
         super(result);
     }
 
-    
     @Override
     protected JavaPrim getCppBoolMappingType() {
         return JavaPrim.Boolean;
@@ -28,5 +27,4 @@ public class NodeJSTypeConversion extends TypeConversion {
     public Expression getEnumItemValue(EnumItem enumItem, boolean forceConstants) {
         return varRef(enumItem.getName());
     }
-    
 }

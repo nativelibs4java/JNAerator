@@ -418,10 +418,11 @@ public class JNAeratorConfig {
         if (headers.exists()) {
             preprocessorConfig.implicitIncludes.add(headers.getAbsolutePath());
             File mainHeader = new File(headers, framework + ".h");
-            if (mainHeader.exists())
+            if (mainHeader.exists()) {
                 addSourceFile(mainHeader, framework, true, true, false);
-            else
+            } else {
                 addSourceFile(headers, framework, true, true, false);
+            }
         } else {
             new IOException("No Headers subdirectory in framework '" + framework + "' found here : " + file).printStackTrace();
         }

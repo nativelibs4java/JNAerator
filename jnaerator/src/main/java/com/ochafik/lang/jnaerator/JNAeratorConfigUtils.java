@@ -79,9 +79,9 @@ public class JNAeratorConfigUtils {
         if (SystemUtils.isMacOSX()) {
             DEFAULT_INCLUDE_PATH = new ArrayList<String>();
             for (String s : new String[]{
-                        "/Developer/SDKs/MacOSX10.5.sdk/usr/include",
-                        "/Developer/SDKs/MacOSX10.4u.sdk/usr/include"
-                    }) {
+                "/Developer/SDKs/MacOSX10.5.sdk/usr/include",
+                "/Developer/SDKs/MacOSX10.4u.sdk/usr/include"
+            }) {
                 if (new File(s).exists()) {
                     DEFAULT_INCLUDE_PATH.add(s);
                     break;
@@ -464,10 +464,11 @@ public class JNAeratorConfigUtils {
 
         }
     }
-    
+
     public static File getFrameworkHeaderDirectory(String framework, List<String> frameworksPath) throws IOException {
         return new File(getFrameworkDirectory(framework, frameworksPath), "Headers");
     }
+
     public static File getFrameworkDirectory(String framework, List<String> frameworksPath) throws IOException {
         File file = new File(framework);
         if (!file.getName().matches("\\.framework$") || !file.exists()) {

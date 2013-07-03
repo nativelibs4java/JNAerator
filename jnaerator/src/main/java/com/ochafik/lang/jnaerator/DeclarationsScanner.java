@@ -12,9 +12,9 @@ import java.util.Stack;
  * @author ochafik
  */
 public class DeclarationsScanner extends Scanner {
-    
+
     Stack<DeclarationsHolder> declarationsHolders = new Stack<DeclarationsHolder>();
-	
+
     @Override
     public void visitStruct(Struct struct) {
         declarationsHolders.push(struct);

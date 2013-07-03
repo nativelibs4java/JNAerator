@@ -19,10 +19,6 @@
 package com.ochafik.lang.jnaerator;
 
 import com.ochafik.lang.jnaerator.JNAeratorCommandLineArgs.PathType;
-import org.bridj.CRuntime;
-import com.ochafik.lang.jnaerator.parser.TypeRef.SimpleTypeRef;
-import org.bridj.ann.Ptr;
-import com.ochafik.lang.jnaerator.parser.DeclarationsHolder;
 import java.io.File;
 
 import java.io.FileNotFoundException;
@@ -34,12 +30,10 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.tools.DiagnosticCollector;
@@ -53,7 +47,6 @@ import org.rococoa.cocoa.foundation.NSClass;
 import org.rococoa.Rococoa;
 
 import org.bridj.BridJ;
-import org.bridj.cpp.CPPRuntime;
 import com.ochafik.io.FileListUtils;
 import com.ochafik.io.IOUtils;
 import com.ochafik.io.ReadText;
@@ -65,44 +58,24 @@ import com.ochafik.lang.compiler.MemoryJavaFile;
 import com.ochafik.lang.compiler.URLFileObject;
 import com.ochafik.lang.jnaerator.JNAeratorCommandLineArgs.OptionDef;
 import com.ochafik.lang.jnaerator.JNAeratorConfig.OutputMode;
-import com.ochafik.lang.jnaerator.parser.Annotation;
 import com.ochafik.lang.jnaerator.parser.Arg;
-import com.ochafik.lang.jnaerator.parser.Declaration;
-import com.ochafik.lang.jnaerator.parser.Declarator;
 import com.ochafik.lang.jnaerator.parser.Define;
 import com.ochafik.lang.jnaerator.parser.Element;
-import com.ochafik.lang.jnaerator.parser.Expression;
 import com.ochafik.lang.jnaerator.parser.Function;
-import com.ochafik.lang.jnaerator.parser.Identifier;
 import com.ochafik.lang.jnaerator.parser.ModifiableElement;
 import com.ochafik.lang.jnaerator.parser.Modifier;
-import com.ochafik.lang.jnaerator.parser.ModifierType;
 import com.ochafik.lang.jnaerator.parser.ObjCppParser;
 import com.ochafik.lang.jnaerator.parser.Scanner;
-import com.ochafik.lang.jnaerator.parser.SourceFile;
 import com.ochafik.lang.jnaerator.parser.Struct;
 import com.ochafik.lang.jnaerator.parser.TypeRef;
-import com.ochafik.lang.jnaerator.parser.VariablesDeclaration;
-import com.ochafik.lang.jnaerator.parser.Expression.MemberRefStyle;
-import com.ochafik.lang.jnaerator.parser.Identifier.QualificationSeparator;
-import com.ochafik.lang.jnaerator.parser.Identifier.QualifiedIdentifier;
-import com.ochafik.lang.jnaerator.parser.Identifier.SimpleIdentifier;
 import com.ochafik.lang.jnaerator.parser.ModifierKind;
 import com.ochafik.lang.jnaerator.parser.ObjCppLexer;
-import com.ochafik.lang.jnaerator.parser.Statement;
-import com.ochafik.lang.jnaerator.parser.Struct.Type;
-import com.ochafik.lang.jnaerator.runtime.LibraryExtractor;
-import com.ochafik.lang.jnaerator.runtime.MangledFunctionMapper;
 import com.ochafik.lang.jnaerator.runtime.Mangling;
 import com.ochafik.lang.jnaerator.studio.JNAeratorStudio;
-import com.ochafik.lang.jnaerator.studio.JNAeratorStudio.SyntaxException;
 import com.ochafik.util.listenable.Adapter;
 import com.ochafik.util.listenable.Pair;
 import com.ochafik.util.string.RegexUtils;
 import com.ochafik.util.string.StringUtils;
-import com.sun.jna.Native;
-import com.sun.jna.NativeLibrary;
-import com.sun.jna.win32.StdCallLibrary;
 import java.io.BufferedReader;
 import java.io.FileOutputStream;
 import java.io.FileReader;
@@ -111,7 +84,6 @@ import java.text.MessageFormat;
 import java.util.logging.Logger;
 import org.antlr.runtime.ANTLRReaderStream;
 import org.antlr.runtime.CommonTokenStream;
-import static com.ochafik.lang.jnaerator.parser.ElementsHelper.*;
 import com.ochafik.lang.jnaerator.parser.Function.SignatureType;
 import java.io.*;
 /*
@@ -679,7 +651,6 @@ public class JNAerator {
                     config.parsedArgs = parsedArgs;
 
                     for (String framework : config.frameworks) {
-                        
                     }
 
                     config.addRootDir(new File("."));
@@ -902,8 +873,9 @@ public class JNAerator {
                 classOutputter[0] = new ClassOutputter() {
                     @Override
                     public PrintWriter getSourceWriter(String path) throws IOException {
-                        if (!path.startsWith("file:"))
+                        if (!path.startsWith("file:")) {
                             path = "file:///" + path;
+                        }
                         if (path.endsWith(".java")) {
                             MemoryJavaFile c = new MemoryJavaFile(path, (String) null, JavaFileObject.Kind.SOURCE);
                             javaCompilerMemoryFileManager.inputs.put(c.getPath().toString(), c);
@@ -925,7 +897,6 @@ public class JNAerator {
                         pomOut.close();
                     }
                     classOutputter[0] = new ClassOutputter() {
-                        
                         public PrintWriter getSourceWriter(String path) throws IOException {
                             File file = new File(JNAerator.this.config.sourcesOutputDir, path);
                             File parent = file.getParentFile();
@@ -937,7 +908,6 @@ public class JNAerator {
 
                             return newFileWriter(file);
                         }
-                        
                     };
                 }
             }
@@ -945,12 +915,12 @@ public class JNAerator {
             Result result = createResult(new ClassOutputter() {
                 public PrintWriter getSourceWriter(String path) throws IOException {
                     PrintWriter out = JNAerator.this.getSourceWriter(classOutputter[0], path);
-                    if (path.endsWith(".java"))
+                    if (path.endsWith(".java")) {
                         return createUnicodeEscapeWriter(out);
-                    else
+                    } else {
                         return out;
+                    }
                 }
-                
             }, feedback);
 
             if (config.outputMode == null) {
@@ -1061,6 +1031,7 @@ public class JNAerator {
             }
         };
     }
+
     public void parseLibSymbols(SourceFiles sourceFiles, Result result) throws FileNotFoundException, IOException {
         PrintWriter fileOut = null;
         if (config.extractedSymbolsOut != null) {
@@ -1263,10 +1234,8 @@ public class JNAerator {
     class JNALibraryMapping extends LibraryMapping {
     }
 
-    
     //Pattern rxObj1 = Pattern.compile("(\\w+)_([\\w_]+)_.*");
     /// To be overridden
-
     public Result createResult(final ClassOutputter outputter, Feedback feedback) {
         return new Result(config, outputter, feedback);
     }
@@ -1445,9 +1414,9 @@ public class JNAerator {
         }
 
         result.symbols = Symbols.resolveSymbols(sourceFiles);
-        
+
         generateLibraryFiles(sourceFiles, result);
-        
+
         if (config.verbose) {
             for (String unknownType : result.typeConverter.unknownTypes) {
                 System.out.println("Unknown Type: " + unknownType);
@@ -1472,7 +1441,7 @@ public class JNAerator {
             out.close();
         }
     }
-    
+
     protected void generateLibraryFiles(SourceFiles sourceFiles, Result result) throws IOException {
         result.declarationsConverter.generateLibraryFiles(sourceFiles, result, config);
     }
