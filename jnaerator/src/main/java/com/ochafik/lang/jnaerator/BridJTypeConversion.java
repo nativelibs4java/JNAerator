@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import org.bridj.IntValuedEnum;
 import org.bridj.util.DefaultParameterizedType;
+
 /**
  *
  * @author ochafik
@@ -61,10 +62,10 @@ public class BridJTypeConversion extends TypeConversion {
         }
         return super.typeLiteral(c);
     }
- 
+
     @Override
-    public Expression getEnumItemValue(Enum.EnumItem enumItem, boolean forceConstants) { 
-        Enum e = (Enum)enumItem.getParentElement();
+    public Expression getEnumItemValue(Enum.EnumItem enumItem, boolean forceConstants) {
+        Enum e = (Enum) enumItem.getParentElement();
         if (forceConstants) {
             Map<String, EnumItemResult> values = getEnumValuesAndCommentsByName(e, null);
             EnumItemResult enumResult = values.get(enumItem.getName());
@@ -76,10 +77,10 @@ public class BridJTypeConversion extends TypeConversion {
         if (e.getTag() != null) {
             enumValue = methodCall(enumValue, "value");
         }
-		
+
         return cast(typeRef(int.class), enumValue.setParenthesis(true));
     }
-    
+
     public class NL4JConversion {
 
         public ConvType type = ConvType.Default;
@@ -104,20 +105,24 @@ public class BridJTypeConversion extends TypeConversion {
                     default:
                         return typeRef;
                 }
-            } else
+            } else {
                 return typeRef;
+            }
         }
+
         public Expression arrayLength() {
             Expression length = null;
             for (Expression m : arrayLengths) {
                 m.setParenthesis(true);
-                if (length == null)
+                if (length == null) {
                     length = m.clone();
-                else
+                } else {
                     length = expr(length, Expression.BinaryOperator.Multiply, m.clone());
+                }
             }
             return length.setParenthesis(arrayLengths.size() > 1);
         }
+
         public TypeRef getIndirectTypeRef() {
             if (type == ConvType.Void) {
                 return typeRef(ident("?"));
@@ -172,11 +177,11 @@ public class BridJTypeConversion extends TypeConversion {
             return element;
         }
     }
-    
+
     public NL4JConversion convertTypeToNL4J(TypeRef valueType, Identifier libraryClassName, Expression structIOExpr, Expression valueExpr, int fieldIndex, int bits) throws UnsupportedConversionException {
-        
+
         TypeRef original = valueType;
-        
+
         if (!(original instanceof TypeRef.TargettedTypeRef)) {
             TypeRef resolved = result.resolveType(original, false);
             if (resolved == null) {
@@ -186,7 +191,7 @@ public class BridJTypeConversion extends TypeConversion {
                 valueType = resolved;
             }
         }
-        
+
         //Expression offsetExpr = structIOExpr == null ? null : methodCall(structIOExpr, "getFieldOffset", expr(fieldIndex));
         //Expression bitOffsetExpr = structIOExpr == null || bits <= 0 ? null : methodCall(structIOExpr, "getFieldBitOffset", expr(fieldIndex));
         //Expression bitLengthExpr = structIOExpr == null || bits <= 0  ? null : methodCall(structIOExpr, "getFieldBitLength", expr(fieldIndex));
@@ -203,11 +208,12 @@ public class BridJTypeConversion extends TypeConversion {
             return convertPrimitiveTypeRefToNL4J(prim, structIOExpr, fieldIndex, valueExpr);
         } else if (valueType instanceof TypeRef.Pointer) {
             // Treat callback pointers as callbacks.
-            TypeRef targetRef = ((TypeRef.Pointer)(valueType)).getTarget();
-            if (targetRef instanceof TypeRef.FunctionSignature)
+            TypeRef targetRef = ((TypeRef.Pointer) (valueType)).getTarget();
+            if (targetRef instanceof TypeRef.FunctionSignature) {
                 valueType = targetRef;
+            }
         }
-        
+
         if (valueType instanceof TypeRef.TargettedTypeRef) {
             TypeRef targetRef = ((TypeRef.TargettedTypeRef) valueType).getTarget();
 
@@ -216,30 +222,34 @@ public class BridJTypeConversion extends TypeConversion {
 
                 List<Expression> sizes = new ArrayList<Expression>();
                 for (Expression dim : arrayRef.flattenDimensions()) {
-                    if (dim == null || dim instanceof Expression.EmptyArraySize)
+                    if (dim == null || dim instanceof Expression.EmptyArraySize) {
                         continue;
-                
+                    }
+
                     Expression m = convertExpressionToJava(dim, libraryClassName, false, true, null).getFirst();
                     m.setParenthesis(false);
                     sizes.add(m);
                 }
-                if (!sizes.isEmpty())
+                if (!sizes.isEmpty()) {
                     conv.arrayLengths = sizes;
+                }
             }
 
             try {
                 conv.targetTypeConversion = convertTypeToNL4J(targetRef, libraryClassName, null, null, -1, -1);
-            } catch (UnsupportedConversionException ex) {}
-            
-            if (allowFakePointers && 
-                    (conv.targetTypeConversion == null || conv.targetTypeConversion.isUndefined) &&
-                    original instanceof TypeRef.SimpleTypeRef) {
+            } catch (UnsupportedConversionException ex) {
+            }
+
+            if (allowFakePointers
+                    && (conv.targetTypeConversion == null || conv.targetTypeConversion.isUndefined)
+                    && original instanceof TypeRef.SimpleTypeRef) {
                 conv.type = ConvType.Pointer;
                 conv.isTypedPointer = true;
-                conv.typeRef = typeRef(result.getFakePointer(libraryClassName, ((TypeRef.SimpleTypeRef)original).getName().clone()));
+                conv.typeRef = typeRef(result.getFakePointer(libraryClassName, ((TypeRef.SimpleTypeRef) original).getName().clone()));
                 if (structIOExpr != null) {
-                    if (conv.arrayLengths == null)
+                    if (conv.arrayLengths == null) {
                         conv.setExpr = methodCall(structIOExpr.clone(), "setPointerField", thisRef(), expr(fieldIndex), valueExpr);
+                    }
                     conv.getExpr = methodCall(structIOExpr.clone(), "getTypedPointerField", thisRef(), expr(fieldIndex));
                 }
                 return conv;
@@ -248,19 +258,20 @@ public class BridJTypeConversion extends TypeConversion {
                 conv.typeRef = typeRef(result.config.runtime.pointerClass);
                 return conv;
             } else {
-				TypeRef pointedTypeRef = conv.targetTypeConversion.getIndirectTypeRef();
-				
-				if (pointedTypeRef != null) {
+                TypeRef pointedTypeRef = conv.targetTypeConversion.getIndirectTypeRef();
+
+                if (pointedTypeRef != null) {
                     conv.type = ConvType.Pointer;
                     conv.isUndefined = conv.targetTypeConversion.isUndefined;
                     conv.typeRef = typeRef(ident(result.config.runtime.pointerClass, expr(pointedTypeRef.clone())));
-					if (structIOExpr != null) {
-						if (conv.arrayLengths == null)
-							conv.setExpr = methodCall(structIOExpr.clone(), "setPointerField", thisRef(), expr(fieldIndex), valueExpr);
-						conv.getExpr = methodCall(structIOExpr.clone(), "getPointerField", thisRef(), expr(fieldIndex));
-					}
-					return conv;
-				}
+                    if (structIOExpr != null) {
+                        if (conv.arrayLengths == null) {
+                            conv.setExpr = methodCall(structIOExpr.clone(), "setPointerField", thisRef(), expr(fieldIndex), valueExpr);
+                        }
+                        conv.getExpr = methodCall(structIOExpr.clone(), "getPointerField", thisRef(), expr(fieldIndex));
+                    }
+                    return conv;
+                }
             }
         } else if (valueType.getResolvedJavaIdentifier() != null) {
             conv.typeRef = typeRef(valueType.getResolvedJavaIdentifier().clone());
@@ -285,13 +296,14 @@ public class BridJTypeConversion extends TypeConversion {
                     conv.getExpr = methodCall(structIOExpr.clone(), "getNativeObjectField", thisRef(), expr(fieldIndex));
                     //conv.getExpr = new Expression.New(conv.typeRef, (Expression)methodCall(structIOExpr.clone(), "offset", offsetExpr.clone()));
                 }
-            } else
+            } else {
                 throw new RuntimeException("Failed to recognize conversion type: " + valueType);
+            }
             return conv;
         }
 
         if (valueType instanceof TypeRef.SimpleTypeRef && allowFakePointers) {
-            Identifier name = ((TypeRef.SimpleTypeRef)valueType).getName();
+            Identifier name = ((TypeRef.SimpleTypeRef) valueType).getName();
             if (name != null) {
                 conv.type = ConvType.Pointer;
                 conv.typeRef = typeRef(result.getUndefinedType(libraryClassName, name.resolveLastSimpleIdentifier().clone()));
@@ -341,8 +353,7 @@ public class BridJTypeConversion extends TypeConversion {
         }
         return conv;
     }
-    
-    
+
     public Expression getFlatArraySizeExpression(TypeRef.Pointer.ArrayRef arrayRef, Identifier callerLibraryName) throws UnsupportedConversionException {
         Expression mul = null;
         List<Expression> dims = arrayRef.flattenDimensions();
@@ -365,7 +376,7 @@ public class BridJTypeConversion extends TypeConversion {
         }
         return mul;
     }
-    
+
     protected Expression sizeofToJava(TypeRef type, Identifier libraryClassName) throws UnsupportedConversionException {
         type = resolveTypeDef(type, libraryClassName, true, false);
 //		type = type;
@@ -427,21 +438,23 @@ public class BridJTypeConversion extends TypeConversion {
         }
         return res;
     }
+
     @Override
     public Pair<Expression, TypeRef> convertExpressionToJava(Expression x, Identifier libraryClassName, boolean promoteNativeLongToLong, boolean forceConstants, Map<String, Pair<Expression, TypeRef>> mappings) throws UnsupportedConversionException {
         Pair<Expression, TypeRef> res = null;
         if (x instanceof Expression.Cast) {
             TypeRef tpe = ((Expression.Cast) x).getType();
             Pair<Expression, TypeRef> casted = convertExpressionToJava(((Expression.Cast) x).getTarget(), libraryClassName, promoteNativeLongToLong, forceConstants, mappings);
-            
+
             NL4JConversion conv = convertTypeToNL4J(tpe, libraryClassName, null, null, -1, -1);
             TypeRef tr = conv.typeRef;
             Expression val = casted.getFirst();
             if (ConvType.Pointer.equals(conv.type)) {
-                    if (isString(val))
-                        val = methodCall(expr(typeRef(result.config.runtime.pointerClass)), "pointerToCString", val);
-                    else
-                        val = methodCall(expr(typeRef(result.config.runtime.pointerClass)), "pointerToAddress", val);
+                if (isString(val)) {
+                    val = methodCall(expr(typeRef(result.config.runtime.pointerClass)), "pointerToCString", val);
+                } else {
+                    val = methodCall(expr(typeRef(result.config.runtime.pointerClass)), "pointerToAddress", val);
+                }
             }
             res = typed(val, tr);
         } else if (x instanceof Expression.FunctionCall) {
