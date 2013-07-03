@@ -5,6 +5,8 @@
 package com.ochafik.lang.jnaerator;
 
 import com.ochafik.lang.SyntaxUtils;
+import static com.ochafik.lang.jnaerator.TypeConversion.TypeConversionMode.FieldType;
+import static com.ochafik.lang.jnaerator.TypeConversion.TypeConversionMode.PointedValue;
 import com.ochafik.lang.jnaerator.parser.*;
 import com.ochafik.lang.jnaerator.parser.Enum;
 
@@ -202,10 +204,10 @@ public class JNATypeConversion extends TypeConversion {
 						TypeRef.SimpleTypeRef ptargett = (TypeRef.SimpleTypeRef) ptarget;
 						Identifier tname = ptargett.getName();
 						if (result.structsFullNames.contains(tname)) {
-							if (conversionMode == TypeConversionMode.FieldType)
-								return typeRef(PointerByReference.class);
-							else
-								return new TypeRef.ArrayRef(typeRef(ident(ptargett.getName(), "ByReference")));
+//							if (conversionMode == TypeConversionMode.FieldType)
+//                                                            return typeRef(PointerByReference.class);
+//							else
+                                                            return new TypeRef.ArrayRef(typeRef(ident(ptargett.getName(), "ByReference")));
 						} else if ((tname = result.findFakePointer(tname)) != null)
 							return new TypeRef.ArrayRef(typeRef(tname.clone()));
 					}
@@ -349,27 +351,36 @@ public class JNATypeConversion extends TypeConversion {
 
             boolean isQualStruct = result.structsFullNames.contains(name);
             //isQualCallback = result.callbacksFullNames.contains(name);
-            if (!isQualStruct && isResolved((TypeRef.SimpleTypeRef) valueType)) {
-                return valueType;
-            }
-
-            if (name instanceof Identifier.SimpleIdentifier) {
-                TypeRef tr = findObjCClass(name);
-                if (tr == null) {
-                    tr = findObjCClass(new Identifier.SimpleIdentifier(((Identifier.SimpleIdentifier) name).getName()));
+            TypeRef.SimpleTypeRef structRef = null;
+            
+            if (!isQualStruct && (valueType instanceof TypeRef.SimpleTypeRef) && isResolved((TypeRef.SimpleTypeRef) valueType)) {
+                structRef = (TypeRef.SimpleTypeRef) valueType;
+            } else {
+                if (name instanceof Identifier.SimpleIdentifier) {
+                    TypeRef tr = findObjCClass(name);
+                    if (tr == null) {
+                        tr = findObjCClass(new Identifier.SimpleIdentifier(((Identifier.SimpleIdentifier) name).getName()));
+                    }
+                    if (tr != null) {
+                        return tr;
+                    }
                 }
-                if (tr != null) {
-                    return tr;
-                }
+                structRef = isQualStruct ? typeRef(name) : findStructRef(name, libraryClassName);
             }
-            TypeRef.SimpleTypeRef structRef = isQualStruct ? typeRef(name) : findStructRef(name, libraryClassName);
+            
             if (structRef != null) {
+                isQualStruct = result.structsFullNames.contains(structRef.getName());
                 switch (conversionMode) {
                     case PointedValue:
+                        if (!(isQualStruct && isResolved(structRef)))
+                            return typeRef(result.config.runtime.pointerClass);
                     case FieldType:
                         return structRef;
                     default:
-                        return subType(structRef, ident("ByValue"));
+                        if (isQualStruct)
+                            return subType(structRef, ident("ByValue"));
+                        else
+                            return structRef;
                 }
             }
 
@@ -397,7 +408,10 @@ public class JNATypeConversion extends TypeConversion {
 
         if (valueType instanceof TypeRef.SimpleTypeRef && allowFakePointers) {
             //return typeRef(result.getUndefinedType(libraryClassName, ((SimpleTypeRef)valueType).getName().clone()));
-            return typeRef(result.getFakePointer(libraryClassName, ((TypeRef.SimpleTypeRef)valueType).getName().clone()));
+//            if (conversionMode == PointedValue)
+//                return typeRef(result.config.runtime.pointerClass);
+//            else
+                return typeRef(result.getFakePointer(libraryClassName, ((TypeRef.SimpleTypeRef)valueType).getName().clone()));
         }
         unknownTypes.add(String.valueOf(valueType));
         throw new UnsupportedConversionException(valueType, null);

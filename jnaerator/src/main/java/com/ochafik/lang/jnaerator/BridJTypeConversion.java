@@ -177,15 +177,16 @@ public class BridJTypeConversion extends TypeConversion {
         
         TypeRef original = valueType;
         
-        TypeRef resolved = result.resolveType(original, false);
+        if (!(original instanceof TypeRef.TargettedTypeRef)) {
+            TypeRef resolved = result.resolveType(original, false);
+            if (resolved == null) {
+                resolved = resolveTypeDef(valueType, libraryClassName, false/*true*/, true);
+            }
+            if (resolved != null) {
+                valueType = resolved;
+            }
+        }
         
-        //if (valueType != null && valueType.toString().contains("MonoDomain"))
-        //    valueType = (TypeRef)valueType;
-        if (resolved != null)
-            valueType = resolved;
-        else
-            valueType = resolveTypeDef(valueType, libraryClassName, false/*true*/, true);
-
         //Expression offsetExpr = structIOExpr == null ? null : methodCall(structIOExpr, "getFieldOffset", expr(fieldIndex));
         //Expression bitOffsetExpr = structIOExpr == null || bits <= 0 ? null : methodCall(structIOExpr, "getFieldBitOffset", expr(fieldIndex));
         //Expression bitLengthExpr = structIOExpr == null || bits <= 0  ? null : methodCall(structIOExpr, "getFieldBitLength", expr(fieldIndex));
@@ -230,7 +231,9 @@ public class BridJTypeConversion extends TypeConversion {
                 conv.targetTypeConversion = convertTypeToNL4J(targetRef, libraryClassName, null, null, -1, -1);
             } catch (UnsupportedConversionException ex) {}
             
-            if ((conv.targetTypeConversion == null || conv.targetTypeConversion.isUndefined) && allowFakePointers && original instanceof TypeRef.SimpleTypeRef) {
+            if (allowFakePointers && 
+                    (conv.targetTypeConversion == null || conv.targetTypeConversion.isUndefined) &&
+                    original instanceof TypeRef.SimpleTypeRef) {
                 conv.type = ConvType.Pointer;
                 conv.isTypedPointer = true;
                 conv.typeRef = typeRef(result.getFakePointer(libraryClassName, ((TypeRef.SimpleTypeRef)original).getName().clone()));
@@ -249,6 +252,7 @@ public class BridJTypeConversion extends TypeConversion {
 				
 				if (pointedTypeRef != null) {
                     conv.type = ConvType.Pointer;
+                    conv.isUndefined = conv.targetTypeConversion.isUndefined;
                     conv.typeRef = typeRef(ident(result.config.runtime.pointerClass, expr(pointedTypeRef.clone())));
 					if (structIOExpr != null) {
 						if (conv.arrayLengths == null)

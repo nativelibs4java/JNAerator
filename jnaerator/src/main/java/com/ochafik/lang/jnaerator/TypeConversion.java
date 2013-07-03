@@ -583,7 +583,9 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
         });
         TypeRef tr = holder.getValueType();
 //		tr.setParentElement(valueType.getParentElement());
-        return tr == null ? null : tr == valueTypeCl || convertToJavaRef ? valueType : tr.clone();
+        TypeRef resolved = tr == null ? null : tr.clone();
+        return resolved;
+//        return tr == null ? null : tr == valueTypeCl || convertToJavaRef ? valueType : tr.clone();
     }
 
     public static class JavaPrimitive extends Primitive {
