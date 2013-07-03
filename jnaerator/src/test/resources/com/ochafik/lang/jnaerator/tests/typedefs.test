@@ -6,8 +6,9 @@ struct ReSampleContext;
 typedef struct ReSampleContext ReSampleContext;
 void f2(ReSampleContext*);
 
-typedef void FC(int);
-void f3(FC a, FC* b);
+typedef float FC(int);
+void f3(FC* a);
+FC f4;
 
 typedef void (fshort1)(short x);
 typedef void (fshort2)(short);
@@ -40,7 +41,8 @@ f2((Pointer<ReSampleContext>)null);
 
 Callback cb = (FC)null;
 Pointer<FC> pfc = null;
-f3(pfc, pfc);
+f3(pfc);
+float ret = f4(0);
 
 ((fshort1)null).apply((short)0);
 ((fshort2)null).apply((short)0);

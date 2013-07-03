@@ -952,6 +952,7 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
 
         Enum,
         Pointer,
+        FunctionSignature,
         Primitive,
         Struct,
         NativeLong,

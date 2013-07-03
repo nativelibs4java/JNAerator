@@ -1,8 +1,31 @@
+typedef struct sdk_private sdk_private;
+typedef sdk_private *sdk_t;
+void sdk_new(sdk_t *sdk, const char* msg);
+void sdk_free(sdk_t sdk);
+
 typedef struct _cl_event *          cl_event;
 void f(cl_event, cl_event*);
+
 --
-#runtime(BridJ)
+#runtime(JNAerator)
+
 import test.*;
 import static test.TestLibrary.*;
+
+sdk_new((PointerByReference)null, (String)null);
+sdk_new((Pointer)null, (Pointer)null);
+sdk_free((sdk_t)null);
+
+f((Pointer)null, (Pointer)null);
+f((cl_event)null, (PointerByReference)null);
+
+--
+#runtime(BridJ)
+
+import test.*;
+import static test.TestLibrary.*;
+
+sdk_new((Pointer<sdk_t>)null, (Pointer<Byte>)null);
+sdk_free((sdk_t)null);
 
 f((cl_event)null, (Pointer<cl_event>)null);

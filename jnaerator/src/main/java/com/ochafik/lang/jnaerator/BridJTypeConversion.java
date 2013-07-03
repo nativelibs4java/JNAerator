@@ -159,6 +159,7 @@ public class BridJTypeConversion extends TypeConversion {
                         break;
                     case Struct:
                     case ComplexDouble:
+                    case FunctionSignature:
                     case Default:
                         //throw new UnsupportedConversionException(typeRef, "Struct by value not supported yet");
                         break;
@@ -206,14 +207,7 @@ public class BridJTypeConversion extends TypeConversion {
         JavaPrim prim = getPrimitive(valueType, libraryClassName);
         if (prim != null) {
             return convertPrimitiveTypeRefToNL4J(prim, structIOExpr, fieldIndex, valueExpr);
-        } else if (valueType instanceof TypeRef.Pointer) {
-            // Treat callback pointers as callbacks.
-            TypeRef targetRef = ((TypeRef.Pointer) (valueType)).getTarget();
-            if (targetRef instanceof TypeRef.FunctionSignature) {
-                valueType = targetRef;
-            }
         }
-
         if (valueType instanceof TypeRef.TargettedTypeRef) {
             TypeRef targetRef = ((TypeRef.TargettedTypeRef) valueType).getTarget();
 
@@ -276,12 +270,7 @@ public class BridJTypeConversion extends TypeConversion {
         } else if (valueType.getResolvedJavaIdentifier() != null) {
             conv.typeRef = typeRef(valueType.getResolvedJavaIdentifier().clone());
             if (valueType instanceof TypeRef.FunctionSignature) {
-                conv.type = ConvType.Pointer;
-                conv.typeRef = typeRef(ident(result.config.runtime.pointerClass, expr(conv.typeRef)));
-                if (structIOExpr != null) {
-                    conv.setExpr = methodCall(structIOExpr.clone(), "setPointerField", thisRef(), expr(fieldIndex), valueExpr);
-                    conv.getExpr = methodCall(structIOExpr.clone(), "getPointerField", thisRef(), expr(fieldIndex));
-                }
+                conv.type = ConvType.FunctionSignature;
             } else if (valueType instanceof Enum) {
                 conv.type = ConvType.Enum;
                 conv.typeRef = typeRef(ident(IntValuedEnum.class, expr(conv.typeRef)));
