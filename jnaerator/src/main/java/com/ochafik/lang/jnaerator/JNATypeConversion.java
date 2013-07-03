@@ -203,7 +203,7 @@ public class JNATypeConversion extends TypeConversion {
 					if (ptarget instanceof TypeRef.SimpleTypeRef) {
 						TypeRef.SimpleTypeRef ptargett = (TypeRef.SimpleTypeRef) ptarget;
 						Identifier tname = ptargett.getName();
-						if (result.structsFullNames.contains(tname)) {
+                                                if (result.structsFullNames.contains(tname)) {
 //							if (conversionMode == TypeConversionMode.FieldType)
 //                                                            return typeRef(PointerByReference.class);
 //							else
@@ -213,6 +213,12 @@ public class JNATypeConversion extends TypeConversion {
 					}
 				}
 				if (name != null) {
+                                    if (result.isFakePointer(name)) {
+                                        if (conversionMode == TypeConversionMode.NativeParameter)
+                                            return typeRef(result.config.runtime.pointerClass);
+                                        else
+                                            return typeRef(PointerByReference.class);
+                                    }
 					/// Pointer to Objective-C class ?
 					convArgType = findObjCClass(name);
 					boolean isQualStruct = result.structsFullNames.contains(name);
@@ -271,7 +277,6 @@ public class JNATypeConversion extends TypeConversion {
 								}
 								prim = getPrimitive(convArgType, libraryClassName);
 							} catch (UnsupportedConversionException ex) {
-								//convArgType = null;//return typeRef(result.config.runtime.pointerClass);
 								if (valueType instanceof TypeRef.Pointer && 
 										target instanceof TypeRef.SimpleTypeRef &&
 										result.config.features.contains(JNAeratorConfig.GenFeatures.TypedPointersForForwardDeclarations) &&
