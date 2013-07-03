@@ -1,7 +1,8 @@
 Current development version (0.12-SNAPSHOT)
 
 - Added support for JNA 3.5.1 (implement getFieldOrder in all structs, see issue #384)
-- Dropped support for bit fields in JNA structs (users should implement bit manipulation logic manually or use BridJ).
+- Added support for node.js target runtime (see example of bindings: https://github.com/ochafik/node-opencl)
+- Dropped support for bit fields in JNA structs (users should implement bit manipulation logic manually or use BridJ: JNAerator's fork of JNA that added this feature incurred too much maintenance work).
 - Dropped old shared library (DLL, Mach-O) scanning code, superseded by dyncall/dynload and BridJ's demanglers.
 - Fixed parsing of unsigned long constants (issue #362, issue #374)
 - Fixed generation of raw bindings for callback return types (issue #386)
@@ -11,6 +12,18 @@ Current development version (0.12-SNAPSHOT)
 - Fixed support of enums inside objc classes (issue #370)
 - Fixed parsing of `@optional` and `@required` objective-c annotations (issue #369)
 - Fixed UTF32Char, added VOID, CHAR and byte as predefined types (issue #363)
+- Fixed silent disappearance of struct field conversion errors (issue #390)
+- Fixed pom files for Maven output modes (removed rococoa dependency by default, added commented repo needed by it)
+- Fixed resolution of typedef'd structs when the typedef name was chosen as "better" than the original struct tag (issue #367)
+- Fixed restitution of hex constants (issue #362)
+- Fixed parsing of __restrict__ args
+- Fixed parsing of MinGW system headers (issue #373)
+- Fixed wrong use of stdcall mapper outside Windows in JNAerator Runtime
+- Fixed recursive typedefs
+- Fixed handling of large unicode values (issue #401)
+- Fixed warnings for getFieldOrder (issue #408)
+- Fixed handling of constant array sizes that depend on enums for BridJ (issue #354)
+- Fixed handling of hypens in package names (issue #260)
 ...
 
 Version 0.11 (20130107)
