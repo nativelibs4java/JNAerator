@@ -735,8 +735,11 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
 //		SimpleIdentifier libClass = result.getLibraryClassFullName(library);
 //		return SyntaxUtils.equal(libClass, callerLibraryClass) ? name : libClass + "." + name;
 //	}
-
-    public Identifier libMember(Identifier libClass, Identifier libraryClassName, Identifier member) {
+  
+    protected Identifier packageMember(Identifier libraryPackage, Identifier name) {
+        return ident(libraryPackage, name);
+    }
+    protected Identifier libMember(Identifier libClass, Identifier libraryClassName, Identifier member) {
         //return ident(SyntaxUtils.equal(libClass, libraryClassName) ? null : libClass, member);
         return ident(libClass, member);
         //return member; //TODODODODODODODODOoOOOOO
@@ -1586,7 +1589,8 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
         if (parentStruct != null && parentStruct != s) {
             return ident(getTaggedTypeIdentifierInJava(parentStruct), name);
         } else if ((s instanceof Struct) && (result.config.putTopStructsInSeparateFiles || result.config.runtime == JNAeratorConfig.Runtime.BridJ)) {
-            return ident(result.getLibraryPackage(library), name);
+            return packageMember(result.getLibraryPackage(library), name);
+            //return ident(result.getLibraryPackage(library), name);
         } else {
             return libMember(result.getLibraryClassFullName(library), null, name);
         }
