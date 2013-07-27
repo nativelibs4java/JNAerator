@@ -112,11 +112,11 @@ public class JNAeratorStudio extends JPanel {
 //	JList resultsList = new JList();
     JComboBox resultsListCombo = new JComboBox();
     JCheckBox directCallingCb = new JCheckBox("Direct Calling", false),
-            structsAsTopLevelClassesCb = new JCheckBox("Structs as Top-Level classes", true),
-            charPtrAsString = new JCheckBox("char*/wchar_t* as (W)String", false),
+            structsAsTopLevelClassesCb = new JCheckBox("Top-level structs", true),
+            charPtrAsString = new JCheckBox("(w)char* as (W)String", false),
             reificationCb = new JCheckBox("Reification", false),
-            convertBodiesCb = new JCheckBox("Convert Statements (experimental, BridJ only)", false),
-            genRawBindingsCb = new JCheckBox("Generate raw bindings (BridJ only)", false),
+            convertBodiesCb = new JCheckBox("Convert statements (BridJ)", false),
+            genRawBindingsCb = new JCheckBox("Raw bindings (BridJ)", false),
             //scalaSettersCb = new JCheckBox("Scala struct field setters", false),
             beautifyNamesCb = new JCheckBox("Beautify names", false),
             noCommentCb = new JCheckBox("No comments", false);
