@@ -59,10 +59,15 @@ public class MissingNamesChooser extends Scanner {
     }
     NameGenerationStyle nameGenerationStyle = NameGenerationStyle.PreserveCaseAndSeparateByUnderscores;
     Result result;
+    
 
     public MissingNamesChooser(Result result, boolean renameFunctionSignatures) {
         this.result = result;
         this.renameFunctionSignatures = renameFunctionSignatures;
+    }
+    
+    protected boolean treatFunctionSignatureAsPointers() {
+        return result.config.runtime.hasJNA;
     }
 
     public void setNameGenerationStyle(NameGenerationStyle nameGenerationStyle) {
@@ -175,12 +180,12 @@ public class MissingNamesChooser extends Scanner {
                 if (d instanceof VariablesDeclaration) {
                     VariablesDeclaration pvd = (VariablesDeclaration) d;
                     pvd.addDeclarator(new DirectDeclarator((origName == null ? fnameClone : origName).toString()));
-                    functionSignature.replaceBy(new TypeRef.SimpleTypeRef(fnameClone));
+                    functionSignature.replaceBy(functionSignatureRef(fnameClone));
                 } else {
                     d.replaceBy(null); // special case of C++-like struct sub-type definition 
                 }
             } else {
-                functionSignature.replaceBy(new TypeRef.SimpleTypeRef(fnameClone.clone()));
+                functionSignature.replaceBy(functionSignatureRef(fnameClone));
             }
             TypeDef td = new TypeDef();
             td.importDetails(functionSignature, true);
@@ -189,6 +194,11 @@ public class MissingNamesChooser extends Scanner {
             holder.addDeclaration(td);
             td.accept(this);
         }
+    }
+    
+    TypeRef functionSignatureRef(Identifier funSigName) {
+        TypeRef.SimpleTypeRef tr = new TypeRef.SimpleTypeRef(funSigName.clone());
+        return treatFunctionSignatureAsPointers() ? tr : result.typeConverter.pointerTypeRef(tr);
     }
 
     static boolean isUnnamed(TaggedTypeRefDeclaration d) {

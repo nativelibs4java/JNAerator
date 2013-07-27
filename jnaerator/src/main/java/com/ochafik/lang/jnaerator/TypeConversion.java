@@ -200,7 +200,11 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
             this.simpleName = type == null ? null : type.getSimpleName();
         }
     }
-
+    
+    public TypeRef pointerTypeRef(TypeRef targetTypeRef) {
+        return typeRef(result.config.runtime.pointerClass);
+    }
+    
     public Expression typeLiteral(TypeRef c) {
         if (c != null && c.toString().equals("?")) {
             return Constant.newNull();

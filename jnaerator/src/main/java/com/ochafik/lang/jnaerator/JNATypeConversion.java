@@ -193,11 +193,9 @@ public class JNATypeConversion extends TypeConversion {
                         if (valueType instanceof TypeRef.ArrayRef) {
                             return new TypeRef.ArrayRef(tr);
                         } else {
-                            return tr;
+                            return typeRef(PointerByReference.class);
                         }
                     }
-                    //else
-                    //	return typeRef(((FunctionSignature)valueType).getFunction().getName());
                 } else if (target instanceof TypeRef.Pointer) {
                     if (conversionMode == TypeConversionMode.NativeParameter) {
                         return typeRef(PointerByReference.class);
@@ -225,6 +223,9 @@ public class JNATypeConversion extends TypeConversion {
                         } else {
                             return typeRef(PointerByReference.class);
                         }
+                    }
+                    if (result.callbacksFullNames.contains(name)) {
+                        return typeRef(name.clone());
                     }
                     /// Pointer to Objective-C class ?
                     convArgType = findObjCClass(name);

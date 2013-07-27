@@ -302,7 +302,12 @@ public class BridJTypeConversion extends TypeConversion {
         }
         throw new UnsupportedConversionException(original, "Unsupported type");
     }
-
+    
+    @Override
+    public TypeRef pointerTypeRef(TypeRef targetTypeRef) {
+        return typeRef(ident(result.config.runtime.pointerClass, expr(targetTypeRef.clone())));
+    }
+    
     private NL4JConversion convertPrimitiveTypeRefToNL4J(JavaPrim prim, Expression structIOExpr, int fieldIndex, Expression valueExpr) {
         NL4JConversion conv = new NL4JConversion();
         String radix;
