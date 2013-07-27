@@ -850,6 +850,18 @@ public class Result extends Scanner {
     }
 
     protected TypeRef resolveType(TypeRef tr, boolean keepUnresolvedIdentifiers, Set<Identifier> resolvedTypeDefs) {
+        if (tr instanceof TypeRef.TaggedTypeRef) {
+            TypeRef.TaggedTypeRef ttr = (TypeRef.TaggedTypeRef) tr;
+            if (ttr.isForwardDeclaration() && ttr.getTag() != null) {
+                TypeRef resolved = null;
+                if (ttr instanceof Enum) {
+                    resolved = resolveEnum(ttr.getTag());
+                } else if (ttr instanceof Struct) {
+                    resolved = resolveStruct(ttr.getTag());
+                }
+                return resolved != null ? resolved : tr;
+            }
+        }
         if (tr instanceof TypeRef.TargettedTypeRef) {
             TypeRef.TargettedTypeRef ttr = (TypeRef.TargettedTypeRef) tr;
             TypeRef originalTarget = ttr.getTarget();
@@ -876,7 +888,6 @@ public class Result extends Scanner {
                 return resolved;
             }
         }
-
         return tr;
     }
 

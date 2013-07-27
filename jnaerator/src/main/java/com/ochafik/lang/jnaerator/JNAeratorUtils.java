@@ -97,6 +97,8 @@ public class JNAeratorUtils {
             String tn = ttr.getTag().toString();
             if (tn.startsWith("_")) {
                 idealName = tn.substring(1);
+            } else {
+                return tn;
             }
         }
         DirectDeclarator plainDecl = null, idealDecl = null;

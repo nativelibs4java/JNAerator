@@ -24,6 +24,15 @@ typedef void (fint1)(int x);
 typedef void (fint2)(int);
 typedef void (*fint3)(int);
 typedef void (*fint4)(int x);
+
+typedef enum SomeEnum1 SomeType1;
+enum SomeEnum1 { A, B };
+void fe1(SomeType1 t);
+
+enum SomeEnum2 { A, B };
+typedef enum SomeEnum2 SomeType2;
+void fe2(SomeType2 t);
+
 --
 #runtime(JNAerator)
 import test.*;
@@ -58,3 +67,6 @@ float ret = f4(0);
 ((fint2)null).apply((int)0);
 ((fint3)null).apply((int)0);
 ((fint4)null).apply((int)0);
+
+fe1(SomeEnum1.A);
+fe2(SomeEnum2.A);
