@@ -360,17 +360,16 @@ public class Result extends Scanner {
         if (e == null) {
             return 0;
         }
+        
+        int base = e.isForwardDeclaration() ? 0 : 10;
         Element p = e.getParentElement();
         if (p instanceof TypeDef) {
-            return 4;
+            return base + 4;
         }
         if (p instanceof TaggedTypeRefDeclaration) {
-            return 3;
+            return base + 3;
         }
-        if (e.isForwardDeclaration()) {
-            return 2;
-        }
-        return 1;
+        return base + 1;
     }
 
     @Override
