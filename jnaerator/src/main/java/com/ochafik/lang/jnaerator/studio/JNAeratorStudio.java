@@ -94,6 +94,7 @@ import com.ochafik.util.SystemUtils;
 import com.ochafik.util.listenable.ListenableCollections;
 import com.ochafik.util.listenable.ListenableComboModel;
 import com.ochafik.util.listenable.ListenableList;
+import com.ochafik.util.string.StringUtils;
 import java.util.List;
 
 /*
@@ -116,6 +117,7 @@ public class JNAeratorStudio extends JPanel {
             charPtrAsString = new JCheckBox("(w)char* as (W)String", false),
             reificationCb = new JCheckBox("Reification", false),
             convertBodiesCb = new JCheckBox("Convert statements (BridJ)", false),
+            extractInterfaceCb = new JCheckBox("Extract Interface (BridJ)", false),
             genRawBindingsCb = new JCheckBox("Raw bindings (BridJ)", false),
             //scalaSettersCb = new JCheckBox("Scala struct field setters", false),
             beautifyNamesCb = new JCheckBox("Beautify names", false),
@@ -254,6 +256,7 @@ public class JNAeratorStudio extends JPanel {
             setPref("options.topLevelStructs", structsAsTopLevelClassesCb.isSelected());
             setPref("options.reification", reificationCb.isSelected());
             setPref("options.convertBodies", convertBodiesCb.isSelected());
+            setPref("options.extractInterface", extractInterfaceCb.isSelected());
             setPref("options.genRawBindings", genRawBindingsCb.isSelected());
             //setPref("options.scalaSetters", scalaSettersCb.isSelected());
             setPref("options.beautifyNames", beautifyNamesCb.isSelected());
@@ -447,6 +450,7 @@ public class JNAeratorStudio extends JPanel {
         optPanel.add(convertBodiesCb);
         optPanel.add(genRawBindingsCb);
         optPanel.add(beautifyNamesCb);
+        optPanel.add(extractInterfaceCb);
         optBox.add(optPanel);
         for (Component c : optBox.getComponents()) {
             ((JComponent) c).setAlignmentX(0);
@@ -563,6 +567,8 @@ public class JNAeratorStudio extends JPanel {
                 config.noComments = noCommentCb.isSelected();
                 config.defaultLibrary = libraryName.getText();
                 config.libraryForElementsInNullFile = libraryName.getText();
+                if (extractInterfaceCb.isSelected())
+                    config.extractedLibraries.put(libraryName.getText(), "I" + StringUtils.capitalize(libraryName.getText()));
 //				config.addFile(getFile(), "");
                 config.preprocessorConfig.includeStrings.add(sourceArea.getText());
                 if (config.runtime == Runtime.BridJ) {
@@ -794,6 +800,7 @@ public class JNAeratorStudio extends JPanel {
             js.structsAsTopLevelClassesCb.setSelected(getPref("options.topLevelStructs", true));
             js.reificationCb.setSelected(getPref("options.reification", false));
             js.convertBodiesCb.setSelected(getPref("options.convertBodies", false));
+            js.extractInterfaceCb.setSelected(getPref("options.extractInterface", false));
             js.genRawBindingsCb.setSelected(getPref("options.genRawBindings", false));
             js.beautifyNamesCb.setSelected(getPref("options.beautifyNames", false));
             js.charPtrAsString.setSelected(getPref("options.charPtrAsString", false));
