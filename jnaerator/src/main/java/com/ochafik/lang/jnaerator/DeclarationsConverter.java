@@ -153,7 +153,7 @@ public abstract class DeclarationsConverter {
                     //TypeRef type = v.getValueType();
                     String name = decl.resolveName();
 
-                    JavaPrim prim = result.typeConverter.getPrimitive(mutatedType, out.getResolvedJavaIdentifier());
+                    JavaPrim prim = result.typeConverter.getPrimitive(mutatedType);
                     if (prim == null) {
                         if (mutatedType.toString().contains("NSString")) {
                             String value = constants.get(name);
@@ -341,7 +341,7 @@ public abstract class DeclarationsConverter {
 
             Pair<Expression, TypeRef> converted = alreadyConverted ? x : result.typeConverter.convertExpressionToJava(x.getFirst(), libraryClassName, true, false, null);
             //TypeRef tr = result.typeConverter.inferJavaType(converted);
-            JavaPrim prim = result.typeConverter.getPrimitive(converted.getValue(), libraryClassName);
+            JavaPrim prim = result.typeConverter.getPrimitive(converted.getValue());
 
             if (forceInteger && prim == JavaPrim.Boolean) {
                 prim = JavaPrim.Int;

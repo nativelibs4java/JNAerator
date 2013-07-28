@@ -518,7 +518,7 @@ public class BridJer {
     }
 
     TypeRef getWrapperType(TypeRef tr) {
-        JavaPrim prim = result.typeConverter.getPrimitive(tr, null);
+        JavaPrim prim = result.typeConverter.getPrimitive(tr);
         if (prim != null) {
             return typeRef(prim.wrapperType);
         }

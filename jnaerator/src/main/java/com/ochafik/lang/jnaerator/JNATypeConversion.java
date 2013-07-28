@@ -115,7 +115,7 @@ public class JNATypeConversion extends TypeConversion {
         }
 
         if (valueType instanceof TypeRef.Primitive) {
-            JavaPrim prim = getPrimitive(valueType, libraryClassName);
+            JavaPrim prim = getPrimitive(valueType);
             if (prim != null) {
                 return primRef(prim);
             }
@@ -170,7 +170,7 @@ public class JNATypeConversion extends TypeConversion {
             boolean staticallySized = valueType instanceof TypeRef.ArrayRef && ((TypeRef.ArrayRef) valueType).hasStaticStorageSize();
 
             TypeRef convArgType = null;
-            JavaPrim prim = getPrimitive(target, libraryClassName);
+            JavaPrim prim = getPrimitive(target);
             if (prim != null) {
                 if (prim == JavaPrim.Void) {
                     return typeRef(result.config.runtime.pointerClass);
@@ -288,7 +288,7 @@ public class JNATypeConversion extends TypeConversion {
                                     }
                                     return tr;
                                 }
-                                prim = getPrimitive(convArgType, libraryClassName);
+                                prim = getPrimitive(convArgType);
                             } catch (UnsupportedConversionException ex) {
                                 if (valueType instanceof TypeRef.Pointer
                                         && target instanceof TypeRef.SimpleTypeRef
@@ -312,7 +312,7 @@ public class JNATypeConversion extends TypeConversion {
                 } else {
                     try {
                         convArgType = convertTypeToJNA(target, conversionMode, libraryClassName);
-                        prim = getPrimitive(convArgType, libraryClassName);
+                        prim = getPrimitive(convArgType);
                     } catch (UnsupportedConversionException ex) {
                         //convArgType = null;//
                         return typeRef(result.config.runtime.pointerClass);
@@ -424,7 +424,7 @@ public class JNATypeConversion extends TypeConversion {
             }
         }
 
-        JavaPrim prim = getPrimitive(valueType, libraryClassName);
+        JavaPrim prim = getPrimitive(valueType);
         if (prim != null) {
             return primRef(prim);
         }

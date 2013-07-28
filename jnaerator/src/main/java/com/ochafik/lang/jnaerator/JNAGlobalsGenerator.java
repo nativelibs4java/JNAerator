@@ -72,7 +72,7 @@ public class JNAGlobalsGenerator extends GlobalsGenerator {
                     }
 
                     boolean isPointer = type instanceof com.ochafik.lang.jnaerator.parser.TypeRef.Pointer;
-                    TypeConversion.JavaPrim prim = result.typeConverter.getPrimitive(isPointer ? ((com.ochafik.lang.jnaerator.parser.TypeRef.Pointer) type).getTarget() : type, callerLibraryName);
+                    TypeConversion.JavaPrim prim = result.typeConverter.getPrimitive(isPointer ? ((com.ochafik.lang.jnaerator.parser.TypeRef.Pointer) type).getTarget() : type);
                     type.setMarkedAsResolved(false);
                     TypeRef convertedType = typeConverter().convertTypeToJNA(type, TypeConversion.TypeConversionMode.NativeParameter, callerLibraryName);
                     String convTypStr = convertedType.toString();

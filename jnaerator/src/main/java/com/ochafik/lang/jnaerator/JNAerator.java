@@ -193,7 +193,7 @@ public class JNAerator {
     static Logger logger = Logger.getLogger(JNAerator.class.getName());
 
     public static void main(String[] argsArray) {
-        //argsArray = new String[] { "/Users/ochafik/src/boost_1_48_0/config.jnaerator", "-v" };
+//        argsArray = new String[] { "/Users/ochafik/github/nativelibs4java/libraries/OpenCL/OpenCL4Java/src/main/jnaerator/config.jnaerator", "-mode", "Directory", "-f" };
         main(new JNAerator(new JNAeratorConfig()), argsArray);
     }
 
@@ -319,6 +319,9 @@ public class JNAerator {
                             break;
                         case CPlusPlusGen:
                             config.genCPlusPlus = true;
+                            break;
+                        case NoStaticInit:
+                            config.noStaticInit = true;
                             break;
                         case CurrentLibrary:
                             currentLibrary = a.getStringParam(0);

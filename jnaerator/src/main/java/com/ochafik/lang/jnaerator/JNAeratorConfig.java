@@ -395,6 +395,7 @@ public class JNAeratorConfig {
     //public boolean fastStructs;
     public List<Pair<MessageFormat, MessageFormat>> onlineDocumentationURLFormats = new ArrayList<Pair<MessageFormat, MessageFormat>>();
     public String entryName;
+    public boolean noStaticInit;
     public int maxConstructedFields = 10;
     public boolean beanStructs;
     public boolean reification;

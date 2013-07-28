@@ -186,6 +186,7 @@ public class BridJDeclarationsConverter extends DeclarationsConverter {
             DeclarationsHolder declarations, DeclarationsHolder implementations, Identifier libraryClassName, 
             String sig, Identifier functionName, String library, int iConstructor) throws UnsupportedConversionException {
         assert implementations != null;
+        boolean extractingDeclarations = declarations != null && implementations != declarations;
         Element parent = function.getParentElement();
         MemberVisibility visibility = function.getVisibility();
         boolean isPublic = visibility == MemberVisibility.Public || function.hasModifier(ModifierType.Public);
@@ -256,7 +257,7 @@ public class BridJDeclarationsConverter extends DeclarationsConverter {
 
         fillIn(signatures, functionName, nativeMethod, returnType, paramTypes, paramNames, varArgType, varArgName, isCallback, false);
 
-        List<Declaration> implementationDecls = new ArrayList<Declaration>();
+        List<Declaration> extractibleDecls = new ArrayList<Declaration>();
         Block convertedBody = null;
         if (isConstructor) {
             convertedBody = block(stat(methodCall("super", superConstructorArgs.toArray(new Expression[superConstructorArgs.size()]))));
@@ -265,7 +266,8 @@ public class BridJDeclarationsConverter extends DeclarationsConverter {
                 Pair<Element, List<Declaration>> bodyAndExtraDeclarations = result.bridjer.convertToJava(function.getBody(), libraryClassName);
                 convertedBody = (Block) bodyAndExtraDeclarations.getFirst();
                 for (Declaration d : bodyAndExtraDeclarations.getSecond()) {
-                    implementationDecls.add(d);
+                    implementations.addDeclaration(d);
+//                    extractibleDecls.add(d);
                 }
             } catch (Exception ex) {
                 ex.printStackTrace(System.out);
@@ -277,28 +279,31 @@ public class BridJDeclarationsConverter extends DeclarationsConverter {
             nativeMethod.importComments(function, isCallback ? null : getFileCommentContent(function));
         }
 
-        implementationDecls.add(nativeMethod);
-
         boolean generateStaticMethod = (isStatic || !isCallback && !isInStruct) &&
                 (declarations == null || implementations == declarations);
         
         nativeMethod.addModifiers(
-                isProtected ? ModifierType.Protected : ModifierType.Public,
+                isProtected && !extractingDeclarations ? ModifierType.Protected : ModifierType.Public,
                 generateStaticMethod ? ModifierType.Static : null);
         
+        implementations.addDeclaration(nativeMethod);
+        
+        boolean forwardedToRaw = false;
         if (convertedBody == null) {
-            boolean forwardedToRaw = false;
-            if (result.config.genRawBindings && !isCallback) {
+            if (result.config.genRawBindings) {// && !isCallback) {
 //                Function rawMethod = nativeMethod.clone();
                 rawMethod.setArgs(Collections.EMPTY_LIST);
                 fillIn(signatures, functionName, rawMethod, returnType, paramTypes, paramNames, varArgType, varArgName, isCallback, true);
-                rawMethod.addModifiers(ModifierType.Protected, ModifierType.Native);
+                rawMethod.addModifiers(
+                    extractingDeclarations || isCallback ? ModifierType.Public : ModifierType.Protected, 
+                    isCallback ? ModifierType.Abstract : ModifierType.Native);
                 if (generateStaticMethod) {
                     rawMethod.addModifiers(ModifierType.Static);
                 }
 
                 if (!nativeMethod.computeSignature(SignatureType.ArgsAndRet).equals(rawMethod.computeSignature(SignatureType.ArgsAndRet))) {
-                    implementationDecls.add(rawMethod);
+                    implementations.addDeclaration(rawMethod);
+                    extractibleDecls.add(rawMethod);
 
                     List<Expression> followedArgs = new ArrayList<Expression>();
                     for (int i = 0, n = paramTypes.size(); i < n; i++) {
@@ -365,19 +370,25 @@ public class BridJDeclarationsConverter extends DeclarationsConverter {
 
             if (!forwardedToRaw) {
                 nativeMethod.addModifiers(isCallback ? ModifierType.Abstract : ModifierType.Native);
+            } else if (isCallback) {
+                nativeMethod.addModifiers(ModifierType.Final);
             }
         } else {
             nativeMethod.setBody(convertedBody);
         }
 
-        for (Declaration d : implementationDecls) {
-            implementations.addDeclaration(d);
-            if (declarations != null && implementations != declarations) {
+        if (!forwardedToRaw && convertedBody == null) {
+            extractibleDecls.add(nativeMethod);
+        }
+        
+        for (Declaration d : extractibleDecls) {
+            if (extractingDeclarations) {
                 if (d instanceof Function) {
                     Function m = (Function)d.clone();
                     m.setBody(null);
                     m.removeModifiers(ModifierType.Abstract, ModifierType.Final, 
-                        ModifierType.Static, ModifierType.Native, ModifierType.Public);
+                        ModifierType.Static, ModifierType.Native,
+                        ModifierType.Public, ModifierType.Protected);
                     declarations.addDeclaration(m);
 //                    d.addAnnotation(new Annotation(typeRef(Override.class)));
                 }
@@ -478,6 +489,8 @@ public class BridJDeclarationsConverter extends DeclarationsConverter {
             }
         }
         Struct structJavaClass = publicStaticClass(structName, baseClass, Struct.Type.JavaClass, struct);
+        if (!result.config.noStaticInit)
+            structJavaClass.addDeclaration(newStaticInit());
         //if (result.config.microsoftCOM) {
         if (uuid != null) {
             structJavaClass.addAnnotation(new Annotation(result.config.runtime.typeRef(JNAeratorConfig.Runtime.Ann.IID), uuid));
@@ -875,11 +888,8 @@ public class BridJDeclarationsConverter extends DeclarationsConverter {
             if (declarationsFullClassName != null) {
                 implementations.addProtocol(declarationsFullClassName.clone());
             }
-            implementations.addDeclaration(new Function(Function.Type.StaticInit, null, null).setBody(block(
-                    stat(methodCall(
-                    expr(typeRef(BridJ.class)),
-                    Expression.MemberRefStyle.Dot,
-                    "register")))).addModifiers(ModifierType.Static));
+            if (!config.noStaticInit)
+                implementations.addDeclaration(newStaticInit());
             implementations.setResolvedJavaIdentifier(implementationsFullClassName);
 
             Struct declarations;
@@ -912,5 +922,14 @@ public class BridJDeclarationsConverter extends DeclarationsConverter {
                 writeLibraryInterface(result, sourceFiles, implementations, library, javaPackage);
             }
         }
+    }
+
+    private Function newStaticInit() {
+        Function f = new Function(Function.Type.StaticInit, null, null).setBody(block(
+            stat(methodCall(
+            expr(typeRef(BridJ.class)),
+            Expression.MemberRefStyle.Dot,
+            "register")))).addModifiers(ModifierType.Static);
+        return f;
     }
 }

@@ -420,6 +420,9 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
     TypeRef normalizeTypeRef(TypeRef tr, HashSet<Identifier> resolvedNames) {
         if (tr instanceof TypeRef.SimpleTypeRef) {
             Identifier name = ((TypeRef.SimpleTypeRef)tr).getName();
+//            if (isObjCppPrimitive(name.toString())) {
+//                return tr;
+//            }
             TypeRef td = resolvedNames.add(name) ? result.getTypeDef(name) : null;
             if (td != null)
                 return normalizeTypeRef(td, resolvedNames);
@@ -483,7 +486,7 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
         }
     }
 
-    public JavaPrim getPrimitive(TypeRef valueType, Identifier libraryClassName) {
+    public JavaPrim getPrimitive(TypeRef valueType) {
         if (!(valueType instanceof Primitive) && !(valueType instanceof JavaPrimitive)) {
             valueType = normalizeTypeRef(valueType);
         }
@@ -1169,7 +1172,7 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
     }
 
     public Expression getJavaClassLitteralExpression(TypeRef tr) {
-        JavaPrim prim = result.typeConverter.getPrimitive(tr, null);
+        JavaPrim prim = result.typeConverter.getPrimitive(tr);
         return prim != null ? classLiteral(prim.type) : typeLiteral(tr.clone());
     }
 
@@ -1202,8 +1205,8 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
                         tr = t1;
                     } else {
                         // t1 & t2 are already java primitives...
-                        JavaPrim p1 = "long".equals(t1.toString()) ? JavaPrim.Long : getPrimitive(t1, null),
-                                p2 = "long".equals(t2.toString()) ? JavaPrim.Long : getPrimitive(t2, null);
+                        JavaPrim p1 = "long".equals(t1.toString()) ? JavaPrim.Long : getPrimitive(t1),
+                                p2 = "long".equals(t2.toString()) ? JavaPrim.Long : getPrimitive(t2);
                         if (p1 != null && p2 != null) {
                             switch (bop.getOperator()) {
                                 case LeftShift:
