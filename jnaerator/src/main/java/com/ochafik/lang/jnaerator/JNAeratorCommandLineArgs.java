@@ -232,6 +232,7 @@ public class JNAeratorCommandLineArgs {
         PreprocessingOut("-preprocessingOut", "Write the preprocessor output in a file (automatically set when ${Verbose} is used).", new ArgDef(Type.OutputFile, "outFile")),
         EmptyStructsAsForwardDecls(
         "-emptyStructsAsForwardDecls", "Treat empty structs as forward declarations"),
+        OptionalFunctions("-optionalFunctions", "Mark functions which name matches the provided regular expression pattern with the @Optional annotation (BridJ-only)", new ArgDef(Type.String, "namePattern")),
         SkipEnums("-skipEnums", "Skip enumerations which name matches the provided regular expression pattern", new ArgDef(Type.String, "namePattern")),
         SkipStructs("-skipStructs", "Skip structs and classes which name matches the provided regular expression pattern", new ArgDef(Type.String, "namePattern")),
         SkipFunctions("-skipFunctions", "Skip functions which name matches the provided regular expression pattern", new ArgDef(Type.String, "namePattern")),

@@ -654,6 +654,15 @@ public abstract class DeclarationsConverter {
         }
         return false;
     }
+    
+    public boolean isOptionalFunction(String name) {
+        for (Pattern p : result.config.optionalFunctions) {
+            if (p.matcher(name).matches()) {
+                return true;
+            }
+        }
+        return false;
+    }
     public final void convertStructs(List<Struct> structs, Signatures signatures, DeclarationsHolder out, String library) throws IOException {
         if (structs != null) {
             for (Struct struct : structs) {

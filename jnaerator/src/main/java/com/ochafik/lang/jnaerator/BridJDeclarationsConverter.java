@@ -51,6 +51,7 @@ import static com.ochafik.lang.jnaerator.parser.ElementsHelper.*;
 import com.ochafik.lang.jnaerator.parser.Function.SignatureType;
 import org.bridj.*;
 import org.bridj.ann.Convention;
+import org.bridj.ann.Optional;
 import org.bridj.cpp.CPPRuntime;
 import org.bridj.objc.NSObject;
 
@@ -286,6 +287,8 @@ public class BridJDeclarationsConverter extends DeclarationsConverter {
                 isProtected && !extractingDeclarations ? ModifierType.Protected : ModifierType.Public,
                 generateStaticMethod ? ModifierType.Static : null);
         
+        boolean isOptional = isOptionalFunction(function.getName() + "");
+        
         implementations.addDeclaration(nativeMethod);
         
         boolean forwardedToRaw = false;
@@ -304,6 +307,10 @@ public class BridJDeclarationsConverter extends DeclarationsConverter {
                 if (!nativeMethod.computeSignature(SignatureType.ArgsAndRet).equals(rawMethod.computeSignature(SignatureType.ArgsAndRet))) {
                     implementations.addDeclaration(rawMethod);
                     extractibleDecls.add(rawMethod);
+                    
+                    if (isOptional && !isCallback) {
+                        rawMethod.addAnnotation(new Annotation(typeRef(Optional.class)));
+                    }
 
                     List<Expression> followedArgs = new ArrayList<Expression>();
                     for (int i = 0, n = paramTypes.size(); i < n; i++) {
@@ -370,6 +377,9 @@ public class BridJDeclarationsConverter extends DeclarationsConverter {
 
             if (!forwardedToRaw) {
                 nativeMethod.addModifiers(isCallback ? ModifierType.Abstract : ModifierType.Native);
+                if (isOptional && !isCallback) {
+                    nativeMethod.addAnnotation(new Annotation(typeRef(Optional.class)));
+                }
             } else if (isCallback) {
                 nativeMethod.addModifiers(ModifierType.Final);
             }

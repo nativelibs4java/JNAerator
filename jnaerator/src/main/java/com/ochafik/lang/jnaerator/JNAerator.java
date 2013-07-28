@@ -363,6 +363,9 @@ public class JNAerator {
                         case Direct:
                             config.useJNADirectCalls = true;
                             break;
+                        case OptionalFunctions:
+                            config.optionalFunctions.add(Pattern.compile(a.getStringParam(0)));
+                            break;
                         case SkipEnums:
                             config.skippedEnumNames.add(Pattern.compile(a.getStringParam(0)));
                             break;

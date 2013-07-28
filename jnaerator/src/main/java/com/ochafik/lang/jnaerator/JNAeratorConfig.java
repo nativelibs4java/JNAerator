@@ -393,6 +393,7 @@ public class JNAeratorConfig {
     public boolean treatEmptyStructsAsForwardDecls;
     public String[] libraryNamingPrefixes;
     public boolean extractLibSymbols;
+    public final List<Pattern> optionalFunctions = new ArrayList<Pattern>();
     public final List<Pattern> skippedStructNames = new ArrayList<Pattern>();
     public final List<Pattern> skippedFunctionNames = new ArrayList<Pattern>();
     public final List<Pattern> skippedEnumNames = new ArrayList<Pattern>();
