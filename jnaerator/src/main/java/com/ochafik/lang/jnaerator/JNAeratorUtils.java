@@ -30,12 +30,17 @@ import com.ochafik.lang.jnaerator.parser.Function;
 import com.ochafik.lang.jnaerator.parser.StoredDeclarations;
 import com.ochafik.lang.jnaerator.parser.Declarator.DirectDeclarator;
 import com.ochafik.lang.jnaerator.parser.StoredDeclarations.TypeDef;
+import com.ochafik.lang.jnaerator.parser.TypeRef;
+import com.ochafik.lang.jnaerator.parser.TypeRef.FunctionSignature;
 import com.ochafik.lang.jnaerator.parser.TypeRef.TaggedTypeRef;
 
 public class JNAeratorUtils {
 
     static String getExactTypeDefName(Element e) {
         Element parent = e.getParentElement();
+        if (e instanceof FunctionSignature && parent instanceof TypeRef.Pointer) {
+            parent = parent.getParentElement();
+        }
         if (parent == null || !(parent instanceof TypeDef)) {
             return null;
         }

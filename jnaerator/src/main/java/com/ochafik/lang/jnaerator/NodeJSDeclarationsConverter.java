@@ -160,7 +160,7 @@ public class NodeJSDeclarationsConverter extends DeclarationsConverter {
     };
 
     private TypeRef resolveTypeDef(TypeRef typeRef) {
-        TypeRef tr = result.typeConverter.resolveTypeDef(typeRef, null, false, false);
+        TypeRef tr = result.typeConverter.normalizeTypeRef(typeRef);
         return tr;
     }
 

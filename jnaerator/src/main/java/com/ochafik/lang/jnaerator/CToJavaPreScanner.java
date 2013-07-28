@@ -27,14 +27,10 @@ import com.ochafik.lang.jnaerator.parser.Declarator.FunctionDeclarator;
 import com.ochafik.lang.jnaerator.parser.Declarator.MutableByDeclarator;
 import com.ochafik.lang.jnaerator.parser.StoredDeclarations.TypeDef;
 import com.ochafik.lang.jnaerator.parser.TypeRef.FunctionSignature;
-import com.ochafik.lang.jnaerator.parser.TypeRef.SimpleTypeRef;
 import com.ochafik.lang.jnaerator.parser.TypeRef.TaggedTypeRef;
 import com.ochafik.lang.jnaerator.parser.TypeRef.TargettedTypeRef;
-import com.ochafik.util.string.StringUtils;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.EnumSet;
 import java.util.List;
 
 public class CToJavaPreScanner extends Scanner {
@@ -175,7 +171,12 @@ public class CToJavaPreScanner extends Scanner {
                 f.addModifiers(fd.getTarget().getModifiers());
                 FunctionSignature fs = new FunctionSignature(f);
                 d.setValueType(fs);
-                d.setDeclarators(Arrays.asList((Declarator) new DirectDeclarator(fd.resolveName(), fd.getDefaultValue())));
+                
+                Declarator target = fd.getTarget();
+                Declarator newTarget = target == null ?
+                    new DirectDeclarator(fd.resolveName(), fd.getDefaultValue()) :
+                    target.clone();
+                d.setDeclarators(Arrays.asList(newTarget));
                 d.accept(this);
             }
         }
@@ -259,7 +260,20 @@ public class CToJavaPreScanner extends Scanner {
     @Override
     public void visitArg(Arg arg) {
         Declarator d = arg.getDeclarator();
-        if (d != null && !(d instanceof DirectDeclarator)) {
+        if (d == null) {
+            TypeRef tr = arg.getValueType();
+            if (tr instanceof TypeRef.Pointer) {
+                TypeRef target = ((TypeRef.Pointer)tr).getTarget();
+                if (target instanceof TypeRef.FunctionSignature) {
+                    TypeRef.FunctionSignature fs = (TypeRef.FunctionSignature) target;
+                    Identifier name = fs.getFunction() == null ? null : fs.getFunction().getName();
+                    if (name != null) {
+                        arg.setDeclarator(new DirectDeclarator(name.toString()));
+                        fs.getFunction().setName(null);
+                    }
+                }
+            }
+        } else if (!(d instanceof DirectDeclarator)) {
             MutableByDeclarator type = d.mutateType(arg.getValueType());
             if (type instanceof TypeRef) {
                 arg.setValueType((TypeRef) type);

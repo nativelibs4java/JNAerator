@@ -7,6 +7,7 @@ package com.ochafik.lang.jnaerator;
 import com.ochafik.lang.jnaerator.parser.Enum.EnumItem;
 import com.ochafik.lang.jnaerator.parser.Expression;
 import static com.ochafik.lang.jnaerator.parser.ElementsHelper.*;
+import com.ochafik.lang.jnaerator.parser.TypeRef;
 
 /**
  *

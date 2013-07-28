@@ -200,8 +200,12 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
             this.simpleName = type == null ? null : type.getSimpleName();
         }
     }
+
+    protected TypeRef functionPointerTypeRef(TypeRef.FunctionSignature fs) {
+        return fs;
+    }
     
-    public TypeRef pointerTypeRef(TypeRef targetTypeRef) {
+    protected TypeRef pointerTypeRef(TypeRef targetTypeRef) {
         return typeRef(result.config.runtime.pointerClass);
     }
     
@@ -408,195 +412,54 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
         return null;
     }
 
-    boolean isResoluble(TypeRef tr, Identifier libraryClassName) {
-        return isResoluble(tr, libraryClassName, new HashSet<Identifier>());
-    }
+    
 
-    boolean isResoluble(TypeRef tr, Identifier libraryClassName, Set<Identifier> typeDefsEncountered) {
-        if (tr instanceof Primitive
-                || tr instanceof FunctionSignature
-                || tr instanceof TaggedTypeRef) {
-            return true;
-        } else if (tr instanceof TargettedTypeRef) {
-            return isResoluble(((TargettedTypeRef) tr).getTarget(), libraryClassName, typeDefsEncountered);
-        } else if (tr instanceof SimpleTypeRef) {
-            Identifier name = ((SimpleTypeRef) tr).getName();
-            TypeRef tdt = typeDefsEncountered.add(name) ? result.getTypeDef(name) : null;
-            if (tdt != null) {
-                return isResoluble(tdt, libraryClassName, typeDefsEncountered);
-            } else {
-                TypeRef ft = findTypeRef(name, libraryClassName);
-                return ft != null;
+    TypeRef normalizeTypeRef(TypeRef tr) {
+        return normalizeTypeRef(tr, new HashSet<Identifier>());
+    }
+    TypeRef normalizeTypeRef(TypeRef tr, HashSet<Identifier> resolvedNames) {
+        if (tr instanceof TypeRef.SimpleTypeRef) {
+            Identifier name = ((TypeRef.SimpleTypeRef)tr).getName();
+            TypeRef td = resolvedNames.add(name) ? result.getTypeDef(name) : null;
+            if (td != null)
+                return normalizeTypeRef(td, resolvedNames);
+            
+            Struct s = result.resolveStruct(name);
+            if (s != null)
+                return s;
+            Enum e = result.resolveEnum(name);
+            if (e != null)
+                return e;
+            TypeRef.FunctionSignature c = result.resolveCallback(name);
+            if (c != null)
+                return functionPointerTypeRef(c);
+        }
+        if (tr instanceof TypeRef.TargettedTypeRef) {
+            TypeRef.TargettedTypeRef ttr = (TypeRef.TargettedTypeRef) tr;
+            TypeRef target = ttr.getTarget();
+            TypeRef ntarget = normalizeTypeRef(target, resolvedNames);
+            if (ntarget != target) {
+                ttr = (TypeRef.TargettedTypeRef) ttr.clone();
+                ttr.setTarget(target);
             }
+            return ttr;
         }
-        return false;
-    }
-
-    public TypeRef resolveTypeDef(TypeRef valueType, final Identifier libraryClassName, final boolean convertToJavaRef, final boolean convertEnumToJavaRef) {
-        return resolveTypeDef(valueType, libraryClassName, convertToJavaRef, convertEnumToJavaRef, new HashSet<Identifier>());
-    }
-
-    protected TypeRef resolveTypeDef(TypeRef valueType, final Identifier libraryClassName, final boolean convertToJavaRef, final boolean convertEnumToJavaRef, final Set<Identifier> typeDefsEncountered) {
-        if (valueType == null) {
-            return null;
-        }
-
-        if (valueType instanceof TaggedTypeRef && convertToJavaRef) {
-            TaggedTypeRef ttr = (TaggedTypeRef) valueType;
-            if (ttr.getTag() != null) {
-                TypeRef ref = ttr instanceof Struct
-                        ? findStructRef(ttr.getTag(), libraryClassName)
-                        : ttr instanceof Enum && convertEnumToJavaRef
-                        ? findEnum(ttr.getTag(), libraryClassName)
-                        : null;
-                if (ref == null && convertEnumToJavaRef) {
-                    return ref;
+        if (tr instanceof TaggedTypeRef) {
+            TaggedTypeRef ttr = (TaggedTypeRef) tr;
+            if (ttr.isForwardDeclaration()) {
+                Identifier name = ttr.getTag();
+                if (ttr instanceof Struct) {
+                    ttr = result.resolveStruct(name);
+                } else if (ttr instanceof Enum) {
+                    ttr = result.resolveEnum(name);
                 }
+                if (ttr != null)
+                    return ttr;
             }
         }
-        final TypeRef valueTypeCl = valueType.clone();
-        Arg holder = new Arg();
-        holder.setValueType(valueTypeCl);
-        holder.setParentElement(valueType.getParentElement());
-        holder.accept(new Scanner() {
-            java.util.Stack<String> names = new java.util.Stack<String>();
-            int depth = 0;
-
-            @Override
-            public void visitSimpleTypeRef(SimpleTypeRef simpleTypeRef) {
-                depth++;
-
-                try {
-                    Identifier name = ((SimpleTypeRef) simpleTypeRef).getName();
-                    if (name == null) {
-                        return;
-                    }
-
-                    String nameStr = name.toString();
-                    if (nameStr == null) {
-                        return;
-                    }
-
-                    if (JavaPrim.getJavaPrim(nameStr) != null) {
-                        return;
-                    }
-
-                    if (names.contains(nameStr)) {
-                        return;
-                    }
-                    names.push(nameStr);
-
-                    try {
-                        if (result.resolvePrimitive(nameStr) != null) {
-                            return;
-                        }
-
-                        super.visitSimpleTypeRef(simpleTypeRef);
-                        if (simpleTypeRef.isMarkedAsResolved()) {
-                            return;
-                        }
-
-                        //					Identifier oc = findObjCClassIdent(name);
-                        //					if (oc != null) {
-                        //						name.replaceBy(oc);
-                        //					}
-
-                        if (convertToJavaRef) {
-                            TypeRef t = findTypeRef(name, libraryClassName);
-                            if (t != null) {
-                                if (!convertToJavaRef || (t instanceof Enum) && !convertEnumToJavaRef) {
-                                    return;
-                                }
-                                simpleTypeRef.replaceBy(t);
-                            }
-                        }
-
-                        Define define = result.defines.get(name);
-                        Expression expression = define == null ? null : define.getValue();
-                        if (expression != null) {
-                            if (!convertToJavaRef) {
-                                return;
-                            }
-                            Identifier fieldName = null;
-                            if (expression instanceof Expression.VariableRef) {
-                                fieldName = ((Expression.VariableRef) expression).getName();
-                            } else if (expression instanceof MemberRef) {
-                                fieldName = ((MemberRef) expression).getName();
-                            }
-
-                            if (fieldName != null && !fieldName.equals(name)) {
-                                simpleTypeRef.replaceBy(resolveTypeDef(new TypeRef.SimpleTypeRef(fieldName), libraryClassName, true /*convertToJavaRef*/, convertEnumToJavaRef, typeDefsEncountered));
-                                return;
-                            }
-                        }
-
-                        TypeRef tr = typeDefsEncountered.add(name) ? result.getTypeDef(name) : null;
-                        if (tr != null) {
-                            if (!isResoluble(tr, libraryClassName)) {
-                                if (convertToJavaRef)// && !(tr instanceof TargettedTypeRef))
-                                {
-                                    simpleTypeRef.replaceBy(typeRef(result.getFakePointer(libraryClassName, name)));
-                                } else {
-                                    simpleTypeRef.replaceBy(resolveTypeDef(tr.clone(), libraryClassName, convertToJavaRef, convertEnumToJavaRef, typeDefsEncountered));
-                                }
-                                return;
-                            }
-
-                            if (tr instanceof Enum && !convertEnumToJavaRef) {
-                                simpleTypeRef.replaceBy(typeRef(int.class));
-                                return;
-                            }
-                            if (tr instanceof TaggedTypeRef) {
-                                Identifier name2 = result.declarationsConverter.getActualTaggedTypeName((TaggedTypeRef) tr);
-                                if (name2 != null) {
-                                    name = name2;
-                                }
-                            }
-                            if (convertToJavaRef) {
-                                if (tr instanceof TaggedTypeRef) {
-                                    TaggedTypeRef s = (TaggedTypeRef) tr;
-                                    if (s.isForwardDeclaration()) {
-                                        return;
-                                    }
-
-//									if (tr instanceof Enum) {
-//										tr = typeRef(s.getTag().clone());
-//									} else {
-                                    Identifier ident = getTaggedTypeIdentifierInJava(s);
-                                    if (ident != null) {
-                                        tr = typeRef(ident);//findRef(name, s, libraryClassName));
-                                    }//									}
-                                } else if (tr instanceof FunctionSignature) {
-                                    tr = findCallbackRef((FunctionSignature) tr, libraryClassName);
-                                }
-                            }
-                            String strs = simpleTypeRef.toString();
-                            String trs = tr == null ? null : tr.toString();
-                            if (trs != null && !strs.equals(trs)) {
-                                TypeRef clo = tr.clone();
-                                simpleTypeRef.replaceBy(clo);
-                                if (depth < 30) {
-                                    clo.accept(this);
-                                } else {
-                                    System.err.println("Infinite loop in type conversion ? " + tr);
-                                }
-                            }
-                            return;
-                        }
-                    } finally {
-                        names.pop();
-                    }
-                } finally {
-                    depth--;
-                }
-            }
-        });
-        TypeRef tr = holder.getValueType();
-//		tr.setParentElement(valueType.getParentElement());
-        TypeRef resolved = tr == null ? null : tr.clone();
-        return resolved;
-//        return tr == null ? null : tr == valueTypeCl || convertToJavaRef ? valueType : tr.clone();
+        return tr;
     }
+    
 
     public static class JavaPrimitive extends Primitive {
 
@@ -622,7 +485,7 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
 
     public JavaPrim getPrimitive(TypeRef valueType, Identifier libraryClassName) {
         if (!(valueType instanceof Primitive) && !(valueType instanceof JavaPrimitive)) {
-            valueType = resolveTypeDef(valueType, libraryClassName, true, true);
+            valueType = normalizeTypeRef(valueType);
         }
         if (valueType == null) {
             return null;
@@ -820,6 +683,8 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
         Identifier parentIdent = null;
 
         Element parent = functionSignature.getParentElement();
+        if (parent instanceof TypeRef.Pointer)
+            parent = parent.getParentElement();
 
         boolean firstParent = true;
         while (parent != null) {
@@ -1592,7 +1457,7 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
         //Struct parentStruct = s.findParentOfType(Struct.class);
         if (parentStruct != null && parentStruct != s) {
             return ident(getTaggedTypeIdentifierInJava(parentStruct), name);
-        } else if ((s instanceof Struct) && (result.config.putTopStructsInSeparateFiles || result.config.runtime == JNAeratorConfig.Runtime.BridJ)) {
+        } else if ((s instanceof Struct) && (result.config.putTopStructsInSeparateFiles)) {// || result.config.runtime == JNAeratorConfig.Runtime.BridJ)) {
             return packageMember(result.getLibraryPackage(library), name);
             //return ident(result.getLibraryPackage(library), name);
         } else {

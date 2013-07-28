@@ -17,7 +17,9 @@ import com.sun.jna.WString;
 import com.sun.jna.ptr.ByReference;
 import com.sun.jna.ptr.PointerByReference;
 import java.nio.Buffer;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 /**
  *
@@ -463,5 +465,197 @@ public class JNATypeConversion extends TypeConversion {
             }
         }
         return super.convertExpressionToJava(x, libraryClassName, promoteNativeLongToLong, forceConstant, mappings);
+    }
+    
+    
+    public TypeRef resolveTypeDef(TypeRef valueType, final Identifier libraryClassName, final boolean convertToJavaRef, final boolean convertEnumToJavaRef) {
+        return resolveTypeDef(valueType, libraryClassName, convertToJavaRef, convertEnumToJavaRef, new HashSet<Identifier>());
+    }
+
+    protected TypeRef resolveTypeDef(TypeRef valueType, final Identifier libraryClassName, final boolean convertToJavaRef, final boolean convertEnumToJavaRef, final Set<Identifier> typeDefsEncountered) {
+        if (valueType == null) {
+            return null;
+        }
+
+        if (valueType instanceof TypeRef.TaggedTypeRef && convertToJavaRef) {
+            TypeRef.TaggedTypeRef ttr = (TypeRef.TaggedTypeRef) valueType;
+            if (ttr.getTag() != null) {
+                TypeRef ref = ttr instanceof Struct
+                        ? findStructRef(ttr.getTag(), libraryClassName)
+                        : ttr instanceof Enum && convertEnumToJavaRef
+                        ? findEnum(ttr.getTag(), libraryClassName)
+                        : null;
+                if (ref == null && convertEnumToJavaRef) {
+                    return ref;
+                }
+            }
+        }
+        final TypeRef valueTypeCl = valueType.clone();
+        Arg holder = new Arg();
+        holder.setValueType(valueTypeCl);
+        holder.setParentElement(valueType.getParentElement());
+        holder.accept(new Scanner() {
+            java.util.Stack<String> names = new java.util.Stack<String>();
+            int depth = 0;
+
+            @Override
+            public void visitSimpleTypeRef(TypeRef.SimpleTypeRef simpleTypeRef) {
+                depth++;
+
+                try {
+                    Identifier name = ((TypeRef.SimpleTypeRef) simpleTypeRef).getName();
+                    if (name == null) {
+                        return;
+                    }
+
+                    String nameStr = name.toString();
+                    if (nameStr == null) {
+                        return;
+                    }
+
+                    if (JavaPrim.getJavaPrim(nameStr) != null) {
+                        return;
+                    }
+
+                    if (names.contains(nameStr)) {
+                        return;
+                    }
+                    names.push(nameStr);
+
+                    try {
+                        if (result.resolvePrimitive(nameStr) != null) {
+                            return;
+                        }
+
+                        super.visitSimpleTypeRef(simpleTypeRef);
+                        if (simpleTypeRef.isMarkedAsResolved()) {
+                            return;
+                        }
+
+                        //					Identifier oc = findObjCClassIdent(name);
+                        //					if (oc != null) {
+                        //						name.replaceBy(oc);
+                        //					}
+
+                        if (convertToJavaRef) {
+                            TypeRef t = findTypeRef(name, libraryClassName);
+                            if (t != null) {
+                                if (!convertToJavaRef || (t instanceof Enum) && !convertEnumToJavaRef) {
+                                    return;
+                                }
+                                simpleTypeRef.replaceBy(t);
+                                return;
+                            }
+                        }
+
+                        Define define = result.defines.get(name);
+                        Expression expression = define == null ? null : define.getValue();
+                        if (expression != null) {
+                            if (!convertToJavaRef) {
+                                return;
+                            }
+                            Identifier fieldName = null;
+                            if (expression instanceof Expression.VariableRef) {
+                                fieldName = ((Expression.VariableRef) expression).getName();
+                            } else if (expression instanceof Expression.MemberRef) {
+                                fieldName = ((Expression.MemberRef) expression).getName();
+                            }
+
+                            if (fieldName != null && !fieldName.equals(name)) {
+                                simpleTypeRef.replaceBy(resolveTypeDef(new TypeRef.SimpleTypeRef(fieldName), libraryClassName, true /*convertToJavaRef*/, convertEnumToJavaRef, typeDefsEncountered));
+                                return;
+                            }
+                        }
+
+                        TypeRef tr = typeDefsEncountered.add(name) ? result.getTypeDef(name) : null;
+                        if (tr != null) {
+                            if (!isResoluble(tr, libraryClassName)) {
+                                if (convertToJavaRef)// && !(tr instanceof TargettedTypeRef))
+                                {
+                                    simpleTypeRef.replaceBy(typeRef(result.getFakePointer(libraryClassName, name)));
+                                } else {
+                                    simpleTypeRef.replaceBy(resolveTypeDef(tr.clone(), libraryClassName, convertToJavaRef, convertEnumToJavaRef, typeDefsEncountered));
+                                }
+                                return;
+                            }
+
+                            if (tr instanceof Enum && !convertEnumToJavaRef) {
+                                simpleTypeRef.replaceBy(typeRef(int.class));
+                                return;
+                            }
+                            if (tr instanceof TypeRef.TaggedTypeRef) {
+                                Identifier name2 = result.declarationsConverter.getActualTaggedTypeName((TypeRef.TaggedTypeRef) tr);
+                                if (name2 != null) {
+                                    name = name2;
+                                }
+                            }
+                            if (convertToJavaRef) {
+                                if (tr instanceof TypeRef.TaggedTypeRef) {
+                                    TypeRef.TaggedTypeRef s = (TypeRef.TaggedTypeRef) tr;
+                                    if (s.isForwardDeclaration()) {
+                                        return;
+                                    }
+
+//									if (tr instanceof Enum) {
+//										tr = typeRef(s.getTag().clone());
+//									} else {
+                                    Identifier ident = getTaggedTypeIdentifierInJava(s);
+                                    if (ident != null) {
+                                        tr = typeRef(ident);//findRef(name, s, libraryClassName));
+                                    }//									}
+                                } else if (tr instanceof TypeRef.FunctionSignature) {
+                                    tr = findCallbackRef((TypeRef.FunctionSignature) tr, libraryClassName);
+                                }
+                            }
+                            String strs = simpleTypeRef.toString();
+                            String trs = tr == null ? null : tr.toString();
+                            if (trs != null && !strs.equals(trs)) {
+                                TypeRef clo = tr.clone();
+                                simpleTypeRef.replaceBy(clo);
+                                if (depth < 30) {
+                                    clo.accept(this);
+                                } else {
+                                    System.err.println("Infinite loop in type conversion ? " + tr);
+                                }
+                            }
+                            return;
+                        }
+                    } finally {
+                        names.pop();
+                    }
+                } finally {
+                    depth--;
+                }
+            }
+        });
+        TypeRef tr = holder.getValueType();
+//		tr.setParentElement(valueType.getParentElement());
+        TypeRef resolved = tr == null ? null : tr.clone();
+        return resolved;
+//        return tr == null ? null : tr == valueTypeCl || convertToJavaRef ? valueType : tr.clone();
+    }
+
+    boolean isResoluble(TypeRef tr, Identifier libraryClassName) {
+        return isResoluble(tr, libraryClassName, new HashSet<Identifier>());
+    }
+
+    boolean isResoluble(TypeRef tr, Identifier libraryClassName, Set<Identifier> typeDefsEncountered) {
+        if (tr instanceof TypeRef.Primitive
+                || tr instanceof TypeRef.FunctionSignature
+                || tr instanceof TypeRef.TaggedTypeRef) {
+            return true;
+        } else if (tr instanceof TypeRef.TargettedTypeRef) {
+            return isResoluble(((TypeRef.TargettedTypeRef) tr).getTarget(), libraryClassName, typeDefsEncountered);
+        } else if (tr instanceof TypeRef.SimpleTypeRef) {
+            Identifier name = ((TypeRef.SimpleTypeRef) tr).getName();
+            TypeRef tdt = typeDefsEncountered.add(name) ? result.getTypeDef(name) : null;
+            if (tdt != null) {
+                return isResoluble(tdt, libraryClassName, typeDefsEncountered);
+            } else {
+                TypeRef ft = findTypeRef(name, libraryClassName);
+                return ft != null;
+            }
+        }
+        return false;
     }
 }

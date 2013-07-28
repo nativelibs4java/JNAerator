@@ -506,8 +506,19 @@ public class BridJDeclarationsConverter extends DeclarationsConverter {
                     TypeRef tr = td.getValueType();
                     if (tr instanceof Struct) {
                         outputConvertedStruct((Struct) tr, childSignatures, structJavaClass, callerLibraryClass, callerLibrary, false);
-                    } else if (tr instanceof FunctionSignature) {
-                        convertCallback((FunctionSignature) tr, childSignatures, structJavaClass, callerLibraryClass);
+                    } else {
+                        FunctionSignature fs = null;
+                        if (tr instanceof FunctionSignature) {
+                            fs = (FunctionSignature) tr;
+                        } else if (tr instanceof TypeRef.Pointer) {
+                            TypeRef target = ((TypeRef.Pointer) tr).getTarget();
+                            if (target instanceof FunctionSignature) {
+                                fs = (FunctionSignature) target;
+                            }
+                        }
+                        if (fs != null) {
+                            convertCallback(fs, childSignatures, structJavaClass, callerLibraryClass);
+                        }
                     }
                 } else if (result.config.genCPlusPlus && d instanceof Function) {
                     Function f = (Function) d;
@@ -674,6 +685,7 @@ public class BridJDeclarationsConverter extends DeclarationsConverter {
             getGlobalPointerExpr = methodCall(methodCall(methodCall(expr(typeRef(BridJ.class)), "getNativeLibrary", expr(callerLibrary)), "getSymbolPointer", expr(name)), "as", result.typeConverter.typeLiteral(javaType.clone()));
         }
         List<Declaration> out = new ArrayList<Declaration>();
+        boolean addedGetterOrSetter = false;
         if (conv.getExpr != null) {
             Function getter = convDecl.clone();
             if (isGlobal) {
@@ -684,6 +696,7 @@ public class BridJDeclarationsConverter extends DeclarationsConverter {
                         new Statement.Return(conv.getExpr)));
             }
             out.add(getter);
+            addedGetterOrSetter = true;
         }
 
         if (!conv.readOnly && conv.setExpr != null) {
@@ -702,6 +715,7 @@ public class BridJDeclarationsConverter extends DeclarationsConverter {
                         new Statement.Return(thisRef())));
             }
             out.add(setter);
+            addedGetterOrSetter = true;
 
             if (result.config.scalaStructSetters) {
                 setter = new Function();
@@ -715,6 +729,10 @@ public class BridJDeclarationsConverter extends DeclarationsConverter {
                         new Statement.Return(varRef(name))));
                 out.add(setter);
             }
+        }
+        
+        if (!addedGetterOrSetter) {
+            out.add(new EmptyDeclaration("Failed to convert value " + name + " of type " + mutatedType));
         }
         return out;
     }

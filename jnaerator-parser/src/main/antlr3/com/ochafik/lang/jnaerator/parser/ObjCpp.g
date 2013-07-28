@@ -1266,7 +1266,7 @@ templateArgDecl returns [Arg arg]
 		)? 
 	;	
 	
-functionSignatureSuffix returns [FunctionSignature signature]
+functionSignatureSuffix returns [FunctionSignature signature, PointerStyle pointerStyle]
 	:	tk='(' {
 			$signature = mark(new FunctionSignature(new Function(Function.Type.CFunction, null, null)), getLine($tk));
 			$signature.getFunction().setType(Function.Type.CFunction);
@@ -1278,6 +1278,7 @@ functionSignatureSuffix returns [FunctionSignature signature]
 		)?
 		(
 			pt=('*' | '^') {
+				$pointerStyle = PointerStyle.parsePointerStyle($pt.text);
 				if ($pt.text != null && $pt.text.equals("^"))
 					$signature.setType(FunctionSignature.Type.ObjCBlock);
 			}
@@ -1307,28 +1308,28 @@ functionSignatureSuffix returns [FunctionSignature signature]
 		)? ')'
 	;
 
-functionSignatureSuffixNoName returns [FunctionSignature signature]
-	:	tk='(' m=modifiers? pt=('*' | '^') ')' { 
-			$signature = mark(new FunctionSignature(new Function(Function.Type.CFunction, null, null)), getLine($tk));
-			if ($pt.text.equals("^"))
-				$signature.setType(FunctionSignature.Type.ObjCBlock);
-			$signature.getFunction().setType(Function.Type.CFunction);
-			if ($m.modifiers != null)
-				$signature.getFunction().addModifiers($m.modifiers);
-		}
-		'(' (
-			a1=argDef { 
-				if (!$a1.text.equals("void"))
-					((FunctionSignature)$signature).getFunction().addArg($a1.arg); 
-			}
-			(
-				',' 
-				ax=argDef { 
-					((FunctionSignature)$signature).getFunction().addArg($ax.arg); 
-				}
-			)*
-		)? ')'
-	;
+//functionSignatureSuffixNoName returns [FunctionSignature signature]
+//	:	tk='(' m=modifiers? pt=('*' | '^') ')' { 
+//			$signature = mark(new FunctionSignature(new Function(Function.Type.CFunction, null, null)), getLine($tk));
+//			if ($pt.text.equals("^"))
+//				$signature.setType(FunctionSignature.Type.ObjCBlock);
+//			$signature.getFunction().setType(Function.Type.CFunction);
+//			if ($m.modifiers != null)
+//				$signature.getFunction().addModifiers($m.modifiers);
+//		}
+//		'(' (
+//			a1=argDef { 
+//				if (!$a1.text.equals("void"))
+//					((FunctionSignature)$signature).getFunction().addArg($a1.arg); 
+//			}
+//			(
+//				',' 
+//				ax=argDef { 
+//					((FunctionSignature)$signature).getFunction().addArg($ax.arg); 
+//				}
+//			)*
+//		)? ')'
+//	;
 
 mutableTypeRef returns [TypeRef type]
 @before {
@@ -1353,6 +1354,9 @@ mutableTypeRef returns [TypeRef type]
 					if ($f1.signature != null && $f1.signature.getFunction() != null) {
 						$f1.signature.getFunction().setValueType($type); 
 						$type = $f1.signature;
+						if ($f1.pointerStyle != null) {
+							$type = new Pointer($type, $f1.pointerStyle);
+						}
 					}
 				}
 			)
@@ -1375,8 +1379,6 @@ declarator  returns [Declarator decl]
 						inner=declarator {
 							// TODO EMPTY DECLARATOR... maybe not the brightest idea one can have...
 							$decl = new PointerDeclarator($inner.decl == null ? new DirectDeclarator(null) : $inner.decl, PointerStyle.parsePointerStyle($pt.text));
-							//$decl = new PointerDeclarator(new DirectDeclarator("toto")/*$inner.decl*/, PointerStyle.parsePointerStyle($pt.text));
-							//$decl = new DirectDeclarator("toto");
 						} 
 					)
 				)

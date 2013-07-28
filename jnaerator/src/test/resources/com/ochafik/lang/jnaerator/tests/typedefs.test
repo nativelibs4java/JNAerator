@@ -51,20 +51,20 @@ f2((Pointer<ReSampleContext>)null);
 Callback cb = (FC)null;
 Pointer<FC> pfc = null;
 f3(pfc);
-float ret = f4(0);
+//float ret = f4(0);
 
-((fshort1)null).apply((short)0);
-((fshort2)null).apply((short)0);
+//((fshort1)null).apply((short)0);
+//((fshort2)null).apply((short)0);
 ((fshort3)null).apply((short)0);
 ((fshort4)null).apply((short)0);
 
-((flong1)null).apply((long)0);
-((flong2)null).apply((long)0);
+//((flong1)null).apply((long)0);
+//((flong2)null).apply((long)0);
 ((flong3)null).apply((long)0);
 ((flong4)null).apply((long)0);
 
-((fint1)null).apply((int)0);
-((fint2)null).apply((int)0);
+//((fint1)null).apply((int)0);
+//((fint2)null).apply((int)0);
 ((fint3)null).apply((int)0);
 ((fint4)null).apply((int)0);
 

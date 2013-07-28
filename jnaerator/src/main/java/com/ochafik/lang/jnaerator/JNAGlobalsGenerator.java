@@ -50,7 +50,9 @@ public class JNAGlobalsGenerator extends GlobalsGenerator {
                     continue;
                 }
 
-                boolean isCallback = result.callbacksByName.containsKey(ident(type.toString()));//type instanceof FunctionSignature;
+                TypeRef targetType = type instanceof TypeRef.Pointer ? ((TypeRef.Pointer)type).getTarget() : null;
+                boolean isCallback = targetType != null &&
+                        result.callbacksByName.containsKey(ident(targetType.toString()));//type instanceof FunctionSignature;
                 List<Modifier> modifiers = new ArrayList<Modifier>(type.getModifiers());
                 modifiers.addAll(globals.getModifiers());
 
@@ -89,8 +91,8 @@ public class JNAGlobalsGenerator extends GlobalsGenerator {
                             globalType = typeRef(ident(GlobalStruct.class, expr(convertedType.clone())));
                             extraArg = memberRef(expr(convertedType.clone()), Expression.MemberRefStyle.Dot, "class");
                         } else if (isCallback) {
-                            globalType = typeRef(ident(GlobalCallback.class, expr(type.clone())));
-                            extraArg = memberRef(expr(type.clone()), Expression.MemberRefStyle.Dot, "class");
+                            globalType = typeRef(ident(GlobalCallback.class, expr(targetType.clone())));
+                            extraArg = memberRef(expr(targetType.clone()), Expression.MemberRefStyle.Dot, "class");
                         } else if (isPointer) {
                             Class<? extends ByReference> brt = result.typeConverter.primToByReference.get(prim);
                             if (brt != null) {

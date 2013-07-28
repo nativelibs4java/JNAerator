@@ -16,11 +16,13 @@ import com.ochafik.lang.jnaerator.parser.Enum;
 
 import static com.ochafik.lang.jnaerator.parser.ElementsHelper.*;
 import com.ochafik.lang.jnaerator.parser.TypeRef.SimpleTypeRef;
+import com.ochafik.lang.jnaerator.parser.TypeRef.TaggedTypeRef;
 import com.ochafik.lang.jnaerator.runtime.NativeSize;
 import com.ochafik.util.listenable.Pair;
 import com.ochafik.util.string.StringUtils;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import org.bridj.IntValuedEnum;
@@ -178,25 +180,11 @@ public class BridJTypeConversion extends TypeConversion {
             return element;
         }
     }
-
     public NL4JConversion convertTypeToNL4J(TypeRef valueType, Identifier libraryClassName, Expression structIOExpr, Expression valueExpr, int fieldIndex, int bits) throws UnsupportedConversionException {
 
         TypeRef original = valueType;
-
-        if (!(original instanceof TypeRef.TargettedTypeRef)) {
-            TypeRef resolved = result.resolveType(original, false);
-            if (resolved == null) {
-                resolved = resolveTypeDef(valueType, libraryClassName, false/*true*/, true);
-            }
-            if (resolved != null) {
-                valueType = resolved;
-            }
-        }
-
-        //Expression offsetExpr = structIOExpr == null ? null : methodCall(structIOExpr, "getFieldOffset", expr(fieldIndex));
-        //Expression bitOffsetExpr = structIOExpr == null || bits <= 0 ? null : methodCall(structIOExpr, "getFieldBitOffset", expr(fieldIndex));
-        //Expression bitLengthExpr = structIOExpr == null || bits <= 0  ? null : methodCall(structIOExpr, "getFieldBitLength", expr(fieldIndex));
-
+        valueType = normalizeTypeRef(valueType);
+        
         NL4JConversion conv = new NL4JConversion();
 
         if (valueType == null) {
@@ -271,6 +259,7 @@ public class BridJTypeConversion extends TypeConversion {
             conv.typeRef = typeRef(valueType.getResolvedJavaIdentifier().clone());
             if (valueType instanceof TypeRef.FunctionSignature) {
                 conv.type = ConvType.FunctionSignature;
+//                conv.typeRef = pointerTypeRef(conv.typeRef);
             } else if (valueType instanceof Enum) {
                 conv.type = ConvType.Enum;
                 conv.typeRef = typeRef(ident(IntValuedEnum.class, expr(conv.typeRef)));
@@ -302,11 +291,22 @@ public class BridJTypeConversion extends TypeConversion {
         }
         throw new UnsupportedConversionException(original, "Unsupported type");
     }
+
+    @Override
+    public TypeRef functionPointerTypeRef(TypeRef.FunctionSignature fs) {
+        return pointerTypeRef(fs);
+    }
     
     @Override
     public TypeRef pointerTypeRef(TypeRef targetTypeRef) {
         return typeRef(ident(result.config.runtime.pointerClass, expr(targetTypeRef.clone())));
     }
+
+    @Override
+    public TypeRef findCallbackRef(TypeRef.FunctionSignature s, Identifier callerLibraryClass) {
+        return pointerTypeRef(super.findCallbackRef(s, callerLibraryClass));
+    }
+
     
     private NL4JConversion convertPrimitiveTypeRefToNL4J(JavaPrim prim, Expression structIOExpr, int fieldIndex, Expression valueExpr) {
         NL4JConversion conv = new NL4JConversion();
@@ -372,7 +372,7 @@ public class BridJTypeConversion extends TypeConversion {
     }
 
     protected Expression sizeofToJava(TypeRef type, Identifier libraryClassName) throws UnsupportedConversionException {
-        type = resolveTypeDef(type, libraryClassName, true, false);
+        type = normalizeTypeRef(type);//resolveTypeDef(type, libraryClassName, true, false);
 //		type = type;
 
         Expression res = null;

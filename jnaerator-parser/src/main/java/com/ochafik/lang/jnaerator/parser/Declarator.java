@@ -186,7 +186,8 @@ public abstract class Declarator extends ModifiableElement {
 			
 			type = type.clone();
 			if (type instanceof Function) {
-				type = (MutableByDeclarator)new TypeRef.FunctionSignature((Function)type).importDetails((Element)type, true);
+                TypeRef fs = new TypeRef.FunctionSignature((Function)type).importDetails((Element)type, true);
+                type = (MutableByDeclarator) new TypeRef.Pointer(fs, getPointerStyle());
 			} else if (type instanceof TypeRef) {
 				type = (MutableByDeclarator) new TypeRef.Pointer((TypeRef)type, getPointerStyle()).importDetails((Element)type, true);
 			} else

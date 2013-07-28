@@ -150,6 +150,7 @@ public class MissingNamesChooser extends Scanner {
     @Override
     public void visitFunctionSignature(FunctionSignature functionSignature) {
         Identifier origName = functionSignature.getFunction() == null ? null : functionSignature.getFunction().getName();
+        Element parent = functionSignature.getParentElement();
 
         if (!renameFunctionSignatures) {
             super.visitFunctionSignature(functionSignature);
@@ -166,16 +167,18 @@ public class MissingNamesChooser extends Scanner {
         if (!chooseNameIfMissing(functionSignature)) {
             super.visitFunctionSignature(functionSignature);
         }
+        
+        if ((parent instanceof TypeDef) ||
+            (parent instanceof TypeRef.Pointer) && (parent.getParentElement() instanceof TypeDef)) {
+            return;
+        }
 
         DeclarationsHolder holder = functionSignature.findParentOfType(DeclarationsHolder.class);
         Function f = functionSignature.getFunction();
         if (holder != null && f != null && !isNull(f.getName())) {
             Identifier fnameClone = f.getName().clone();
-            StoredDeclarations d = as(functionSignature.getParentElement(), StoredDeclarations.class);
-            if (d instanceof TypeDef) {
-                return;
-            }
-
+            StoredDeclarations d = as(parent, StoredDeclarations.class);
+            
             if (d != null && d.getDeclarators().isEmpty()) {
                 if (d instanceof VariablesDeclaration) {
                     VariablesDeclaration pvd = (VariablesDeclaration) d;
@@ -198,7 +201,8 @@ public class MissingNamesChooser extends Scanner {
     
     TypeRef functionSignatureRef(Identifier funSigName) {
         TypeRef.SimpleTypeRef tr = new TypeRef.SimpleTypeRef(funSigName.clone());
-        return treatFunctionSignatureAsPointers() ? tr : result.typeConverter.pointerTypeRef(tr);
+        return tr;//treatFunctionSignatureAsPointers() ? tr : new TypeRef.Pointer(tr, Declarator.PointerStyle.Pointer);
+        //result.typeConverter.pointerTypeRef(tr);
     }
 
     static boolean isUnnamed(TaggedTypeRefDeclaration d) {

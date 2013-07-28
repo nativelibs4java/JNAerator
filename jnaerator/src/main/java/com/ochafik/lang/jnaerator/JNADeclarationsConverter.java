@@ -20,7 +20,7 @@ package com.ochafik.lang.jnaerator;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.List;
 import java.util.regex.Pattern;
 
 import org.rococoa.AlreadyRetained;
@@ -53,6 +53,16 @@ import com.sun.jna.NativeLibrary;
 import com.sun.jna.PointerType;
 import com.sun.jna.win32.StdCallLibrary;
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 public class JNADeclarationsConverter extends DeclarationsConverter {
 
@@ -441,8 +451,19 @@ public class JNADeclarationsConverter extends DeclarationsConverter {
                     TypeRef tr = td.getValueType();
                     if (tr instanceof Struct) {
                         outputConvertedStruct((Struct) tr, childSignatures, structJavaClass, callerLibraryClass, callerLibrary, false);
-                    } else if (tr instanceof FunctionSignature) {
-                        convertCallback((FunctionSignature) tr, childSignatures, structJavaClass, callerLibraryClass);
+                    } else {
+                        FunctionSignature fs = null;
+                        if (tr instanceof FunctionSignature) {
+                            fs = (FunctionSignature) tr;
+                        } else if (tr instanceof TypeRef.Pointer) {
+                            TypeRef target = ((TypeRef.Pointer) tr).getTarget();
+                            if (target instanceof FunctionSignature) {
+                                fs = (FunctionSignature) target;
+                            }
+                        }
+                        if (fs != null) {
+                            convertCallback(fs, childSignatures, structJavaClass, callerLibraryClass);
+                        }
                     }
                 } else if (result.config.genCPlusPlus && d instanceof Function) {
                     Function f = (Function) d;
@@ -587,7 +608,7 @@ public class JNADeclarationsConverter extends DeclarationsConverter {
                 mutatedType,
                 TypeConversion.TypeConversionMode.FieldType,
                 callerLibraryName);
-        mutatedType = result.typeConverter.resolveTypeDef(mutatedType, callerLibraryName, true, false);
+        mutatedType = ((JNATypeConversion)result.typeConverter).resolveTypeDef(mutatedType, callerLibraryName, true, false);
 
         VariablesDeclaration convDecl = new VariablesDeclaration();
         convDecl.addModifiers(ModifierType.Public);
@@ -1107,4 +1128,6 @@ public class JNADeclarationsConverter extends DeclarationsConverter {
             hubOut.close();
         }
     }
+    
+    
 }

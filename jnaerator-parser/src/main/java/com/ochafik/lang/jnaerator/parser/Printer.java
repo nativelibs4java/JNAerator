@@ -429,18 +429,23 @@ public class Printer implements Visitor {
         assert e.getFunction().getBody() == null;
         modifiersStringPrefix(e);
         append(e.getFunction().getValueType()).space(e.getFunction().getValueType() != null);
-        append("(");
-        modifiersStringPrefix(e.getFunction());
-        switch (e.getType()) {
-            case CFunction:
-                append("*");
-                break;
-            case ObjCBlock:
-                append("^");
-                break;
+        if (e.getParentElement() instanceof TypeRef.Pointer) {
+            append("(");
+            modifiersStringPrefix(e.getFunction());
+            switch (e.getType()) {
+                case CFunction:
+                    append("*");
+                    break;
+                case ObjCBlock:
+                    append("^");
+                    break;
+            }
+            append(e.getFunction().getName());
+            append(")");
+        } else {
+            append(e.getFunction().getName());
         }
-        append(e.getFunction().getName());
-        append(")(");
+        append("(");
         implode(e.getFunction().getArgs(), ", ");
         append(")");
         append(e.getModifiers().isEmpty() ? "" : " ");
@@ -455,7 +460,9 @@ public class Printer implements Visitor {
     public void visitPointer(Pointer e) {
         modifiersStringPrefix(e);
         append(e.getTarget());
-        append(e.getPointerStyle());
+        if (!(e.getTarget() instanceof FunctionSignature)) {
+            append(e.getPointerStyle());
+        }
     }
 
     public void visitArray(ArrayRef e) {
