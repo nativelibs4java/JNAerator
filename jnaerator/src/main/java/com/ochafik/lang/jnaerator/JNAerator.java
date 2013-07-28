@@ -225,7 +225,7 @@ public class JNAerator {
                 boolean simpleGUI = false;
                 NativePlatform arch = NativePlatform.getCurrentPlatform();//LibraryExtractor.getCurrentOSAndArchString();
                 File libraryFileForCurrentArch = null;
-                String currentLibrary = null;
+                String currentLibrary = null, currentExtractedInterface = null;
 
                 @Override
                 List<String> parsed(ParsedArg a) throws Exception {
@@ -322,6 +322,13 @@ public class JNAerator {
                             break;
                         case CurrentLibrary:
                             currentLibrary = a.getStringParam(0);
+                            if (currentExtractedInterface != null)
+                                config.extractedLibraries.put(currentLibrary, currentExtractedInterface);
+                            break;
+                        case ExtractDeclarations:
+                            currentExtractedInterface = a.getStringParam(0);
+                            if (currentLibrary != null)
+                                config.extractedLibraries.put(currentLibrary, currentExtractedInterface);
                             break;
                         case CurrentPackage:
                             config.packageName = a.getStringParam(0);

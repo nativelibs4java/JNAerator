@@ -34,7 +34,7 @@ public abstract class GlobalsGenerator {
     @SuppressWarnings("unchecked")
     protected abstract void convertGlobals(VariablesDeclaration globals, Signatures signatures, DeclarationsHolder out, Expression nativeLibFieldExpr, Identifier callerLibraryName, String callerLibrary) throws UnsupportedConversionException;
 
-    public void convertGlobals(List<VariablesDeclaration> list, Signatures signatures, DeclarationsHolder out, Expression nativeLibFieldExpr, Identifier libraryNameExpression, String library) {
+    public void convertGlobals(List<VariablesDeclaration> list, Signatures signatures, DeclarationsHolder out, Expression nativeLibFieldExpr, String library) {
         if (list == null) {
             return;
         }
@@ -43,7 +43,7 @@ public abstract class GlobalsGenerator {
         }
         for (VariablesDeclaration v : list) {
             try {
-                convertGlobals(v, signatures, out, nativeLibFieldExpr, libraryNameExpression, library);
+                convertGlobals(v, signatures, out, nativeLibFieldExpr, out.getResolvedJavaIdentifier(), library);
             } catch (UnsupportedConversionException ex) {
                 out.addDeclaration(result.declarationsConverter.skipDeclaration(v, ex.toString()));
             }

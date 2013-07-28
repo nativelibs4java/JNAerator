@@ -192,7 +192,10 @@ public class NodeJSDeclarationsConverter extends DeclarationsConverter {
     }
 
     @Override
-    protected void convertFunction(Function function, Signatures signatures, boolean callback, DeclarationsHolder objOut, Identifier libraryClassName, String sig, Identifier functionName, String library, int iConstructor) {
+    protected void convertFunction(Function function, Signatures signatures, boolean callback, 
+            DeclarationsHolder declarations, DeclarationsHolder implementations, Identifier libraryClassName, 
+            String sig, Identifier functionName, String library, int iConstructor) {
+        assert implementations == declarations || declarations == null;
         String methodName = library + "_" + (function.getParentElement() instanceof Struct ? ((Struct) function.getParentElement()).getTag() + "_" : "") + function.getName();
         Function method = new Function(Function.Type.CppMethod, ident(methodName), typeRef(v8Ident("Handle", v8Ident("Value"))));
         method.addArg(new Arg(argsName, new TypeRef.Pointer(typeRef(v8Ident("Arguments")), Declarator.PointerStyle.Reference).addModifiers(ModifierType.Const)));
@@ -329,9 +332,9 @@ public class NodeJSDeclarationsConverter extends DeclarationsConverter {
         }
         method.setBody(body);
 
-        objOut.addDeclaration(method);
+        implementations.addDeclaration(method);
 
-        Block initBlock = getInitMethodBody(objOut);
+        Block initBlock = getInitMethodBody(implementations);
         initBlock.addStatement(stat(methodCall("NODE_SET_METHOD", varRef(initTarget), expr(functionName.toString()), varRef(methodName))));
     }
 
@@ -430,11 +433,11 @@ public class NodeJSDeclarationsConverter extends DeclarationsConverter {
             dummyNodeBufferFreeCallback.setBody(new Block());
             sourceFile.addDeclaration(dummyNodeBufferFreeCallback);
 
-            fillLibraryMapping(result, sourceFiles, sourceFile, library, null, null, null);
+            fillLibraryMapping(result, sourceFiles, sourceFile, sourceFile, library, null, null);
             initMethod.replaceBy(null);
             sourceFile.addDeclaration(initMethod);
             sourceFile.addDeclaration(decl(stat(methodCall("NODE_MODULE", varRef(ident(library)), varRef(ident(initFunctionName))))));
-            writeLibraryInterface(result, sourceFiles, sourceFile, library, null, null);
+            writeLibraryInterface(result, sourceFiles, sourceFile, library, null);
 
             Map<String, Object> gypTarget = map();
             gypTarget.put("target_name", library);

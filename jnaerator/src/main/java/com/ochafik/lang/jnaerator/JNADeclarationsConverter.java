@@ -168,12 +168,13 @@ public class JNADeclarationsConverter extends DeclarationsConverter {
     Map<String, Pair<Function, List<Function>>> functionAlternativesByNativeSignature = new LinkedHashMap<String, Pair<Function, List<Function>>>();
 
     @Override
-    protected void convertFunction(Function function, Signatures signatures, boolean isCallback, DeclarationsHolder out, Identifier libraryClassName, String sig, Identifier functionName, String library, int iConstructor) {
+    protected void convertFunction(Function function, Signatures signatures, boolean isCallback, DeclarationsHolder declarations, DeclarationsHolder implementations, Identifier libraryClassName, String sig, Identifier functionName, String library, int iConstructor) {
+        assert implementations == declarations || declarations == null;
         Pair<Function, List<Function>> alternativesPair = functionAlternativesByNativeSignature.get(sig);
         if (alternativesPair != null) {
             if (result.config.choicesInputFile != null) {
                 for (Function alt : alternativesPair.getValue()) {
-                    out.addDeclaration(alt.clone());
+                    implementations.addDeclaration(alt.clone());
                 }
                 return;
             }
@@ -340,25 +341,25 @@ public class JNADeclarationsConverter extends DeclarationsConverter {
                     natFunc.addAnnotation(new Annotation(Deprecated.class));
                 }
                 collectParamComments(natFunc);
-                out.addDeclaration(natFunc);
+                implementations.addDeclaration(natFunc);
                 alternatives.add(cleanClone(natFunc));
             }
 
             if (alternativeOutputs) {
                 if (signatures == null || signatures.addMethod(primOrBufSign)) {
                     collectParamComments(primOrBufFunc);
-                    out.addDeclaration(primOrBufFunc);
+                    implementations.addDeclaration(primOrBufFunc);
                     alternatives.add(cleanClone(primOrBufFunc));
                 }
                 if (signatures == null || signatures.addMethod(bufSign)) {
                     collectParamComments(natStructFunc);
-                    out.addDeclaration(natStructFunc);
+                    implementations.addDeclaration(natStructFunc);
                     alternatives.add(cleanClone(natStructFunc));
                 }
             }
         } catch (UnsupportedConversionException ex) {
             if (!result.config.limitComments) {
-                out.addDeclaration(new EmptyDeclaration(getFileCommentContent(function), ex.toString()));
+                implementations.addDeclaration(new EmptyDeclaration(getFileCommentContent(function), ex.toString()));
             }
         }
     }
@@ -439,7 +440,7 @@ public class JNADeclarationsConverter extends DeclarationsConverter {
                 if (d instanceof TaggedTypeRefDeclaration) {
                     TaggedTypeRef tr = ((TaggedTypeRefDeclaration) d).getTaggedTypeRef();
                     if (tr instanceof Struct) {
-                        outputConvertedStruct((Struct) tr, childSignatures, structJavaClass, callerLibraryClass, callerLibrary, false);
+                        outputConvertedStruct((Struct) tr, childSignatures, structJavaClass, callerLibrary, false);
                     } else if (tr instanceof Enum) {
                         convertEnum((Enum) tr, childSignatures, structJavaClass, callerLibraryClass);
                     }
@@ -447,7 +448,7 @@ public class JNADeclarationsConverter extends DeclarationsConverter {
                     TypeDef td = (TypeDef) d;
                     TypeRef tr = td.getValueType();
                     if (tr instanceof Struct) {
-                        outputConvertedStruct((Struct) tr, childSignatures, structJavaClass, callerLibraryClass, callerLibrary, false);
+                        outputConvertedStruct((Struct) tr, childSignatures, structJavaClass, callerLibrary, false);
                     } else {
                         FunctionSignature fs = null;
                         if (tr instanceof FunctionSignature) {
@@ -459,7 +460,7 @@ public class JNADeclarationsConverter extends DeclarationsConverter {
                             }
                         }
                         if (fs != null) {
-                            convertCallback(fs, childSignatures, structJavaClass, callerLibraryClass);
+                            convertCallback(fs, childSignatures, structJavaClass);
                         }
                     }
                 } else if (result.config.genCPlusPlus && d instanceof Function) {
@@ -469,7 +470,8 @@ public class JNADeclarationsConverter extends DeclarationsConverter {
                         continue;
                     }
                     List<Declaration> decls = new ArrayList<Declaration>();
-                    convertFunction(f, childSignatures, false, new ListWrapper(decls), callerLibraryClass, -1);
+                    DeclarationsHolder out = new ListWrapper(decls);
+                    convertFunction(f, childSignatures, false, out, out, callerLibraryClass, -1);
                     for (Declaration md : decls) {
                         if (!(md instanceof Function)) {
                             continue;
@@ -1018,6 +1020,7 @@ public class JNADeclarationsConverter extends DeclarationsConverter {
 
 
             Struct interf = new Struct();
+            interf.setResolvedJavaIdentifier(fullLibraryClassName);
             interf.addToCommentBefore("JNA Wrapper for library <b>" + library + "</b>",
                     result.declarationsConverter.getFileCommentContent(result.config.libraryProjectSources.get(library), null));
             if (hubOut != null) {
@@ -1117,8 +1120,8 @@ public class JNADeclarationsConverter extends DeclarationsConverter {
                 interf.setType(Struct.Type.JavaInterface);
             }
 
-            fillLibraryMapping(result, sourceFiles, interf, library, javaPackage, fullLibraryClassName, nativeLibFieldExpr);
-            writeLibraryInterface(result, sourceFiles, interf, library, javaPackage, fullLibraryClassName);
+            fillLibraryMapping(result, sourceFiles, interf, interf, library, javaPackage, nativeLibFieldExpr);
+            writeLibraryInterface(result, sourceFiles, interf, library, javaPackage);
         }
         if (hubOut != null) {
             hubOut.println(librariesHub.toString());

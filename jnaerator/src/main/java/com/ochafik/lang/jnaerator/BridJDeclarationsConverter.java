@@ -182,7 +182,10 @@ public class BridJDeclarationsConverter extends DeclarationsConverter {
     }
 
     @Override
-    public void convertFunction(Function function, Signatures signatures, boolean isCallback, DeclarationsHolder out, Identifier libraryClassName, String sig, Identifier functionName, String library, int iConstructor) throws UnsupportedConversionException {
+    public void convertFunction(Function function, Signatures signatures, boolean isCallback, 
+            DeclarationsHolder declarations, DeclarationsHolder implementations, Identifier libraryClassName, 
+            String sig, Identifier functionName, String library, int iConstructor) throws UnsupportedConversionException {
+        assert implementations != null;
         Element parent = function.getParentElement();
         MemberVisibility visibility = function.getVisibility();
         boolean isPublic = visibility == MemberVisibility.Public || function.hasModifier(ModifierType.Public);
@@ -253,6 +256,7 @@ public class BridJDeclarationsConverter extends DeclarationsConverter {
 
         fillIn(signatures, functionName, nativeMethod, returnType, paramTypes, paramNames, varArgType, varArgName, isCallback, false);
 
+        List<Declaration> implementationDecls = new ArrayList<Declaration>();
         Block convertedBody = null;
         if (isConstructor) {
             convertedBody = block(stat(methodCall("super", superConstructorArgs.toArray(new Expression[superConstructorArgs.size()]))));
@@ -261,7 +265,7 @@ public class BridJDeclarationsConverter extends DeclarationsConverter {
                 Pair<Element, List<Declaration>> bodyAndExtraDeclarations = result.bridjer.convertToJava(function.getBody(), libraryClassName);
                 convertedBody = (Block) bodyAndExtraDeclarations.getFirst();
                 for (Declaration d : bodyAndExtraDeclarations.getSecond()) {
-                    out.addDeclaration(d);
+                    implementationDecls.add(d);
                 }
             } catch (Exception ex) {
                 ex.printStackTrace(System.out);
@@ -273,9 +277,15 @@ public class BridJDeclarationsConverter extends DeclarationsConverter {
             nativeMethod.importComments(function, isCallback ? null : getFileCommentContent(function));
         }
 
-        out.addDeclaration(nativeMethod);
+        implementationDecls.add(nativeMethod);
 
-        boolean generateStaticMethod = isStatic || !isCallback && !isInStruct;
+        boolean generateStaticMethod = (isStatic || !isCallback && !isInStruct) &&
+                (declarations == null || implementations == declarations);
+        
+        nativeMethod.addModifiers(
+                isProtected ? ModifierType.Protected : ModifierType.Public,
+                generateStaticMethod ? ModifierType.Static : null);
+        
         if (convertedBody == null) {
             boolean forwardedToRaw = false;
             if (result.config.genRawBindings && !isCallback) {
@@ -288,7 +298,7 @@ public class BridJDeclarationsConverter extends DeclarationsConverter {
                 }
 
                 if (!nativeMethod.computeSignature(SignatureType.ArgsAndRet).equals(rawMethod.computeSignature(SignatureType.ArgsAndRet))) {
-                    out.addDeclaration(rawMethod);
+                    implementationDecls.add(rawMethod);
 
                     List<Expression> followedArgs = new ArrayList<Expression>();
                     for (int i = 0, n = paramTypes.size(); i < n; i++) {
@@ -360,9 +370,19 @@ public class BridJDeclarationsConverter extends DeclarationsConverter {
             nativeMethod.setBody(convertedBody);
         }
 
-        nativeMethod.addModifiers(
-                isProtected ? ModifierType.Protected : ModifierType.Public,
-                generateStaticMethod ? ModifierType.Static : null);
+        for (Declaration d : implementationDecls) {
+            implementations.addDeclaration(d);
+            if (declarations != null && implementations != declarations) {
+                if (d instanceof Function) {
+                    Function m = (Function)d.clone();
+                    m.setBody(null);
+                    m.removeModifiers(ModifierType.Abstract, ModifierType.Final, 
+                        ModifierType.Static, ModifierType.Native, ModifierType.Public);
+                    declarations.addDeclaration(m);
+//                    d.addAnnotation(new Annotation(typeRef(Override.class)));
+                }
+            }
+        }
 
     }
 
@@ -497,7 +517,7 @@ public class BridJDeclarationsConverter extends DeclarationsConverter {
                 if (d instanceof TaggedTypeRefDeclaration) {
                     TaggedTypeRef tr = ((TaggedTypeRefDeclaration) d).getTaggedTypeRef();
                     if (tr instanceof Struct) {
-                        outputConvertedStruct((Struct) tr, childSignatures, structJavaClass, callerLibraryClass, callerLibrary, false);
+                        outputConvertedStruct((Struct) tr, childSignatures, structJavaClass, callerLibrary, false);
                     } else if (tr instanceof Enum) {
                         convertEnum((Enum) tr, childSignatures, structJavaClass, callerLibraryClass);
                     }
@@ -505,7 +525,7 @@ public class BridJDeclarationsConverter extends DeclarationsConverter {
                     TypeDef td = (TypeDef) d;
                     TypeRef tr = td.getValueType();
                     if (tr instanceof Struct) {
-                        outputConvertedStruct((Struct) tr, childSignatures, structJavaClass, callerLibraryClass, callerLibrary, false);
+                        outputConvertedStruct((Struct) tr, childSignatures, structJavaClass, callerLibrary, false);
                     } else {
                         FunctionSignature fs = null;
                         if (tr instanceof FunctionSignature) {
@@ -517,7 +537,7 @@ public class BridJDeclarationsConverter extends DeclarationsConverter {
                             }
                         }
                         if (fs != null) {
-                            convertCallback(fs, childSignatures, structJavaClass, callerLibraryClass);
+                            convertCallback(fs, childSignatures, structJavaClass);
                         }
                     }
                 } else if (result.config.genCPlusPlus && d instanceof Function) {
@@ -533,7 +553,8 @@ public class BridJDeclarationsConverter extends DeclarationsConverter {
                         continue;
                     }
                     List<Declaration> decls = new ArrayList<Declaration>();
-                    convertFunction(f, childSignatures, false, new ListWrapper(decls), callerLibraryClass, isConstructor ? iConstructor : -1);
+                    DeclarationsHolder out = new ListWrapper(decls);
+                    convertFunction(f, childSignatures, false, out, out, callerLibraryClass, isConstructor ? iConstructor : -1);
                     for (Declaration md : decls) {
                         if (!(md instanceof Function)) {
                             continue;
@@ -817,11 +838,11 @@ public class BridJDeclarationsConverter extends DeclarationsConverter {
     }
 
     @Override
-    protected void fillLibraryMapping(Result result, SourceFiles sourceFiles, DeclarationsHolder interf, String library, Identifier javaPackage, Identifier fullLibraryClassName, Expression nativeLibFieldExpr) throws IOException {
-        super.fillLibraryMapping(result, sourceFiles, interf, library, javaPackage, fullLibraryClassName, nativeLibFieldExpr);
+    protected void fillLibraryMapping(Result result, SourceFiles sourceFiles, DeclarationsHolder declarations, DeclarationsHolder implementations, String library, Identifier javaPackage, Expression nativeLibFieldExpr) throws IOException {
+        super.fillLibraryMapping(result, sourceFiles, declarations, implementations, library, javaPackage, nativeLibFieldExpr);
 
-        if (interf instanceof ModifiableElement) {
-            ModifiableElement minterf = (ModifiableElement) interf;
+        if (implementations instanceof ModifiableElement) {
+            ModifiableElement minterf = (ModifiableElement) implementations;
             minterf.addAnnotation(new Annotation(org.bridj.ann.Library.class, expr(library)));
             minterf.addAnnotation(new Annotation(org.bridj.ann.Runtime.class, classLiteral(result.hasCPlusPlus ? CPPRuntime.class : CRuntime.class)));
         }
@@ -835,26 +856,44 @@ public class BridJDeclarationsConverter extends DeclarationsConverter {
             }
 
             Identifier javaPackage = result.javaPackageByLibrary.get(library);
-            Identifier simpleLibraryClassName = result.getLibraryClassSimpleName(library);
+            Identifier implementationsSimpleClassName = result.getLibraryClassSimpleName(library);
+            Identifier declarationsSimpleClassName = result.getLibraryDeclarationsClassSimpleName(library);
 
-            Identifier fullLibraryClassName = result.getLibraryClassFullName(library);//ident(javaPackage, libraryClassName);
+            Identifier implementationsFullClassName = result.getLibraryClassFullName(library);//ident(javaPackage, libraryClassName);
+            Identifier declarationsFullClassName = result.getLibraryDeclarationsClassFullName(library);
             //if (!result.objCClasses.isEmpty())
             //	out.println("import org.rococoa.ID;");
 
 
-            Struct interf = new Struct();
-            interf.setType(Struct.Type.JavaClass);
-            interf.addToCommentBefore("Wrapper for library <b>" + library + "</b>",
+            Struct implementations = new Struct();
+            implementations.setType(Struct.Type.JavaClass);
+            implementations.addToCommentBefore("Wrapper for library <b>" + library + "</b>",
                     result.declarationsConverter.getFileCommentContent(result.config.libraryProjectSources.get(library), null));
-            interf.addModifiers(ModifierType.Public);
-            interf.setTag(simpleLibraryClassName);
-            interf.addParent(ident(config.runtime.libraryClass, expr(typeRef(simpleLibraryClassName))));
-            interf.addDeclaration(new Function(Function.Type.StaticInit, null, null).setBody(block(
+            implementations.addModifiers(ModifierType.Public);
+            implementations.setTag(implementationsSimpleClassName);
+            implementations.addParent(ident(config.runtime.libraryClass, expr(typeRef(implementationsSimpleClassName))));
+            if (declarationsFullClassName != null) {
+                implementations.addProtocol(declarationsFullClassName.clone());
+            }
+            implementations.addDeclaration(new Function(Function.Type.StaticInit, null, null).setBody(block(
                     stat(methodCall(
                     expr(typeRef(BridJ.class)),
                     Expression.MemberRefStyle.Dot,
                     "register")))).addModifiers(ModifierType.Static));
+            implementations.setResolvedJavaIdentifier(implementationsFullClassName);
 
+            Struct declarations;
+            if (declarationsFullClassName != null) {
+                declarations = new Struct();
+                declarations.setType(Struct.Type.JavaInterface);
+                declarations.addToCommentBefore("Interface for library <b>" + library + "</b>",
+                        result.declarationsConverter.getFileCommentContent(result.config.libraryProjectSources.get(library), null));
+                declarations.addModifiers(ModifierType.Public);
+                declarations.setTag(declarationsSimpleClassName.clone());
+                declarations.setResolvedJavaIdentifier(declarationsFullClassName);
+            } else {
+                declarations = implementations;
+            }
 //            String libFileOrDirArgName = "libraryFileOrDirectory";
 //            Function constr = new Function(Function.Type.JavaMethod, fullLibraryClassName.resolveLastSimpleIdentifier().clone(), null, new Arg(libFileOrDirArgName, typeRef(File.class)));
 //            constr.addModifiers(ModifierType.Public);
@@ -867,8 +906,11 @@ public class BridJDeclarationsConverter extends DeclarationsConverter {
 //            constr.setBody(block(stat(methodCall("super", classLiteral(typeRef(fullLibraryClassName.clone()))))));
 //            interf.addDeclaration(constr);
 
-            fillLibraryMapping(result, sourceFiles, interf, library, javaPackage, fullLibraryClassName, varRef("this"));
-            writeLibraryInterface(result, sourceFiles, interf, library, javaPackage, fullLibraryClassName);
+            fillLibraryMapping(result, sourceFiles, declarations, implementations, library, javaPackage, varRef("this"));
+            writeLibraryInterface(result, sourceFiles, declarations, library, javaPackage);
+            if (declarations != implementations) {
+                writeLibraryInterface(result, sourceFiles, implementations, library, javaPackage);
+            }
         }
     }
 }

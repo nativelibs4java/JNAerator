@@ -622,6 +622,20 @@ public class Result extends Scanner {
         return ident(getLibraryPackage(library), getLibraryClassSimpleName(library));
     }
 
+    public Identifier getLibraryDeclarationsClassSimpleName(String library) {
+        if (config.runtime != JNAeratorConfig.Runtime.BridJ)
+            return null;
+        String name = config.extractedLibraries.get(library);
+        if (name == null)
+            return null;
+        return ident(name);
+    }
+
+    public Identifier getLibraryDeclarationsClassFullName(String library) {
+        Identifier name = getLibraryDeclarationsClassSimpleName(library);
+        return name == null ? null : ident(getLibraryPackage(library), name);
+    }
+
     public String getLibraryFileExpression(String library) {
         Class<?> platformClass = config.runtime.hasJNA ? com.sun.jna.Platform.class : SystemUtils.class;
         if (library.equals("c")) {

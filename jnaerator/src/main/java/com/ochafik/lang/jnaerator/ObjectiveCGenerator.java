@@ -494,6 +494,7 @@ public class ObjectiveCGenerator {
             Struct classStruct, List<Declaration> declarations, boolean isProtocol) throws IOException {
 
         Identifier fullClassName = getFullClassName(in);
+        instanceStruct.setResolvedJavaIdentifier(fullClassName);
 
         Set<String> objSigs = DeclarationsConverter.getMethodsAndTheirSignatures(NSObject.class).getSecond(),
                 clasSigs = new HashSet<String>();//DeclarationsConverter.getMethodsAndTheirSignatures(NSClass.class).getSecond();
@@ -503,7 +504,8 @@ public class ObjectiveCGenerator {
             if (d instanceof Function) {
                 Function f = (Function) d;
                 List<Declaration> decls = new ArrayList<Declaration>();
-                result.declarationsConverter.convertFunction(f, null/*signatures*/, false, new DeclarationsHolder.ListWrapper(decls), fullClassName, -1);
+                DeclarationsHolder out = new DeclarationsHolder.ListWrapper(decls);
+                result.declarationsConverter.convertFunction(f, null/*signatures*/, false, out, out, fullClassName, -1);
 
                 if (f.hasModifier(ModifierType.Static)) {
                     for (Declaration decl : decls) {
@@ -545,7 +547,7 @@ public class ObjectiveCGenerator {
             } else if (d instanceof TaggedTypeRefDeclaration) {
                 TaggedTypeRef tr = ((TaggedTypeRefDeclaration) d).getTaggedTypeRef();
                 if (tr instanceof Struct) {
-                    result.declarationsConverter.outputConvertedStruct((Struct) tr, signatures, instanceStruct, fullClassName, null, false);
+                    result.declarationsConverter.outputConvertedStruct((Struct) tr, signatures, instanceStruct, null, false);
                 } else if (tr instanceof Enum) {
                     result.declarationsConverter.convertEnum((Enum) tr, signatures, instanceStruct, fullClassName);
                 }
@@ -553,9 +555,9 @@ public class ObjectiveCGenerator {
                 TypeDef td = (TypeDef) d;
                 TypeRef tr = td.getValueType();
                 if (tr instanceof Struct) {
-                    result.declarationsConverter.outputConvertedStruct((Struct) tr, signatures, instanceStruct, fullClassName, null, false);
+                    result.declarationsConverter.outputConvertedStruct((Struct) tr, signatures, instanceStruct, null, false);
                 } else if (tr instanceof FunctionSignature) {
-                    result.declarationsConverter.convertCallback((FunctionSignature) tr, signatures, instanceStruct, fullClassName);
+                    result.declarationsConverter.convertCallback((FunctionSignature) tr, signatures, instanceStruct);
                 }
             }
             iChild[0]++;

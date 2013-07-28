@@ -505,6 +505,7 @@ public class JNAeratorConfig {
     public String packageName = null, rootPackageName = null;
     public String defaultLibrary;
     public Map<String, File> libraryProjectSources = new LinkedHashMap<String, File>();
+    public Map<String, String> extractedLibraries = new HashMap<String, String>();
     public Adapter<File, String> fileToLibrary = new Adapter<File, String>() {
         public String adapt(File file) {
             String libraryName = null;

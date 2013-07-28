@@ -48,8 +48,8 @@ public abstract class DeclarationsConverter {
     }
     protected final Result result;
 
-    public void convertCallback(FunctionSignature functionSignature, Signatures signatures, DeclarationsHolder out, Identifier callerLibraryName) {
-        Struct decl = convertCallback(functionSignature, signatures, callerLibraryName);
+    public void convertCallback(FunctionSignature functionSignature, Signatures signatures, DeclarationsHolder out) {
+        Struct decl = convertCallback(functionSignature, signatures, out.getResolvedJavaIdentifier());
         if (decl != null) {
             out.addDeclaration(new TaggedTypeRefDeclaration(decl));
         }
@@ -81,7 +81,7 @@ public abstract class DeclarationsConverter {
         if (!result.config.noComments) {
             callbackStruct.addToCommentBefore(comel.getCommentBefore(), comel.getCommentAfter(), getFileCommentContent(comel));
         }
-        convertFunction(function, new Signatures(), true, callbackStruct, callerLibraryName, -1);
+        convertFunction(function, new Signatures(), true, callbackStruct, callbackStruct, callerLibraryName, -1);
         for (Declaration d : callbackStruct.getDeclarations()) {
             if (d instanceof Function) {
                 callbackStruct.addAnnotations(callbackStruct.getAnnotations());
@@ -92,7 +92,7 @@ public abstract class DeclarationsConverter {
         return callbackStruct;
     }
 
-    public void convertCallbacks(List<FunctionSignature> functionSignatures, Signatures signatures, DeclarationsHolder out, Identifier libraryClassName) {
+    public void convertCallbacks(List<FunctionSignature> functionSignatures, Signatures signatures, DeclarationsHolder out) {
         if (functionSignatures != null) {
             for (FunctionSignature functionSignature : functionSignatures) {
                 if (functionSignature.findParentOfType(Struct.class) != null) {
@@ -103,7 +103,7 @@ public abstract class DeclarationsConverter {
                 if (a != null && a.getParentElement() == null) {
                     continue;//TODO understand why we end up having an orphan Arg here !!!!
                 }
-                convertCallback(functionSignature, signatures, out, libraryClassName);
+                convertCallback(functionSignature, signatures, out);
             }
         }
 
@@ -111,11 +111,9 @@ public abstract class DeclarationsConverter {
 
     protected abstract void configureCallbackStruct(Struct callbackStruct);
 
-    protected abstract void convertFunction(Function function, Signatures signatures, boolean callback, DeclarationsHolder objOut, Identifier libraryClassName, String sig, Identifier functionName, String library, int iConstructor);
-
     protected abstract Struct createFakePointerClass(Identifier fakePointer);
 
-    public void convertConstants(String library, List<Define> defines, Element sourcesRoot, final Signatures signatures, final DeclarationsHolder out, final Identifier libraryClassName) {
+    public void convertConstants(String library, List<Define> defines, Element sourcesRoot, final Signatures signatures, final DeclarationsHolder out) {
         //final List<Define> defines = new ArrayList<Define>();
         final Map<String, String> constants = Result.getMap(result.stringConstants, library);
 //		
@@ -155,7 +153,7 @@ public abstract class DeclarationsConverter {
                     //TypeRef type = v.getValueType();
                     String name = decl.resolveName();
 
-                    JavaPrim prim = result.typeConverter.getPrimitive(mutatedType, libraryClassName);
+                    JavaPrim prim = result.typeConverter.getPrimitive(mutatedType, out.getResolvedJavaIdentifier());
                     if (prim == null) {
                         if (mutatedType.toString().contains("NSString")) {
                             String value = constants.get(name);
@@ -167,7 +165,7 @@ public abstract class DeclarationsConverter {
                     }
 
                     try {
-                        convertConstant(name, prim, mutatedType, decl.getDefaultValue(), v, decl, out, signatures, libraryClassName);
+                        convertConstant(name, prim, mutatedType, decl.getDefaultValue(), v, decl, out, signatures, out.getResolvedJavaIdentifier());
                     } catch (UnsupportedConversionException ex) {
                         out.addDeclaration(skipDeclaration(decl, ex.getMessage()));
                     }
@@ -182,7 +180,7 @@ public abstract class DeclarationsConverter {
                 }
 
                 try {
-                    convertDefine(define, out, signatures, libraryClassName);
+                    convertDefine(define, out, signatures, out.getResolvedJavaIdentifier());
                 } catch (UnsupportedConversionException ex) {
                     out.addDeclaration(skipDeclaration(define, ex.toString()));
                 }
@@ -392,7 +390,8 @@ public abstract class DeclarationsConverter {
 
     }
 
-    public void convertEnums(List<Enum> enums, Signatures signatures, DeclarationsHolder out, Identifier libraryClassName) {
+    public void convertEnums(List<Enum> enums, Signatures signatures, DeclarationsHolder out) {
+        Identifier libraryClassName = out.getResolvedJavaIdentifier();
         if (enums != null) {
             //out.println("public static class ENUMS {");
             for (com.ochafik.lang.jnaerator.parser.Enum e : enums) {
@@ -423,7 +422,17 @@ public abstract class DeclarationsConverter {
         throw new RuntimeException("Unhandled runtime : " + result.config.runtime.name());
     }
 
-    public void convertFunction(Function function, Signatures signatures, boolean isCallback, final DeclarationsHolder out, final Identifier libraryClassName, int iConstructor) {
+    
+
+    protected abstract void convertFunction(
+            Function function, Signatures signatures, boolean callback, 
+            DeclarationsHolder declarations, DeclarationsHolder implementations, Identifier libraryClassName,
+            String sig, Identifier functionName, String library, int iConstructor);
+    
+    public void convertFunction(
+            Function function, Signatures signatures, boolean isCallback, 
+            final DeclarationsHolder declarations, final DeclarationsHolder implementations, Identifier libraryClassName,
+            int iConstructor) {
         if (result.config.functionsAccepter != null && !result.config.functionsAccepter.adapt(function)) {
             return;
         }
@@ -469,7 +478,7 @@ public abstract class DeclarationsConverter {
                 ? new DeclarationsHolder() {
             @Override
             public void addDeclaration(Declaration d) {
-                out.addDeclaration(d);
+                implementations.addDeclaration(d);
                 if (d instanceof Function) {
                     Function f = (Function) d;
                     List<Arg> args = f.getArgs();
@@ -483,7 +492,7 @@ public abstract class DeclarationsConverter {
                         if (tr instanceof SimpleTypeRef) {
                             Identifier id = ((SimpleTypeRef) tr).getName();
                             if (result.isFakePointer(id)) {
-                                result.addFunctionReifiableInFakePointer(id, libraryClassName, f);
+                                result.addFunctionReifiableInFakePointer(id, declarations.getResolvedJavaIdentifier(), f);
                             }
                         }
                     }
@@ -492,18 +501,24 @@ public abstract class DeclarationsConverter {
 
             @Override
             public List<Declaration> getDeclarations() {
-                return out.getDeclarations();
+                return implementations.getDeclarations();
             }
+
+            public Identifier getResolvedJavaIdentifier() {
+                return implementations.getResolvedJavaIdentifier();
+            }
+            
         }
-                : out;
+                : implementations;
 
         try {
-            convertFunction(function, signatures, isCallback, objOut, libraryClassName, sig, functionName, library, iConstructor);
+            convertFunction(function, signatures, isCallback, declarations, objOut, libraryClassName, sig, functionName, library, iConstructor);
         } catch (UnsupportedConversionException ex) {
             Declaration d = skipDeclaration(function);
             if (d != null) {
                 d.addToCommentBefore(ex.toString());
-                out.addDeclaration(d);
+                declarations.addDeclaration(d);
+                implementations.addDeclaration(d.clone());
             }
         }
     }
@@ -537,11 +552,11 @@ public abstract class DeclarationsConverter {
         }
     }
 
-    public void convertFunctions(List<Function> functions, Signatures signatures, DeclarationsHolder out, Identifier libraryClassName) {
+    public void convertFunctions(List<Function> functions, Signatures signatures, DeclarationsHolder declarations, DeclarationsHolder implementations) {
         if (functions != null) {
             //System.err.println("FUNCTIONS " + functions);
             for (Function function : functions) {
-                convertFunction(function, signatures, false, out, libraryClassName, -1);
+                convertFunction(function, signatures, false, declarations, implementations, declarations.getResolvedJavaIdentifier(), -1);
             }
         }
     }
@@ -598,8 +613,8 @@ public abstract class DeclarationsConverter {
         return count;
     }
 
-    protected void outputConvertedStruct(Struct struct, Signatures signatures, DeclarationsHolder out, Identifier callerLibraryClass, String callerLibrary, boolean onlyFields) throws IOException {
-        Struct structJavaClass = convertStruct(struct, signatures, callerLibraryClass, callerLibrary, onlyFields);
+    protected void outputConvertedStruct(Struct struct, Signatures signatures, DeclarationsHolder out, String callerLibrary, boolean onlyFields) throws IOException {
+        Struct structJavaClass = convertStruct(struct, signatures, out.getResolvedJavaIdentifier(), callerLibrary, onlyFields);
         if (structJavaClass == null) {
             return;
         }
@@ -624,7 +639,7 @@ public abstract class DeclarationsConverter {
         }
     }
 
-    public void convertStructs(List<Struct> structs, Signatures signatures, DeclarationsHolder out, Identifier libraryClassName, String library) throws IOException {
+    public void convertStructs(List<Struct> structs, Signatures signatures, DeclarationsHolder out, String library) throws IOException {
         if (structs != null) {
             for (Struct struct : structs) {
                 if (struct.findParentOfType(Struct.class) != null) {
@@ -635,7 +650,7 @@ public abstract class DeclarationsConverter {
                     continue;
                 }
 
-                outputConvertedStruct(struct, signatures, out, libraryClassName, library, false);
+                outputConvertedStruct(struct, signatures, out, library, false);
             }
         }
     }
@@ -845,24 +860,35 @@ public abstract class DeclarationsConverter {
 
     public abstract void generateLibraryFiles(SourceFiles sourceFiles, Result result, JNAeratorConfig config) throws IOException;
 
-    protected void fillLibraryMapping(Result result, SourceFiles sourceFiles, DeclarationsHolder interf, String library, Identifier javaPackage, Identifier fullLibraryClassName, Expression nativeLibFieldExpr) throws IOException {
+    protected void fillLibraryMapping(Result result, SourceFiles sourceFiles, DeclarationsHolder declarations, DeclarationsHolder implementations, String library, Identifier javaPackage, Expression nativeLibFieldExpr) throws IOException {
 
-        Signatures signatures = result.getSignaturesForOutputClass(fullLibraryClassName);
+        Identifier implementationsFullClassName = result.getLibraryClassFullName(library);//ident(javaPackage, libraryClassName);
+        Identifier declarationsFullClassName = result.getLibraryDeclarationsClassFullName(library);
+            
+        Signatures signatures = result.getSignaturesForOutputClass(declarationsFullClassName);
         result.typeConverter.allowFakePointers = true;
-        result.declarationsConverter.convertEnums(result.enumsByLibrary.get(library), signatures, interf, fullLibraryClassName);
-        result.declarationsConverter.convertConstants(library, result.definesByLibrary.get(library), sourceFiles, signatures, interf, fullLibraryClassName);
-        result.declarationsConverter.convertStructs(result.structsByLibrary.get(library), signatures, interf, fullLibraryClassName, library);
-        result.declarationsConverter.convertCallbacks(result.callbacksByLibrary.get(library), signatures, interf, fullLibraryClassName);
-        result.declarationsConverter.convertFunctions(result.functionsByLibrary.get(library), signatures, interf, fullLibraryClassName);
+        convertEnums(result.enumsByLibrary.get(library), signatures, declarations);
+        convertConstants(library, result.definesByLibrary.get(library), sourceFiles, signatures, declarations);
+        convertStructs(result.structsByLibrary.get(library), signatures, declarations, library);
+        convertCallbacks(result.callbacksByLibrary.get(library), signatures, declarations);
+        convertFunctions(result.functionsByLibrary.get(library), signatures, declarations, implementations);
 
         if (result.globalsGenerator != null) {
-            result.globalsGenerator.convertGlobals(result.globalsByLibrary.get(library), signatures, interf, nativeLibFieldExpr, fullLibraryClassName, library);
+            result.globalsGenerator.convertGlobals(result.globalsByLibrary.get(library), signatures, declarations, nativeLibFieldExpr, library);
         }
 
         result.typeConverter.allowFakePointers = false;
 
-        Set<String> fakePointers = result.fakePointersByLibrary.get(fullLibraryClassName);
-        if (fakePointers != null) {
+        Set<String> implFakePointers = result.fakePointersByLibrary.get(implementationsFullClassName.toString());
+        Set<String> declFakePointers = declarationsFullClassName == null ? null : result.fakePointersByLibrary.get(declarationsFullClassName.toString());
+                
+        if (implFakePointers != null || declFakePointers != null) {
+            Set<String> fakePointers = new HashSet<String>();
+            if (implFakePointers != null)
+                fakePointers.addAll(implFakePointers);
+            if (declFakePointers != null)
+                fakePointers.addAll(declFakePointers);
+
             for (String fakePointerName : fakePointers) {
                 if (fakePointerName.contains("::")) {
                     continue;
@@ -878,16 +904,16 @@ public abstract class DeclarationsConverter {
                     ptClass.addToCommentBefore("Pointer to unknown (opaque) type");
                 }
 
-                interf.addDeclaration(decl(ptClass));
+                declarations.addDeclaration(decl(ptClass));
 
                 if (result.config.reification) {
-                    result.reifier.reifyFakePointer(ptClass, fullLibraryClassName, fakePointerName, signatures);
+                    result.reifier.reifyFakePointer(ptClass, declarations.getResolvedJavaIdentifier(), fakePointerName, signatures);
                 }
 
             }
         }
 
-        Set<String> undefinedTypes = result.undefinedTypesByLibrary.get(fullLibraryClassName);
+        Set<String> undefinedTypes = result.undefinedTypesByLibrary.get(declarations.getResolvedJavaIdentifier());
         if (undefinedTypes != null) {
             for (String undefinedTypeName : undefinedTypes) {
                 if (undefinedTypeName.contains("::")) {
@@ -901,12 +927,13 @@ public abstract class DeclarationsConverter {
 
                 Struct ptClass = result.declarationsConverter.publicStaticClass(fakePointer, null, Struct.Type.JavaInterface, null);
                 ptClass.addToCommentBefore("Undefined type");
-                interf.addDeclaration(decl(ptClass));
+                declarations.addDeclaration(decl(ptClass));
             }
         }
     }
 
-    protected void writeLibraryInterface(Result result, SourceFiles sourceFiles, DeclarationsHolder interf, String library, Identifier javaPackage, Identifier fullLibraryClassName) throws IOException {
+    protected void writeLibraryInterface(Result result, SourceFiles sourceFiles, DeclarationsHolder interf, String library, Identifier javaPackage) throws IOException {
+        Identifier fullLibraryClassName = interf.getResolvedJavaIdentifier();
         Signatures signatures = result.getSignaturesForOutputClass(fullLibraryClassName);
         if (interf instanceof Struct) {
             interf = result.notifyBeforeWritingClass(fullLibraryClassName, (Struct) interf, signatures, library);
