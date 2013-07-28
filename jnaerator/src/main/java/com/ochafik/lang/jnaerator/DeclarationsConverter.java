@@ -38,6 +38,7 @@ import com.ochafik.util.listenable.Pair;
 import static com.ochafik.lang.jnaerator.parser.ElementsHelper.*;
 import static com.ochafik.lang.jnaerator.TypeConversion.*;
 import com.ochafik.lang.jnaerator.parser.Function.SignatureType;
+import java.util.regex.Pattern;
 
 public abstract class DeclarationsConverter {
 
@@ -398,6 +399,9 @@ public abstract class DeclarationsConverter {
                 if (e.findParentOfType(Struct.class) != null) {
                     continue;
                 }
+                
+                if (skip(e.getTag() + "", result.config.skippedEnumNames))
+                    continue;
 
                 convertEnum(e, signatures, out, libraryClassName);
             }
@@ -552,10 +556,12 @@ public abstract class DeclarationsConverter {
         }
     }
 
-    public void convertFunctions(List<Function> functions, Signatures signatures, DeclarationsHolder declarations, DeclarationsHolder implementations) {
+    public final void convertFunctions(List<Function> functions, Signatures signatures, DeclarationsHolder declarations, DeclarationsHolder implementations) {
         if (functions != null) {
             //System.err.println("FUNCTIONS " + functions);
             for (Function function : functions) {
+                if (skip(function.getName() + "", result.config.skippedFunctionNames))
+                    continue;
                 convertFunction(function, signatures, false, declarations, implementations, declarations.getResolvedJavaIdentifier(), -1);
             }
         }
@@ -639,16 +645,24 @@ public abstract class DeclarationsConverter {
         }
     }
 
-    public void convertStructs(List<Struct> structs, Signatures signatures, DeclarationsHolder out, String library) throws IOException {
+    private boolean skip(String name, List<Pattern> skipPatterns) {
+        for (Pattern p : skipPatterns) {
+            if (p.matcher(name).matches()) {
+                System.out.println("Skipping '" + name + "' because of skip pattern \"" + p.pattern() + "\"");
+                return true;
+            }
+        }
+        return false;
+    }
+    public final void convertStructs(List<Struct> structs, Signatures signatures, DeclarationsHolder out, String library) throws IOException {
         if (structs != null) {
             for (Struct struct : structs) {
-                if (struct.findParentOfType(Struct.class) != null) {
+                if (struct.findParentOfType(Struct.class) != null)
                     continue;
-                }
-
-                if (!result.config.genCPlusPlus && struct.getType().isCpp()) {
+                if (!result.config.genCPlusPlus && struct.getType().isCpp())
                     continue;
-                }
+                if (skip(struct.getTag() + "", result.config.skippedStructNames))
+                    continue;
 
                 outputConvertedStruct(struct, signatures, out, library, false);
             }

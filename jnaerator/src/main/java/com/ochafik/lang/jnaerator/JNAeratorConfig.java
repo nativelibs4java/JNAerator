@@ -56,6 +56,7 @@ import java.util.logging.Level;
 import static com.ochafik.lang.jnaerator.parser.ElementsHelper.*;
 import java.io.*;
 import java.util.Collections;
+import java.util.regex.Pattern;
 
 public class JNAeratorConfig {
 
@@ -392,6 +393,9 @@ public class JNAeratorConfig {
     public boolean treatEmptyStructsAsForwardDecls;
     public String[] libraryNamingPrefixes;
     public boolean extractLibSymbols;
+    public final List<Pattern> skippedStructNames = new ArrayList<Pattern>();
+    public final List<Pattern> skippedFunctionNames = new ArrayList<Pattern>();
+    public final List<Pattern> skippedEnumNames = new ArrayList<Pattern>();
     //public boolean fastStructs;
     public List<Pair<MessageFormat, MessageFormat>> onlineDocumentationURLFormats = new ArrayList<Pair<MessageFormat, MessageFormat>>();
     public String entryName;
