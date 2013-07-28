@@ -203,7 +203,9 @@ public class ObjectiveCGenerator {
         Identifier javaPackage = getPackageName(struct);
         Identifier tag = struct.getTag();
         String categ = struct.getCategoryName();
-        return ident(javaPackage, categ == null ? tag.clone() : ident(categ));
+        
+        Identifier fullName = ident(javaPackage, categ == null ? tag.clone() : ident(categ));
+        return fullName;
     }
 
     public void generateObjectiveCClasses() throws IOException {

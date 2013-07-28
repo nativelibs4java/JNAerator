@@ -84,7 +84,8 @@ public class Result extends Scanner {
     public final Set<Identifier> structsFullNames = new HashSet<Identifier>(),
             enumsFullNames = new HashSet<Identifier>(),
             unionsFullNames = new HashSet<Identifier>(),
-            callbacksFullNames = new HashSet<Identifier>();
+            callbacksFullNames = new HashSet<Identifier>(),
+            objectiveCClassesFullNames = new HashSet<Identifier>();
 
     /**
      * @param config
@@ -567,6 +568,11 @@ public class Result extends Scanner {
                     } else {
                         getMap(classes, struct.getType()).put(struct.getTag(), struct);
                     }
+                    
+                    Identifier fullName = objectiveCGenerator.getFullClassName(struct);
+                    objectiveCClassesFullNames.add(fullName);
+                    struct.setResolvedJavaIdentifier(fullName);
+                
 
                     break;
                 default:

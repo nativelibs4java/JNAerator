@@ -231,7 +231,8 @@ public class JNATypeConversion extends TypeConversion {
                     }
                     /// Pointer to Objective-C class ?
                     convArgType = findObjCClass(name);
-                    boolean isQualStruct = result.structsFullNames.contains(name);
+                    boolean isQualStruct = result.structsFullNames.contains(name) ||
+                            result.objectiveCClassesFullNames.contains(name);
                     if (convArgType == null || isQualStruct) {
                         /// Pointer to C structure
                         TypeRef.SimpleTypeRef structRef = isQualStruct ? typeRef(name) : findStructRef(name, libraryClassName);
