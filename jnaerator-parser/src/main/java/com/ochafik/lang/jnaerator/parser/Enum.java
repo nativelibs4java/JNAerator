@@ -119,7 +119,7 @@ public class Enum extends TaggedTypeRef {
 				setBody((Struct) by);
 				return true;
 			}
-			return false;
+			return super.replaceChild(child, by);
 		}
 		
 	}

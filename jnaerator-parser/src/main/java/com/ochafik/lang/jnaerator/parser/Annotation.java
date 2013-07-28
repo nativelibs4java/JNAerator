@@ -87,7 +87,8 @@ public class Annotation extends Element {
             setAnnotationClass((TypeRef)by);
             return true;
         }
-		return replaceChild(arguments, Expression.class, this, child, by);
+		return replaceChild(arguments, Expression.class, this, child, by) ||
+            super.replaceChild(child, by);
 	}
 
 }

@@ -56,7 +56,7 @@ public abstract class ModifiableElement extends Element {
 		if (replaceChild(annotations, Annotation.class, this, child, by))
 			return true;
 		
-		return false;
+		return super.replaceChild(child, by);
 	}
 	
 

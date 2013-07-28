@@ -54,12 +54,21 @@ public abstract class Element {
 	static int nextId = 1;
 	private final int id = nextId++;
 	protected EnumSet<Language> possibleLanguages;
-    
+    protected Identifier resolvedJavaIdentifier;
+
     protected Map<Object, Object> attributes;
 
     public Element() {
         if (Thread.interrupted())
             throw new RuntimeException(new InterruptedException());
+    }
+    
+    public void setResolvedJavaIdentifier(Identifier resolvedJavaIdentifier) {
+        this.resolvedJavaIdentifier = changeValue(this, this.resolvedJavaIdentifier, resolvedJavaIdentifier);
+    }
+
+    public Identifier getResolvedJavaIdentifier() {
+        return resolvedJavaIdentifier;
     }
 
     
@@ -370,7 +379,14 @@ public abstract class Element {
 		parentElements.remove(e);
 	}*/
 	
-	public abstract boolean replaceChild(Element child, Element by);
+	public boolean replaceChild(Element child, Element by) {
+		if (getResolvedJavaIdentifier() == child) {
+            setResolvedJavaIdentifier((Identifier)by);
+            return true;
+        }
+			
+		return false;
+	}
 	public abstract Element getNextChild(Element child);
 	public abstract Element getPreviousChild(Element child);
 	

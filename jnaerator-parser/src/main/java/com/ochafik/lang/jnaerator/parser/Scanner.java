@@ -118,7 +118,7 @@ public class Scanner implements Visitor {
 	}
 
 	protected void visitElement(Element d) {
-		
+        visit(d.getResolvedJavaIdentifier());
 	}
 
 	public void visitStruct(Struct struct) {

@@ -103,7 +103,10 @@ public abstract class Identifier extends Element implements Comparable<Object> {
 		}
 		@Override
 		public boolean replaceChild(Element child, Element by) {
-			return replaceChild(templateArguments, Expression.class, this, child, by);
+            if (replaceChild(templateArguments, Expression.class, this, child, by)) {
+                return true;
+            }
+            return super.replaceChild(child, by);
 		}
 		@Override
 		public boolean isPlain() {
@@ -176,7 +179,10 @@ public abstract class Identifier extends Element implements Comparable<Object> {
 		}
 		@Override
 		public boolean replaceChild(Element child, Element by) {
-			return replaceChild(identifiers, SimpleIdentifier.class, this, child, by);
+            if (replaceChild(identifiers, SimpleIdentifier.class, this, child, by)) {
+                return true;
+            }
+            return super.replaceChild(child, by);
 		}
 		public void addIdentifiers(List<SimpleIdentifier> is) {
 			for (SimpleIdentifier i : is)

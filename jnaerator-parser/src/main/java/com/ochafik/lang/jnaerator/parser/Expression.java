@@ -77,7 +77,8 @@ public abstract class Expression extends Element {
 		}
 		@Override
 		public boolean replaceChild(Element child, Element by) {
-			return replaceChild(getExpressions(), Expression.class, this, child, by);
+            return replaceChild(getExpressions(), Expression.class, this, child, by) ||
+                super.replaceChild(child, by);
 		}
 	}
 	public static class OpaqueExpression extends Expression {
@@ -108,12 +109,6 @@ public abstract class Expression extends Element {
 		public Element getPreviousChild(Element child) {
 			return null;
 		}
-
-		@Override
-		public boolean replaceChild(Element child, Element by) {
-			return false;
-		}
-
 	}
 	boolean parenthesis;
 	public Expression setParenthesis(boolean parenthesis) {
@@ -187,7 +182,7 @@ public abstract class Expression extends Element {
 				setType((TypeRef) by);
 				return true;
 			}
-			return false;
+			return super.replaceChild(child, by);
 		}
 	}
 
@@ -206,11 +201,6 @@ public abstract class Expression extends Element {
 		@Override
 		public Element getPreviousChild(Element child) {
 			return null;
-		}
-
-		@Override
-		public boolean replaceChild(Element child, Element by) {
-			return false;
 		}
 	}
 	
@@ -258,7 +248,7 @@ public abstract class Expression extends Element {
 				setTarget((Expression)by);
 			if (child == getName())
 				setName((Identifier)by);
-			return false;
+			return super.replaceChild(child, by);
 		}
 		
 		
@@ -345,7 +335,8 @@ public abstract class Expression extends Element {
 			}
             return 
                 replaceChild(initialValues, Expression.class, this, child, by) ||
-                replaceChild(dimensions, Expression.class, this, child, by);
+                replaceChild(dimensions, Expression.class, this, child, by) ||
+                super.replaceChild(child, by);
 		}
 
 	}
@@ -402,7 +393,7 @@ public abstract class Expression extends Element {
 				setConstruction((FunctionCall) by);
 				return true;
 			}
-			return false;
+			return super.replaceChild(child, by);
 		}
 	}
 	public static class FunctionCall extends MemberRef {
@@ -567,7 +558,7 @@ public abstract class Expression extends Element {
 				setIndex((Expression)by);
 				return true;
 			}
-			return false;
+			return super.replaceChild(child, by);
 		}
 	}
 	
@@ -611,7 +602,7 @@ public abstract class Expression extends Element {
 				setName((Identifier) by);
 				return true;
 			}
-			return false;
+			return super.replaceChild(child, by);
 		}
 	}
 
@@ -759,11 +750,6 @@ public abstract class Expression extends Element {
 		public Element getPreviousChild(Element child) {
 			return null;
 		}
-
-		@Override
-		public boolean replaceChild(Element child, Element by) {
-			return false;
-		}
 	}
 	public static class ConditionalExpression extends Expression {
 		Expression test, thenValue, elseValue;
@@ -828,7 +814,7 @@ public abstract class Expression extends Element {
 				setElseValue((Expression)by);
 				return true;
 			}
-			return false;
+			return super.replaceChild(child, by);
 		}
 		
 	}
@@ -879,7 +865,7 @@ public abstract class Expression extends Element {
 				setType((TypeRef)by);
 				return true;
 			}
-			return false;
+			return super.replaceChild(child, by);
 		}
 	}
 	public static class AssignmentOp extends Expression {
@@ -947,7 +933,7 @@ public abstract class Expression extends Element {
 				setValue((Expression) by);
 				return true;
 			}
-			return false;
+			return super.replaceChild(child, by);
 		}
 
 
@@ -1019,7 +1005,7 @@ public abstract class Expression extends Element {
 				setSecondOperand((Expression) by);
 				return true;
 			}
-			return false;
+			return super.replaceChild(child, by);
 		}
 
 	}
@@ -1072,7 +1058,7 @@ public abstract class Expression extends Element {
 				setOperand((Expression) by);
 				return true;
 			}
-			return false;
+			return super.replaceChild(child, by);
 		}
 
 	}
@@ -1219,11 +1205,6 @@ public abstract class Expression extends Element {
 		@Override
 		public Element getPreviousChild(Element child) {
 			return null;
-		}
-
-		@Override
-		public boolean replaceChild(Element child, Element by) {
-			return false;
 		}
 
 		public Integer asInteger() {

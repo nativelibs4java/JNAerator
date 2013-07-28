@@ -24,6 +24,7 @@ import java.util.List;
 public interface DeclarationsHolder {
 	void addDeclaration(Declaration d);
 	List<Declaration> getDeclarations();
+	Identifier getResolvedJavaIdentifier();
 	
 	public static class ListWrapper implements DeclarationsHolder {
 		public ListWrapper(List<Declaration> list) {
@@ -39,6 +40,9 @@ public interface DeclarationsHolder {
 		public List<Declaration> getDeclarations() {
 			return Collections.unmodifiableList(list);
 		}
-		
+
+        public Identifier getResolvedJavaIdentifier() {
+            return null;
+        }
 	}
 }
