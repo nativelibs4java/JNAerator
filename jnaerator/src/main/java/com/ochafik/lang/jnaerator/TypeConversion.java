@@ -414,10 +414,10 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
 
     
 
-    TypeRef normalizeTypeRef(TypeRef tr) {
+    public TypeRef normalizeTypeRef(TypeRef tr) {
         return normalizeTypeRef(tr, new HashSet<Identifier>());
     }
-    TypeRef normalizeTypeRef(TypeRef tr, HashSet<Identifier> resolvedNames) {
+    public TypeRef normalizeTypeRef(TypeRef tr, HashSet<Identifier> resolvedNames) {
         if (tr instanceof TypeRef.SimpleTypeRef) {
             Identifier name = ((TypeRef.SimpleTypeRef)tr).getName();
 //            if (isObjCppPrimitive(name.toString())) {
