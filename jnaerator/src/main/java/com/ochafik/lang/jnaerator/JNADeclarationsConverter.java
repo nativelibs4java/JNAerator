@@ -314,10 +314,7 @@ public class JNADeclarationsConverter extends DeclarationsConverter {
                     if (mutType == null) {
                         throw new UnsupportedConversionException(function, "Argument " + arg.getName() + " cannot be converted");
                     }
-
-                    if (mutType.toString().contains("NSOpenGLContextParameter")) {
-                        argName = argName.toString();
-                    }
+                    
                     natFunc.addArg(new Arg(argName, typeConverter().convertTypeToJNA(mutType, TypeConversionMode.NativeParameter, libraryClassName)));
                     if (alternativeOutputs) {
                         primOrBufFunc.addArg(new Arg(argName, typeConverter().convertTypeToJNA(mutType, TypeConversionMode.PrimitiveOrBufferParameter, libraryClassName)));

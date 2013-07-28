@@ -393,6 +393,10 @@ public class JNATypeConversion extends TypeConversion {
                         }
                     case FieldType:
                         return structRef;
+                    case NativeParameter:
+                    case NativeParameterWithStructsPtrPtrs:
+                        if (result.isFakePointer(name))
+                            return typeRef(result.config.runtime.pointerClass);
                     default:
                         if (isQualStruct) {
                             return subType(structRef, ident("ByValue"));

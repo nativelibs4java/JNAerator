@@ -12,12 +12,12 @@ void f(cl_event, cl_event*);
 import test.*;
 import static test.TestLibrary.*;
 
-sdk_new((PointerByReference)null, (String)null);
-sdk_new((Pointer)null, (Pointer)null);
-sdk_free((sdk_t)null);
+INSTANCE.sdk_new((PointerByReference)null, (String)null);
+INSTANCE.sdk_new((Pointer)null, (Pointer)null);
+INSTANCE.sdk_free((sdk_t)null);
 
-f((Pointer)null, (Pointer)null);
-f((cl_event)null, (PointerByReference)null);
+INSTANCE.f((Pointer)null, (Pointer)null);
+INSTANCE.f((cl_event)null, (PointerByReference)null);
 
 --
 #runtime(BridJ)
