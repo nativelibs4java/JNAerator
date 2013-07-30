@@ -1076,6 +1076,7 @@ public class JNADeclarationsConverter extends DeclarationsConverter {
                             expr(typeRef(Native.class)),
                             Expression.MemberRefStyle.Dot,
                             "register",
+                            memberRef(expr(libTypeRef.clone()), MemberRefStyle.Dot, ident("class")),
                             libraryNameFieldExpr.clone())))).addModifiers(ModifierType.Static));
                 } else {
                     Expression[] loadLibArgs = isJNAerator
