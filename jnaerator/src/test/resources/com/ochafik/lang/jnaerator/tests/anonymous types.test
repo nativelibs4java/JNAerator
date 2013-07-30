@@ -33,6 +33,6 @@ a.v((long)0);
 a.fptr().get().apply();
 //a.u(new ComplexArgFunction_pArg_struct.u_union());
 a.u().e(ComplexArgFunction_pArg_struct.u_union.e_enum.A);
-ComplexArgFunction(Pointer.pointerTo(a));
+ComplexArgFunction(Pointer.getPointer(a));
 
 f((Pointer<f_arg_callback>)null);

@@ -15,7 +15,7 @@ import test.*;
 import static test.TestLibrary.*;
 
 T t = new T();
-Pointer<T> p = pointerTo(t);
+Pointer<T> p = getPointer(t);
 p = t.operatorPlusEqual(p);
 
 Pointer<Integer> pInt = allocateInt();

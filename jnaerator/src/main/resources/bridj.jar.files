@@ -96,7 +96,6 @@ org/bridj/Pointer$OrderedPointer.class
 org/bridj/Pointer$Releaser.class
 org/bridj/Pointer$StringType.class
 org/bridj/Pointer.class
-org/bridj/PointerGC.class
 org/bridj/PointerIO.class
 org/bridj/SignalConstants.class
 org/bridj/SignalError.class
