@@ -1,12 +1,18 @@
 Current development version (0.12-SNAPSHOT)
 
-- Added support for JNA 3.5.1 (implement getFieldOrder in all structs, see issue #384)
+- Added support for JNA 4.0.0 (implement getFieldOrder in all structs, see issue #384)
 - Added support for node.js target runtime (see example of bindings: https://github.com/ochafik/node-opencl)
+- Added -optionalFunctions option to tag functions with `@org.bridj.ann.Optional`
+- Added mechanism to skip generation of entities (-skipStructs, -skipEnums, -skipFunctions)
+- Added -noStaticInit option for BridJ
+- Added -extractDeclarations option to create an interface with all the methods and types of a library (BridJ-specific)
+- Moved to ECJ 4.2.2
 - Dropped support for bit fields in JNA structs (users should implement bit manipulation logic manually or use BridJ: JNAerator's fork of JNA that added this feature incurred too much maintenance work).
 - Dropped old shared library (DLL, Mach-O) scanning code, superseded by dyncall/dynload and BridJ's demanglers.
 - Fixed parsing of unsigned long constants (issue #362, issue #374)
 - Fixed generation of raw bindings for callback return types (issue #386)
 - Fixed generation of raw bindings with varargs (issue #386, patch contributed by twitwi!)
+- Fixed generation of pointer to fake pointer for JNA target (issue #403)
 - Fixed handling of library names with hyphens (issue #260)
 - Fixed support of identifiers with Object method names (issue #375)
 - Fixed support of enums inside objc classes (issue #370)
@@ -20,10 +26,12 @@ Current development version (0.12-SNAPSHOT)
 - Fixed parsing of MinGW system headers (issue #373)
 - Fixed wrong use of stdcall mapper outside Windows in JNAerator Runtime
 - Fixed recursive typedefs
+- Fixed typedefs of forward-declared enums and structs (issue #430)
 - Fixed handling of large unicode values (issue #401)
 - Fixed warnings for getFieldOrder (issue #408)
 - Fixed handling of constant array sizes that depend on enums for BridJ (issue #354)
 - Fixed handling of hypens in package names (issue #260)
+- Fixed OSGi imports (issue #429, thanks to Michael Werle for the pull request!)
 ...
 
 Version 0.11 (20130107)
