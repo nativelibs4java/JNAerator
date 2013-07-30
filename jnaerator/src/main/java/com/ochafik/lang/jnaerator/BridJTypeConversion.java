@@ -308,7 +308,6 @@ public class BridJTypeConversion extends TypeConversion {
         return pointerTypeRef(super.findCallbackRef(s, callerLibraryClass));
     }
 
-    
     private NL4JConversion convertPrimitiveTypeRefToNL4J(JavaPrim prim, Expression structIOExpr, int fieldIndex, Expression valueExpr) {
         NL4JConversion conv = new NL4JConversion();
         String radix;
