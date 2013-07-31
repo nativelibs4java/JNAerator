@@ -1072,12 +1072,18 @@ public class JNADeclarationsConverter extends DeclarationsConverter {
 
                 if (result.config.useJNADirectCalls) {
                     interf.addDeclaration(new Function(Function.Type.StaticInit, null, null).setBody(block(
-                            stat(methodCall(
-                            expr(typeRef(Native.class)),
-                            Expression.MemberRefStyle.Dot,
-                            "register",
-                            memberRef(expr(libTypeRef.clone()), MemberRefStyle.Dot, ident("class")),
-                            libraryNameFieldExpr.clone())))).addModifiers(ModifierType.Static));
+                        stat(
+                            methodCall(
+                                expr(typeRef(Native.class)),
+                                Expression.MemberRefStyle.Dot,
+                                "register",
+                                memberRef(expr(libTypeRef.clone()), MemberRefStyle.Dot, ident("class")),
+                                //TODO: use this line instead when okay to break JNA 3.x (see https://github.com/ochafik/nativelibs4java/pull/432):
+                                //libraryNameFieldExpr.clone()
+                                nativeLibFieldExpr.clone()
+                            )
+                        )
+                    )).addModifiers(ModifierType.Static));
                 } else {
                     Expression[] loadLibArgs = isJNAerator
                             ? new Expression[]{libraryNameFieldExpr.clone(), libClassLiteral, optionsMapExpr.clone()}
