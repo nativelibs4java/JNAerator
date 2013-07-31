@@ -135,6 +135,7 @@ org/bridj/ann/Name.class
 org/bridj/ann/Optional.class
 org/bridj/ann/Ptr.class
 org/bridj/ann/Runtime.class
+org/bridj/ann/SetsLastError.class
 org/bridj/ann/Struct.class
 org/bridj/ann/Symbol.class
 org/bridj/ann/Template.class
