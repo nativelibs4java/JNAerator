@@ -427,9 +427,12 @@ public class JNAerator {
                         case SizeAsLong:
                             config.sizeAsLong = true;
                             break;
-                        case GenRawBindings:
-                            config.genRawBindings = true;
+                        case NoRawBindings:
+                            config.genRawBindings = false;
                             break;
+                        case PublicRawBindings:
+                        		config.publicRawBindings = true;
+                        		break;
                         case Undefine:
                             config.undefines.add(a.getStringParam(0));
                             break;

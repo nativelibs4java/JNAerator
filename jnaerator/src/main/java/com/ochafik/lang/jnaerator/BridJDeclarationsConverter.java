@@ -284,7 +284,8 @@ public class BridJDeclarationsConverter extends DeclarationsConverter {
                 (declarations == null || implementations == declarations);
         
         nativeMethod.addModifiers(
-                isProtected && !extractingDeclarations ? ModifierType.Protected : ModifierType.Public,
+                isProtected && !extractingDeclarations && !result.config.publicRawBindings ?
+                		ModifierType.Protected : ModifierType.Public,
                 generateStaticMethod ? ModifierType.Static : null);
         
         boolean isOptional = isOptionalFunction(function.getName() + "");
@@ -298,7 +299,8 @@ public class BridJDeclarationsConverter extends DeclarationsConverter {
                 rawMethod.setArgs(Collections.EMPTY_LIST);
                 fillIn(signatures, functionName, rawMethod, returnType, paramTypes, paramNames, varArgType, varArgName, isCallback, true);
                 rawMethod.addModifiers(
-                    extractingDeclarations || isCallback ? ModifierType.Public : ModifierType.Protected, 
+                    extractingDeclarations || isCallback || result.config.publicRawBindings ?
+                    		ModifierType.Public : ModifierType.Protected, 
                     isCallback ? ModifierType.Abstract : ModifierType.Native);
                 if (generateStaticMethod) {
                     rawMethod.addModifiers(ModifierType.Static);
