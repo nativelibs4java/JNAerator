@@ -806,6 +806,13 @@ public class JNADeclarationsConverter extends DeclarationsConverter {
         emptyConstructor.setBody(block(stat(methodCall("super"))));
         addConstructor(structJavaClass, emptyConstructor);
 
+        Function addressConstructor = new Function(Function.Type.JavaMethod, structName.clone(), null).addModifiers(ModifierType.Public);
+        String pointerVarName = "peer";
+        addressConstructor.addArg(new Arg(pointerVarName, typeRef(com.sun.jna.Pointer.class)));
+        FunctionCall superPointerCall = methodCall("super");
+        superPointerCall.addArgument(varRef(pointerVarName));
+        addressConstructor.setBody(block(stat(superPointerCall)));
+        addConstructor(structJavaClass, addressConstructor);
 
         boolean isUnion = nativeStruct.getType() == Struct.Type.CUnion;
         if (isUnion) {
