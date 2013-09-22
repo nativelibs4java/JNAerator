@@ -46,6 +46,7 @@ import java.text.MessageFormat;
 import static com.ochafik.lang.jnaerator.parser.ElementsHelper.*;
 import static com.ochafik.lang.jnaerator.TypeConversion.*;
 import com.ochafik.lang.jnaerator.parser.Function.SignatureType;
+import com.ochafik.lang.jnaerator.parser.Identifier.SimpleIdentifier;
 import com.ochafik.lang.jnaerator.runtime.LibraryExtractor;
 import com.ochafik.lang.jnaerator.runtime.MangledFunctionMapper;
 import com.sun.jna.Native;
@@ -190,20 +191,11 @@ public class JNADeclarationsConverter extends DeclarationsConverter {
         Function natFunc = new Function();
 
         Element parent = function.getParentElement();
-        List<String> ns = new ArrayList<String>(function.getNameSpace());
         boolean isMethod = parent instanceof Struct;
         if (isMethod) {
-            ns.clear();
-            ns.addAll(parent.getNameSpace());
             switch (((Struct) parent).getType()) {
                 case ObjCClass:
                 case ObjCProtocol:
-                    break;
-                case CPPClass:
-                    if (!result.config.genCPlusPlus && !function.hasModifier(ModifierType.Static)) {
-                        return;
-                    }
-                    ns.add(((Struct) parent).getTag().toString());
                     break;
             }
         }
@@ -248,12 +240,12 @@ public class JNADeclarationsConverter extends DeclarationsConverter {
             if (isCallback) {
                 modifiedMethodName = ident(result.config.callbackInvokeMethodName);
             } else {
-                modifiedMethodName = result.typeConverter.getValidJavaMethodName(ident(StringUtils.implode(ns, result.config.cPlusPlusNameSpaceSeparator) + (ns.isEmpty() ? "" : result.config.cPlusPlusNameSpaceSeparator) + functionName));
+                modifiedMethodName = result.typeConverter.getValidJavaMethodName(ident(functionName));
             }
             Set<String> names = new LinkedHashSet<String>();
             //if (ns.isEmpty())
 
-            if (function.getName() != null && !modifiedMethodName.equals(function.getName().toString()) && ns.isEmpty()) {
+            if (function.getName() != null && !modifiedMethodName.equals(function.getName().toString())) {
                 names.add(function.getName().toString());
             }
             if (function.getAsmName() != null) {
@@ -621,7 +613,7 @@ public class JNADeclarationsConverter extends DeclarationsConverter {
                 Expression x = dims.get(i);
 
                 if (x == null || x instanceof EmptyArraySize) {
-                    javaType = jr = new ArrayRef(typeRef(Pointer.class));
+                    javaType = jr = new ArrayRef(typeRef(com.sun.jna.Pointer.class));
                     break;
                 } else {
                     Pair<Expression, TypeRef> c = result.typeConverter.convertExpressionToJava(x, callerLibraryName, false, true, null);
@@ -795,6 +787,13 @@ public class JNADeclarationsConverter extends DeclarationsConverter {
         return ret;
     }
 
+    private boolean isJNAPointer(TypeRef tr) {
+        if (!(tr instanceof SimpleTypeRef))
+            return false;
+        SimpleTypeRef str = (SimpleTypeRef) tr;
+        Identifier name = str.getName().eraseTemplateArguments();
+        return name.toString().equals(com.sun.jna.Pointer.class.getName());
+    }
     @SuppressWarnings("unchecked")
     private void addStructConstructors(Identifier structName, Struct structJavaClass/*, Struct byRef,
              Struct byVal*/, Struct nativeStruct) throws IOException {
@@ -806,15 +805,8 @@ public class JNADeclarationsConverter extends DeclarationsConverter {
         emptyConstructor.setBody(block(stat(methodCall("super"))));
         addConstructor(structJavaClass, emptyConstructor);
 
-        Function addressConstructor = new Function(Function.Type.JavaMethod, structName.clone(), null).addModifiers(ModifierType.Public);
-        String pointerVarName = "peer";
-        addressConstructor.addArg(new Arg(pointerVarName, typeRef(com.sun.jna.Pointer.class)));
-        FunctionCall superPointerCall = methodCall("super");
-        superPointerCall.addArgument(varRef(pointerVarName));
-        addressConstructor.setBody(block(stat(superPointerCall)));
-        addConstructor(structJavaClass, addressConstructor);
-
         boolean isUnion = nativeStruct.getType() == Struct.Type.CUnion;
+        boolean addPointerConstructor = true;
         if (isUnion) {
             Map<String, Pair<TypeRef, List<Pair<String, String>>>> fieldsAndCommentsByTypeStr = new HashMap<String, Pair<TypeRef, List<Pair<String, String>>>>();
             for (Declaration d : initialMembers) {
@@ -831,7 +823,8 @@ public class JNADeclarationsConverter extends DeclarationsConverter {
                 if (!isField(vd)) {
                     continue;
                 }
-
+                if (isJNAPointer(tr))
+                    addPointerConstructor = false;
                 String trStr = tr.toString();
                 Pair<TypeRef, List<Pair<String, String>>> pair = fieldsAndCommentsByTypeStr.get(trStr);
                 if (pair == null) {
@@ -891,6 +884,8 @@ public class JNADeclarationsConverter extends DeclarationsConverter {
                 fieldsConstr.addArg(new Arg(name, vd.getValueType().clone()));
                 iArg++;
             }
+            if (iArg == 1 && isJNAPointer(fieldsConstr.getArgs().get(0).getValueType()))
+                addPointerConstructor = false;
 
             FunctionCall superCall = methodCall("super");
             // Adding parent fields
@@ -965,6 +960,17 @@ public class JNADeclarationsConverter extends DeclarationsConverter {
                     structJavaClass.addDeclaration(fieldsConstr);
                 }
             }
+        }
+        if (addPointerConstructor) {
+        	Function addressConstructor = new Function(Function.Type.JavaMethod, structName.clone(), null).addModifiers(ModifierType.Public);
+	        String pointerVarName = "peer";
+	        addressConstructor.addArg(new Arg(pointerVarName, typeRef(com.sun.jna.Pointer.class)));
+	        FunctionCall superPointerCall = methodCall("super");
+	        superPointerCall.addArgument(varRef(pointerVarName));
+	        addressConstructor.setBody(block(stat(superPointerCall)));
+	        addConstructor(structJavaClass, addressConstructor);
+
+	        
         }
     }
 
