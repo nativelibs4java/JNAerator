@@ -65,7 +65,9 @@ import com.ochafik.util.string.StringUtils;
 import java.util.LinkedHashMap;
 
 import static com.ochafik.lang.jnaerator.parser.ElementsHelper.*;
+import com.ochafik.lang.jnaerator.parser.Namespace;
 import com.ochafik.lang.jnaerator.parser.TaggedTypeRefDeclaration;
+import java.util.Stack;
 
 public class Result extends Scanner {
 
@@ -494,6 +496,22 @@ public class Result extends Scanner {
     public Identifier getHubFullClassName() {
         return config.entryName == null ? null : ident(config.entryName.toLowerCase(), config.entryName);
     }
+    
+    //List<Identifier> currentNamespace = new ArrayList<Identifier>();
+    Stack<Identifier> currentNamespace = new Stack<Identifier>();
+
+    @Override
+    public void visitNamespace(Namespace ns) {
+        if (currentNamespace.isEmpty())
+            currentNamespace.push(ns.getName());
+        else
+            currentNamespace.push(currentNamespace.peek().derive(Identifier.QualificationSeparator.Colons, ns.getName()));
+        try {
+            super.visitNamespace(ns);
+        } finally {
+            currentNamespace.pop();
+        }
+    }    
 
     @Override
     public void visitStruct(Struct struct) {
@@ -506,7 +524,8 @@ public class Result extends Scanner {
                     }
                 case CStruct:
                 case CUnion:
-
+                    if (!currentNamespace.isEmpty())
+                        struct.setParentNamespace(currentNamespace.peek().clone());
                     boolean isFwd = struct.isForwardDeclaration();
                     if (!isFwd && struct.getDeclarations().isEmpty() && config.treatEmptyStructsAsForwardDecls) {
                         List<SimpleTypeRef> parents = struct.getParents();

@@ -47,7 +47,6 @@ import java.util.Collections;
 public abstract class Element {
 	//List<Element> parentElements = new ArrayList<Element>(); 
 	Element parentElement;
-	protected List<String> nameSpace = new ArrayList<String>();
 	String elementFile;
 	int elementLine = -1;
 	String commentBefore, commentAfter;
@@ -114,17 +113,6 @@ public abstract class Element {
 		setElementFile(null);
 		setElementLine(-1);
 	}
-	public void addNameSpace(String nameSpace) {
-		this.nameSpace.add(0, nameSpace);
-	}
-	public List<String> getNameSpace() {
-		return unmodifiableList(nameSpace);
-	}
-	public void setNameSpace(List<String> nameSpace) {
-		this.nameSpace.clear();
-		this.nameSpace.addAll(nameSpace);
-	}
-	
     public Element importComments(Element e, String... extraComments) {
         if (e != null) {
             importDetails(e, false);
@@ -137,10 +125,7 @@ public abstract class Element {
 	public Element importDetails(Element from, boolean move) {
 		if (from == null)
 			return this;
-		
-		if (!from.getNameSpace().isEmpty())
-			setNameSpace(from.getNameSpace());
-		
+
 		if (from.getElementFile() != null)
 			setElementFile(from.getElementFile());
 		if (from.getElementLine() >= 0)

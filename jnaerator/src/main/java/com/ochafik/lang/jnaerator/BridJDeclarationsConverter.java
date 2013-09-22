@@ -507,6 +507,9 @@ public class BridJDeclarationsConverter extends DeclarationsConverter {
         if (uuid != null) {
             structJavaClass.addAnnotation(new Annotation(result.config.runtime.typeRef(JNAeratorConfig.Runtime.Ann.IID), uuid));
         }
+        if (struct.getParentNamespace() != null) {
+            structJavaClass.addAnnotation(new Annotation(typeRef(Namespace.class), struct.getParentNamespace().toString()));
+        }
         structJavaClass.addToCommentBefore(preComments);
         //System.out.println("parentFieldsCount(structName = " + structName + ") = " + parentFieldsCount);
         final int iChild[] = new int[]{parentFieldsCount};
