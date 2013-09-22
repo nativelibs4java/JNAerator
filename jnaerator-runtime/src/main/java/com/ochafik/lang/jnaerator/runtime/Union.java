@@ -31,6 +31,8 @@ public abstract class Union<S extends Union<S, V, R>, V extends S, R extends S>
 		StructureType,
 		StructureTypeDependent
 {	
+	protected Union() { super(); }
+	protected Union(Pointer peer) { super(peer); }
 	public interface ByReference extends com.sun.jna.Union.ByReference, StructureTypeDependent {}
 	public interface ByValue extends com.sun.jna.Union.ByValue, StructureTypeDependent {}
 
