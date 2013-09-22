@@ -132,6 +132,7 @@ org/bridj/ann/Forwardable.class
 org/bridj/ann/JNIBound.class
 org/bridj/ann/Library.class
 org/bridj/ann/Name.class
+org/bridj/ann/Namespace.class
 org/bridj/ann/Optional.class
 org/bridj/ann/Ptr.class
 org/bridj/ann/Runtime.class
