@@ -121,6 +121,7 @@ public class JNAeratorStudio extends JPanel {
             genRawBindingsCb = new JCheckBox("Raw bindings (BridJ)", true),
             //scalaSettersCb = new JCheckBox("Scala struct field setters", false),
             beautifyNamesCb = new JCheckBox("Beautify names", false),
+            forceNamesCb = new JCheckBox("Force Names (BridJ)", false),
             noCommentCb = new JCheckBox("No comments", false);
     JComboBox runtimeCombo;
     JComboBox modeCombo;
@@ -260,6 +261,7 @@ public class JNAeratorStudio extends JPanel {
             setPref("options.genRawBindings", genRawBindingsCb.isSelected());
             //setPref("options.scalaSetters", scalaSettersCb.isSelected());
             setPref("options.beautifyNames", beautifyNamesCb.isSelected());
+            setPref("options.forceNames", forceNamesCb.isSelected());
             setPref("options.charPtrAsString", charPtrAsString.isSelected());
             setPref("options.targetRuntime", ((JNAeratorConfig.Runtime) runtimeCombo.getSelectedItem()).name());
             setPref("options.outputMode", ((JNAeratorConfig.OutputMode) modeCombo.getSelectedItem()).name());
@@ -440,7 +442,7 @@ public class JNAeratorStudio extends JPanel {
         optBox.add(modeBox);
 
 
-        JPanel optPanel = new JPanel(new GridLayout(3, 3));
+        JPanel optPanel = new JPanel(new GridLayout(4, 3));
         optPanel.add(directCallingCb);
         optPanel.add(noCommentCb);
         optPanel.add(structsAsTopLevelClassesCb);
@@ -451,6 +453,7 @@ public class JNAeratorStudio extends JPanel {
         optPanel.add(genRawBindingsCb);
         optPanel.add(beautifyNamesCb);
         optPanel.add(extractInterfaceCb);
+        optPanel.add(forceNamesCb);
         optBox.add(optPanel);
         for (Component c : optBox.getComponents()) {
             ((JComponent) c).setAlignmentX(0);
@@ -555,6 +558,7 @@ public class JNAeratorStudio extends JPanel {
                 config.outputJar = getOutputJarFile();
                 config.outputDir = getOutputDir();
                 config.useJNADirectCalls = directCallingCb.isSelected();
+                config.forceNames = forceNamesCb.isSelected();
                 config.putTopStructsInSeparateFiles = structsAsTopLevelClassesCb.isSelected();
                 config.reification = reificationCb.isSelected();
                 config.convertBodies = convertBodiesCb.isSelected();
@@ -803,6 +807,7 @@ public class JNAeratorStudio extends JPanel {
             js.extractInterfaceCb.setSelected(getPref("options.extractInterface", false));
             js.genRawBindingsCb.setSelected(getPref("options.genRawBindings", false));
             js.beautifyNamesCb.setSelected(getPref("options.beautifyNames", false));
+            js.forceNamesCb.setSelected(getPref("options.forceNames", false));
             js.charPtrAsString.setSelected(getPref("options.charPtrAsString", false));
             //js.scalaSettersCb.setSelected(getPref("options.scalaSetters", false));
             js.noCommentCb.setSelected(getPref("options.noComments", false));

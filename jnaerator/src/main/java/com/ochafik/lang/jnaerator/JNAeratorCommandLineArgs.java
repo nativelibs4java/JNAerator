@@ -192,6 +192,7 @@ public class JNAeratorCommandLineArgs {
         LibraryNamingPrefixes("-libraryNamingPrefixes", "Define prefixes commonly used in the library so that reification of functions is optimal (See -reification)", new ArgDef(Type.String, "commaSeparatedPrefixes")),
         //Test(				"-test",				"Launch JNAerator's unit tests (DEBUG option)"),
         Studio("-studio", "Launch JNAeratorStudio"),
+        ForceNames("-forceNames", "Force @Name annotations on all supported entities (structs, classes, enums, methods) to allow refactoring of resulting sources (BridJ-only)."),
         NoStaticInit("-noStaticInit", "Don't generate static init block with BridJ.register() call (BridJ-specific)"),
         ExtractDeclarations("-extractDeclarations", "Extract current library's declarations to an interface with the provided simple name (will be in same package as library implementation class); BridJ-specific", new ArgDef(Type.String, "interfaceSimpleClassName")),
         ScalaOut("-scalaOut", "[Experimental] Output Scala wrappers (callbacks implicits...)", new ArgDef(Type.OutputDir, "outDir")),

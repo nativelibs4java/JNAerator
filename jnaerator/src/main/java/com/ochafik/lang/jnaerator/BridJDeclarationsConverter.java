@@ -62,7 +62,7 @@ public class BridJDeclarationsConverter extends DeclarationsConverter {
     }
 
     public void annotateActualName(ModifiableElement e, Identifier name) {
-        e.addAnnotation(new Annotation(Name.class, expr(name.toString())));
+        e.addAnnotation(new Annotation(org.bridj.ann.Name.class, expr(name.toString())));
     }
 
     @Override
@@ -100,14 +100,13 @@ public class BridJDeclarationsConverter extends DeclarationsConverter {
             signatures = new Signatures();
 
             Enum en = new Enum();
+            if (result.config.forceNames || !rawEnumName.equals(enumName))
+                annotateActualName(en, rawEnumName);
+            addParentNamespaceAnnotation(en, e.getParentNamespace());
             if (!result.config.noComments) {
                 en.importComments(e, "enum values", getFileCommentContent(e));
             }
 
-            if (!rawEnumName.equals(enumName)) {
-                annotateActualName(en, rawEnumName);
-            }
-            addParentNamespaceAnnotation(en, e.getParentNamespace());
             en.setType(Enum.Type.Java);
             en.setTag(enumName.clone());
             en.addModifiers(ModifierType.Public);
@@ -431,7 +430,7 @@ public class BridJDeclarationsConverter extends DeclarationsConverter {
         if (!javaMethodName.equals(functionName)) {
             nativeMethod.setName(javaMethodName);
         }
-        if (!isCallback && !javaMethodName.equals(functionName)) {
+        if (!isCallback && !javaMethodName.equals(functionName) || returnType != null && result.config.forceNames) {
             annotateActualName(nativeMethod, functionName);
         }
     }
@@ -508,6 +507,8 @@ public class BridJDeclarationsConverter extends DeclarationsConverter {
         if (uuid != null) {
             structJavaClass.addAnnotation(new Annotation(result.config.runtime.typeRef(JNAeratorConfig.Runtime.Ann.IID), uuid));
         }
+        if (result.config.forceNames)
+            annotateActualName(structJavaClass, structName);
         addParentNamespaceAnnotation(structJavaClass, struct.getParentNamespace());
         structJavaClass.addToCommentBefore(preComments);
         //System.out.println("parentFieldsCount(structName = " + structName + ") = " + parentFieldsCount);

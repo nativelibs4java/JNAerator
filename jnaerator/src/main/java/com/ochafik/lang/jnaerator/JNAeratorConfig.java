@@ -391,6 +391,7 @@ public class JNAeratorConfig {
     public boolean genRawBindings = true;
     public boolean publicRawBindings;
     public boolean beautifyNames;
+    public boolean forceNames;
     public boolean treatEmptyStructsAsForwardDecls;
     public String[] libraryNamingPrefixes;
     public boolean extractLibSymbols;

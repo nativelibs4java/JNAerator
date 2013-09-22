@@ -427,6 +427,9 @@ public class JNAerator {
                         case SizeAsLong:
                             config.sizeAsLong = true;
                             break;
+                        case ForceNames:
+                            config.forceNames = true;
+                            break;
                         case NoRawBindings:
                             config.genRawBindings = false;
                             break;
