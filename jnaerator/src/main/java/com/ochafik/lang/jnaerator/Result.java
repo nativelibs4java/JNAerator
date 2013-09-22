@@ -341,6 +341,8 @@ public class Result extends Scanner {
             if (declarativePower(e) > declarativePower(oldEnum)) {
                 enumsByName.put(name, e);
                 e.setResolvedJavaIdentifier(typeConverter.computeTaggedTypeIdentifierInJava(e));
+                if (!currentNamespace.isEmpty())
+                    e.setParentNamespace(currentNamespace.peek().clone());
                 Identifier originalName = e.getOriginalTag();
                 if (originalName != null) {
                     enumsByName.put(originalName, e);

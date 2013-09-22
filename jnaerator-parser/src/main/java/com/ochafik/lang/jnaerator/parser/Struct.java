@@ -33,7 +33,6 @@ public class Struct extends TypeRef.TaggedTypeRef implements DeclarationsHolder 
 	final List<SimpleTypeRef> protocols = new ArrayList<SimpleTypeRef>();
 	String categoryName;
 	final List<Declaration> declarations = new ArrayList<Declaration>();
-    Identifier parentNamespace;
 
     public enum MemberVisibility {
 		Public, Private, Protected
@@ -87,11 +86,7 @@ public class Struct extends TypeRef.TaggedTypeRef implements DeclarationsHolder 
 		if (super.replaceChild(child, by))
 			return true;
 		
-        if (child == parentNamespace) {
-            setParentNamespace((Identifier) by);
-            return true;
-        }
-		if (replaceChild(protocols, SimpleTypeRef.class, this, child, by))
+        if (replaceChild(protocols, SimpleTypeRef.class, this, child, by))
 			return true;
 
 		if (replaceChild(parents, SimpleTypeRef.class, this, child, by))
@@ -173,15 +168,6 @@ public class Struct extends TypeRef.TaggedTypeRef implements DeclarationsHolder 
 	public Type getType() {
 		return type;
 	}
-
-    public void setParentNamespace(Identifier parentNamespace) {
-        this.parentNamespace = changeValue(this, this.parentNamespace, parentNamespace);
-    }
-
-    public Identifier getParentNamespace() {
-        return parentNamespace;
-    }
-    
     
 	public List<Declaration> getDeclarations() {
 		return unmodifiableList(declarations);

@@ -170,8 +170,6 @@ public class Scanner implements Visitor {
 
 	protected void doVisitStruct(Struct struct) {
 		visitTaggedTypeRef(struct);
-		if (struct.getParentNamespace() != null)
-        visitIdentifier(struct.getParentNamespace());
 		visit(struct.getDeclarations());
 		visit(struct.getProtocols());
 		visit(struct.getParents());
@@ -368,6 +366,8 @@ public class Scanner implements Visitor {
 		visitTypeRef(taggedTypeRef);
 		visit(taggedTypeRef.getTag());
 		visit(taggedTypeRef.getOriginalTag());
+		if (taggedTypeRef.getParentNamespace() != null)
+            visitIdentifier(taggedTypeRef.getParentNamespace());
 		
 	}
 

@@ -18,6 +18,7 @@
 */
 package com.ochafik.lang.jnaerator.parser;
 
+import static com.ochafik.lang.jnaerator.parser.Element.changeValue;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -47,6 +48,7 @@ public abstract class TypeRef extends ModifiableElement implements Declarator.Mu
 	}
 	public static abstract class TaggedTypeRef extends TypeRef {
 		Identifier tag, originalTag;
+        Identifier parentNamespace;
 		public Identifier getTag() {
 			return tag;
 		}
@@ -70,8 +72,20 @@ public abstract class TypeRef extends ModifiableElement implements Declarator.Mu
 				setOriginalTag((Identifier)by);
 				return true;
 			}
+            if (child == getParentNamespace()) {
+                setParentNamespace((Identifier) by);
+                return true;
+            }
 			return super.replaceChild(child, by);
 		}
+        
+        public void setParentNamespace(Identifier parentNamespace) {
+            this.parentNamespace = changeValue(this, this.parentNamespace, parentNamespace);
+        }
+
+        public Identifier getParentNamespace() {
+            return parentNamespace;
+        }
 		public void setOriginalTag(Identifier originalTag) {
 			this.originalTag = changeValue(this, this.originalTag, originalTag);
 		}

@@ -107,6 +107,7 @@ public class BridJDeclarationsConverter extends DeclarationsConverter {
             if (!rawEnumName.equals(enumName)) {
                 annotateActualName(en, rawEnumName);
             }
+            addParentNamespaceAnnotation(en, e.getParentNamespace());
             en.setType(Enum.Type.Java);
             en.setTag(enumName.clone());
             en.addModifiers(ModifierType.Public);
@@ -507,9 +508,7 @@ public class BridJDeclarationsConverter extends DeclarationsConverter {
         if (uuid != null) {
             structJavaClass.addAnnotation(new Annotation(result.config.runtime.typeRef(JNAeratorConfig.Runtime.Ann.IID), uuid));
         }
-        if (struct.getParentNamespace() != null) {
-            structJavaClass.addAnnotation(new Annotation(typeRef(org.bridj.ann.Namespace.class), expr(struct.getParentNamespace().toString())));
-        }
+        addParentNamespaceAnnotation(structJavaClass, struct.getParentNamespace());
         structJavaClass.addToCommentBefore(preComments);
         //System.out.println("parentFieldsCount(structName = " + structName + ") = " + parentFieldsCount);
         final int iChild[] = new int[]{parentFieldsCount};
@@ -946,5 +945,11 @@ public class BridJDeclarationsConverter extends DeclarationsConverter {
             Expression.MemberRefStyle.Dot,
             "register")))).addModifiers(ModifierType.Static);
         return f;
+    }
+
+    private void addParentNamespaceAnnotation(ModifiableElement dest, Identifier parentNamespace) {
+        if (parentNamespace != null) {
+            dest.addAnnotation(new Annotation(typeRef(org.bridj.ann.Namespace.class), expr(parentNamespace.toString())));
+        }
     }
 }
