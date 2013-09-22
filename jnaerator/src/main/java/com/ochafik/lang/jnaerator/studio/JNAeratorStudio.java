@@ -118,7 +118,7 @@ public class JNAeratorStudio extends JPanel {
             reificationCb = new JCheckBox("Reification", false),
             convertBodiesCb = new JCheckBox("Convert statements (BridJ)", false),
             extractInterfaceCb = new JCheckBox("Extract Interface (BridJ)", false),
-            genRawBindingsCb = new JCheckBox("Raw bindings (BridJ)", false),
+            genRawBindingsCb = new JCheckBox("Raw bindings (BridJ)", true),
             //scalaSettersCb = new JCheckBox("Scala struct field setters", false),
             beautifyNamesCb = new JCheckBox("Beautify names", false),
             noCommentCb = new JCheckBox("No comments", false);
