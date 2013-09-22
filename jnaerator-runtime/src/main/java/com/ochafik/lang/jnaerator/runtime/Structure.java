@@ -33,6 +33,12 @@ public abstract class Structure<S extends Structure<S, V, R>, V extends S, R ext
 		StructureType,
 		StructureTypeDependent
 {	
+    protected Structure(Pointer p) {
+        super(p);
+    }
+    protected Structure() {
+        super();
+    }
 	public interface ByReference extends com.sun.jna.Structure.ByReference, StructureTypeDependent {}
 	public interface ByValue extends com.sun.jna.Structure.ByValue, StructureTypeDependent {}
 	
