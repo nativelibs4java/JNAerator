@@ -307,7 +307,8 @@ public enum ModifierType implements Modifier {
 	HashMap<String, Modifier>();
 	static {
 		for (ModifierType m : values()) {
-			mods.put(m.name().toLowerCase(), m);
+			String n = m == _Complex ? m.name() : m.name().toLowerCase();
+			mods.put(n, m);
 		}
 	}
 	/**
@@ -318,7 +319,7 @@ public enum ModifierType implements Modifier {
 	public static Modifier parseModifier(String name, ModifierKind... kinds) {
 		try {
 			//Modifier modifier = Modifier.valueOf(name);
-			Modifier modifier = mods.get(name.toLowerCase());
+			Modifier modifier = mods.get(name);
 			if (kinds.length == 0 || modifier == null)
 				return modifier;
 			for (ModifierKind kind : kinds)

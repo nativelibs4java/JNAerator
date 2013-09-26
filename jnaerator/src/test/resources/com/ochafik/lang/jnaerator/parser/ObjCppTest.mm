@@ -68,6 +68,12 @@ char* initstate(unsigned, char*, size_t); /* no  __DARWIN_ALIAS needed */
 --
 register unsigned int g;
 --
+typedef struct myStruct
+{
+  char Struct[2];
+  char typeName[2];
+} Mine;
+--
 void srand(unsigned);
 --
 void f(int* pA, int* pB) {
