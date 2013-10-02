@@ -226,7 +226,7 @@ public class JNAeratorCommandLineArgs {
         new ArgDef(Type.String, "libName")),
         DefaultLibrary("-defaultLibrary", "Name of output library for elements declared in files not covered by a ${CurrentLibrary} switch", new ArgDef(Type.String, "libName")),
         Help("-?-h(?:elp)?", "Show command line arguments help"),
-        EntryName("-entryClass", "Generate a class _entryclassName.EntryClassName_ that will contain all of the jnaerated libraries instances. User code will just need to static import or derive from this class to access to the instances.", new ArgDef(Type.String, "entryClassName")),
+        EntryName("-entryClass", "Generate a class _entryclassName.EntryClassName_ that will contain all of the jnaerated libraries instances. User code will just need to static import or derive from this class to access to the instances (has no effect for BridJ runtime).", new ArgDef(Type.String, "entryClassName")),
         //		Undefine(			"-U(.*)?",				"Undefine a preprocessor symbol before ", new ArgDef(Type.String, "entryClassName")),
         Verbose("-v(?:erbose)?", "Verbose output (both console and files)"),
         ChoicesOut("-choicesOut", "Write the function alternative choices made (automatically set when ${Verbose} is used).", new ArgDef(Type.OutputFile, "outFile")),
