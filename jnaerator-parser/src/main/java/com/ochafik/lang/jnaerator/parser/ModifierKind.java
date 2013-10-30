@@ -26,6 +26,7 @@ public enum ModifierKind {
 	Extended,
 	NumericTypeQualifier,
 	ReferenceQualifier,
+  ObjCPropertyModifier,
 	SizeModifier,
 	SignModifier, ///http://msdn.microsoft.com/en-us/library/cc264105.aspx
 	StringAnnotation,

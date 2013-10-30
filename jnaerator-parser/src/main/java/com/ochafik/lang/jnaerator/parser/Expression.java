@@ -1334,16 +1334,20 @@ public abstract class Expression extends Element {
 			else
 				return new Constant(Type.Long, IntForm.String, result, orig);
 		}
-		
-		public static Constant parseString(final String orig) {
+    
+    public static Constant parseString(final String orig) {
             String string = orig;
-			int len = string.length();
-			if (len < 2 || string.charAt(0) != '"' || string.charAt(len - 1) != '"')
-				throw new IllegalArgumentException("Expecting string, got " + string);
+      int len = string.length();
+      if (len < 2 || string.charAt(0) != '"' || string.charAt(len - 1) != '"')
+        throw new IllegalArgumentException("Expecting string, got " + string);
 
-			string = string.substring(1, len - 1);
-			return new Constant(Type.String, parseNakedString(string), orig);
-		}
+      string = string.substring(1, len - 1);
+      return new Constant(Type.String, parseNakedString(string), orig);
+    }
+    
+    public static Constant string(final String s) {
+      return new Constant(Type.String, s, s);
+    }
 
 		public static Constant parseDecimal(String string) {
 			return parseInteger(string, 10, IntForm.Decimal, false);

@@ -119,23 +119,43 @@ public enum ModifierType implements Modifier {
 	Private(__private), 
 	Protected(of(Publicity)),
 	Explicit(of(Publicity, StorageClassSpecifier)), 
-	
+
 	Inline(of(C, StorageClassSpecifier)),
 	__inline(Inline),
 	__inline__(Inline),
     __forceinline(of(C, StorageClassSpecifier)),
-	
+
 	In(of(ObjectiveC, OnlyInArgDef)),
 	Out(of(ObjectiveC, OnlyInArgDef)),
 	InOut(of(ObjectiveC, OnlyInArgDef)),
 	OneWay(of(ObjectiveC, OnlyInArgDef)),
 	ByCopy(of(ObjectiveC, OnlyInArgDef)),
 	ByRef(of(ObjectiveC, OnlyInArgDef)),
-    
-	Package(of(ObjectiveC)),
+
+  Package(of(ObjectiveC)),
 	Optional(of(ObjectiveC)),
 	Required(of(ObjectiveC)),
-	
+
+  Readonly(of(ObjectiveC, ObjCPropertyModifier)),
+  Readwrite(of(ObjectiveC, ObjCPropertyModifier)),
+  Strong(of(ObjectiveC, ObjCPropertyModifier)),
+  Retain(of(ObjectiveC, ObjCPropertyModifier)),
+  Unsafe_unretained(of(ObjectiveC, ObjCPropertyModifier)),
+  Copy(of(ObjectiveC, ObjCPropertyModifier)),
+  Assign(of(ObjectiveC, ObjCPropertyModifier)),
+  Nonatomic(of(ObjectiveC, ObjCPropertyModifier)),
+  Atomic(of(ObjectiveC, ObjCPropertyModifier)),
+  Getter(of(ObjectiveC, ObjCPropertyModifier)),
+  Setter(of(ObjectiveC, ObjCPropertyModifier)),
+  Weak(of(Attribute, ObjectiveC, ObjCPropertyModifier)),
+
+  __strong(of(ObjectiveC, TypeQualifier)),
+  __weak(of(ObjectiveC, TypeQualifier)),
+  __autoreleasing(of(ObjectiveC, TypeQualifier)),
+  __unsafe_unretained(of(ObjectiveC, TypeQualifier)),
+  __block(of(ObjectiveC, TypeQualifier)),
+  __bridge(of(ObjectiveC, TypeQualifier)),
+
 	Align(of(Declspec, HasArguments)),
 	Allocate(of(Declspec, HasArguments)),
 	AppDomain(of(Declspec)),
@@ -203,7 +223,7 @@ public enum ModifierType implements Modifier {
 	Used(of(Attribute)),
 	Visibility(of(Attribute)),
 	Warn_unused_result(of(Attribute)),
-	Weak(of(Attribute)), 
+	//Weak(of(Attribute)), 
 	__gnu_inline(of(Attribute)),
 	gnu_inline(__gnu_inline, of(Attribute)),
 	__dllimport__(of(Attribute)),

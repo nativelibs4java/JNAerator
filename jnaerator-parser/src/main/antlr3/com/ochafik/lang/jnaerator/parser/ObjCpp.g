@@ -785,15 +785,40 @@ functionPointerOrSimpleVarDecl returns [Declaration decl]
     }
   ;
 
-// TODO parse modifiers : assign, nonatomic, readonly, copy...
-objCPropertyAttribute
+objCPropertyAttribute returns [Modifier modifier]
     :
-        IDENTIFIER ( '=' IDENTIFIER )?
+        //IDENTIFIER ( '=' IDENTIFIER )?
+        { next(ModifierKind.ObjCPropertyModifier) }? m=IDENTIFIER {
+          $modifier = ModifierType.parseModifier($m.text);
+        }
+        (
+          '=' v=IDENTIFIER {
+            $modifier = new ValuedModifier($modifier, Constant.string($v.text));
+          }
+        )?
     ;
+
 objCPropertyDecl returns [Property property]
+@init {
+  List<Modifier> modifiers = new ArrayList<Modifier>();
+}
+@after { 
+  $property.addModifiers(modifiers);
+}
   :
     '@property' 
-    ( '(' objCPropertyAttribute ( ',' objCPropertyAttribute ) * ) ? 
+    (
+      '('
+          a1=objCPropertyAttribute {
+            modifiers.add($a1.modifier);
+          }
+          (
+            ',' ax=objCPropertyAttribute {
+              modifiers.add($ax.modifier);
+            }
+          )*
+      ')'
+    )?
     functionPointerOrSimpleVarDecl ';' {
       $property = new Property($functionPointerOrSimpleVarDecl.decl);
     }

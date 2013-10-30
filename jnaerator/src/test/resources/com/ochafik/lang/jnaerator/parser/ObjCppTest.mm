@@ -517,6 +517,14 @@ namespace std  {
   using ::mbstate_t;
 }
 --
+@interface Foo {
+  __strong __weak __autoreleasing __unsafe_unretained __block __bridge int _bar;
+}
+
+@property(readonly, readwrite, strong, retain, unsafe_unretained, copy, assign, nonatomic, atomic, getter=barre, weak) int bar;
+
+@end
+--
 extern TestMe();
 --
 #pragma fail

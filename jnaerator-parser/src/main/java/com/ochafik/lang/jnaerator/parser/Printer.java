@@ -875,7 +875,7 @@ public class Printer implements Visitor {
     public void visitProperty(Property e) {
         append("@property");
         if (!e.getModifiers().isEmpty()) {
-            append("(").implode(e.getModifiers(), " ").append(")");
+            append("(").implode(e.getModifiers(), ", ").append(")");
         }
         append(" ", e.getDeclaration());
     }
