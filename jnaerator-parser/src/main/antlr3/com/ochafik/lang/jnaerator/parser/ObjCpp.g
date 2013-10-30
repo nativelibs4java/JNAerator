@@ -787,7 +787,6 @@ functionPointerOrSimpleVarDecl returns [Declaration decl]
 
 objCPropertyAttribute returns [Modifier modifier]
     :
-        //IDENTIFIER ( '=' IDENTIFIER )?
         { next(ModifierKind.ObjCPropertyModifier) }? m=IDENTIFIER {
           $modifier = ModifierType.parseModifier($m.text);
         }
