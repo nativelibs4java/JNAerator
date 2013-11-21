@@ -537,3 +537,5 @@ class fpos
 {
 	fpos() {}
 };
+--
+typedef enum : Foo { Quux } Baz;

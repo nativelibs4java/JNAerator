@@ -674,6 +674,7 @@ enumCore returns [Enum e]
     (
       ( m1=modifiers { modifiers.addAll($m1.modifiers); } )?
       (
+      	( ':' IDENTIFIER )?
         ab=enumBody {
           $e = $ab.e;
           $e.setForwardDeclaration(false);
@@ -681,6 +682,7 @@ enumCore returns [Enum e]
         tag=qualifiedIdentifier
         (
           ( m2=modifiers { modifiers.addAll($m2.modifiers); } )?
+          ( ':' IDENTIFIER )?
           nb=enumBody {
             $e = $nb.e;
             $e.setForwardDeclaration(false);
