@@ -380,6 +380,13 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
         TypeRef pInt = new TypeRef.Pointer(new Primitive("int"), Declarator.PointerStyle.Pointer);
         result.addManualTypeDef("intptr_t", pInt);
         result.addManualTypeDef("uintptr_t", pInt);
+
+        // TODO: Add a windows failsafe mode that defines all the typedefs needed:
+        // http://msdn.microsoft.com/en-us/library/windows/desktop/aa383751(v=vs.85).aspx
+//        TypeRef pVoid = new TypeRef.Pointer(new Primitive("void"), Declarator.PointerStyle.Pointer);
+//        result.addManualTypeDef("PVOID", pVoid);
+//        result.addManualTypeDef("LPVOID", pVoid);
+//        result.addManualTypeDef("LPCVOID", pVoid);
     }
 
     protected TypeRef findTypeRef(Identifier name, Identifier libraryClassName) {
