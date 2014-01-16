@@ -208,11 +208,10 @@ public class BridJDeclarationsConverter extends DeclarationsConverter {
 
         addCallingConventionAnnotation(function, nativeMethod);
 
-        if (function.getName() != null && !functionName.toString().equals(function.getName().toString()) && !isCallback) {
-            TypeRef mgc = result.config.runtime.typeRef(JNAeratorConfig.Runtime.Ann.Name);
-            if (mgc != null) {
-                nativeMethod.addAnnotation(new Annotation(mgc, "(\"" + function.getName() + "\")"));
-            }
+        if (function.getName() != null && !isCallback &&
+            (!functionName.toString().equals(function.getName().toString()) || result.config.forceNames))
+        {
+            annotateActualName(nativeMethod, function.getName());
         }
 
         Function rawMethod = nativeMethod.clone();
@@ -429,9 +428,6 @@ public class BridJDeclarationsConverter extends DeclarationsConverter {
         Identifier javaMethodName = signatures == null ? functionName : signatures.findNextMethodName(natSig, functionName);
         if (!javaMethodName.equals(functionName)) {
             nativeMethod.setName(javaMethodName);
-        }
-        if (!isCallback && !javaMethodName.equals(functionName) || returnType != null && result.config.forceNames) {
-            annotateActualName(nativeMethod, functionName);
         }
     }
 
