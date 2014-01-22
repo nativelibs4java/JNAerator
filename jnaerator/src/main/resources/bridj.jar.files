@@ -85,10 +85,12 @@ org/bridj/Pointer$2$1.class
 org/bridj/Pointer$2.class
 org/bridj/Pointer$3$1.class
 org/bridj/Pointer$3.class
+org/bridj/Pointer$4$1.class
 org/bridj/Pointer$4.class
 org/bridj/Pointer$5.class
 org/bridj/Pointer$6.class
 org/bridj/Pointer$7.class
+org/bridj/Pointer$8.class
 org/bridj/Pointer$DisorderedPointer.class
 org/bridj/Pointer$FreeReleaser.class
 org/bridj/Pointer$ListType.class
@@ -97,6 +99,7 @@ org/bridj/Pointer$Releaser.class
 org/bridj/Pointer$StringType.class
 org/bridj/Pointer.class
 org/bridj/PointerIO.class
+org/bridj/PointerLRUCache.class
 org/bridj/SignalConstants.class
 org/bridj/SignalError.class
 org/bridj/SizeT.class
@@ -299,10 +302,10 @@ org/bridj/jawt/JAWT_Rectangle.class
 org/bridj/jawt/JawtLibrary$JNIEnv.class
 org/bridj/jawt/JawtLibrary.class
 org/bridj/lib/darwin_universal/libbridj.dylib
-org/bridj/lib/linux_armel/libbridj.so
 org/bridj/lib/linux_armhf/libbridj.so
 org/bridj/lib/linux_x64/libbridj.so
 org/bridj/lib/linux_x86/libbridj.so
+org/bridj/lib/sunos_x64/libbridj.so
 org/bridj/lib/sunos_x86/libbridj.so
 org/bridj/lib/win32/bridj.dll
 org/bridj/lib/win64/bridj.dll
