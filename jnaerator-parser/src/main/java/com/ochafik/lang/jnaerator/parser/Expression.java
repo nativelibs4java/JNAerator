@@ -1304,7 +1304,7 @@ public abstract class Expression extends Element {
 						if (Character.isDigit(c)) {
 							int start = i - 1;
 							int end = i;
-							while (Character.isDigit(string.charAt(end))) {
+							while (end < len && Character.isDigit(string.charAt(end))) {
 								end++;
 							}
 							b.append((char)Integer.parseInt(string.substring(start, end), 8));
