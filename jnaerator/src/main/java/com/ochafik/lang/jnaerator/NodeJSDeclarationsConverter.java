@@ -180,7 +180,7 @@ public class NodeJSDeclarationsConverter extends DeclarationsConverter {
                 return NodeType.Boolean;
             } else if (n.matches("void")) {
                 return NodeType.Void;
-            } else if (n.equals("va_list")) {
+            } else if (n.equals("va_list") || n.equals("__builtin_va_list")) {
                 return NodeType.VAList;
             } else {
                 return NodeType.Number;

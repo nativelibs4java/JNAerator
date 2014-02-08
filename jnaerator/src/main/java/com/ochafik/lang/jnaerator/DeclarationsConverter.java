@@ -49,6 +49,13 @@ public abstract class DeclarationsConverter {
     }
     protected final Result result;
 
+    protected static boolean isVarArgs(Arg arg) {
+        if (arg.isVarArg()) {
+            return true;
+        }
+        String t = arg.getValueType() + "";
+        return t.equals("va_list") || t.equals("__builtin_va_list") || t.equals("__gnuc_va_list");
+    }
     public void convertCallback(FunctionSignature functionSignature, Signatures signatures, DeclarationsHolder out) {
         Struct decl = convertCallback(functionSignature, signatures, out.getResolvedJavaIdentifier());
         if (decl != null) {

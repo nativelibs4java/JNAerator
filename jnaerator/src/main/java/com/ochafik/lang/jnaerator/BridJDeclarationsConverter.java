@@ -240,9 +240,9 @@ public class BridJDeclarationsConverter extends DeclarationsConverter {
 
         for (Arg arg : function.getArgs()) {
             String paramName;
-            if (arg.isVarArg()) {
-                assert arg.getValueType() == null;
-                paramName = varArgName = chooseJavaArgName("varargs", iArg, argNames);
+            if (isVarArgs(arg)) {
+//                assert arg.getValueType() == null;
+                paramName = varArgName = chooseJavaArgName(arg.getName() == null ? "varargs" : arg.getName(), iArg, argNames);
                 varArgType = ident(isObjectiveC ? NSObject.class : Object.class);
             } else {
                 paramName = chooseJavaArgName(arg.getName(), iArg, argNames);

@@ -291,10 +291,10 @@ public class JNADeclarationsConverter extends DeclarationsConverter {
 
             int iArg = 1;
             for (Arg arg : function.getArgs()) {
-                if (arg.isVarArg() && arg.getValueType() == null) {
+                if (isVarArgs(arg)) {
                     //TODO choose vaname dynamically !
                     Identifier vaType = ident(isObjectiveC ? NSObject.class : Object.class);
-                    String argName = chooseJavaArgName("varargs", iArg, argNames);
+                    String argName = chooseJavaArgName(arg.getName() == null ? "varargs" : arg.getName(), iArg, argNames);
                     natFunc.addArg(new Arg(argName, typeRef(vaType.clone()))).setVarArg(true);
                     if (alternativeOutputs) {
                         primOrBufFunc.addArg(new Arg(argName, typeRef(vaType.clone()))).setVarArg(true);

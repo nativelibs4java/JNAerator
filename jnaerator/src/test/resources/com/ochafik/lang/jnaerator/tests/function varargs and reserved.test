@@ -1,4 +1,7 @@
 void varargAndReserved(int transient, ...);
+void f1(va_list ap);
+void f2(__gnuc_va_list ap);
+void f3(__builtin_va_list ap);
 --
 #runtime(JNAerator)
 import test.*;
@@ -6,6 +9,12 @@ import static test.TestLibrary.*;
 
 INSTANCE.varargAndReserved(1);
 INSTANCE.varargAndReserved(1,(Pointer)null);
+INSTANCE.f1(1);
+INSTANCE.f1(1, 2);
+INSTANCE.f2(1);
+INSTANCE.f2(1, 2);
+INSTANCE.f3(1);
+INSTANCE.f3(1, 2);
 --
 #runtime(BridJ)
 import test.*;
@@ -13,3 +22,9 @@ import static test.TestLibrary.*;
 
 varargAndReserved(1);
 varargAndReserved(1,(Pointer)null);
+f1(1);
+f1(1, 2);
+f2(1);
+f2(1, 2);
+f3(1);
+f3(1, 2);
