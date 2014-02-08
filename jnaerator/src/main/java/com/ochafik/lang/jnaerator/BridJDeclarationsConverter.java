@@ -503,6 +503,7 @@ public class BridJDeclarationsConverter extends DeclarationsConverter {
         if (uuid != null) {
             structJavaClass.addAnnotation(new Annotation(result.config.runtime.typeRef(JNAeratorConfig.Runtime.Ann.IID), uuid));
         }
+        structJavaClass.setResolvedJavaIdentifier(ident(structName));
         if (result.config.forceNames)
             annotateActualName(structJavaClass, structName);
         addParentNamespaceAnnotation(structJavaClass, struct.getParentNamespace());
