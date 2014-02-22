@@ -407,9 +407,9 @@ public class ObjectiveCGenerator {
             addAllocIfMissing(in, "new_");
         }
 
-        outputMembers(signatures, in, instanceStruct, structThatReceivesStaticMethods, in.getDeclarations(), isProtocol || isCategory);
         Identifier fullClassName = getFullClassName(in);
-
+        outputMembers(signatures, in, instanceStruct, structThatReceivesStaticMethods, in.getDeclarations(), isProtocol || isCategory);
+        
         /*
          if (!isProtocol && !isCategory) {
          // Output static proxies for static category methods
@@ -557,7 +557,7 @@ public class ObjectiveCGenerator {
                 if (tr instanceof Struct) {
                     result.declarationsConverter.outputConvertedStruct((Struct) tr, signatures, instanceStruct, null, false);
                 } else if (tr instanceof FunctionSignature) {
-                    result.declarationsConverter.convertCallback((FunctionSignature) tr, signatures, instanceStruct);
+                    result.declarationsConverter.convertCallback((FunctionSignature) tr, signatures, instanceStruct, fullClassName);
                 }
             }
             iChild[0]++;

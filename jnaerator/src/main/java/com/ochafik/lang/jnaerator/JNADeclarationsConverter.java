@@ -452,7 +452,7 @@ public class JNADeclarationsConverter extends DeclarationsConverter {
                             }
                         }
                         if (fs != null) {
-                            convertCallback(fs, childSignatures, structJavaClass);
+                            convertCallback(fs, childSignatures, structJavaClass, callerLibraryClass);
                         }
                     }
                 } else if (result.config.genCPlusPlus && d instanceof Function) {

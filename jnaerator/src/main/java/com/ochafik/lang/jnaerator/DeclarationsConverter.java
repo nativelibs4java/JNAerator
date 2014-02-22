@@ -56,8 +56,8 @@ public abstract class DeclarationsConverter {
         String t = arg.getValueType() + "";
         return t.equals("va_list") || t.equals("__builtin_va_list") || t.equals("__gnuc_va_list");
     }
-    public void convertCallback(FunctionSignature functionSignature, Signatures signatures, DeclarationsHolder out) {
-        Struct decl = convertCallback(functionSignature, signatures, out.getResolvedJavaIdentifier());
+    public void convertCallback(FunctionSignature functionSignature, Signatures signatures, DeclarationsHolder out, Identifier libraryClass) {
+        Struct decl = convertCallback(functionSignature, signatures, libraryClass);//out.getResolvedJavaIdentifier());
         if (decl != null) {
             out.addDeclaration(new TaggedTypeRefDeclaration(decl));
         }
@@ -100,7 +100,7 @@ public abstract class DeclarationsConverter {
         return callbackStruct;
     }
 
-    public void convertCallbacks(List<FunctionSignature> functionSignatures, Signatures signatures, DeclarationsHolder out) {
+    public void convertCallbacks(List<FunctionSignature> functionSignatures, Signatures signatures, DeclarationsHolder out, Identifier libraryClass) {
         if (functionSignatures != null) {
             for (FunctionSignature functionSignature : functionSignatures) {
                 if (functionSignature.findParentOfType(Struct.class) != null) {
@@ -111,7 +111,7 @@ public abstract class DeclarationsConverter {
                 if (a != null && a.getParentElement() == null) {
                     continue;//TODO understand why we end up having an orphan Arg here !!!!
                 }
-                convertCallback(functionSignature, signatures, out);
+                convertCallback(functionSignature, signatures, out, libraryClass);
             }
         }
 
@@ -894,13 +894,15 @@ public abstract class DeclarationsConverter {
 
         Identifier implementationsFullClassName = result.getLibraryClassFullName(library);//ident(javaPackage, libraryClassName);
         Identifier declarationsFullClassName = result.getLibraryDeclarationsClassFullName(library);
+        
+        Identifier libraryClass = declarations.getResolvedJavaIdentifier();
             
         Signatures signatures = result.getSignaturesForOutputClass(declarationsFullClassName);
         result.typeConverter.allowFakePointers = true;
         convertEnums(result.enumsByLibrary.get(library), signatures, declarations);
         convertConstants(library, result.definesByLibrary.get(library), sourceFiles, signatures, declarations);
         convertStructs(result.structsByLibrary.get(library), signatures, declarations, library);
-        convertCallbacks(result.callbacksByLibrary.get(library), signatures, declarations);
+        convertCallbacks(result.callbacksByLibrary.get(library), signatures, declarations, libraryClass);
         convertFunctions(result.functionsByLibrary.get(library), signatures, declarations, implementations);
 
         if (result.globalsGenerator != null) {

@@ -1,0 +1,20 @@
+typedef struct S *T;
+T f();
+
+typedef struct _V V;
+typedef struct _T T;
+
+struct _T {
+  void (*cb)(V *);
+};
+
+V* f(const T*);
+
+--
+#runtime(BridJ)
+import test.*;
+import static test.TestLibrary.*;
+
+T t = new T();
+t.cb((Pointer<T.cb_callback>) null);
+t.cb().get().apply((Pointer<V>) null);
