@@ -1,0 +1,10 @@
+#define NULL_AS_INTS ((const int *) (void*)null)
+#define STRING_AS_INTS ((const int *) "h")
+
+--
+#runtime(BridJ)
+import test.*;
+import static test.TestLibrary.*;
+
+Pointer<Integer> pi = STRING_AS_INTS;
+//pi = NULL_AS_INTS;

@@ -445,9 +445,14 @@ public class BridJTypeConversion extends TypeConversion {
             Expression val = casted.getFirst();
             if (ConvType.Pointer.equals(conv.type)) {
                 if (isString(val)) {
-                    val = methodCall(expr(typeRef(result.config.runtime.pointerClass)), "pointerToCString", val);
+                    val = methodCall(
+                        methodCall(expr(typeRef(result.config.runtime.pointerClass)), "pointerToCString", val),
+                        "as",
+                        typeLiteral(conv.targetTypeConversion.typeRef)
+                    );
                 } else {
-                    val = methodCall(expr(typeRef(result.config.runtime.pointerClass)), "pointerToAddress", val);
+                    val = methodCall(expr(typeRef(result.config.runtime.pointerClass)), "pointerToAddress", val,
+                        typeLiteral(conv.targetTypeConversion.typeRef));
                 }
             }
             res = typed(val, tr);

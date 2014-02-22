@@ -32,7 +32,7 @@ public class Namespace extends Declarations {
     public Namespace() {}
     public Namespace(Identifier name, Declaration... declarations) {
         setName(name);
-        setDeclarations(declarations);
+        setDeclarations(Arrays.asList(declarations));
     }
     @Override
     public void accept(Visitor visitor) {
