@@ -1,0 +1,37 @@
+enum E { A, B };
+typedef void* (*F1)(void*, E);
+typedef void* (*F2)();
+
+--
+#runtime(BridJ)
+import test.*;
+import static test.TestLibrary.*;
+import org.bridj.ann.Ptr;
+
+F1 f1 = new F1() {
+	@Override
+	public Pointer<? > apply(Pointer<? > voidPtr1, IntValuedEnum<TestLibrary.E > E1) {
+		return null;
+	}
+	@Override
+	@Ptr
+	public long apply(@Ptr long voidPtr1, int E1) {
+		return 0L;
+	}
+};
+Pointer<?> ptr = f1.apply((Pointer<?>) null, E.A);
+long peer = f1.apply(0L, (int) E.A.value());
+
+F2 f2 = new F2() {
+	@Override
+	public Pointer<? > apply() {
+		return null;
+	}
+	@Override
+	@Ptr
+	public long apply$2() {
+		return 0L;
+	}
+};
+ptr = f2.apply();
+peer = f2.apply$2();

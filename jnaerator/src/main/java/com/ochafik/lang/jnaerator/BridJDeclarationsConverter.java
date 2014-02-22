@@ -313,64 +313,85 @@ public class BridJDeclarationsConverter extends DeclarationsConverter {
                         rawMethod.addAnnotation(new Annotation(typeRef(Optional.class)));
                     }
 
-                    List<Expression> followedArgs = new ArrayList<Expression>();
+                    List<Expression> objectToRawFollowedArgs = new ArrayList<Expression>();
+                    List<Expression> rawToObjectFollowedArgs = new ArrayList<Expression>();
                     for (int i = 0, n = paramTypes.size(); i < n; i++) {
                         NL4JConversion paramType = paramTypes.get(i);
                         String paramName = paramNames.get(i);
-                        Expression followedArg;
 
                         switch (paramType.type) {
                             case Pointer:
-                                followedArg = methodCall(expr(typeRef(org.bridj.Pointer.class)), "getPeer", varRef(paramName));
+                                objectToRawFollowedArgs.add(createGetPeerExpression(varRef(paramName)));
+                                rawToObjectFollowedArgs.add(createPointerToAddressExpression(paramType, varRef(paramName)));
                                 break;
                             case Enum:
-                                followedArg = cast(typeRef(int.class), methodCall(varRef(paramName), "value"));
+                                objectToRawFollowedArgs.add(createGetEnumValueExpression(varRef(paramName)));
+                                rawToObjectFollowedArgs.add(createEnumExpression(paramType, varRef(paramName)));
                                 break;
 //                            case NativeSize:
 //                            case NativeLong:
 //                                followedArg = methodCall(varRef(paramName), "longValue");
 //                                break;
                             default:
-                                followedArg = varRef(paramName);
+                                objectToRawFollowedArgs.add(varRef(paramName));
+                                rawToObjectFollowedArgs.add(varRef(paramName));
                                 break;
                         }
-                        followedArgs.add(followedArg);
                     }
                     if (varArgType != null) {
-                        followedArgs.add(varRef(varArgName));
+                        objectToRawFollowedArgs.add(varRef(varArgName));
+                        rawToObjectFollowedArgs.add(varRef(varArgName));
                     }
 
-                    Expression followedCall = methodCall(rawMethod.getName().toString(), followedArgs.toArray(new Expression[followedArgs.size()]));
+                    Expression objectToRawFollowedCall =
+                        methodCall(rawMethod.getName().toString(), objectToRawFollowedArgs.toArray(new Expression[objectToRawFollowedArgs.size()]));
+                    
+                    Expression rawToObjectFollowedCall =
+                        methodCall(nativeMethod.getName().toString(), rawToObjectFollowedArgs.toArray(new Expression[rawToObjectFollowedArgs.size()]));
+                    
                     boolean isVoid = "void".equals(String.valueOf(nativeMethod.getValueType()));
                     if (isVoid) {
-                        nativeMethod.setBody(block(stat(followedCall)));
+                        nativeMethod.setBody(block(stat(objectToRawFollowedCall)));
+                        if (isCallback) {
+                            rawMethod.removeModifiers(ModifierType.Abstract);
+                            rawMethod.setBody(block(stat(rawToObjectFollowedCall)));
+                        }
                     } else {
                         switch (returnType.type) {
                             case Pointer:
-                                if (returnType.isTypedPointer) {
-                                    followedCall = new New(nativeMethod.getValueType(), followedCall);
-                                } else {
-                                    Expression ptrExpr = expr(typeRef(org.bridj.Pointer.class));
-                                    Expression targetTypeExpr = result.typeConverter.typeLiteral(getSingleTypeParameter(nativeMethod.getValueType()));
-                                    if (targetTypeExpr == null || (returnType.targetTypeConversion != null && returnType.targetTypeConversion.type == ConvType.Void)) {
-                                        followedCall = methodCall(ptrExpr, "pointerToAddress", followedCall);
-                                    } else {
-                                        followedCall = methodCall(ptrExpr, "pointerToAddress", followedCall, targetTypeExpr);
-                                    }
-                                }
+                                objectToRawFollowedCall = createPointerToAddressExpression(returnType, objectToRawFollowedCall);
+                                rawToObjectFollowedCall = createGetPeerExpression(rawToObjectFollowedCall);
+//                                if (returnType.isTypedPointer) {
+//                                    objectToRawFollowedCall = new New(nativeMethod.getValueType(), objectToRawFollowedCall);
+//                                } else {
+//                                    Expression ptrExpr = expr(typeRef(org.bridj.Pointer.class));
+//                                    Expression targetTypeExpr = result.typeConverter.typeLiteral(getSingleTypeParameter(nativeMethod.getValueType()));
+//                                    if (targetTypeExpr == null || (returnType.targetTypeConversion != null && returnType.targetTypeConversion.type == ConvType.Void)) {
+//                                        objectToRawFollowedCall = methodCall(ptrExpr, "pointerToAddress", objectToRawFollowedCall);
+//                                    } else {
+//                                        objectToRawFollowedCall = methodCall(ptrExpr, "pointerToAddress", objectToRawFollowedCall, targetTypeExpr);
+//                                    }
+//                                }
                                 break;
                             case Enum:
-                                followedCall = methodCall(expr(typeRef(org.bridj.FlagSet.class)), "fromValue", followedCall, result.typeConverter.typeLiteral(getSingleTypeParameter(nativeMethod.getValueType())));
+                                objectToRawFollowedCall = createEnumExpression(returnType, objectToRawFollowedCall);
+                                rawToObjectFollowedCall = createGetEnumValueExpression(rawToObjectFollowedCall);
+//                                objectToRawFollowedCall = methodCall(expr(typeRef(org.bridj.FlagSet.class)), "fromValue", objectToRawFollowedCall, result.typeConverter.typeLiteral(getSingleTypeParameter(nativeMethod.getValueType())));
                                 break;
                             case NativeLong:
                             case NativeSize:
                                 if (!rawMethod.getValueType().toString().equals("long")) {
-                                    followedCall = new New(nativeMethod.getValueType().clone(), followedCall);
+                                    objectToRawFollowedCall = new New(nativeMethod.getValueType().clone(), objectToRawFollowedCall);
+                                    rawToObjectFollowedCall = createGetIntegralValueExpression(rawToObjectFollowedCall);
                                 }
                             default:
                                 break;
                         }
-                        nativeMethod.setBody(block(new Statement.Return(followedCall)));
+                        nativeMethod.setBody(block(new Statement.Return(objectToRawFollowedCall)));
+                        if (isCallback) {
+                            rawMethod.removeModifiers(ModifierType.Abstract);
+                            rawMethod.setBody(block(new Statement.Return(rawToObjectFollowedCall)));
+                        }
                     }
                     forwardedToRaw = true;
                 }
@@ -381,8 +402,6 @@ public class BridJDeclarationsConverter extends DeclarationsConverter {
                 if (isOptional && !isCallback) {
                     nativeMethod.addAnnotation(new Annotation(typeRef(Optional.class)));
                 }
-            } else if (isCallback) {
-                nativeMethod.addModifiers(ModifierType.Final);
             }
         } else {
             nativeMethod.setBody(convertedBody);
@@ -406,6 +425,35 @@ public class BridJDeclarationsConverter extends DeclarationsConverter {
             }
         }
 
+    }
+    
+    private Expression createGetEnumValueExpression(Expression value) {
+        return cast(typeRef(int.class), methodCall(value, "value"));
+    }
+    private Expression createGetIntegralValueExpression(Expression value) {
+        return methodCall(value, "longValue");
+    }
+    
+    private Expression createGetPeerExpression(Expression value) {
+        return methodCall(expr(typeRef(org.bridj.Pointer.class)), "getPeer", value);
+    }
+    private Expression createPointerToAddressExpression(NL4JConversion pointerType, Expression value) {
+        TypeRef tr = pointerType.getTypeRef(false);
+        if (pointerType.isTypedPointer) {
+            return new New(tr, value);
+        } else {
+            Expression ptrExpr = expr(typeRef(org.bridj.Pointer.class));
+            Expression targetTypeExpr = result.typeConverter.typeLiteral(getSingleTypeParameter(tr));
+            if (targetTypeExpr == null || (pointerType.targetTypeConversion != null && pointerType.targetTypeConversion.type == ConvType.Void)) {
+                return methodCall(ptrExpr, "pointerToAddress", value);
+            } else {
+                return methodCall(ptrExpr, "pointerToAddress", value, targetTypeExpr);
+            }
+        }
+    }
+    private Expression createEnumExpression(NL4JConversion enumType, Expression value) {
+        TypeRef tr = enumType.getTypeRef(false);
+        return methodCall(expr(typeRef(org.bridj.FlagSet.class)), "fromValue", value, result.typeConverter.typeLiteral(getSingleTypeParameter(tr)));
     }
 
     private void fillIn(Signatures signatures, Identifier functionName, Function nativeMethod, NL4JConversion returnType, List<NL4JConversion> paramTypes, List<String> paramNames, Identifier varArgType, String varArgName, boolean isCallback, boolean useRawTypes) {
