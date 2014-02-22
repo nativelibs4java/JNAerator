@@ -210,7 +210,10 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
     }
     
     public Expression typeLiteral(TypeRef c) {
-        if (c != null && c.toString().equals("?")) {
+        if (c == null) {
+            return null;
+        }
+        if (c.toString().equals("?")) {
             return Constant.newNull();
         }
         return memberRef(expr(c), MemberRefStyle.Dot, "class");
