@@ -1,6 +1,7 @@
 enum E { A, B };
 typedef void* (*F1)(void*, E);
 typedef void* (*F2)();
+typedef void* (*F3)(int** pptr);
 
 --
 #runtime(BridJ)

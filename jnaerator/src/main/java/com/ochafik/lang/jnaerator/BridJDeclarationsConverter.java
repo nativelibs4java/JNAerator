@@ -447,7 +447,8 @@ public class BridJDeclarationsConverter extends DeclarationsConverter {
             if (targetTypeExpr == null || (pointerType.targetTypeConversion != null && pointerType.targetTypeConversion.type == ConvType.Void)) {
                 return methodCall(ptrExpr, "pointerToAddress", value);
             } else {
-                return methodCall(ptrExpr, "pointerToAddress", value, targetTypeExpr);
+                // Cast to unparameterized Pointer to avoid weird cast cases
+                return cast(typeRef(org.bridj.Pointer.class), methodCall(ptrExpr, "pointerToAddress", value, targetTypeExpr));
             }
         }
     }
