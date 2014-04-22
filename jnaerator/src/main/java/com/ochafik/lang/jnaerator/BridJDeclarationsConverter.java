@@ -392,6 +392,10 @@ public class BridJDeclarationsConverter extends DeclarationsConverter {
                             rawMethod.removeModifiers(ModifierType.Abstract);
                             rawMethod.setBody(block(new Statement.Return(rawToObjectFollowedCall)));
                         }
+                        else if (function.getName() != null && !function.getName().equals(rawMethod.getName()))
+                        {
+                        	annotateActualName(rawMethod, function.getName());
+                        }
                     }
                     forwardedToRaw = true;
                 }
