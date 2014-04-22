@@ -208,10 +208,12 @@ public class BridJDeclarationsConverter extends DeclarationsConverter {
 
         addCallingConventionAnnotation(function, nativeMethod);
 
+        boolean annotatedActualName = false;
         if (function.getName() != null && !isCallback &&
             (!functionName.toString().equals(function.getName().toString()) || result.config.forceNames))
         {
             annotateActualName(nativeMethod, function.getName());
+            annotatedActualName = true;
         }
 
         Function rawMethod = nativeMethod.clone();
@@ -391,10 +393,11 @@ public class BridJDeclarationsConverter extends DeclarationsConverter {
                         if (isCallback) {
                             rawMethod.removeModifiers(ModifierType.Abstract);
                             rawMethod.setBody(block(new Statement.Return(rawToObjectFollowedCall)));
-                        }
-                        else if (function.getName() != null && !function.getName().equals(rawMethod.getName()))
-                        {
+                        } else if (function.getName() != null &&
+                                    !function.getName().equals(rawMethod.getName()) &&
+                                    !annotatedActualName) {
                         	annotateActualName(rawMethod, function.getName());
+                            annotatedActualName = true;
                         }
                     }
                     forwardedToRaw = true;
