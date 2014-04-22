@@ -1,6 +1,11 @@
 long l(void);
 short s(void);
 i(void);
+
+int func1(int, int []);
+int func2(int, int b []);
+int func3(int, int [2]);
+int func4(int, int b [2]);
 --
 #runtime(BridJ)
 import test.*;
@@ -12,3 +17,8 @@ import com.ochafik.lang.jnaerator.runtime.*;
 long l = l();
 short s = s();
 int i = i();
+
+i = func1(1, (Pointer<Integer>) null);
+i = func2(1, (Pointer<Integer>) null);
+i = func3(1, (Pointer<Integer>) null);
+i = func4(1, (Pointer<Integer>) null);

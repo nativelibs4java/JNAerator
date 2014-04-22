@@ -1241,14 +1241,15 @@ typeMutator returns [TypeMutator mutator]
     '^' { 
       $mutator = TypeMutator.HAT; 
     } |
-    '[' ']'  { $mutator = TypeMutator.BRACKETS; }
-  ;
-
-arrayTypeMutator returns [TypeMutator mutator]
-  :  '[' 
-      expression {
-        $mutator = TypeMutator.array($expression.expr); 
-      }      
+    '[' 
+      (
+      	  expression {
+	        $mutator = TypeMutator.array($expression.expr); 
+	      } | 
+	      {
+	      	$mutator = TypeMutator.BRACKETS;
+	      } 
+      )      
     ']' 
   ;
 
