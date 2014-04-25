@@ -322,19 +322,22 @@ public class JNADeclarationsConverter extends DeclarationsConverter {
                     bufSign = alternativeOutputs ? natStructFunc.computeSignature(SignatureType.JavaStyle) : null;
 
             if (signatures == null || signatures.addMethod(natSign)) {
-                if (alternativeOutputs && !primOrBufSign.equals(natSign)) {
-                    if (!result.config.noComments) {
-                        if (primOrBufSign.equals(bufSign)) {
-                            natFunc.addToCommentBefore(Arrays.asList("@deprecated use the safer method {@link #" + primOrBufSign + "} instead"));
-                        } else {
-                            natFunc.addToCommentBefore(Arrays.asList("@deprecated use the safer methods {@link #" + primOrBufSign + "} and {@link #" + bufSign + "} instead"));
+                boolean isDeprecated = alternativeOutputs && !primOrBufSign.equals(natSign);
+                if (!(isDeprecated && result.config.skipDeprecated)) {
+                    if (isDeprecated) {
+                        if (!result.config.noComments) {
+                            if (primOrBufSign.equals(bufSign)) {
+                                natFunc.addToCommentBefore(Arrays.asList("@deprecated use the safer method {@link #" + primOrBufSign + "} instead"));
+                            } else {
+                                natFunc.addToCommentBefore(Arrays.asList("@deprecated use the safer methods {@link #" + primOrBufSign + "} and {@link #" + bufSign + "} instead"));
+                            }
                         }
+                        natFunc.addAnnotation(new Annotation(Deprecated.class));
                     }
-                    natFunc.addAnnotation(new Annotation(Deprecated.class));
+                    collectParamComments(natFunc);
+                    implementations.addDeclaration(natFunc);
+                    alternatives.add(cleanClone(natFunc));
                 }
-                collectParamComments(natFunc);
-                implementations.addDeclaration(natFunc);
-                alternatives.add(cleanClone(natFunc));
             }
 
             if (alternativeOutputs) {

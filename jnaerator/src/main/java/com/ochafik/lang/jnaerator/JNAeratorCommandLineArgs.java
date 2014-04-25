@@ -225,6 +225,7 @@ public class JNAeratorCommandLineArgs {
         + "Note that a special hack is done for library \"c\" on Windows systems : the output name is set to \"msvcrt\" instead of \"c\".\n",
         new ArgDef(Type.String, "libName")),
         DefaultLibrary("-defaultLibrary", "Name of output library for elements declared in files not covered by a ${CurrentLibrary} switch", new ArgDef(Type.String, "libName")),
+        SkipDeprecated("-skipDeprecated", "Don't generate members that would be tagged as @Deprecated"),
         Help("-?-h(?:elp)?", "Show command line arguments help"),
         EntryName("-entryClass", "Generate a class _entryclassName.EntryClassName_ that will contain all of the jnaerated libraries instances. User code will just need to static import or derive from this class to access to the instances (has no effect for BridJ runtime).", new ArgDef(Type.String, "entryClassName")),
         //		Undefine(			"-U(.*)?",				"Undefine a preprocessor symbol before ", new ArgDef(Type.String, "entryClassName")),

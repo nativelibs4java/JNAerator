@@ -387,6 +387,7 @@ public class JNAeratorConfig {
     public boolean useJNADirectCalls;
     public boolean limitComments, noComments;
     public boolean putTopStructsInSeparateFiles = true;
+    public boolean skipDeprecated;
     //public boolean bundleRuntime = true;
     public boolean genRawBindings = true;
     public boolean publicRawBindings;
