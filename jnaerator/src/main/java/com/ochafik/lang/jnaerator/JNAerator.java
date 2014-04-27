@@ -311,6 +311,9 @@ public class JNAerator {
                         case COM:
                             config.microsoftCOM = true;
                             break;
+                        case ForceStringSignatures:
+                            config.charPtrAsString = true;
+                            break;
                         case NoStringReturns:
                             config.stringifyConstCStringReturnValues = false;
                             break;

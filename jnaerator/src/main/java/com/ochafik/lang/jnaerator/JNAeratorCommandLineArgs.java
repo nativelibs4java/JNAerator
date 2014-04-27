@@ -197,6 +197,7 @@ public class JNAeratorCommandLineArgs {
         ExtractDeclarations("-extractDeclarations", "Extract current library's declarations to an interface with the provided simple name (will be in same package as library implementation class); BridJ-specific", new ArgDef(Type.String, "interfaceSimpleClassName")),
         ScalaOut("-scalaOut", "[Experimental] Output Scala wrappers (callbacks implicits...)", new ArgDef(Type.OutputDir, "outDir")),
         NoStringReturns("-noStringReturns", "Prevent const char* and const wchar_t* return types from being converted to String and WString."),
+        ForceStringSignatures("-forceStringSignatures", "Force String and String[] signatures for char* and char** params (JNA runtime only)."),
         Project("-project", "Read Visual Studio 2008 project or solution file and use the configuration specified (e.g. \"Release|Win32\").", new ArgDef(Type.ExistingFile, "solutionFile"), new ArgDef(Type.String, "\"Config|Platform\"")),
         NoAuto("-noAuto", "No auto-configuration of preprocessor symbols and paths"),
         COM("-com", "Generate Microsoft COM (C++) bindings."),
