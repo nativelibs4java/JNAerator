@@ -887,10 +887,10 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
             }
         }
     }
-    Pattern wstringPat = Pattern.compile("(__)?const wchar_t\\*"),
-            stringPat = Pattern.compile("(__)?const char\\*"),
-            wstringPtrPtrPat = Pattern.compile("(__)?const wchar_t\\*\\*"),
-            stringPtrPtrPat = Pattern.compile("(__)?const char\\*\\*");
+    Pattern wstringPat = Pattern.compile("((__)?const ){1,2}wchar_t\\*"),
+            stringPat = Pattern.compile("((__)?const ){1,2}char\\*"),
+            wstringPtrPtrPat = Pattern.compile("((__)?const ){1,2}wchar_t\\*\\*"),
+            stringPtrPtrPat = Pattern.compile("((__)?const ){1,2}char\\*\\*");
 
     protected boolean isString(String typeRefAsString, boolean wide) {
         if (wide) {

@@ -1,4 +1,5 @@
 void CopyBytes(char* dest, const char* source, const wchar_t* wsource, size_t n, const int* intArray);
+void Foo(const char* bar, const char** bars, const char * const * bazz);
 int process(void* ptr);
 --
 #runtime(JNAerator)
@@ -10,5 +11,7 @@ import com.ochafik.lang.jnaerator.runtime.*;
 
 INSTANCE.CopyBytes((Pointer)null, (Pointer)null, (CharByReference)null, (NativeSize)null, (IntByReference)null);
 INSTANCE.CopyBytes((ByteBuffer)null, (String)null, (WString)null, (NativeSize)null, (int[])null);
+
+INSTANCE.Foo((String)null, (String[])null, (String[])null);
 
 INSTANCE.process((Pointer)null);
