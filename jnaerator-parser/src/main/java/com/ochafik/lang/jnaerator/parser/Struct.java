@@ -205,4 +205,9 @@ public class Struct extends TypeRef.TaggedTypeRef implements DeclarationsHolder 
 	public void setParents(SimpleTypeRef... ns) {
 		setParents(Arrays.asList(ns));
 	}
+
+    @Override
+    public DeclarationsHolder resolveHolder() {
+        return this;
+    }
 }

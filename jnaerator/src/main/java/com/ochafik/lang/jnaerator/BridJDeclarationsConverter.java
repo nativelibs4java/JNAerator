@@ -187,7 +187,7 @@ public class BridJDeclarationsConverter extends DeclarationsConverter {
             DeclarationsHolder declarations, DeclarationsHolder implementations, Identifier libraryClassName, 
             String sig, Identifier functionName, String library, int iConstructor) throws UnsupportedConversionException {
         assert implementations != null;
-        boolean extractingDeclarations = declarations != null && implementations != declarations;
+        boolean extractingDeclarations = declarations != null && declarations.resolveHolder() != implementations.resolveHolder();
         Element parent = function.getParentElement();
         MemberVisibility visibility = function.getVisibility();
         boolean isPublic = visibility == MemberVisibility.Public || function.hasModifier(ModifierType.Public);

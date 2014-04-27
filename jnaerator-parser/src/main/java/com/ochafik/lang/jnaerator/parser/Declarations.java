@@ -85,4 +85,9 @@ public class Declarations extends Declaration implements DeclarationsHolder {
 			return true;
 		return super.replaceChild(child, by);
 	}
+
+    @Override
+    public DeclarationsHolder resolveHolder() {
+        return this;
+    }
 }

@@ -515,10 +515,15 @@ public abstract class DeclarationsConverter {
                 return implementations.getDeclarations();
             }
 
+            @Override
             public Identifier getResolvedJavaIdentifier() {
                 return implementations.getResolvedJavaIdentifier();
             }
-            
+
+            @Override
+            public DeclarationsHolder resolveHolder() {
+                return implementations.resolveHolder();
+            }
         }
                 : implementations;
 

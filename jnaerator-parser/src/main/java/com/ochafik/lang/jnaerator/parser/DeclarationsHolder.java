@@ -25,6 +25,9 @@ public interface DeclarationsHolder {
 	void addDeclaration(Declaration d);
 	List<Declaration> getDeclarations();
 	Identifier getResolvedJavaIdentifier();
+
+    /** @return any proxied holder for identity comparison, or this if there's no proxied holder. */
+    DeclarationsHolder resolveHolder();
 	
 	public static class ListWrapper implements DeclarationsHolder {
 		public ListWrapper(List<Declaration> list) {
@@ -33,16 +36,24 @@ public interface DeclarationsHolder {
 
 		List<Declaration> list;
 
-		public void addDeclaration(Declaration d) {
+		@Override
+        public void addDeclaration(Declaration d) {
 			list.add(d);
 		}
 
-		public List<Declaration> getDeclarations() {
+		@Override
+        public List<Declaration> getDeclarations() {
 			return Collections.unmodifiableList(list);
 		}
 
+        @Override
         public Identifier getResolvedJavaIdentifier() {
             return null;
+        }
+
+        @Override
+        public DeclarationsHolder resolveHolder() {
+            return this;
         }
 	}
 }

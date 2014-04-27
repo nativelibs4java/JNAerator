@@ -1,0 +1,3 @@
+
+//void f(const char**, size_t);
+void f();

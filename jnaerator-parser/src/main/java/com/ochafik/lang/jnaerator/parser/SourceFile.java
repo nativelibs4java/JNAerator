@@ -108,4 +108,9 @@ public class SourceFile extends Element implements DeclarationsHolder {
 	public String getLibrary() {
 		return library;
 	}
+
+    @Override
+    public DeclarationsHolder resolveHolder() {
+        return this;
+    }
 }
