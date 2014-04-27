@@ -771,6 +771,7 @@ public class BridJDeclarationsConverter extends DeclarationsConverter {
 //			convDecl.importDetails(valueType, false);
 //			valueType.stripDetails();
         convDecl.moveAllCommentsBefore();
+        convDecl.deDioxygenizeCommentBefore();
 
         convDecl.setName(ident(name));
 

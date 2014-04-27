@@ -297,33 +297,45 @@ import static com.ochafik.lang.jnaerator.parser.StoredDeclarations.*;
     return getCommentBefore(getTokenStream().index());
   }
   protected String getCommentBefore(int index) {
-    String comment = null;
-    boolean toleratedNewLine = false;
     while (index > 0) {
       Token token = getTokenStream().get(--index);
-      if (token.getType() == COMMENT || token.getType() == LINE_COMMENT) {
-        //if (comment != null)
-        //return comment;
-        if (comment != null && comment.endsWith("\n") && toleratedNewLine)
-              return null;
-        if (comment != null)
-          return comment;
-        comment = token.getText();
-          if (comment != null && comment.endsWith("\n") && toleratedNewLine)
-              return null;
-      } else if (token.getType() == WS) {
-        if (token.getText().indexOf("\n") >= 0) {
-          if (comment != null)
+      switch (token.getType()) {
+        case COMMENT:
+        case LINE_COMMENT:
+          String comment = token.getText();
+          while (index > 0) {
+            Token prevToken = getTokenStream().get(--index);
+            switch (prevToken.getType()) {
+              case COMMENT:
+              case LINE_COMMENT:
+                if (prevToken.getText().indexOf("\n") >= 0) {
+                  return comment;
+                }
+                break;
+              default:
+                if (getLine(prevToken) < getLine(token)) {
+                  return comment;
+                } else {
+                  return null;
+                }
+            }
+          }
+          if (index == 0) {
             return comment;
-          else if (toleratedNewLine)
-            return null;
-          else
-            toleratedNewLine = true;
-        }
-      } else
-        return null;
+          }
+          break;
+        case SEMICOLON:
+        case LBRACE:
+        case RBRACE:
+        case LPAREN:
+        case RPAREN:
+        case COMMA:
+          return null;
+        default:
+          break;
+      }
     }
-    return comment;
+    return null;
   }
   protected String getCommentAfterOnSameLine(int index, String forbiddenChars) {
     int size = getTokenStream().size();
@@ -486,8 +498,8 @@ scope Symbols;
         if ($sourceFile.getElementFile() == null)
           $sourceFile.setElementFile(getFile());
       } |
-      { next("extern") }?=> IDENTIFIER STRING '{' |
-      '}'
+      { next("extern") }?=> IDENTIFIER STRING LBRACE |
+      RBRACE
     )* 
      EOF
    ;
@@ -499,14 +511,14 @@ externDeclarations returns [ExternDeclarations declaration]
       $declaration.setLanguage($STRING.text);
     }
     (
-      '{' 
+      LBRACE 
         (
           ed=declaration { 
             $declaration.addDeclaration($ed.declaration); 
           } |
           lineDirective
         )* 
-      '}' |
+      RBRACE |
       dd=declaration { 
         $declaration.addDeclaration($dd.declaration); 
         }
@@ -560,10 +572,10 @@ scope ModContext;
         { next("extern") }?=> externDeclarations {
           $declaration = $externDeclarations.declaration; 
         } |
-        { next("using") }?=> IDENTIFIER qualifiedIdentifier ';' {
+        { next("using") }?=> IDENTIFIER qualifiedIdentifier SEMICOLON {
           // TODO
         } |
-        varDecl ';' { 
+        varDecl SEMICOLON { 
           $declaration = $varDecl.decl; 
         } |
         objCClassDef { 
@@ -575,11 +587,11 @@ scope ModContext;
         forwardClassDecl {
           $declaration = new Declarations($forwardClassDecl.declarations); 
         } |
-        //nonMutableTypeRef ';' | // TODO
+        //nonMutableTypeRef SEMICOLON | // TODO
         namespaceDecl {
           $declaration = $namespaceDecl.namespace;
         }// | 
-        //';' */// allow isolated semi-colons
+        //SEMICOLON */// allow isolated semi-colons
       )
       {
         String commentAfter = getCommentAfterOnSameLine($startTokenIndex, null);
@@ -594,7 +606,7 @@ scope ModContext;
   
 namespaceDecl returns [Namespace namespace]
   :
-    'namespace' ns=IDENTIFIER '{' {
+    'namespace' ns=IDENTIFIER LBRACE {
       $namespace = new Namespace();
       $namespace.setName(new SimpleIdentifier($ns.text));
     }
@@ -604,7 +616,7 @@ namespaceDecl returns [Namespace namespace]
       } |
       lineDirective
     )*
-    '}'
+    RBRACE
   ;
   
 forwardClassDecl returns [List<Declaration> declarations]
@@ -614,13 +626,13 @@ forwardClassDecl returns [List<Declaration> declarations]
       $declarations.add(decl(Struct.forwardDecl(new SimpleIdentifier($n1.text), Struct.Type.ObjCClass))); 
       defineTypeIdentifierInParentScope($n1.text);
     }
-    (',' 
+    (COMMA 
     nx=IDENTIFIER { 
       $declarations.add(decl(Struct.forwardDecl(new SimpleIdentifier($nx.text), Struct.Type.ObjCClass))); 
       defineTypeIdentifierInParentScope($nx.text);
     }
     )*
-    ';' 
+    SEMICOLON 
   ;
   
 functionPointerVarDecl  returns [Declaration decl]
@@ -630,7 +642,7 @@ functionPointerVarDecl  returns [Declaration decl]
     }? {
       $decl = new FunctionPointerDeclaration(((FunctionSignature)$tr.type));
     }
-    ';'
+    SEMICOLON
   ;
   
 enumItem returns [Enum.EnumItem item]
@@ -649,21 +661,21 @@ scope ModContext;
             $e.setType(Enum.Type.C);
       $e.setForwardDeclaration(false); 
     }
-    '{' 
+    LBRACE 
       (  
         i1=enumItem { 
           if ($i1.text != null)
             $e.addItem($i1.item); 
         }
         (
-          ',' 
+          COMMA 
           (ix=enumItem { 
             if ($ix.text != null)
               $e.addItem($ix.item); 
           })?
         )*
       )?
-    '}'
+    RBRACE
   ;
 enumCore returns [Enum e]
 @init {
@@ -726,7 +738,7 @@ objCClassDef returns [Struct struct]
         }
       ) |
       (
-        '(' categoryName=IDENTIFIER ')' {
+        LPAREN categoryName=IDENTIFIER RPAREN {
           $struct.setCategoryName($categoryName.text);
         }
       ) |
@@ -735,26 +747,26 @@ objCClassDef returns [Struct struct]
       '<' (
         p1=IDENTIFIER { $struct.addProtocol(new SimpleIdentifier($p1.text)); }
         (
-          ',' 
+          COMMA 
           px=IDENTIFIER { $struct.addProtocol(new SimpleIdentifier($px.text)); }
         )*
       )? '>'
     )?
     (
-      '{'
+      LBRACE
       (
         '@package' | // TODO keep in AST 
         '@public' { $struct.setNextMemberVisibility(Struct.MemberVisibility.Public); } | 
         '@private' { $struct.setNextMemberVisibility(Struct.MemberVisibility.Private); } | 
         '@protected' { $struct.setNextMemberVisibility(Struct.MemberVisibility.Protected); } |
         (
-          functionPointerOrSimpleVarDecl ';' {
+          functionPointerOrSimpleVarDecl SEMICOLON {
             $struct.addDeclaration($functionPointerOrSimpleVarDecl.decl);
           }
         ) |
         lineDirective
       )* 
-      '}'
+      RBRACE
     )?
     { $struct.setNextMemberVisibility(Struct.MemberVisibility.Public); }
     (
@@ -769,7 +781,7 @@ objCClassDef returns [Struct struct]
       typeDef {
         $struct.addDeclaration($typeDef.typeDef); 
       } |
-      vd=varDecl ';' {
+      vd=varDecl SEMICOLON {
         $struct.addDeclaration($vd.decl);
       } |
       lineDirective
@@ -809,18 +821,18 @@ objCPropertyDecl returns [Property property]
   :
     '@property' 
     (
-      '('
+      LPAREN
           a1=objCPropertyAttribute {
             modifiers.add($a1.modifier);
           }
           (
-            ',' ax=objCPropertyAttribute {
+            COMMA ax=objCPropertyAttribute {
               modifiers.add($ax.modifier);
             }
           )*
-      ')'
+      RPAREN
     )?
-    functionPointerOrSimpleVarDecl ';' {
+    functionPointerOrSimpleVarDecl SEMICOLON {
       $property = new Property($functionPointerOrSimpleVarDecl.decl);
     }
   ;
@@ -847,25 +859,25 @@ scope ModContext;
     )
     (
       // Optional return type
-      '('
+      LPAREN
         returnTypeRef=mutableTypeRef? { 
           $function.setValueType($returnTypeRef.type); 
         }
-      ')'
+      RPAREN
     )?
     methodName=(IDENTIFIER | 'class') { 
       $function.setName(new SimpleIdentifier($methodName.text)); 
       $function.setCommentAfter(getCommentAfterOnSameLine($methodName.getTokenIndex(), null));
     } 
     (
-      ':' '(' argType1=mutableTypeRef ')' argName1=IDENTIFIER {
+      ':' LPAREN argType1=mutableTypeRef RPAREN argName1=IDENTIFIER {
         Arg arg = new Arg($argName1.text, $argType1.type);
         arg.setSelector($methodName.text);
         $function.addArg(arg);
       }
       (
         sel=IDENTIFIER ':' 
-        '(' argType=mutableTypeRef ')' 
+        LPAREN argType=mutableTypeRef RPAREN 
         argName=IDENTIFIER {
           Arg arg = new Arg($argName.text, $argType.type);
           arg.setSelector($sel.text);
@@ -873,12 +885,12 @@ scope ModContext;
         }
       )*
       (
-        ',' '...' {
+        COMMA '...' {
           $function.addArg(Arg.createVarArgs());
         }
       )?
     )?
-    ';'
+    SEMICOLON
   ;
 
 structBody returns [Struct struct]
@@ -892,7 +904,7 @@ scope Symbols;
       $struct = new Struct();
       $struct.setForwardDeclaration(false); 
     }
-    '{'
+    LBRACE
       (
         (
           { next("public") }? IDENTIFIER { $struct.setNextMemberVisibility(Struct.MemberVisibility.Public); } | 
@@ -903,7 +915,7 @@ scope Symbols;
           friendDecl=declaration {
             $struct.addDeclaration(new FriendDeclaration(friendDecl.declaration));
           } |
-          friendVar=varDecl ';' {
+          friendVar=varDecl SEMICOLON {
             $struct.addDeclaration(new FriendDeclaration(decl.declaration));
           }
         ) |
@@ -927,12 +939,12 @@ scope Symbols;
         decl=declaration {
           $struct.addDeclaration($decl.declaration);
         } |
-        fv=varDecl ';' {
+        fv=varDecl SEMICOLON {
           $struct.addDeclaration($fv.decl);
         } |
         lineDirective
       )*
-    '}'
+    RBRACE
   ;
 
 structCore returns [Struct struct]
@@ -1068,32 +1080,32 @@ functionDeclarationSuffix returns [List<Arg> args, List<Modifier> postModifiers,
       { next("throw") }? IDENTIFIER {
         $thrown = new ArrayList<TypeRef>();
       }
-      '('
+      LPAREN
         (
           t1=mutableTypeRef {
             $thrown.add($t1.type);
           }
           (
-            ','
+            COMMA
             tx=mutableTypeRef {
               $thrown.add($tx.type);
             }
           )*
         )?
-      ')'
+      RPAREN
     )?          
     (
       ':'
       i1=constructorInitializer { $initializers.add($i1.init); }
       (
-        ',' ix=constructorInitializer { $initializers.add($ix.init); }
+        COMMA ix=constructorInitializer { $initializers.add($ix.init); }
       )*
     )?
     (  
       ( 
         { next(2, "0") }? '=' DECIMAL_NUMBER // TODO mark in DOM
       )?
-      ';' |
+      SEMICOLON |
       statementsBlock {
         $body = $statementsBlock.statement;
       }
@@ -1103,9 +1115,9 @@ constructorInitializer returns [FunctionCall init]
   :  qn=qualifiedCppFunctionName {
       $init = new FunctionCall(new TypeRefExpression(new SimpleTypeRef($qn.identifier)));
     }  
-    '(' (
+    LPAREN (
       el=topLevelExprList { $init.addArguments($el.exprs); }
-    )? ')'
+    )? RPAREN
   ;
   
 modifiers returns [List<Modifier> modifiers]
@@ -1124,10 +1136,10 @@ modifiers returns [List<Modifier> modifiers]
 pragmaContent  :  
     //{ next("__pragma") }?=> pragmaContent
       // MSVC-specific : parse as token soup for now
-      IDENTIFIER '('
-        (IDENTIFIER | constant | ',' | ':' | '(' (IDENTIFIER | constant | ',' | ':')* ')')*
-      ')'
-      ';'?
+      IDENTIFIER LPAREN
+        (IDENTIFIER | constant | COMMA | ':' | LPAREN (IDENTIFIER | constant | COMMA | ':')* RPAREN)*
+      RPAREN
+      SEMICOLON?
     //) 
   ;
 
@@ -1144,10 +1156,10 @@ modifier returns [List<Modifier> modifiers, String asmName]
     } |
     //{ next("__declspec", "__attribute__") }?=> IDENTIFIER
     ( '__declspec' | '__attribute__' )
-    '('+ (  
+    LPAREN+ (  
       { next(ModifierKind.Extended) }? m=IDENTIFIER 
       (
-        '(' arg=constant ')' {
+        LPAREN arg=constant RPAREN {
           $modifiers.add(new ValuedModifier(ModifierType.parseModifier($m.text), $arg.constant));
         } |
         {
@@ -1156,8 +1168,8 @@ modifier returns [List<Modifier> modifiers, String asmName]
       )
       //extendedModifiers { $modifiers.addAll($extendedModifiers.modifiers); }
     
-    )* ')'+ |
-    { next("__asm") }?=> IDENTIFIER '(' ( 
+    )* RPAREN+ |
+    { next("__asm") }?=> IDENTIFIER LPAREN ( 
       an=STRING { 
         String s = String.valueOf(Constant.parseString($an.text).getValue());
         if ($asmName == null) 
@@ -1165,13 +1177,13 @@ modifier returns [List<Modifier> modifiers, String asmName]
         else 
           $asmName += s; 
       } 
-    )+ ')' |
+    )+ RPAREN |
     { next("__success") }?=>
-    IDENTIFIER '(' 'return' binaryOp expression  ')' |
+    IDENTIFIER LPAREN 'return' binaryOp expression  RPAREN |
     
     // TODO handle it properly @see http://blogs.msdn.com/staticdrivertools/archive/2008/11/06/annotating-for-success.aspx
     { next(ModifierKind.VCAnnotation1Arg, ModifierKind.VCAnnotation2Args) }?=>
-    m=IDENTIFIER '(' x=constant ')' {
+    m=IDENTIFIER LPAREN x=constant RPAREN {
       $modifiers.add(new ValuedModifier(ModifierType.parseModifier($m.text), $x.constant));
     }
   ;
@@ -1186,7 +1198,7 @@ scope ModContext;
     (
       { next(ModifierKind.Extended) }? m=IDENTIFIER 
       (
-        '(' arg=constant ')' {
+        LPAREN arg=constant RPAREN {
           $modifiers.add(new ValuedModifier(ModifierType.parseModifier($m.text), $arg.constant));
         } |
         {
@@ -1265,7 +1277,7 @@ templatePrefix returns [Template template]
         $template.addArg($t1.arg);
       }
       (
-        ',' tx=templateArgDecl {
+        COMMA tx=templateArgDecl {
           $template.addArg($tx.arg);
         }
       )* 
@@ -1294,7 +1306,7 @@ templateArgDecl returns [Arg arg]
   ;  
   
 functionSignatureSuffix returns [FunctionSignature signature, PointerStyle pointerStyle]
-  :  tk='(' {
+  :  tk=LPAREN {
       $signature = mark(new FunctionSignature(new Function(Function.Type.CFunction, null, null)), getLine($tk));
       $signature.getFunction().setType(Function.Type.CFunction);
     }
@@ -1320,23 +1332,23 @@ functionSignatureSuffix returns [FunctionSignature signature, PointerStyle point
         $signature.getFunction().setName(new SimpleIdentifier($IDENTIFIER.text));
       }
     )?
-    ')'
-    '(' (
+    RPAREN
+    LPAREN (
       a1=argDef { 
         if (!$a1.text.equals("void"))
           $signature.getFunction().addArg($a1.arg); 
       }
       (
-        ',' 
+        COMMA 
         ax=argDef { 
           $signature.getFunction().addArg($ax.arg); 
         }
       )*
-    )? ')'
+    )? RPAREN
   ;
 
 //functionSignatureSuffixNoName returns [FunctionSignature signature]
-//  :  tk='(' m=modifiers? pt=('*' | '^') ')' { 
+//  :  tk=LPAREN m=modifiers? pt=('*' | '^') RPAREN { 
 //      $signature = mark(new FunctionSignature(new Function(Function.Type.CFunction, null, null)), getLine($tk));
 //      if ($pt.text.equals("^"))
 //        $signature.setType(FunctionSignature.Type.ObjCBlock);
@@ -1344,18 +1356,18 @@ functionSignatureSuffix returns [FunctionSignature signature, PointerStyle point
 //      if ($m.modifiers != null)
 //        $signature.getFunction().addModifiers($m.modifiers);
 //    }
-//    '(' (
+//    LPAREN (
 //      a1=argDef { 
 //        if (!$a1.text.equals("void"))
 //          ((FunctionSignature)$signature).getFunction().addArg($a1.arg); 
 //      }
 //      (
-//        ',' 
+//        COMMA 
 //        ax=argDef { 
 //          ((FunctionSignature)$signature).getFunction().addArg($ax.arg); 
 //        }
 //      )*
-//    )? ')'
+//    )? RPAREN
 //  ;
 
 mutableTypeRef returns [TypeRef type]
@@ -1437,14 +1449,14 @@ typeDef returns [TypeDef typeDef]
   }
 }
   :  'typedef'
-     varDecl ';' {
+     varDecl SEMICOLON {
        VariablesDeclaration vd = $varDecl.decl;
       $typeDef = new TypeDef(vd.getValueType(), vd.getDeclarators());
     }
   ;
   
 varDeclEOF returns [Declaration decl]
-  : varDecl ';' EOF { $decl = $varDecl.decl; }
+  : varDecl SEMICOLON EOF { $decl = $varDecl.decl; }
   ;
 
 declarationEOF returns [Declaration declaration]
@@ -1467,7 +1479,7 @@ objCProtocolRefList
   :  '<' 
     IDENTIFIER 
     (
-      ',' 
+      COMMA 
       IDENTIFIER
     )* 
     '>'
@@ -1492,7 +1504,7 @@ declaratorsList returns [List<Declarator> declarators]
       $declarators.add($d.decl); 
     }
     (
-      ',' 
+      COMMA 
       x=declaratorWithValue { 
         $declarators.add($x.decl); 
       }
@@ -1505,7 +1517,7 @@ directDeclarator returns [Declarator decl]
       { parseModifier(next()) == null }?=> IDENTIFIER {
         $decl = mark(new DirectDeclarator($IDENTIFIER.text), getLine($IDENTIFIER));
       } | 
-      '(' inner=declarator ')' {
+      LPAREN inner=declarator RPAREN {
         $decl = $inner.decl;
         if ($decl != null)
           $decl.setParenthesized(true);
@@ -1541,26 +1553,26 @@ argList returns [List<Arg> args, boolean isObjC]
       $args = new ArrayList<Arg>();
     }
     
-    op='(' 
+    op=LPAREN 
     (
       a1=argDef {
         if (!$a1.text.equals("void")) 
           $args.add($a1.arg);
       }
       (
-        ',' 
+        COMMA 
         ax=argDef {
           $args.add($ax.arg);
         }
       )*
       ( 
-        ',' '...' {
+        COMMA '...' {
           $isObjC = true;
           $args.add(Arg.createVarArgs());
         }
       )?
     )?
-    cp=')'
+    cp=RPAREN
   ;
 
 nonMutableTypeRef returns [TypeRef type]
@@ -1714,7 +1726,7 @@ simpleIdentifier returns [SimpleIdentifier identifier]
       '<' (
         a1=typeRefOrExpression { $identifier.addTemplateArgument($a1.expr); }
         (
-          ',' 
+          COMMA 
           ax=typeRefOrExpression  { $identifier.addTemplateArgument($ax.expr); }
         )* 
       )? '>'
@@ -1748,8 +1760,8 @@ operator returns [Expression.Operator op]
     '=' { $op = BinaryOperator.Assign; } |
     '->' '*' { $op = BinaryOperator.ArrowStar; } |
     '[' ']' { $op = BinaryOperator.SquareBrackets; } |
-    '(' ')' { $op = UnaryOperator.Parenthesis; } |
-    ',' { $op = BinaryOperator.Comma; } |
+    LPAREN RPAREN { $op = UnaryOperator.Parenthesis; } |
+    COMMA { $op = BinaryOperator.Comma; } |
     '->' { $op = BinaryOperator.Arrow; }
   ;
   
@@ -1768,7 +1780,7 @@ simpleCppFunctionName returns [SimpleIdentifier identifier]
   
 expressionsBlock returns [ExpressionsBlock expr]
   :
-    '{' { 
+    LBRACE { 
       $expr = new ExpressionsBlock();
     }
     (
@@ -1776,13 +1788,13 @@ expressionsBlock returns [ExpressionsBlock expr]
         $expr.addExpression($e1.expr);
       }
       (
-        ','
+        COMMA
         ex=expression {
           $expr.addExpression($ex.expr);
         }
       )*
     )?
-    '}'
+    RBRACE
   ;
         
         
@@ -1790,7 +1802,7 @@ baseExpression returns [Expression expr]
   :
     i=simpleIdentifier { $expr = new VariableRef($i.identifier); }  |
     constant { $expr = $constant.constant; } |
-    '(' expression ')' { 
+    LPAREN expression RPAREN { 
       $expr = $expression.expr; 
       if ($expr != null)
         $expr.setParenthesis(true);
@@ -1804,9 +1816,9 @@ baseExpression returns [Expression expr]
   
 selectorExpr returns [Expression expr]
   :  '@selector' 
-    '(' 
+    LPAREN 
     selectorName 
-    ')'
+    RPAREN
   ;
 
 selectorName
@@ -1815,16 +1827,16 @@ selectorName
 
 protocolExpr
   :  '@protocol'
-    '('
+    LPAREN
     IDENTIFIER
-    ')'
+    RPAREN
   ;
 
 encodingExpr
   :  '@encode' 
-    '('
+    LPAREN
     IDENTIFIER 
-    ')'
+    RPAREN
   ;
 
 assignmentExpr returns [Expression expr]
@@ -1934,9 +1946,9 @@ compareExpr returns [Expression expr]
   ;
 
 castExpr returns [Expression expr]
-  :  '(' tr=mutableTypeRef ')' (
+  :  LPAREN tr=mutableTypeRef RPAREN (
       inner=castExpr { $expr = new Cast($tr.type, $inner.expr); } |
-      '(' expression ( ',' expression ) + ')' // TODO OpenCL tuple cast 
+      LPAREN expression ( COMMA expression ) + RPAREN // TODO OpenCL tuple cast 
     ) | 
     e=unaryExpr { $expr = $e.expr; }
   ;
@@ -1944,7 +1956,7 @@ castExpr returns [Expression expr]
 unaryExpr returns [Expression expr] 
   :
     { next("sizeof") }? IDENTIFIER (
-      '(' tr=mutableTypeRef ')' {
+      LPAREN tr=mutableTypeRef RPAREN {
         $expr = new FunctionCall(varRef("sizeof"), new TypeRefExpression($tr.type));
       }
       //| unaryExpr // TODO check this !!!
@@ -1993,7 +2005,7 @@ postfixExpr returns [Expression expr]
       '[' expression ']' { 
         $expr = new ArrayAccess($expr, $expression.expr); 
       } |
-      '(' topLevelExprList? ')' {
+      LPAREN topLevelExprList? RPAREN {
         FunctionCall fc = new FunctionCall($expr);
         if ($topLevelExprList.exprs != null)
           for (Expression x : $topLevelExprList.exprs)
@@ -2023,7 +2035,7 @@ topLevelExprList returns [List<Expression> exprs]
     { $exprs = new ArrayList<Expression>(); }
     e=topLevelExpr { $exprs.add($e.expr); }
     (
-      ','
+      COMMA
       f=topLevelExpr { $exprs.add($f.expr); }
     )*
   ;
@@ -2049,23 +2061,23 @@ scope Symbols;
   $Symbols::typeIdentifiers = new HashSet<String>();
 }
   :  { $statement = new Block(); }
-    '{'
+    LBRACE
     (
       statement {
         $statement.addStatement($statement.stat);
       } |
       lineDirective
     )* 
-    '}' 
+    RBRACE 
   ;
   
 gccAsmInOut
   :
-    STRING '(' IDENTIFIER ')'
+    STRING LPAREN IDENTIFIER RPAREN
   ;
 gccAsmInOuts
   :
-    gccAsmInOut ( ',' gccAsmInOut )*
+    gccAsmInOut ( COMMA gccAsmInOut )*
   ;
   
 statement returns [Statement stat]
@@ -2076,14 +2088,14 @@ statement returns [Statement stat]
     // GCC inline asm (see http://ibiblio.org/gferg/ldp/GCC-Inline-Assembly-HOWTO.html)
      
     { next("__asm__", "asm") }?=> IDENTIFIER
-    ( { next("__volatile__", "volatile") }?=> IDENTIFIER )? '('
+    ( { next("__volatile__", "volatile") }?=> IDENTIFIER )? LPAREN
       STRING* ( ':' gccAsmInOuts? )*
-    ')' ';' ? |
+    RPAREN SEMICOLON ? |
     // MSVC inline asm soup
-    { next("__asm") }?=> IDENTIFIER '{'
-      ( expression | ',' )*
-    '}'|
-    { next("foreach") }?=> IDENTIFIER '(' varDecl { next("in") }? IDENTIFIER expression ')' statement { 
+    { next("__asm") }?=> IDENTIFIER LBRACE
+      ( expression | COMMA )*
+    RBRACE|
+    { next("foreach") }?=> IDENTIFIER LPAREN varDecl { next("in") }? IDENTIFIER expression RPAREN statement { 
       // TODO
     } |
     { next("delete") }?=> IDENTIFIER  (
@@ -2093,8 +2105,8 @@ statement returns [Statement stat]
       del=expression { 
         $stat = new Delete($del.expr, false); 
       }
-    ) ';' |
-    pe=postfixExpr ';' {
+    ) SEMICOLON |
+    pe=postfixExpr SEMICOLON {
       // Hack to make sure that f(x); is not parsed as a declaration !
       // Must stay before declaration.
       $stat = new ExpressionStatement($pe.expr); 
@@ -2102,39 +2114,39 @@ statement returns [Statement stat]
     declaration { 
       $stat = stat($declaration.declaration); 
     } |
-    es=expression ';' { 
+    es=expression SEMICOLON { 
       $stat = new ExpressionStatement($es.expr); 
     } |
-    rt='return' rex=expression? ';' { 
+    rt='return' rex=expression? SEMICOLON { 
       $stat = mark(new Return($rex.expr), getLine($rt));
     } |
     IDENTIFIER ':' | // label
-    'break' ';' |
-    'if' '(' ifTest=topLevelExpr ')' thn=statement ('else' els=statement)? { 
+    'break' SEMICOLON |
+    'if' LPAREN ifTest=topLevelExpr RPAREN thn=statement ('else' els=statement)? { 
       $stat = new Statement.If(ifTest.expr, thn, els);
     } | 
-    'while' '(' whileTest=topLevelExpr ')' wh=statement { 
+    'while' LPAREN whileTest=topLevelExpr RPAREN wh=statement { 
       $stat = new Statement.While(whileTest.expr, wh);
     } | 
-    'do' doStat=statement 'while' '(' doWhileTest=topLevelExpr ')' ';' { 
+    'do' doStat=statement 'while' LPAREN doWhileTest=topLevelExpr RPAREN SEMICOLON { 
       $stat = new Statement.DoWhile(doWhileTest.expr, doStat);
     } | 
-    'for' '('
+    'for' LPAREN
       (
-        (varDecl | expression) ? ';' expression? ';' expression?  |
+        (varDecl | expression) ? SEMICOLON expression? SEMICOLON expression?  |
         varDecl ':' expression // Java foreach
       )
-        ')' forStat=statement { 
+        RPAREN forStat=statement { 
       // TODO
     } | 
-    'switch' '(' expression ')' '{' // TODO
+    'switch' LPAREN expression RPAREN LBRACE // TODO
       (  
         'case' topLevelExpr ':' |
         statement |
         lineDirective
       )*
-    '}' |
-    ';'
+    RBRACE |
+    SEMICOLON
   ;
   
 constant returns [Constant constant]
@@ -2184,7 +2196,7 @@ javaTypeIdent returns [Identifier ident]
           $ident.resolveLastSimpleIdentifier().addTemplateArgument($first.expr);
         }
         (
-          ','
+          COMMA
           other=javaTemplateArg  {
             $ident.resolveLastSimpleIdentifier().addTemplateArgument($other.expr);
           }
@@ -2222,18 +2234,18 @@ javaMethodDeclaration returns [Function function]
       $function.setName(ident($name.text));
       $function.setValueType($ret.typeRef);
     }
-    '('
+    LPAREN
     first=javaArg {
       $function.addArg($first.arg);
     }
     (
-      ','
+      COMMA
       other=javaArg {
         $function.addArg($other.arg);
       }
     )
-    ')'
-    ';'
+    RPAREN
+    SEMICOLON
   ;
     
 IDENTIFIER
@@ -2413,6 +2425,13 @@ COMMENT
       $channel=HIDDEN; 
     }
   ;
+
+COMMA: ',';
+LBRACE: '{';
+RBRACE: '}';
+LPAREN: '(';
+RPAREN: ')';
+SEMICOLON: ';';
 
 LINE_COMMENT
   :  (

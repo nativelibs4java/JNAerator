@@ -117,6 +117,7 @@ public abstract class Element {
         if (e != null) {
             importDetails(e, false);
             moveAllCommentsBefore();
+            deDioxygenizeCommentBefore();
         }
         addToCommentBefore(extraComments);
         return this;
@@ -186,6 +187,13 @@ public abstract class Element {
 			addToCommentBefore(getCommentAfter());
 			setCommentAfter(null);
 		}
+	}
+	public void deDioxygenizeCommentBefore() {
+        String comment = getCommentBefore();
+        if (comment != null) {
+            comment = comment.replaceAll("\n\\s*\\* ", "\n");
+        }
+        setCommentBefore(comment);
 	}
 	public void addToCommentBefore(String... s) {
 		addToCommentBefore(Arrays.asList(s));

@@ -647,6 +647,7 @@ public class JNADeclarationsConverter extends DeclarationsConverter {
 //			convDecl.importDetails(valueType, false);
 //			valueType.stripDetails();
             convDecl.moveAllCommentsBefore();
+            convDecl.deDioxygenizeCommentBefore();
             convDecl.setValueType(javaType);
             convDecl.addDeclarator(new DirectDeclarator(name, initVal));
 
