@@ -193,7 +193,7 @@ public class JNAerator {
     static Logger logger = Logger.getLogger(JNAerator.class.getName());
 
     public static void main(String[] argsArray) {
-//        argsArray = new String[] { "/Users/ochafik/github/nativelibs4java/libraries/OpenCL/OpenCL4Java/src/main/jnaerator/config.jnaerator", "-mode", "Directory", "-f" };
+//        argsArray = new String[] { "/Users/ochafik/github/nativelibs4java/libraries/tmp/glib/config.jnaerator", "-mode", "Directory", "-f", "-o", "/Users/ochafik/github/nativelibs4java/libraries/tmp/glib" };
         main(new JNAerator(new JNAeratorConfig()), argsArray);
     }
 
@@ -274,6 +274,9 @@ public class JNAerator {
                             return Arrays.asList(propValue.matches(regex) ? thenCmd : elseCmd);
                         case AddRootDir:
                             config.addRootDir(a.getFileParam("dir"));
+                            break;
+                        case SkipDeprecated:
+                            config.skipDeprecated = true;
                             break;
                         case ConvertBodies:
                             config.convertBodies = true;
