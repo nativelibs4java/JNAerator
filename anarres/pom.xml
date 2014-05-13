@@ -70,6 +70,7 @@
 			<plugin>
 				<groupId>com.nativelibs4java</groupId>
 				<artifactId>maven-velocity-plugin</artifactId>
+        <version>0.8</version>
 			</plugin>
 			
 			<plugin>
