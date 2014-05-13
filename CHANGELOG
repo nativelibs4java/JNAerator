@@ -1,14 +1,33 @@
 Current development version (0.12-SNAPSHOT)
 
+- Added JNA-only -forceStringSignatures option to force String and String[] params even with char* and char** (as opposed to const char* and const char**) (issue #476)
+- Added -skipDeprecated option for JNA output (issue #480)
+- Added -forceNames option to issue Name annotations for all supported entities (issue #443)
+- Added `@Name` support to all entities (issue #443)
+- Added partial support for C++ namespaces with GCC-compiled libraries (issue #446)
+- Added a new "peer pointer" constructor to JNA structures (issue #442, thanks to topikachu@ for the patch!)
+- Added -publicRawBindings and -noRawBindings options (since -genRawBindings is now the default)
 - Added support for JNA 4.0.0 (implement getFieldOrder in all structs, see issue #384)
 - Added support for node.js target runtime (see example of bindings: https://github.com/ochafik/node-opencl)
 - Added -optionalFunctions option to tag functions with `@org.bridj.ann.Optional`
 - Added mechanism to skip generation of entities (-skipStructs, -skipEnums, -skipFunctions)
 - Added -noStaticInit option for BridJ
 - Added -extractDeclarations option to create an interface with all the methods and types of a library (BridJ-specific)
+- Improved harvesting of header comments: go further away before the declaration, and remove leading * in oxygen comment lines (issue #481)
+- Improved raw mode for BridJ callbacks: in raw mode, generate two crossed callbacks, one of which must be overridden.
 - Moved to ECJ 4.2.2
 - Dropped support for bit fields in JNA structs (users should implement bit manipulation logic manually or use BridJ: JNAerator's fork of JNA that added this feature incurred too much maintenance work).
 - Dropped old shared library (DLL, Mach-O) scanning code, superseded by dyncall/dynload and BridJ's demanglers.
+- Fixed missing actual name in raw native methods (issue #499, thanks to @washley for the patch!)
+- Fixed handling of `const char * const *` params for JNA runtime (issue #476)
+- Fixed duplicate bindings with -reification, caused by interaction with interface extraction feature (issue #500)
+- Fixed duplicate & mismatching `@Name` annotations with -beautifyNames (issue #460)
+- Fixed routing of simple callback with ptr-ptr arg (e.g. `typedef void* (*F3)(int** pptr)`)
+- Fixed pointer casts in constants (issue #132)
+- Fixed some GLib parsing issues: type literals of null TypeRefs, support signatures with va_list / __gnuc_va_list and __builtin_va_list, and fixed NPE (issue #132)
+- Fixed parsing of exotic enums (issue #459)
+- Fixed parsing of many Objective-C (property) attributes
+- Fixed case-sensitivity of C/C++ modifiers, which prevented some variables from being parsed (issue #449)
 - Fixed parsing of unsigned long constants (issue #362, issue #374)
 - Fixed generation of raw bindings for callback return types (issue #386)
 - Fixed generation of raw bindings with varargs (issue #386, patch contributed by twitwi!)
