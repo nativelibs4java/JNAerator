@@ -507,7 +507,7 @@ public class JNAeratorConfig {
 //			features.remove(GenFeatures.TypedPointersForForwardDeclarations);
     }
     public boolean verbose;
-    boolean parseInChunks;
+    boolean parseInChunks = true;
     public File outputDir, sourcesOutputDir, resourcesOutputDir;
     public List<String> rootDirectoriesPrefixesForSourceComments = new ArrayList<String>();
     public Adapter<Function, Boolean> functionsAccepter;

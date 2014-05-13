@@ -206,7 +206,7 @@ public class JNAeratorCommandLineArgs {
         Direct("-direct", "JNAerate libraries that use JNA's faster direct call convention"),
         PreferJavac("-preferJavac", "Use Sun's Javac compiler instead of Eclipse's ecj, if possible"),
         StructsInLibrary("-structsInLibrary", "Force structs to be JNAerated as inner classes of their declaring libraries (otherwise, each top-level structure is defined as a top-level class in its library's package)"),
-        ParseInChunks("-parseChunks", "Splits the pre-processor output into multiple smaller parts and parse them separately (in theory everything should be parsed in one chunk, but in practice this means errors are not isolated from the rest of the parsing)"),
+        ParseInOnePiece("-parseInOnePiece", "Doesn't split the pre-processor output into multiple smaller parts and parse everything as it should (in theory everything should be parsed in one chunk, but in practice this means errors are not isolated from the rest of the parsing)"),
         OnlineDocURLFormat("-onlineDoc", "Define a format for online documentation URLs (uses MessageFormat syntax, with arg 0 being the name of the function / structure).", new ArgDef(Type.MessageFormat, "linkDisplayFormat"), new ArgDef(Type.MessageFormat, "urlMessageFormat")),
         CurrentPackage("-package", "Set the Java package in which all the output will reside (by default, set to the library name).", new ArgDef(Type.String, "forcedPackageName")),
         RecursedExtensions("-allowedFileExts", "Colon-separated list of file extensions used to restrict files used when recursing on directories, or \"*\" to parse all files (by default = " + JNAeratorConfig.DEFAULT_HEADER_EXTENSIONS + ")", new ArgDef(Type.String, "extensions")),
