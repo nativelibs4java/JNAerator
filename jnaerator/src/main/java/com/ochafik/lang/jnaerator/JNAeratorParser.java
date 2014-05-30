@@ -266,8 +266,8 @@ public class JNAeratorParser {
                 }
 
                 System.gc();
+                System.err.println("Regular parsing took too long, now trying to parse sources slice by slice.");
             }
-            System.err.println("Regular parsing took too long, now trying to parse sources slice by slice.");
 
 
             // compartimented parsing (at each change of file)

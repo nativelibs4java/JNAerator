@@ -221,7 +221,6 @@ public class BridJDeclarationsConverter extends DeclarationsConverter {
         //Map<String, NL4JConversion> argTypes = new LinkedHashMap<String, NL4JConversion>();
 
         boolean isObjectiveC = function.getType() == Type.ObjCMethod;
-        int iArg = 1;
         Set<String> argNames = new TreeSet<String>();
 
         List<Expression> superConstructorArgs = null;
@@ -240,21 +239,26 @@ public class BridJDeclarationsConverter extends DeclarationsConverter {
             returnType = ((BridJTypeConversion) result.typeConverter).convertTypeToNL4J(function.getValueType(), libraryClassName, null, null, -1, -1);
         }
 
-        for (Arg arg : function.getArgs()) {
+        for (int iArg = 0, nArgs = function.getArgs().size(); iArg < nArgs; iArg++) {
+            Arg arg = function.getArgs().get(iArg);
             String paramName;
-            if (isVarArgs(arg)) {
+            boolean isVarArgs = isVarArgs(arg);
+            if (isVarArgs && iArg == nArgs - 1) {
 //                assert arg.getValueType() == null;
-                paramName = varArgName = chooseJavaArgName(arg.getName() == null ? "varargs" : arg.getName(), iArg, argNames);
+                paramName = varArgName = chooseJavaArgName(arg.getName() == null ? "varargs" : arg.getName(), iArg + 1, argNames);
                 varArgType = ident(isObjectiveC ? NSObject.class : Object.class);
             } else {
-                paramName = chooseJavaArgName(arg.getName(), iArg, argNames);
-                paramTypes.add(((BridJTypeConversion) result.typeConverter).convertTypeToNL4J(arg.getValueType(), libraryClassName, null, null, -1, -1));
+                TypeRef argType = arg.getValueType();
+                if (isVarArgs) {
+                    argType = new TypeRef.Pointer(typeRef(void.class), PointerStyle.Pointer);
+                }
+                paramName = chooseJavaArgName(arg.getName(), iArg + 1, argNames);
+                paramTypes.add(((BridJTypeConversion) result.typeConverter).convertTypeToNL4J(argType, libraryClassName, null, null, -1, -1));
             }
             paramNames.add(paramName);
             if (isConstructor) {
                 superConstructorArgs.add(varRef(paramName));
             }
-            iArg++;
         }
 
         fillIn(signatures, functionName, nativeMethod, returnType, paramTypes, paramNames, varArgType, varArgName, isCallback, false);

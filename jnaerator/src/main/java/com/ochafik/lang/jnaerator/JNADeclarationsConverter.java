@@ -285,27 +285,28 @@ public class JNADeclarationsConverter extends DeclarationsConverter {
             Function natStructFunc = alternativeOutputs ? natFunc.clone() : null;
 
             Set<String> argNames = new TreeSet<String>();
-//			for (Arg arg : function.getArgs())
-//				if (arg.getName() != null)
-//					argNames.add(arg.getName());
 
-            int iArg = 1;
-            for (Arg arg : function.getArgs()) {
-                if (isVarArgs(arg)) {
+            for (int iArg = 0, nArgs = function.getArgs().size(); iArg < nArgs; iArg++) {
+                Arg arg = function.getArgs().get(iArg);
+                boolean isVarArgs = isVarArgs(arg);
+                if (isVarArgs && iArg == nArgs - 1) {
                     //TODO choose vaname dynamically !
                     Identifier vaType = ident(isObjectiveC ? NSObject.class : Object.class);
-                    String argName = chooseJavaArgName(arg.getName() == null ? "varargs" : arg.getName(), iArg, argNames);
+                    String argName = chooseJavaArgName(arg.getName() == null ? "varargs" : arg.getName(), iArg + 1, argNames);
                     natFunc.addArg(new Arg(argName, typeRef(vaType.clone()))).setVarArg(true);
                     if (alternativeOutputs) {
                         primOrBufFunc.addArg(new Arg(argName, typeRef(vaType.clone()))).setVarArg(true);
                         natStructFunc.addArg(new Arg(argName, typeRef(vaType.clone()))).setVarArg(true);
                     }
                 } else {
-                    String argName = chooseJavaArgName(arg.getName(), iArg, argNames);
+                    String argName = chooseJavaArgName(arg.getName(), iArg + 1, argNames);
 
                     TypeRef mutType = arg.createMutatedType();
                     if (mutType == null) {
                         throw new UnsupportedConversionException(function, "Argument " + arg.getName() + " cannot be converted");
+                    }
+                    if (isVarArgs) {
+                        mutType = new TypeRef.Pointer(typeRef(void.class), PointerStyle.Pointer);
                     }
                     
                     natFunc.addArg(new Arg(argName, typeConverter().convertTypeToJNA(mutType, TypeConversionMode.NativeParameter, libraryClassName)));
@@ -314,7 +315,6 @@ public class JNADeclarationsConverter extends DeclarationsConverter {
                         natStructFunc.addArg(new Arg(argName, typeConverter().convertTypeToJNA(mutType, TypeConversionMode.NativeParameterWithStructsPtrPtrs, libraryClassName)));
                     }
                 }
-                iArg++;
             }
 
             String natSign = natFunc.computeSignature(SignatureType.JavaStyle),
