@@ -18,38 +18,13 @@
  */
 package com.ochafik.lang.jnaerator;
 
-import static com.ochafik.lang.jnaerator.parser.ElementsHelper.*;
-
-import java.lang.reflect.Method;
-import java.nio.Buffer;
-import java.nio.ByteBuffer;
-import java.nio.CharBuffer;
-import java.nio.DoubleBuffer;
-import java.nio.FloatBuffer;
-import java.nio.IntBuffer;
-import java.nio.LongBuffer;
-import java.nio.ShortBuffer;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
-import java.util.regex.Pattern;
-
-import org.rococoa.ObjCClass;
-import org.rococoa.ObjCObject;
-import org.rococoa.cocoa.foundation.NSObject;
-
-import org.bridj.util.DefaultParameterizedType;
 import com.ochafik.lang.SyntaxUtils;
 import com.ochafik.lang.jnaerator.JNAeratorConfig.GenFeatures;
-import com.ochafik.lang.jnaerator.parser.Enum;
 import com.ochafik.lang.jnaerator.parser.*;
 import com.ochafik.lang.jnaerator.parser.Declarator.ArrayDeclarator;
 import com.ochafik.lang.jnaerator.parser.Declarator.MutableByDeclarator;
+import static com.ochafik.lang.jnaerator.parser.ElementsHelper.*;
+import com.ochafik.lang.jnaerator.parser.Enum;
 import com.ochafik.lang.jnaerator.parser.Enum.EnumItem;
 import com.ochafik.lang.jnaerator.parser.Expression.Constant;
 import com.ochafik.lang.jnaerator.parser.Expression.MemberRef;
@@ -92,7 +67,30 @@ import com.sun.jna.ptr.LongByReference;
 import com.sun.jna.ptr.NativeLongByReference;
 import com.sun.jna.ptr.PointerByReference;
 import com.sun.jna.ptr.ShortByReference;
+import java.lang.reflect.Method;
+import java.lang.reflect.Type;
+import java.nio.Buffer;
+import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
+import java.nio.DoubleBuffer;
+import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
+import java.nio.LongBuffer;
+import java.nio.ShortBuffer;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.regex.Pattern;
+import org.bridj.util.DefaultParameterizedType;
+import org.rococoa.ObjCClass;
+import org.rococoa.ObjCObject;
+import org.rococoa.cocoa.foundation.NSObject;
 
 public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
 
@@ -214,7 +212,7 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
             return null;
         }
         if (c.toString().equals("?")) {
-            return Constant.newNull();
+            return new Expression.Cast(typeRef(Type.class), Constant.newNull());
         }
         return memberRef(expr(c), MemberRefStyle.Dot, "class");
     }
