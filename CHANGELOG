@@ -15,6 +15,7 @@ Current development version (0.12-SNAPSHOT)
 - Added -extractDeclarations option to create an interface with all the methods and types of a library (BridJ-specific)
 - Improved harvesting of header comments: go further away before the declaration, and remove leading * in oxygen comment lines (issue #481)
 - Improved raw mode for BridJ callbacks: in raw mode, generate two crossed callbacks, one of which must be overridden.
+- Reverted to by-default chunks parsing, and added -parseInOnePiece instead of -parseChunks (makes parsing more robust to syntax errors)
 - Moved to ECJ 4.2.2
 - Dropped support for bit fields in JNA structs (users should implement bit manipulation logic manually or use BridJ: JNAerator's fork of JNA that added this feature incurred too much maintenance work).
 - Dropped old shared library (DLL, Mach-O) scanning code, superseded by dyncall/dynload and BridJ's demanglers.
