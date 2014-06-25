@@ -245,7 +245,6 @@ public class BridJTypeConversion extends TypeConversion {
 
                 if (pointedTypeRef != null) {
                     conv.type = ConvType.Pointer;
-                    conv.isUndefined = conv.targetTypeConversion.isUndefined;
                     conv.typeRef = typeRef(ident(result.config.runtime.pointerClass, expr(pointedTypeRef.clone())));
                     if (structIOExpr != null) {
                         if (conv.arrayLengths == null) {

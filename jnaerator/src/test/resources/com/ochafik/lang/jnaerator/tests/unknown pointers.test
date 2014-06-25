@@ -1,5 +1,8 @@
 struct OpaqueStruct;
 const OpaqueStruct* GetInterestingMessage(UnknownPtr*);
+struct WithOpaque {
+	OpaqueStruct *opaque;
+};
 
 typedef struct S *T;
 T f();
@@ -25,6 +28,7 @@ import static test.TestLibrary.*;
 new OpaqueStruct() {};
 new UnknownPtr() {};
 Pointer<OpaqueStruct> s = GetInterestingMessage((Pointer<UnknownPtr>)null);
+s = new WithOpaque().opaque();
 
 T p = f();
 Pointer pp = p;
