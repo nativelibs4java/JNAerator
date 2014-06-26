@@ -1,0 +1,13 @@
+struct S {
+	time_t time;
+};
+void f(time_t time);
+--
+#runtime(BridJ)
+import test.*;
+import static test.TestLibrary.*;
+
+S s = null;
+TimeT t = s.time();
+s.time(t);
+f(t);

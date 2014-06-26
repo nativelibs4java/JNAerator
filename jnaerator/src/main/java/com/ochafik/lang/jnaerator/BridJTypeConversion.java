@@ -4,17 +4,12 @@
  */
 package com.ochafik.lang.jnaerator;
 
-import static com.ochafik.lang.SyntaxUtils.as;
 import com.ochafik.lang.SyntaxUtils;
-import org.bridj.FlagSet;
-import org.bridj.ValuedEnum;
-import org.bridj.SizeT;
-import org.bridj.ann.CLong;
-import org.bridj.ann.Ptr;
+import static com.ochafik.lang.SyntaxUtils.as;
 import com.ochafik.lang.jnaerator.parser.*;
-import com.ochafik.lang.jnaerator.parser.Enum;
 
 import static com.ochafik.lang.jnaerator.parser.ElementsHelper.*;
+import com.ochafik.lang.jnaerator.parser.Enum;
 import com.ochafik.lang.jnaerator.parser.TypeRef.SimpleTypeRef;
 import com.ochafik.lang.jnaerator.parser.TypeRef.TaggedTypeRef;
 import com.ochafik.lang.jnaerator.runtime.NativeSize;
@@ -25,7 +20,13 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import org.bridj.FlagSet;
 import org.bridj.IntValuedEnum;
+import org.bridj.SizeT;
+import org.bridj.TimeT;
+import org.bridj.ValuedEnum;
+import org.bridj.ann.CLong;
+import org.bridj.ann.Ptr;
 import org.bridj.util.DefaultParameterizedType;
 
 /**
@@ -132,6 +133,9 @@ public class BridJTypeConversion extends TypeConversion {
             if (type == ConvType.NativeSize) {
                 return typeRef(SizeT.class);
             }
+            if (type == ConvType.NativeTime) {
+                return typeRef(TimeT.class);
+            }
             if (type == ConvType.NativeLong) {
                 return typeRef(org.bridj.CLong.class);
             }
@@ -163,6 +167,7 @@ public class BridJTypeConversion extends TypeConversion {
                     case ComplexDouble:
                     case FunctionSignature:
                     case Default:
+                    case NativeTime:
                         //throw new UnsupportedConversionException(typeRef, "Struct by value not supported yet");
                         break;
                     default:
@@ -322,6 +327,12 @@ public class BridJTypeConversion extends TypeConversion {
                 conv.typeRef = typeRef(Long.TYPE);
                 conv.indirectType = typeRef(org.bridj.SizeT.class);
                 radix = "SizeT";
+                break;
+            case NativeTime:
+                conv.type = ConvType.NativeTime;
+                conv.typeRef = typeRef(TimeT.class);
+                //conv.indirectType = typeRef(org.bridj.SizeT.class);
+                radix = "TimeT";
                 break;
             case Void:
                 conv.type = ConvType.Void;

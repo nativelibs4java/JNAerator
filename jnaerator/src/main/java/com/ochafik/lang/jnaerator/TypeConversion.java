@@ -20,6 +20,8 @@ package com.ochafik.lang.jnaerator;
 
 import com.ochafik.lang.SyntaxUtils;
 import com.ochafik.lang.jnaerator.JNAeratorConfig.GenFeatures;
+import static com.ochafik.lang.jnaerator.TypeConversion.ConvType;
+import static com.ochafik.lang.jnaerator.TypeConversion.JavaPrim;
 import com.ochafik.lang.jnaerator.parser.*;
 import com.ochafik.lang.jnaerator.parser.Declarator.ArrayDeclarator;
 import com.ochafik.lang.jnaerator.parser.Declarator.MutableByDeclarator;
@@ -139,6 +141,7 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
         ComplexDouble(null, null, ESize.Sixteen),
         NativeLong(com.sun.jna.NativeLong.class, com.sun.jna.NativeLong.class, ESize.StaticSizeField),
         NativeSize(NativeSize.class, NativeSize.class, ESize.StaticSizeField),
+        NativeTime(null, null, ESize.StaticSizeField),
         NSInteger(org.rococoa.cocoa.foundation.NSInteger.class, org.rococoa.cocoa.foundation.NSInteger.class, ESize.StaticSizeField),
         NSUInteger(org.rococoa.cocoa.foundation.NSUInteger.class, org.rococoa.cocoa.foundation.NSUInteger.class, ESize.StaticSizeField),
         CGFloat(org.rococoa.cocoa.CGFloat.class, org.rococoa.cocoa.CGFloat.class, ESize.StaticSizeField);
@@ -282,6 +285,8 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
         result.prim("long", longPrim);
         result.prim("LONG", longPrim);
         result.prim("ULONG", longPrim);
+
+        result.prim("time_t", JavaPrim.NativeTime);
 
         JavaPrim sizePrim = result.config.sizeAsLong ? longPrim : JavaPrim.NativeSize;
         result.prim("size_t", sizePrim);
@@ -840,6 +845,7 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
         Struct,
         NativeLong,
         NativeSize,
+        NativeTime,
         ComplexDouble,
         Void,
         Callback,
