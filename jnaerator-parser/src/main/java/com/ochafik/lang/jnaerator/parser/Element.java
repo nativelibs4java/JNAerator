@@ -70,6 +70,15 @@ public abstract class Element {
         return resolvedJavaIdentifier;
     }
 
+    public static Identifier getName(Element element) {
+        if (element instanceof Function)
+            return ((Function) element).getName();
+        if (element instanceof TaggedTypeRefDeclaration)
+            return getName(((TaggedTypeRefDeclaration) element).getTaggedTypeRef());
+        if (element instanceof TypeRef.TaggedTypeRef)
+            return ((TypeRef.TaggedTypeRef) element).getTag();
+        return null;
+    }
     
     public Map<Object, Object> getAttributes() {
         return attributes == null ? Collections.EMPTY_MAP : Collections.unmodifiableMap(attributes);

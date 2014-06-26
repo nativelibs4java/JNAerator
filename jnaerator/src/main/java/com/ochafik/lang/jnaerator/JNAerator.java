@@ -320,6 +320,9 @@ public class JNAerator {
                         case SkipIncludedFrameworks:
                             config.skipIncludedFrameworks = true;
                             break;
+                        case LibraryOverrides:
+                            config.libraryOverrides.putAll(a.getMapParam(0));
+                            break;
                         case GenPrivateMembers:
                             config.skipPrivateMembers = false;
                             break;

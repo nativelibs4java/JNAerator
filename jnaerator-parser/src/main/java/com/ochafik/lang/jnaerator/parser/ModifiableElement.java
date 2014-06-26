@@ -25,7 +25,7 @@ import java.util.List;
 
 public abstract class ModifiableElement extends Element {
 	protected final List<Modifier> modifiers = new ArrayList<Modifier>();
-	
+    
 	@Override
 	public void accept(Visitor visitor) {
 		visitor.visitModifiableElement(this);

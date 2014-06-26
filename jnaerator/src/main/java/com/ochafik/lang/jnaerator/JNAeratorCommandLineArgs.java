@@ -57,6 +57,10 @@ public class JNAeratorCommandLineArgs {
                 return (String) params[pos];
             }
 
+            public Map<String, String> getMapParam(int pos) {
+                return (Map) params[pos];
+            }
+
             public MessageFormat getMessageFormatParam(int pos) {
                 return (MessageFormat) params[pos];
             }
@@ -186,6 +190,7 @@ public class JNAeratorCommandLineArgs {
         BeautifyNames("-beautifyNames", "Transform C names to Java-looking names : some_func() => someFunc()"),
         ConvertBodies("-convertBodies", "Experimental conversion of function bodies to equivalent Java code (BridJ only)."),
         JarOut("-jar", "Jar file where all generated sources and the compiled classes go", new ArgDef(Type.OutputFile, "outFile")),
+        LibraryOverrides("-libraryOverrides", "Comma-separated list of `symbol=library` library overrides (when isolated functions are located in a different library than their surrounding code).", new ArgDef(Type.Map, "list")),
         ScalaStructSetters("-scalaStructSetters", "Generate Scala-style setters for BridJ structs (with a name like fieldName_$eq)"),
         WCharAsShort("-wcharAsShort", "Force treatment of wchar_t as short (char by default)"),
         CallbackInvokeName("-callbacksInvokeMethodName", "Name of the invocation method of callbacks ('apply' by default)", new ArgDef(Type.String, "methodName")),
@@ -316,7 +321,10 @@ public class JNAeratorCommandLineArgs {
 
         public enum Type {
 
-            ExistingFile, ExistingDir, File, MessageFormat, String, Int, ExistingFileOrDir, OutputDir, OutputFile, OptionalFile, Enum
+            ExistingFile, ExistingDir, File, MessageFormat, String, Int,
+            ExistingFileOrDir, OutputDir, OutputFile, OptionalFile,
+            Map,
+            Enum
         }
 
         public static class ArgDef {
@@ -378,6 +386,8 @@ public class JNAeratorCommandLineArgs {
                         return arg == null ? null : ((File) arg).toString();
                     case String:
                         return (String) arg;
+                    case Map:
+                        return ((Map) arg).toString();
                     case Int:
                         return ((Integer) arg).toString();
                     default:
@@ -414,6 +424,13 @@ public class JNAeratorCommandLineArgs {
                             throw new FileNotFoundException(f.toString());
                         }
                         return f;
+                    case Map:
+                        Map<String, String> map = new LinkedHashMap<String, String>();
+                        for (String pair : arg.split(",")) {
+                            int i = pair.indexOf("=");
+                            map.put(pair.substring(0, i), pair.substring(i + 1));
+                        }
+                        return map;
                     case File:
                         return findFile(arg, parser);
                     case Int:

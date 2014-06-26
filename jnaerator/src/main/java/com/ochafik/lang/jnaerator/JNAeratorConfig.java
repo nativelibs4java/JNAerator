@@ -409,6 +409,7 @@ public class JNAeratorConfig {
     public boolean reification;
     public boolean convertBodies;
     public boolean removeInlineAsm;
+    public Map<String, String> libraryOverrides = new HashMap<String, String>();
     public Map<String, String> extraJavaSourceFilesContents = new LinkedHashMap<String, String>();
     public Set<String> frameworks = new LinkedHashSet<String>();
     boolean skipIncludedFrameworks;
@@ -602,7 +603,13 @@ public class JNAeratorConfig {
     public boolean noCPlusPlus;
     public String mavenGroupId = "com.mycompany", mavenArtifactId = "my-native-bindings", mavenVersion = "1.0-SNAPSHOT";
 
-    public String getLibrary(String elementFile) {
+    public String getLibrary(String elementFile, Identifier elementName) {
+        if (elementName != null) {
+            String libraryOverride = libraryOverrides.get(elementName.toString());
+            if (libraryOverride != null) {
+                return libraryOverride;
+            }
+        }
         if (elementFile == null) {
             return libraryForElementsInNullFile;
         }

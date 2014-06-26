@@ -430,7 +430,7 @@ public class Result extends Scanner {
 
     String getLibrary(Element decl) {
         String file = resolveFile(decl);
-        String library = config.getLibrary(file);
+        String library = config.getLibrary(file, Element.getName(decl));
         if (library == null) {
             SourceFile f = decl.findParentOfType(SourceFile.class);
             if (f != null) {
