@@ -290,7 +290,6 @@ org/bridj/jawt/JAWT$Lock_callback.class
 org/bridj/jawt/JAWT$Unlock_callback.class
 org/bridj/jawt/JAWT.class
 org/bridj/jawt/JAWTUtils$1.class
-org/bridj/jawt/JAWTUtils$2.class
 org/bridj/jawt/JAWTUtils$LockedComponentRunnable.class
 org/bridj/jawt/JAWTUtils.class
 org/bridj/jawt/JAWT_DrawingSurface$FreeDrawingSurfaceInfo_callback.class
