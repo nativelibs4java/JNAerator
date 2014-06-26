@@ -22,6 +22,7 @@
 	
 	<modules>
 		<module>anarres</module>
+		<!--module>jcpp</module-->
 		<module>ochafik-util</module>
 		<module>ochafik-swing</module>
 		<module>jnaerator-runtime</module>
@@ -115,6 +116,11 @@
 				<artifactId>anarres-jnaerator</artifactId>
 				<version>1.2.8</version>
 			</dependency>
+			<!-- <dependency>
+				<groupId>org.anarres</groupId>
+				<artifactId>cpp</artifactId>
+				<version>1.2.9-SNAPSHOT</version>
+			</dependency> -->
 			<dependency>
 				<groupId>org.eclipse.jdt.core.compiler</groupId>
 				<artifactId>ecj</artifactId>

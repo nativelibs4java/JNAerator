@@ -57,6 +57,10 @@ Users who are looking for ready-to-use libraries should check the NativeLibs4Jav
 			<groupId>com.nativelibs4java</groupId>
 			<artifactId>anarres-jnaerator</artifactId>
 		</dependency>
+		<!--dependency>
+			<groupId>org.anarres</groupId>
+			<artifactId>cpp</artifactId>
+		</dependency -->
 		<dependency>
 			<groupId>org.eclipse.jdt.core.compiler</groupId>
 			<artifactId>ecj</artifactId>
