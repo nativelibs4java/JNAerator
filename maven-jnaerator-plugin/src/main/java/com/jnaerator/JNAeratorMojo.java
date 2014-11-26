@@ -47,7 +47,7 @@ public class JNAeratorMojo
     /**
      * Whether JNAerator should output helper Scala classes (experimental)
      * @parameter expression="false"
-     * @required
+     * @optional
      */
     private boolean generateScala;
 
