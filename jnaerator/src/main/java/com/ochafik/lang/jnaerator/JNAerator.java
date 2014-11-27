@@ -18,6 +18,7 @@
  */
 package com.ochafik.lang.jnaerator;
 
+import com.google.common.base.Preconditions;
 import com.ochafik.lang.jnaerator.JNAeratorCommandLineArgs.PathType;
 import java.io.File;
 
@@ -86,6 +87,7 @@ import org.antlr.runtime.ANTLRReaderStream;
 import org.antlr.runtime.CommonTokenStream;
 import com.ochafik.lang.jnaerator.parser.Function.SignatureType;
 import java.io.*;
+import org.bridj.ann.Library;
 /*
  //include com/ochafik/lang/jnaerator/parser/*.mm
  //include com/ochafik/lang/jnaerator/parser/ObjCpp.g
@@ -193,6 +195,7 @@ public class JNAerator {
     static Logger logger = Logger.getLogger(JNAerator.class.getName());
 
     public static void main(String[] argsArray) {
+//        argsArray = "-library foo -dependencies bar,baz /Users/ochafik/test.h -mode Directory -o /Users/ochafik/tmp".split(" ");
 //        argsArray = new String[] { "/Users/ochafik/github/nativelibs4java/libraries/tmp/glib/config.jnaerator", "-mode", "Directory", "-f", "-o", "/Users/ochafik/github/nativelibs4java/libraries/tmp/glib" };
         main(new JNAerator(new JNAeratorConfig()), argsArray);
     }
@@ -341,6 +344,10 @@ public class JNAerator {
                             currentExtractedInterface = a.getStringParam(0);
                             if (currentLibrary != null)
                                 config.extractedLibraries.put(currentLibrary, currentExtractedInterface);
+                            break;
+                        case Dependencies:
+                            Preconditions.checkState(currentLibrary != null, "Please define -library before -dependencies.");
+                            config.dependencies.put(currentLibrary, a.getList(0));
                             break;
                         case CurrentPackage:
                             config.packageName = a.getStringParam(0);

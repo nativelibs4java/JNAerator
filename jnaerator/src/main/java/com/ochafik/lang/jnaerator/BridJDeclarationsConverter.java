@@ -18,6 +18,7 @@
  */
 package com.ochafik.lang.jnaerator;
 
+import com.google.common.collect.ImmutableMap;
 import org.bridj.ann.Name;
 import org.bridj.BridJ;
 import org.bridj.FlagSet;
@@ -62,7 +63,7 @@ public class BridJDeclarationsConverter extends DeclarationsConverter {
     }
 
     public void annotateActualName(ModifiableElement e, Identifier name) {
-        e.addAnnotation(new Annotation(org.bridj.ann.Name.class, expr(name.toString())));
+        e.addAnnotation(new Annotation(typeRef(org.bridj.ann.Name.class), expr(name.toString())));
     }
 
     @Override
@@ -755,7 +756,8 @@ public class BridJDeclarationsConverter extends DeclarationsConverter {
         convDecl.addModifiers(ModifierType.Public);
 
         if (conv.arrayLengths != null) {
-            convDecl.addAnnotation(new Annotation(result.config.runtime.typeRef(JNAeratorConfig.Runtime.Ann.Length), "({" + StringUtils.implode(conv.arrayLengths, ", ") + "})"));
+            convDecl.addAnnotation(new Annotation(result.config.runtime.typeRef(JNAeratorConfig.Runtime.Ann.Length),
+                    new OpaqueExpression("{" + StringUtils.implode(conv.arrayLengths, ", ") + "}")));
         }
         if (conv.bits != null) {
             convDecl.addAnnotation(new Annotation(result.config.runtime.typeRef(JNAeratorConfig.Runtime.Ann.Bits), conv.bits));
@@ -929,8 +931,18 @@ public class BridJDeclarationsConverter extends DeclarationsConverter {
 
         if (implementations instanceof ModifiableElement) {
             ModifiableElement minterf = (ModifiableElement) implementations;
-            minterf.addAnnotation(new Annotation(org.bridj.ann.Library.class, expr(library)));
-            minterf.addAnnotation(new Annotation(org.bridj.ann.Runtime.class, classLiteral(result.hasCPlusPlus ? CPPRuntime.class : CRuntime.class)));
+            List<String> deps = result.config.dependencies.get(library);
+            Map<String, Expression> namedArguments = null;
+            if (deps != null) {
+                List<Expression> depExprs = new ArrayList<Expression>();
+                for (String dep : deps)
+                    depExprs.add(expr(dep));
+                namedArguments = ImmutableMap.<String, Expression>of(
+                        "dependencies",
+                        NewArray.newAnnotationArrayValue(depExprs));
+            }
+            minterf.addAnnotation(new Annotation(typeRef(org.bridj.ann.Library.class), expr(library), namedArguments));
+            minterf.addAnnotation(new Annotation(typeRef(org.bridj.ann.Runtime.class), classLiteral(result.hasCPlusPlus ? CPPRuntime.class : CRuntime.class)));
         }
     }
 

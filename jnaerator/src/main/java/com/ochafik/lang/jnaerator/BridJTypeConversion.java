@@ -155,13 +155,13 @@ public class BridJTypeConversion extends TypeConversion {
                     case Void:
                         break;
                     case NativeLong:
-                        element.addAnnotation(new Annotation(CLong.class));
+                        element.addAnnotation(new Annotation(typeRef(CLong.class)));
                         break;
                     case NativeSize:
-                        element.addAnnotation(new Annotation(Ptr.class));
+                        element.addAnnotation(new Annotation(typeRef(Ptr.class)));
                         break;
                     case Pointer:
-                        element.addAnnotation(new Annotation(Ptr.class));
+                        element.addAnnotation(new Annotation(typeRef(Ptr.class)));
                         break;
                     case Struct:
                     case ComplexDouble:

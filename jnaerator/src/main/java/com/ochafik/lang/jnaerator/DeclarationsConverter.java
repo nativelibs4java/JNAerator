@@ -643,7 +643,7 @@ public abstract class DeclarationsConverter {
             Identifier fullClassName = ident(javaPackage, structJavaClass.getTag().clone());
 
             if (result.config.runtime == JNAeratorConfig.Runtime.BridJ) {
-                structJavaClass.addAnnotation(new Annotation(org.bridj.ann.Library.class, expr(library)));
+                structJavaClass.addAnnotation(new Annotation(typeRef(org.bridj.ann.Library.class), expr(library)));
             }
             structJavaClass.removeModifiers(ModifierType.Static);
             structJavaClass = result.notifyBeforeWritingClass(fullClassName, structJavaClass, signatures, library);

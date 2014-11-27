@@ -70,6 +70,7 @@ import com.ochafik.lang.jnaerator.parser.TypeRef.TaggedTypeRef;
 import com.ochafik.lang.jnaerator.parser.TypeRef.TargettedTypeRef;
 import com.ochafik.util.listenable.Pair;
 import java.util.List;
+import java.util.Map;
 
 public class Scanner implements Visitor {
 
@@ -320,7 +321,8 @@ public class Scanner implements Visitor {
 	public void visitAnnotation(Annotation annotation) {
 		visitElement(annotation);
         visit(annotation.getAnnotationClass());
-		visit(annotation.getArguments());
+        visit(annotation.getDefaultArgument());
+		visit(annotation.getNamedArguments());
 	}
 
 	public void visitEmptyDeclaration(EmptyDeclaration emptyDeclaration) {
@@ -473,6 +475,13 @@ public class Scanner implements Visitor {
     protected Scanner visit(List<? extends Element> list) {
         if (list != null)
             for (Element e : copy(list))
+                if (e != null)
+                    e.accept(this);
+		return this;
+	}
+    protected Scanner visit(Map<String, ? extends Element> map) {
+        if (map != null)
+            for (Element e : copy(map.values()))
                 if (e != null)
                     e.accept(this);
 		return this;

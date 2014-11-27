@@ -65,6 +65,12 @@ Users who are looking for ready-to-use libraries should check the NativeLibs4Jav
 			<groupId>org.eclipse.jdt.core.compiler</groupId>
 			<artifactId>ecj</artifactId>
 		</dependency>
+	 <dependency>
+	  <groupId>com.google.guava</groupId>
+	  <artifactId>guava</artifactId>
+	  <version>18.0</version>
+	  <type>jar</type>
+	 </dependency>
 	</dependencies>
 
 	<build>

@@ -27,6 +27,7 @@ import java.util.Map;
 import com.ochafik.lang.jnaerator.parser.Identifier.SimpleIdentifier;
 import com.ochafik.util.listenable.Pair;
 import java.math.BigInteger;
+import java.util.Collections;
 
 public abstract class Expression extends Element {
 	private static final long MAX_UINT_VALUE = 2L * Integer.MAX_VALUE;
@@ -270,16 +271,28 @@ public abstract class Expression extends Element {
 	}
 	public static class NewArray extends Expression {
 		TypeRef type;
+        boolean isAnnotationValue;
 		List<Expression> dimensions = new ArrayList<Expression>();
 		List<Expression> initialValues = new ArrayList<Expression>();
 		
 		public NewArray() {}
 		
-		public NewArray(TypeRef type, Expression[] dimensions, Expression[] initialValues) {
+		public NewArray(TypeRef type, List<Expression> dimensions, List<Expression> initialValues) {
 			setType(type);
-			setDimensions(Arrays.asList(dimensions));
-            setInitialValues(Arrays.asList(initialValues));
+			setDimensions(dimensions);
+            setInitialValues(initialValues);
 		}
+        public static NewArray newAnnotationArrayValue(List<Expression> initialValues) {
+            NewArray a = new NewArray(null, Collections.EMPTY_LIST, initialValues);
+            a.setAnnotationValue(true);
+            return a;
+        }
+        public boolean isAnnotationValue() {
+            return isAnnotationValue;
+        }
+        public void setAnnotationValue(boolean value) {
+            isAnnotationValue = value;
+        }
 		public List<Expression> getDimensions() {
 			return unmodifiableList(dimensions);
 		}

@@ -682,10 +682,24 @@ public class Printer implements Visitor {
 
     public void visitAnnotation(Annotation e) {
         append("@", e.getAnnotationClass());
-        if (e.getArgument() != null) {
-            append(e.getArgument());
-        } else if (!e.getArguments().isEmpty()) {
-            append("(").implode(e.getArguments(), ", ").append(")");
+        boolean first = true;
+        boolean hasDefault = e.getDefaultArgument() != null;
+        boolean hasNamed = !e.getNamedArguments().isEmpty();
+        if (hasDefault || hasNamed) {
+            append("(");
+            if (hasDefault) {
+                if (hasNamed)
+                    append("value = ");
+                append(e.getDefaultArgument());
+                first = false;
+            }
+            for (Map.Entry<String, Expression> entry : e.getNamedArguments().entrySet()) {
+                if (!first)
+                    append(", ");
+                append(entry.getKey(), " = ", entry.getValue());
+                first = false;
+            }
+            append(")");
         }
         space();
     }
@@ -698,14 +712,17 @@ public class Printer implements Visitor {
         expressionPre(e);
         boolean noDims = e.getDimensions().isEmpty();
         boolean noVals = e.getInitialValues().isEmpty();
-        append("new ").append(e.getType()).append("[");
-        if (noDims && noVals) {
-            append("0");
-        } else {
-            implode(e.getDimensions(), "][");
+        boolean isAnn = e.isAnnotationValue();
+        if (!isAnn) {
+            append("new ").append(e.getType()).append("[");
+            if (noDims && noVals) {
+                append("0");
+            } else {
+                implode(e.getDimensions(), "][");
+            }
+            append("]");
         }
-        append("]");
-        if (noDims && !noVals) {
+        if (isAnn || noDims && !noVals) {
             append("{").implode(e.getInitialValues(), ", ").append("}");
         }
         expressionPost(e);

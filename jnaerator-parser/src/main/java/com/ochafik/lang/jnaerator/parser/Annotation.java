@@ -22,41 +22,44 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import static com.ochafik.lang.jnaerator.parser.ElementsHelper.*;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 public class Annotation extends Element {
 
     TypeRef annotationClass;
-	//Class<? extends java.lang.annotation.Annotation> annotationClass;
-	final List<Expression> arguments = new ArrayList<Expression>();
-	String argument;
+    final Map<String, Expression> namedArguments = new LinkedHashMap<String, Expression>();
+    Expression defaultArgument;
 	
 	public Annotation() {
-		
 	}
-	
-	public Annotation(Class<? extends java.lang.annotation.Annotation> annotationClass, Expression... arguments) {
-		this(typeRef(annotationClass), arguments);
-	}
-	public Annotation(TypeRef annotationClass, Expression... arguments) {
+	public Annotation(TypeRef annotationClass) {
+        this(annotationClass, null);
+    }
+	public Annotation(TypeRef annotationClass, Expression defaultArgument) {
+        this(annotationClass, defaultArgument, Collections.<String, Expression>emptyMap());
+    }
+	public Annotation(TypeRef annotationClass, Expression defaultArgument, Map<String, Expression> namedArguments) {
 		setAnnotationClass(annotationClass);
-		setArguments(Arrays.asList(arguments));
-	}
-	public Annotation(TypeRef annotationClass, String argument) {
-		setAnnotationClass(annotationClass);
-		setArgument(argument);
+        setDefaultArgument(defaultArgument);
+		setNamedArguments(namedArguments);
 	}
 
-	public void setArgument(String argument) {
-		this.argument = argument;
+    public void setDefaultArgument(Expression defaultArgument) {
+        this.defaultArgument = changeValue(this, this.defaultArgument, defaultArgument);
+    }
+    
+    public Expression getDefaultArgument() {
+        return defaultArgument;
+    }
+    
+    
+	public void setNamedArguments(Map<String, Expression> namedArguments) {
+		changeValue(this, this.namedArguments, namedArguments);
 	}
-	public String getArgument() {
-		return argument;
-	}
-	public void setArguments(List<Expression> arguments) {
-		changeValue(this, this.arguments, arguments);
-	}
-	public List<Expression> getArguments() {
-		return unmodifiableList(arguments);
+	public Map<String, Expression> getNamedArguments() {
+		return Collections.unmodifiableMap(namedArguments);
 	}
 	
 	public TypeRef getAnnotationClass() {
@@ -73,12 +76,12 @@ public class Annotation extends Element {
 	
 	@Override
 	public Element getNextChild(Element child) {
-		return getNextSibling(arguments, child);
+        return getNextSibling(namedArguments.values(), child);
 	}
 
 	@Override
 	public Element getPreviousChild(Element child) {
-		return getPreviousSibling(arguments, child);
+		return getPreviousSibling(namedArguments.values(), child);
 	}
 
 	@Override
@@ -87,7 +90,11 @@ public class Annotation extends Element {
             setAnnotationClass((TypeRef)by);
             return true;
         }
-		return replaceChild(arguments, Expression.class, this, child, by) ||
+		if (child == getDefaultArgument()) {
+            setDefaultArgument((Expression) by);
+            return true;
+        }
+		return replaceChild(namedArguments, Expression.class, this, child, by) ||
             super.replaceChild(child, by);
 	}
 

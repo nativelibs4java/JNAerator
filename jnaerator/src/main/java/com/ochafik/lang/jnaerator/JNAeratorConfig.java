@@ -409,6 +409,7 @@ public class JNAeratorConfig {
     public boolean reification;
     public boolean convertBodies;
     public boolean removeInlineAsm;
+    public Map<String, List<String>> dependencies = new HashMap<String, List<String>>();
     public Map<String, String> libraryOverrides = new HashMap<String, String>();
     public Map<String, String> extraJavaSourceFilesContents = new LinkedHashMap<String, String>();
     public Set<String> frameworks = new LinkedHashSet<String>();

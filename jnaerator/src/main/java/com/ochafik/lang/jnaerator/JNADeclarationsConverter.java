@@ -56,6 +56,7 @@ import com.sun.jna.win32.StdCallLibrary;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -203,7 +204,7 @@ public class JNADeclarationsConverter extends DeclarationsConverter {
         if (!isMethod && library != null) {
             Boolean alreadyRetained = Result.getMap(result.retainedRetValFunctions, library).get(functionName.toString());
             if (alreadyRetained != null && alreadyRetained) {
-                natFunc.addAnnotation(new Annotation(AlreadyRetained.class, expr(alreadyRetained)));
+                natFunc.addAnnotation(new Annotation(typeRef(AlreadyRetained.class), expr(alreadyRetained)));
             }
         }
         //String namespaceArrayStr = "{\"" + StringUtils.implode(ns, "\", \"") + "\"}";
@@ -332,7 +333,7 @@ public class JNADeclarationsConverter extends DeclarationsConverter {
                                 natFunc.addToCommentBefore(Arrays.asList("@deprecated use the safer methods {@link #" + primOrBufSign + "} and {@link #" + bufSign + "} instead"));
                             }
                         }
-                        natFunc.addAnnotation(new Annotation(Deprecated.class));
+                        natFunc.addAnnotation(new Annotation(typeRef(Deprecated.class)));
                     }
                     collectParamComments(natFunc);
                     implementations.addDeclaration(natFunc);
@@ -628,7 +629,7 @@ public class JNADeclarationsConverter extends DeclarationsConverter {
                     }
                 }
             }
-            initVal = new Expression.NewArray(jr.getTarget(), new Expression[]{mul}, new Expression[0]);
+            initVal = new Expression.NewArray(jr.getTarget(), Arrays.asList(mul), Collections.EMPTY_LIST);
         }
         if (javaType == null) {
             throw new UnsupportedConversionException(mutatedType, "failed to convert type to Java");

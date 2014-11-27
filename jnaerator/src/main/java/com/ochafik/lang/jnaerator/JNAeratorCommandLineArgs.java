@@ -4,6 +4,8 @@ import com.ochafik.lang.jnaerator.JNAeratorConfig.OutputMode;
 import com.ochafik.lang.jnaerator.JNAeratorConfig.Runtime;
 import com.ochafik.util.listenable.Pair;
 import com.ochafik.util.string.StringUtils;
+import com.google.common.base.Joiner;
+import com.google.common.base.Splitter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -71,6 +73,10 @@ public class JNAeratorCommandLineArgs {
 
             public <E extends Enum<E>> E getEnumParam(int pos, Class<E> ec) {
                 return ec.cast(params[pos]);
+            }
+
+            List<String> getList(int pos) {
+                return (List) params[pos];
             }
         }
         List<Pair<OptionDef, List<String>>> parsedArgs = new ArrayList<Pair<OptionDef, List<String>>>();
@@ -185,6 +191,7 @@ public class JNAeratorCommandLineArgs {
         //NoRuntime(			"-noRuntime",		 	"Don't copy runtime classes to JAR output"),
         Synchronized("-synchronized", "Generate synchronized native methods"),
         NoRawBindings("-noRawBindings", "Don't generate raw bindings amenable for assembler optimizations."),
+        Dependencies("-dependencies", "Comma-separated list of dependencies for the current library (BridJ only).", new ArgDef(Type.CommaList, "methodName")),
         PublicRawBindings("-publicRawBindings", "Make raw bindings public."),
         BeanStructs("-beanStructs", "Generate getters and setters for struct fields (JNA & JNAerator runtimes only)"),
         BeautifyNames("-beautifyNames", "Transform C names to Java-looking names : some_func() => someFunc()"),
@@ -323,6 +330,7 @@ public class JNAeratorCommandLineArgs {
 
             ExistingFile, ExistingDir, File, MessageFormat, String, Int,
             ExistingFileOrDir, OutputDir, OutputFile, OptionalFile,
+            CommaList,
             Map,
             Enum
         }
@@ -386,6 +394,8 @@ public class JNAeratorCommandLineArgs {
                         return arg == null ? null : ((File) arg).toString();
                     case String:
                         return (String) arg;
+                    case CommaList:
+                        return Joiner.on(",").join((List) arg);
                     case Map:
                         return ((Map) arg).toString();
                     case Int:
@@ -424,6 +434,8 @@ public class JNAeratorCommandLineArgs {
                             throw new FileNotFoundException(f.toString());
                         }
                         return f;
+                    case CommaList:
+                        return Splitter.on(",").splitToList(arg);
                     case Map:
                         Map<String, String> map = new LinkedHashMap<String, String>();
                         for (String pair : arg.split(",")) {

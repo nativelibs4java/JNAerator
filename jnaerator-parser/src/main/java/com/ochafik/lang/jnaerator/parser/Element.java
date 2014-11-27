@@ -405,8 +405,8 @@ public abstract class Element {
 			return pe.getPreviousChild(this);
 		return null;
 	}
-
-	@SuppressWarnings("unchecked")
+    
+    @SuppressWarnings("unchecked")
 	public static <T extends Element> boolean replaceChild(List<T> list, Class<T> type, Element parent, Element child, Element by) {
 		int i = indexOfInstance(child, list);
         
@@ -429,8 +429,32 @@ public abstract class Element {
 		
 		return false;
 	}
+    
+    @SuppressWarnings("unchecked")
+	public static <T extends Element> boolean replaceChild(Map<String, T> map, Class<T> type, Element parent, Element child, Element by) {
+		String i = indexOfInstance(child, map);
+        
+		if (i != null) {
+			T old;
+			if (by == null)
+				old = map.remove(i);
+			else
+                old = map.put(i, type == null ? (T)by : type.cast(by));
 
-    static int indexOfInstance(Element e, List<? extends Element> list) {
+			if (old != by) {
+				if (old != null)
+					old.setParentElement(null);
+				
+				if (by != null)
+					by.setParentElement(parent);
+			}
+			return true;
+		}
+		
+		return false;
+	}
+
+    static <T> int indexOfInstance(Element e, List<? extends Element> list) {
         int i = -1;
         for (int k = 0, n = list.size(); k < n; k++)
             if (list.get(k) == e) {
@@ -439,20 +463,37 @@ public abstract class Element {
             }
         return i;
     }
-	public static <T extends Element> Element getNextSibling(List<T> list, Element child) {
-		int i = indexOfInstance(child, list);
-		if (i >= 0) {
-			return i < list.size() - 1 ? list.get(i + 1) : null;
-		}
-		return null;
+
+    static <T> T indexOfInstance(Element e, Map<T, ? extends Element> map) {
+        for (Map.Entry<T, ? extends Element> entry : map.entrySet()) {
+            if (entry.getValue() == e) {
+                return entry.getKey();
+            }
+        }
+        return null;
+    }
+	public static <T extends Element> Element getNextSibling(Iterable<T> list, Element child) {
+        boolean wasLast = false;
+        for (T value : list) {
+            if (child == value) {
+                wasLast = true;
+            } else if (wasLast) {
+                return value;
+            }
+        }
+        return null;
 	}
 
-	public static <T extends Element> Element getPreviousSibling(List<T> list, Element child) {
-		int i = indexOfInstance(child, list);
-		if (i >= 0) {
-			return i > 0 ? list.get(i - 1) : null;
-		}
-		return null;
+	public static <T extends Element> Element getPreviousSibling(Iterable<T> list, Element child) {
+		T last = null;
+        for (T value : list) {
+            if (child == value) {
+                return last;
+            } else {
+                last = value;
+            }
+        }
+        return null;
 	}
 	public static <T extends Element> void changeValue(Element parent, List<T> oldValue, List<T> newValue) {
 		for (T t : oldValue)
@@ -466,6 +507,22 @@ public abstract class Element {
 					continue;
 				t.setParentElement(parent);
 				oldValue.add(t);
+			}
+		}
+	}
+	public static <T extends Element> void changeValue(Element parent, Map<String, T> oldValue, Map<String, T> newValue) {
+		for (T t : oldValue.values())
+			t.setParentElement(null);
+	
+		oldValue.clear();
+		
+		if (newValue != null) {
+            for (String name : newValue.keySet()) {
+                T t = newValue.get(name);
+				if (t == null)
+					continue;
+				t.setParentElement(parent);
+				oldValue.put(name, t);
 			}
 		}
 	}
