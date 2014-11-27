@@ -1257,7 +1257,11 @@ public abstract class Expression extends Element {
 						return new Constant(Type.LongString, IntForm.String, result, orig);
 				}
 			}
-			return new Constant(Type.Char, parseNakedString(string).charAt(0), orig);
+            String parsed = parseNakedString(string);
+            if (parsed.length() != 1) {
+                throw new IllegalArgumentException("Expected char, go string of length " + parsed.length() + ": '" + parsed + "'");
+            }
+			return new Constant(Type.Char, parsed.charAt(0), orig);
 			
 		}
 		
