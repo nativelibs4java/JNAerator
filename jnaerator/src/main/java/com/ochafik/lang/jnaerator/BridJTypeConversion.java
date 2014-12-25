@@ -186,15 +186,15 @@ public class BridJTypeConversion extends TypeConversion {
         }
     }
     public NL4JConversion convertTypeToNL4J(TypeRef valueType, Identifier libraryClassName, Expression structIOExpr, Expression valueExpr, int fieldIndex, int bits) throws UnsupportedConversionException {
-
-        JavaPrim prim = getPrimitive(valueType);
-        if (prim != null) {
-            return convertPrimitiveTypeRefToNL4J(prim, structIOExpr, fieldIndex, valueExpr);
-        }
         
         TypeRef original = valueType;
         valueType = normalizeTypeRef(valueType);
         
+        JavaPrim prim = getPrimitive(valueType);
+        if (prim != null) {
+            return convertPrimitiveTypeRefToNL4J(prim, structIOExpr, fieldIndex, valueExpr);
+        }
+
         NL4JConversion conv = new NL4JConversion();
 
         if (valueType == null) {
