@@ -42,6 +42,9 @@ public class JNAGlobalsGenerator extends GlobalsGenerator {
     ;
 	
     public void convertGlobals(VariablesDeclaration globals, Signatures signatures, DeclarationsHolder out, Expression nativeLibFieldExpr, Identifier callerLibraryName, String callerLibrary) throws UnsupportedConversionException {
+        if (result.config.runtime == JNAeratorConfig.Runtime.JNA) {
+            return;
+        }
         for (Declarator d : globals.getDeclarators()) {
             try {
                 Identifier name = result.typeConverter.getValidJavaArgumentName(ident(d.resolveName()));
