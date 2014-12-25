@@ -842,14 +842,14 @@ public class Result extends Scanner {
     }
     Map<String, TypeRef> manualTypeDefs = new HashMap<String, TypeRef>();
 
-    public TypeRef getTypeDef(Identifier name) {
-        if (name == null) {
+    public TypeRef getTypeDef(Identifier nameId) {
+        if (nameId == null) {
             return null;
         }
-
+        String name = nameId.toString();
         Pair<TypeDef, Declarator> p = typeDefs.get(name);
         if (p == null) {
-            return manualTypeDefs.get(name.toString());
+            return manualTypeDefs.get(name);
         }
 
         Declarator value = p.getValue();
