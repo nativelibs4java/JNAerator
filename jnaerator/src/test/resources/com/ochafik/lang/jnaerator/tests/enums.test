@@ -18,6 +18,23 @@ struct {
 } S;
 
 --
+#runtime(JNA)
+import test.*;
+import static test.TestLibrary.*;
+
+int i;
+i = A;
+i = B;
+i = C;
+i = A2;
+i = B2;
+i = C2;
+i = E.Item1;
+i = E.Item2;
+i = E.Item3;
+i = E.Item4;
+
+--
 #runtime(JNAerator)
 import test.*;
 import static test.TestLibrary.*;

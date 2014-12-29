@@ -789,26 +789,42 @@ public class BridJDeclarationsConverter extends DeclarationsConverter {
         TypeRef javaType = convDecl.getValueType();
         String pointerGetSetMethodSuffix = StringUtils.capitalize(javaType.toString());
 
-        Expression getGlobalPointerExpr = null;
-        if (isGlobal) {
-            getGlobalPointerExpr = methodCall(methodCall(methodCall(expr(typeRef(BridJ.class)), "getNativeLibrary", expr(callerLibrary)), "getSymbolPointer", expr(name)), "as", result.typeConverter.typeLiteral(javaType.clone()));
-        }
         List<Declaration> out = new ArrayList<Declaration>();
         boolean addedGetterOrSetter = false;
-        if (conv.getExpr != null) {
+        
+        Expression getGlobalPointerExpr = methodCall(methodCall(expr(typeRef(BridJ.class)), "getNativeLibrary", expr(callerLibrary)), "getSymbolPointer", expr(name));
+        String getterName = "get";
+        String setterName = "set";
+        if (isGlobal) {
+            if (conv.pointerGetterName != null &&
+                conv.pointerSetterName != null) {
+                getterName = conv.pointerGetterName;
+                setterName = conv.pointerSetterName;
+            } else {
+//            if (conv.type == ConvType.NativeLong || conv.cLong) {
+//                getterName = "getCLong";
+//                setterName = "setCLong";
+//            } else if (conv.type == ConvType.NativeSize || conv.nativeSize) {
+//                getterName = "getSizeT";
+//                setterName = "setSizeT";
+//            } else {
+                getGlobalPointerExpr = methodCall(getGlobalPointerExpr, "as", result.typeConverter.typeLiteral(javaType.clone()));
+            }
+        }
+        if (conv.getFieldExpr != null) {
             Function getter = convDecl.clone();
             if (isGlobal) {
                 getter.setBody(block(
-                        tryRethrow(new Statement.Return(cast(javaType.clone(), methodCall(getGlobalPointerExpr, "get"))))));
+                        tryRethrow(new Statement.Return(cast(javaType.clone(), methodCall(getGlobalPointerExpr, getterName))))));
             } else {
                 getter.setBody(block(
-                        new Statement.Return(conv.getExpr)));
+                        new Statement.Return(conv.getFieldExpr)));
             }
             out.add(getter);
             addedGetterOrSetter = true;
         }
 
-        if (!conv.readOnly && conv.setExpr != null) {
+        if (!conv.readOnly && conv.setFieldExpr != null) {
             Function setter = convDecl.clone();
             setter.setValueType(typeRef(holderName.clone()));//Void.TYPE));
             setter.addArg(new Arg(name, javaType));
@@ -816,11 +832,11 @@ public class BridJDeclarationsConverter extends DeclarationsConverter {
             if (isGlobal) {
                 setter.setBody(block(
                         tryRethrow(block(
-                        stat(methodCall(getGlobalPointerExpr, "set", varRef(name))),
+                        stat(methodCall(getGlobalPointerExpr, setterName, varRef(name))),
                         new Statement.Return(thisRef())))));
             } else {
                 setter.setBody(block(
-                        stat(conv.setExpr),
+                        stat(conv.setFieldExpr),
                         new Statement.Return(thisRef())));
             }
             out.add(setter);

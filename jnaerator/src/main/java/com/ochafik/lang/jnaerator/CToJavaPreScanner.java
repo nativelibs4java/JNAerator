@@ -188,13 +188,15 @@ public class CToJavaPreScanner extends Scanner {
 
         if (ModifierType.Long.isContainedBy(primitive.getModifiers())) {
             Identifier name = primitive.getName();
-            if (name != null && name.equals("int")) {
+            if (name == null || name.equals("int") || name.equals("long")) {
                 primitive.setName(ident("long"));
-                primitive.removeModifiers(ModifierType.Long);
+                if (name == null) {
+                    primitive.removeModifiers(ModifierType.Long);
+                }
             }
         } else if (ModifierType.Short.isContainedBy(primitive.getModifiers())) {
             Identifier name = primitive.getName();
-            if (name != null && name.equals("int")) {
+            if (name == null || name.equals("int")) {
                 primitive.setName(ident("short"));
                 primitive.removeModifiers(ModifierType.Short);
             }

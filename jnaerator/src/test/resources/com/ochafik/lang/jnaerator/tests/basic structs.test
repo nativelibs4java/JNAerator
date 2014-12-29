@@ -7,17 +7,44 @@ struct B {
    A a;
    A *pa;
 };
+union U {
+  int i;
+  float f;
+};
+--
+#runtime(JNA)
+import test.*;
+import static test.TestLibrary.*;
+
+B b = new B();
+b = new B((Pointer) null);
+b.a = new A.ByValue();
+b.pa = new A.ByReference();
+int i = b.pa.i = 10;
+short s = b.pa.s;
+b.pa.l = 1L;
+
+U u = new U(1);
+u = new U(1f);
+u = new U.ByReference();
+u = new U.ByValue();
 --
 #runtime(JNAerator)
 import test.*;
 import static test.TestLibrary.*;
 
 B b = new B();
+b = new B((Pointer) null);
 b.a = new A.ByValue();
 b.pa = new A.ByReference();
 int i = b.pa.i = 10;
 short s = b.pa.s;
-b.pa.l = (NativeLong)null;
+b.pa.l = 1L;
+
+U u = new U(1);
+u = new U(1f);
+u = new U.ByReference();
+u = new U.ByValue();
 --
 #runtime(BridJ)
 import test.*;
@@ -29,3 +56,5 @@ int i = b.pa().get().i();
 short s = b.pa().get().s();
 b.pa().get().l((long)0);
 long l = b.pa().get().l(); 
+
+U u = new U().i(1).f(1f);

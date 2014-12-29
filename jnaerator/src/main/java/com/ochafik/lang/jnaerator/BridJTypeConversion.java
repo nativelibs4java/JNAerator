@@ -91,12 +91,11 @@ public class BridJTypeConversion extends TypeConversion {
         private TypeRef typeRef, indirectType;
         public List<Expression> arrayLengths;
         public Expression bits;
-        public Expression getExpr, setExpr;
+        public Expression getFieldExpr, setFieldExpr;
+        public String pointerGetterName, pointerSetterName;
         public boolean wideString, readOnly, byValue, nativeSize, cLong, isUndefined, isTypedPointer;
         public Charset charset;
         public final List<Annotation> annotations = new ArrayList<Annotation>();
-        //public String structIOFieldGetterNameRadix;
-        public String pointerFieldGetterNameRadix;
 
         public TypeRef getTypeRef(boolean useRawTypes) {
             if (useRawTypes) {
@@ -236,9 +235,9 @@ public class BridJTypeConversion extends TypeConversion {
                 conv.typeRef = typeRef(result.getFakePointer(libraryClassName, ((TypeRef.SimpleTypeRef) original).getName().clone()));
                 if (structIOExpr != null) {
                     if (conv.arrayLengths == null) {
-                        conv.setExpr = methodCall(structIOExpr.clone(), "setPointerField", thisRef(), expr(fieldIndex), valueExpr);
+                        conv.setFieldExpr = methodCall(structIOExpr.clone(), "setPointerField", thisRef(), expr(fieldIndex), valueExpr);
                     }
-                    conv.getExpr = methodCall(structIOExpr.clone(), "getTypedPointerField", thisRef(), expr(fieldIndex));
+                    conv.getFieldExpr = methodCall(structIOExpr.clone(), "getTypedPointerField", thisRef(), expr(fieldIndex));
                 }
                 return conv;
             } else if (conv.targetTypeConversion == null) {
@@ -251,11 +250,17 @@ public class BridJTypeConversion extends TypeConversion {
                 if (pointedTypeRef != null) {
                     conv.type = ConvType.Pointer;
                     conv.typeRef = typeRef(ident(result.config.runtime.pointerClass, expr(pointedTypeRef.clone())));
+                    if (conv.targetTypeConversion != null &&
+                        conv.targetTypeConversion.type == ConvType.Void)
+                    {
+                        conv.pointerGetterName = "getPointer";
+                        conv.pointerSetterName = "setPointer";
+                    }
                     if (structIOExpr != null) {
                         if (conv.arrayLengths == null) {
-                            conv.setExpr = methodCall(structIOExpr.clone(), "setPointerField", thisRef(), expr(fieldIndex), valueExpr);
+                            conv.setFieldExpr = methodCall(structIOExpr.clone(), "setPointerField", thisRef(), expr(fieldIndex), valueExpr);
                         }
-                        conv.getExpr = methodCall(structIOExpr.clone(), "getPointerField", thisRef(), expr(fieldIndex));
+                        conv.getFieldExpr = methodCall(structIOExpr.clone(), "getPointerField", thisRef(), expr(fieldIndex));
                     }
                     return conv;
                 }
@@ -269,14 +274,14 @@ public class BridJTypeConversion extends TypeConversion {
                 conv.type = ConvType.Enum;
                 conv.typeRef = typeRef(ident(IntValuedEnum.class, expr(conv.typeRef)));
                 if (structIOExpr != null) {
-                    conv.setExpr = methodCall(structIOExpr.clone(), "setEnumField", thisRef(), expr(fieldIndex), valueExpr);
-                    conv.getExpr = methodCall(structIOExpr.clone(), "getEnumField", thisRef(), expr(fieldIndex));//expr(typeRef(FlagSet.class)), "fromValue", methodCall(structPeerExpr.clone(), "getInt", expr(fieldIndex)), classLiteral(conv.typeRef.clone()));
+                    conv.setFieldExpr = methodCall(structIOExpr.clone(), "setEnumField", thisRef(), expr(fieldIndex), valueExpr);
+                    conv.getFieldExpr = methodCall(structIOExpr.clone(), "getEnumField", thisRef(), expr(fieldIndex));//expr(typeRef(FlagSet.class)), "fromValue", methodCall(structPeerExpr.clone(), "getInt", expr(fieldIndex)), classLiteral(conv.typeRef.clone()));
                 }
             } else if (valueType instanceof Struct) {
                 conv.type = ConvType.Struct;
                 if (structIOExpr != null) {
-                    conv.setExpr = methodCall(structIOExpr.clone(), "setNativeObjectField", thisRef(), expr(fieldIndex), valueExpr);
-                    conv.getExpr = methodCall(structIOExpr.clone(), "getNativeObjectField", thisRef(), expr(fieldIndex));
+                    conv.setFieldExpr = methodCall(structIOExpr.clone(), "setNativeObjectField", thisRef(), expr(fieldIndex), valueExpr);
+                    conv.getFieldExpr = methodCall(structIOExpr.clone(), "getNativeObjectField", thisRef(), expr(fieldIndex));
                     //conv.getExpr = new Expression.New(conv.typeRef, (Expression)methodCall(structIOExpr.clone(), "offset", offsetExpr.clone()));
                 }
             } else {
@@ -351,9 +356,13 @@ public class BridJTypeConversion extends TypeConversion {
                 radix = StringUtils.capitalize(prim.type.getName());
                 break;
         }
+        if (radix != null && prim != JavaPrim.NativeTime) {
+            conv.pointerGetterName = "get" + radix;
+            conv.pointerSetterName = "set" + radix;
+        }
         if (structIOExpr != null && radix != null) {
-            conv.setExpr = methodCall(structIOExpr.clone(), "set" + radix + "Field", thisRef(), expr(fieldIndex), valueExpr);
-            conv.getExpr = methodCall(structIOExpr.clone(), "get" + radix + "Field", thisRef(), expr(fieldIndex));
+            conv.setFieldExpr = methodCall(structIOExpr.clone(), "set" + radix + "Field", thisRef(), expr(fieldIndex), valueExpr);
+            conv.getFieldExpr = methodCall(structIOExpr.clone(), "get" + radix + "Field", thisRef(), expr(fieldIndex));
         }
         return conv;
     }

@@ -25,6 +25,7 @@ import com.ochafik.lang.jnaerator.runtime.globals.GlobalCallback;
 import com.ochafik.lang.jnaerator.runtime.globals.GlobalPointer;
 import com.ochafik.lang.jnaerator.runtime.globals.GlobalPointerType;
 import com.ochafik.lang.jnaerator.runtime.globals.GlobalStruct;
+import com.ochafik.lang.jnaerator.runtime.globals.GlobalUnion;
 import com.sun.jna.ptr.ByReference;
 
 import static com.ochafik.lang.jnaerator.parser.ElementsHelper.*;
@@ -59,14 +60,14 @@ public class JNAGlobalsGenerator extends GlobalsGenerator {
                 List<Modifier> modifiers = new ArrayList<Modifier>(type.getModifiers());
                 modifiers.addAll(globals.getModifiers());
 
-                type.setModifiers(Collections.EMPTY_LIST);
+//                type.setModifiers(Collections.EMPTY_LIST);
 
-                if (!isCallback
-                        && !(ModifierType.Extern.isContainedBy(modifiers) || ModifierType.Dllexport.isContainedBy(modifiers) || ModifierType.Dllimport.isContainedBy(modifiers)) //|| Modifier.Const.isContainedBy(modifiers) && d.getDefaultValue() != null
-                        ) {
-                    //result.declarationsConverter.convertCon
-                    continue;
-                }
+                 if (!isCallback
+                         && !(ModifierType.Extern.isContainedBy(modifiers) || ModifierType.Dllexport.isContainedBy(modifiers) || ModifierType.Dllimport.isContainedBy(modifiers)) //|| Modifier.Const.isContainedBy(modifiers) && d.getDefaultValue() != null
+                         ) {
+                     //result.declarationsConverter.convertCon
+                     continue;
+                 }
 
 
                 if (true) {//!result.config.useJNADirectCalls) {
@@ -90,7 +91,10 @@ public class JNAGlobalsGenerator extends GlobalsGenerator {
                         TypeRef globalType = null;
                         Expression extraArg = null;
                         //Class<? extends Global> optionA;
-                        if (isUnion || isStruct) {
+                        if (isUnion) {
+                            globalType = typeRef(ident(GlobalUnion.class, expr(convertedType.clone())));
+                            extraArg = memberRef(expr(convertedType.clone()), Expression.MemberRefStyle.Dot, "class");
+                        } else if (isStruct) {
                             globalType = typeRef(ident(GlobalStruct.class, expr(convertedType.clone())));
                             extraArg = memberRef(expr(convertedType.clone()), Expression.MemberRefStyle.Dot, "class");
                         } else if (isCallback) {
@@ -130,6 +134,9 @@ public class JNAGlobalsGenerator extends GlobalsGenerator {
 
                             out.addDeclaration(vd);
                             continue;
+                        } else {
+                          out.addDeclaration(result.declarationsConverter.skipDeclaration(d,
+                              "Unsupported global value type: " + convTypStr));
                         }
                     }
                 }

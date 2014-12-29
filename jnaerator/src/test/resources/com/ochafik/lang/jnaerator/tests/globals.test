@@ -1,0 +1,119 @@
+extern struct { int i; } s;
+extern union { int i; float f; } u;
+extern enum { A, B } e;
+
+extern int gi;
+extern short gs;
+extern char gc;
+extern long gl;
+extern long long gll;
+extern float gf;
+extern double gd;
+extern bool gb;
+extern size_t gst;
+extern time_t gt;
+
+extern void *gpv;
+extern void **gpp;
+
+extern int *gpi;
+extern short *gps;
+extern char *gpc;
+extern long *gpl;
+extern long long *glpl;
+extern float *gpf;
+extern double *gpd;
+extern bool *gpb;
+extern size_t *gpst;
+extern time_t *gpt;
+--
+#runtime(JNA)
+import test.*;
+import static test.TestLibrary.*;
+
+--
+#runtime(JNAerator)
+import test.*;
+import static test.TestLibrary.*;
+import com.ochafik.lang.jnaerator.runtime.NativeSize;
+
+s_struct.ByValue s_ = s.get();
+s.set(s_);
+
+u_union.ByValue u_ = u.get();
+u.set(u_);
+
+IntByReference e_ = e.get();
+
+gi.set(1);
+int i = gi.get();
+
+gs.set((short) 1);
+short s = gs.get();
+
+gc.set((byte) 1);
+byte c = gc.get();
+
+gl.set(new NativeLong(1L));
+NativeLong l = gl.get();
+
+gll.set(1L);
+long ll = gll.get();
+
+gf.set(1f);
+float f = gf.get();
+
+gd.set(1.0);
+double d = gd.get();
+
+gst.set(new NativeSize(1L));
+NativeSize st = gst.get();
+
+gpv.set((Pointer) null);
+Pointer pv = gpv.get();
+--
+#runtime(BridJ)
+import test.*;
+import test.TestLibrary;
+import static test.TestLibrary.*;
+
+TestLibrary lib = new TestLibrary();
+
+s_struct s_ = lib.s();
+lib.s(s_);
+
+u_union u_ = lib.u();
+lib.u(u_);
+
+IntValuedEnum<e_enum> e_ = lib.e();
+lib.e(e_);
+
+lib.gi(1);
+int i = lib.gi();
+
+lib.gs((short) 1);
+short s = lib.gs();
+
+lib.gc((byte) 1);
+byte c = lib.gc();
+
+lib.gl(1L);
+long l = lib.gl();
+
+lib.gll(1L);
+long ll = lib.gll();
+
+lib.gf(1f);
+float f = lib.gf();
+
+lib.gd(1.0);
+double d = lib.gd();
+
+lib.gb(true);
+boolean b = lib.gb();
+
+lib.gst(1L);
+long st = lib.gst();
+
+lib.gpv((Pointer) null);
+Pointer pv = lib.gpv();

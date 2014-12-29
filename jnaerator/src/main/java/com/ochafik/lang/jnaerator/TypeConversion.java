@@ -549,7 +549,7 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
 //        }
 
         JavaPrim type = result.resolvePrimitive(str);
-        if (type == JavaPrim.Int && longCount > 1) {
+        if ((type == JavaPrim.Int || type == JavaPrim.NativeLong) && longCount >= 1) {
             return JavaPrim.Long;
         }
 
@@ -853,7 +853,6 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
     }
     static Map<String, Pair<Integer, Class<?>>> buffersAndArityByType = new HashMap<String, Pair<Integer, Class<?>>>();
     static Map<String, Pair<Integer, Class<?>>> arraysAndArityByType = new HashMap<String, Pair<Integer, Class<?>>>();
-    static Map<String, String> pointerFieldGetterNameRadixByType = new HashMap<String, String>();
     static Set<String> objectMethodNames = new HashSet<String>();
 
     static {
@@ -886,7 +885,6 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
                 for (String type : new String[]{rawType + suffix, "u" + rawType + suffix}) {
                     buffersAndArityByType.put(type, buffPair);
                     arraysAndArityByType.put(type, arrPair);
-                    pointerFieldGetterNameRadixByType.put(type, radix);
                 }
             }
         }
