@@ -273,7 +273,6 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
         result.prim("GLuint", JavaPrim.Int);
         result.prim("GLenum", JavaPrim.Int);
         result.prim("GLsizei", JavaPrim.Int);
-        result.prim("__darwin_size_t", JavaPrim.Int);
 
         result.prim("__int32", JavaPrim.Int);
 
@@ -291,6 +290,7 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
         JavaPrim sizePrim = result.config.sizeAsLong ? longPrim : JavaPrim.NativeSize;
         result.prim("size_t", sizePrim);
         result.prim("ptrdiff_t", sizePrim);
+        result.prim("__darwin_size_t", JavaPrim.NativeSize);
 
         result.prim("complex double", JavaPrim.ComplexDouble);
 
