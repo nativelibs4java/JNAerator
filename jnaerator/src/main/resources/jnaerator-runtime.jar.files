@@ -71,6 +71,7 @@ com/ochafik/lang/jnaerator/runtime/globals/GlobalPointerType.class
 com/ochafik/lang/jnaerator/runtime/globals/GlobalPrimitive.class
 com/ochafik/lang/jnaerator/runtime/globals/GlobalShort.class
 com/ochafik/lang/jnaerator/runtime/globals/GlobalStruct.class
+com/ochafik/lang/jnaerator/runtime/globals/GlobalUnion.class
 com/ochafik/lang/jnaerator/runtime/scala/ScalaJNA.scala.part
 com/ochafik/lang/jnaerator/runtime/scala/ScalaRococoa.scala.part
 com/ochafik/lang/reflect/DebugUtils$1.class
