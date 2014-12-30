@@ -223,6 +223,8 @@ public class JNAerationTest {
             
             Map<JNAeratorConfig.Runtime, String> sourceByRuntime = new HashMap<JNAeratorConfig.Runtime, String>();
             sourceByRuntime.put(JNAeratorConfig.Runtime.BridJ, "");
+            sourceByRuntime.put(JNAeratorConfig.Runtime.JNA, "");
+            sourceByRuntime.put(JNAeratorConfig.Runtime.JNAerator, "");
                 
             //System.out.println("tt.length = " + tt.length);
 			for (int i = 1; i < tt.length; i++) {

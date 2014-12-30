@@ -117,7 +117,7 @@ public class JNATypeConversion extends TypeConversion {
         if (valueType instanceof TypeRef.Primitive) {
             JavaPrim prim = getPrimitive(valueType);
             if (prim != null) {
-                return primRef(prim);
+                return primRef(valueType, prim);
             }
 
 //			if (!valueType.getModifiers().contains("long"))
@@ -129,7 +129,7 @@ public class JNATypeConversion extends TypeConversion {
                 if (valueType instanceof Enum) {
                     TypeRef tr = findEnum(name, libraryClassName);
                     if (tr != null) {
-                        TypeRef intRef = primRef(JavaPrim.Int);
+                        TypeRef intRef = primRef(valueType, JavaPrim.Int);
                         intRef.setCommentBefore(tr.getCommentBefore());
                         return intRef;
                     }
@@ -175,7 +175,7 @@ public class JNATypeConversion extends TypeConversion {
                 if (prim == JavaPrim.Void) {
                     return typeRef(result.config.runtime.pointerClass);
                 } else {
-                    convArgType = primRef(prim);
+                    convArgType = primRef(valueType, prim);
                 }
             } else {
                 Identifier name = null;
@@ -426,7 +426,7 @@ public class JNATypeConversion extends TypeConversion {
 
         JavaPrim prim = getPrimitive(valueType);
         if (prim != null) {
-            return primRef(prim);
+            return primRef(valueType, prim);
         }
 
         if (valueType instanceof TypeRef.SimpleTypeRef && allowFakePointers) {
@@ -447,8 +447,10 @@ public class JNATypeConversion extends TypeConversion {
             Pair<Expression, TypeRef> casted = convertExpressionToJava(((Expression.Cast) x).getTarget(), libraryClassName, promoteNativeLongToLong, forceConstant, mappings);
 
             TypeRef tr = convertTypeToJNA(tpe, TypeConversionMode.ExpressionType, libraryClassName);
-            Expression val = casted.getFirst();
-            return typed(val, tr);
+            if (tr instanceof JavaPrimitive) {
+                Expression val = casted.getFirst();
+                return typed(val, tr);
+            }
         } else if (x instanceof Expression.TypeRefExpression) {
 
             Expression.TypeRefExpression tre = (Expression.TypeRefExpression) x;

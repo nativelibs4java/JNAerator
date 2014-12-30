@@ -815,9 +815,12 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
         //typeRef(ident(result.getLibraryClassFullName(library), inferCallBackName(s, true)));
     }
 
-    static TypeRef primRef(JavaPrim p) {
+    static TypeRef primRef(Element element, JavaPrim p) {
         if (p == null) {
             return null;
+        }
+        if (p.type == null) {
+            throw new UnsupportedConversionException(element, "Primitive without known type for this runtime: " + p);
         }
 
         return new JavaPrimitive(p);
@@ -1236,7 +1239,7 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
                                             if (promoteNativeLongToLong && (p == JavaPrim.NativeLong || p == JavaPrim.NativeSize)) {
                                                 p = JavaPrim.Long;
                                             }
-                                            tr = primRef(p);
+                                            tr = primRef(x, p);
                                             break;
                                         }
                                     }
@@ -1431,9 +1434,9 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
             } else {
                 String sname = name.toString();
                 if (sname.equals("True") || sname.equals("true")) {
-                    return typed(expr(Expression.Constant.Type.Bool, true), primRef(JavaPrim.Boolean));
+                    return typed(expr(Expression.Constant.Type.Bool, true), primRef(define, JavaPrim.Boolean));
                 } else if (sname.equals("False") || sname.equals("false")) {
-                    return typed(expr(Expression.Constant.Type.Bool, false), primRef(JavaPrim.Boolean));
+                    return typed(expr(Expression.Constant.Type.Bool, false), primRef(define, JavaPrim.Boolean));
                 } else {
                     Enum.EnumItem enumItem = result.enumItems.get(name);
                     if (enumItem != null) {

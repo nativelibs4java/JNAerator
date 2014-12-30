@@ -198,7 +198,7 @@ public class BridJTypeConversion extends TypeConversion {
 
         if (valueType == null) {
             conv.type = ConvType.Void;
-            conv.typeRef = primRef(JavaPrim.Void);
+            conv.typeRef = primRef(valueType, JavaPrim.Void);
             return conv;
         }
         if (valueType instanceof TypeRef.TargettedTypeRef) {
@@ -341,7 +341,7 @@ public class BridJTypeConversion extends TypeConversion {
                 break;
             case Void:
                 conv.type = ConvType.Void;
-                conv.typeRef = primRef(prim);
+                conv.typeRef = primRef(valueExpr, prim);
                 radix = null;
                 break;
             case ComplexDouble:
@@ -351,7 +351,7 @@ public class BridJTypeConversion extends TypeConversion {
                 break;
             default:
                 conv.type = ConvType.Primitive;
-                conv.typeRef = primRef(prim);
+                conv.typeRef = primRef(valueExpr, prim);
                 conv.indirectType = typeRef(prim.wrapperType);
                 radix = StringUtils.capitalize(prim.type.getName());
                 break;

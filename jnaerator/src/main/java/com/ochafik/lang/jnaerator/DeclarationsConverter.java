@@ -213,7 +213,7 @@ public abstract class DeclarationsConverter {
             // TODO
             TypeRef tr = prim == JavaPrim.NativeLong || prim == JavaPrim.NativeSize
                     ? typeRef("long")
-                    : primRef(prim) //result.typeConverter.convertTypeToJNA(mutatedType, TypeConversion.TypeConversionMode.FieldType, libraryClassName)
+                    : primRef(v, prim) //result.typeConverter.convertTypeToJNA(mutatedType, TypeConversion.TypeConversionMode.FieldType, libraryClassName)
                     ;
             VariablesDeclaration vd = new VariablesDeclaration(tr, new DirectDeclarator(name, val.getFirst()));
             if (!result.config.noComments) {
