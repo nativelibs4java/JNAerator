@@ -6,6 +6,7 @@ import com.ochafik.util.listenable.Pair;
 import com.ochafik.util.string.StringUtils;
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
+import com.google.common.collect.FluentIterable;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -119,7 +120,10 @@ public class JNAeratorCommandLineArgs {
                             List<String> parsedArg = new ArrayList<String>();
                             parsedArg.add(arg);
                             for (; iArg < opt.args.length; iArg++) {
-                                String param = args.get(++i);
+                                String param = null;
+                                if (i < args.size() - 1) {
+                                    param = args.get(++i);
+                                }
                                 OptionDef.ArgDef argDef = opt.args[iArg];
                                 pa.params[iArg] = argDef.convertArg(param, this);
                                 parsedArg.add(argDef.normalize(param));
@@ -173,20 +177,28 @@ public class JNAeratorCommandLineArgs {
     public enum OptionDef {
 
         OutputMode("-mode", "Choose the output mode of JNAerator", new ArgDef(Type.Enum, "mode", OutputMode.class)),
-        IncludeArgs("@(.+)?", "Read command-line arguments from a file. File may contain multiple lines (those beginning with \"//\" will be skipped), file wildcards will be resolved within the file content, as well as variables substitutions : $(someEnvOrJavaVarName), with $(DIR) being the parent directory of the current arguments file.", new ArgDef(Type.ExistingFile, "argumentsFile.jnaerator")),
+        IncludeArgs("@(.+)?",
+                strs("@path", "@ path"),
+                "Read command-line arguments from a file. File may contain multiple lines (those beginning with \"//\" will be skipped), file wildcards will be resolved within the file content, as well as variables substitutions : $(someEnvOrJavaVarName), with $(DIR) being the parent directory of the current arguments file.", new ArgDef(Type.ExistingFile, "argumentsFile.jnaerator")),
         OutputDir("-o", "Output directory for all artifacts", new ArgDef(Type.OutputDir, "outDir")),
         ExtractSymbols("-scanSymbols", "Extract, unmangle and parse the symbols all listed shared libraries"),
-        AddIncludePath("-I(.+)?", "Add a directory to the include path or include a file. See doc of JNAERATOR_INCLUDE_PATH", new ArgDef(Type.File, "dir")),
-        AddFrameworksPath("-F(.+)?", "Add a directory to the frameworks path. See doc of JNAERATOR_FRAMEWORKS_PATH", new ArgDef(Type.File, "dir")),
+        AddIncludePath("-I(.+)?",
+                strs("-Ipath", "-I path"),
+                "Add a directory to the include path or include a file. See doc of JNAERATOR_INCLUDE_PATH", new ArgDef(Type.File, "path")),
+        AddFrameworksPath("-F(.+)?",
+                strs("-Fpath", "-F path"),
+                "Add a directory to the frameworks path. See doc of JNAERATOR_FRAMEWORKS_PATH", new ArgDef(Type.File, "path")),
         FrameworksPath("-frameworksPath", "See doc of JNAERATOR_FRAMEWORKS_PATH", new ArgDef(Type.String, "path1:path2...")),
         Framework("-framework", "JNAerate a framework using its headers and its *.bridgesupport files if available", new ArgDef(Type.String, "frameworkName")),
         LimitComments("-limitComments", "Avoid useless comments (source file + line, skipped items...)"),
         NoComments("-noComments", "Don't output any member comment."),
         NoMangling("-noMangling", "Don't output any C++ name mangling information (may cause C++-decorated symbols not to be found at execution time)."),
-        AddRootDir("-addRootDir", "Remove this directory from the path of descendant source files in the generated documentation.", new ArgDef(Type.ExistingDir, "dir")),
+        AddRootDir("-addRootDir", "Remove this directory from the path of descendant source files in the generated documentation.", new ArgDef(Type.ExistingDir, "path")),
         NoCPP("-nocpp", "Do not define the __cplusplus symbol"),
         Reification("-reification", "Automatically create OO shortcuts for functions that look like methods (typedPtr.someFunc() for someFunc(typedPtr))"),
-        Undefine("-U(.+)", "Undefine a preprocessor symbol after the autoconfiguration phase.", new ArgDef(Type.String, "symbolName")),
+        Undefine("-U(.+)",
+                strs("-Uname", "-U name"),
+                "Undefine a preprocessor symbol after the autoconfiguration phase.", new ArgDef(Type.String, "name")),
         GUI("-gui", "Show minimalist progression GUI"),
         //NoRuntime(			"-noRuntime",		 	"Don't copy runtime classes to JAR output"),
         Synchronized("-synchronized", "Generate synchronized native methods"),
@@ -227,11 +239,19 @@ public class JNAeratorCommandLineArgs {
         DontCastConstants("-dontCastConstants", "Don't cast generated constants"),
         Runtime("-runtime", "Choose target runtime library between " + StringUtils.implode(JNAeratorConfig.Runtime.values(), ", ") + " (default: " + JNAeratorConfig.Runtime.DEFAULT + ").", new ArgDef(Type.Enum, "enum", JNAeratorConfig.Runtime.class)),
         IfRegexMatch("-ifRegexMatch", "Conditional evaluation of an argument if a java system property matches a regular expression", new ArgDef(Type.String, "javaProperty"), new ArgDef(Type.String, "regex"), new ArgDef(Type.String, "thenArg"), new ArgDef(Type.String, "elseArg")),
-        DefineMacro("-D([^=]*)(?:=(.*))?", "Define a macro symbol", new ArgDef(Type.String, "name"), new ArgDef(Type.String, "value")),
-        DefineImplicitMacro("-M([^=]*)(?:=(.*))?", "Define an implicit macro symbol, as if it were added by the system (won't count as an explicit macro when generating GYP files and other build artifacts)", new ArgDef(Type.String, "name"), new ArgDef(Type.String, "value")),
-        DefineType("-T([^=]*)(?:=(.*))?", "Define a type symbol", new ArgDef(Type.String, "name"), new ArgDef(Type.String, "value")),
+        DefineMacro("-D([^=]*)(?:=(.*))?", 
+                strs("-Dname=value", "-D name value", "-Dname=", "-DmacroName(x, y, z)=macroBody"),
+                "Define a macro symbol", new ArgDef(Type.String, "name"), new ArgDef(Type.String, "value")),
+        DefineImplicitMacro("-M([^=]*)(?:=(.*))?", 
+                strs("-Mname=value", "-M name value", "-Mname="),
+                "Define an implicit macro symbol, as if it were added by the system (won't count as an explicit macro when generating GYP files and other build artifacts)", new ArgDef(Type.String, "name"), new ArgDef(Type.String, "value")),
+        DefineType("-T([^=]*)(?:=(.*))?", 
+                strs("-Tname=value", "-T name value", "-Tname="),
+                "Define a type symbol", new ArgDef(Type.String, "name"), new ArgDef(Type.String, "value")),
         NoAutoImports("-noAutoImport", "Don't add import statements automatically to output java source files"),
-        RootPackage("-root(?:Package)?", "Define the root package for all output classes", new ArgDef(Type.String, "package")),
+        RootPackage("-root(?:Package)?", 
+                strs("-root", "-rootPackage"),
+                "Define the root package for all output classes", new ArgDef(Type.String, "package")),
         CurrentLibrary("-library", "Define the name of the output library. This is a state parameter, it will affect all files listed after it, until another -library switch is provided. It does not affect sources included from a project file (Visual Studio...).\n"
         + "C functions exported in library \"test\" will end up in class \"TestLibrary\", for instance. \n"
         + "The name of the library is the one fed to JNA to find the shared library, so library \"test\" must be in \"test.dll\" on Windows, \"libtest.dylib\" on Mac OS X and  \"libtest.so\" on other Unices.\n"
@@ -239,10 +259,14 @@ public class JNAeratorCommandLineArgs {
         new ArgDef(Type.String, "libName")),
         DefaultLibrary("-defaultLibrary", "Name of output library for elements declared in files not covered by a ${CurrentLibrary} switch", new ArgDef(Type.String, "libName")),
         SkipDeprecated("-skipDeprecated", "Don't generate members that would be tagged as @Deprecated"),
-        Help("-?-h(?:elp)?", "Show command line arguments help"),
+        Help("-?-h(?:elp)?",
+                strs("-h", "-help"),
+                "Show command line arguments help"),
         EntryName("-entryClass", "Generate a class _entryclassName.EntryClassName_ that will contain all of the jnaerated libraries instances. User code will just need to static import or derive from this class to access to the instances (has no effect for BridJ runtime).", new ArgDef(Type.String, "entryClassName")),
         //		Undefine(			"-U(.*)?",				"Undefine a preprocessor symbol before ", new ArgDef(Type.String, "entryClassName")),
-        Verbose("-v(?:erbose)?", "Verbose output (both console and files)"),
+        Verbose("-v(?:erbose)?",
+                strs("-v", "-verbose"),
+                "Verbose output (both console and files)"),
         ChoicesOut("-choicesOut", "Write the function alternative choices made (automatically set when ${Verbose} is used).", new ArgDef(Type.OutputFile, "outFile")),
         ChoicesIn("-choices", "Read the function alternative choices from a file in the format used by -choicesOut.", new ArgDef(Type.ExistingFile, "choicesFile")),
         PreprocessingOut("-preprocessingOut", "Write the preprocessor output in a file (automatically set when ${Verbose} is used).", new ArgDef(Type.OutputFile, "outFile")),
@@ -277,16 +301,26 @@ public class JNAeratorCommandLineArgs {
         GenPrivateMembers("-genPrivateMembers", "Generate wrappers for private fields and methods (will be protected and deprecated)."),
         CPlusPlusGen("-genCPlusPlus", "[Experimental, Not working at all] Generate C++ classes.");
 
+        static String[] strs(String... strs) {
+            return strs;
+        }
         OptionDef(String clSwitch, String description, ArgDef... args) {
+            this(clSwitch, strs(), description, args);
+        }
+        OptionDef(String clSwitch, String[] examples, String description, ArgDef... args) {
             this.clSwitch = clSwitch;
             this.description = description;
             this.args = args;
+            this.examples = examples;
             switchPattern = clSwitch == null ? null : Pattern.compile(clSwitch);
             for (int i = 0; i < args.length; i++) {
                 args[i].position = i;
             }
         }
 
+        String switchName() {
+            return clSwitch == null ? "" : clSwitch.replace("(?i)", "");
+        }
         public String toString() {
             return super.toString() + ": " + description();
         }
@@ -313,6 +347,7 @@ public class JNAeratorCommandLineArgs {
         public final Pattern switchPattern;
         public final String clSwitch;
         private final String description;
+        public final String[] examples;
 
         public String description() {
             return isDeprecated() ? "(deprecated) " + description : description;
@@ -518,17 +553,28 @@ public class JNAeratorCommandLineArgs {
                 return o1.clSwitch.compareTo(o2.clSwitch);
             }
         });
+        
         if (wikiFormat) {
             for (OptionDef opt : opts) {
-                System.out.print(" * *" + (opt.clSwitch == null ? "" : opt.clSwitch) + "*");
+                if (opt.examples.length > 0) {
+                    for (String example : opt.examples) {
+                         System.out.println(" * *" + example + "*");
+                    }
+                } else {
+                    System.out.print(" * *" + opt.switchName() + "*");
+                    for (OptionDef.ArgDef ad : opt.args) {
+                        System.out.print(" ");
+                        System.out.print(ad.name);
+                    }
+                    System.out.println();
+                }
+                System.out.println("  " + opt.description().replaceAll("\\*", "`*`").replaceAll("\n", "\n  "));
                 for (OptionDef.ArgDef ad : opt.args) {
                     String desc =
                             ad.type == OptionDef.Type.Enum ? StringUtils.implode(ad.additionalClass.getEnumConstants(), " | ")
                             : ad.type.toString();
-                    System.out.print(" <" + ad.name + ": " + desc + ">");
+                    System.out.println("  _" + ad.name + "_: " + desc);
                 }
-                System.out.println();
-                System.out.println("  " + opt.description().replaceAll("\\*", "`*`").replaceAll("\n", "\n  "));
             }
         } else {
             System.out.println("Credits:   JNAerator is Copyright (c) 2008-2009 Olivier Chafik");
@@ -539,15 +585,25 @@ public class JNAeratorCommandLineArgs {
             System.out.println("           Licensing & Copyright details : http://code.google.com/p/jnaerator/wiki/CreditsAndLicense");
 
             for (OptionDef opt : opts) {
-                System.out.print("\t" + (opt.clSwitch == null ? "" : opt.clSwitch));
+                if (opt.examples.length > 0) {
+                    for (String example : opt.examples) {
+                         System.out.println("\t" + example);
+                    }
+                } else {
+                    System.out.print("\t" + opt.switchName());
+                    for (OptionDef.ArgDef ad : opt.args) {
+                        System.out.print(" ");
+                        System.out.print(ad.name);
+                    }
+                    System.out.println();
+                }
+                System.out.println("\t\t" + opt.description());
                 for (OptionDef.ArgDef ad : opt.args) {
                     String desc =
                             ad.type == OptionDef.Type.Enum ? StringUtils.implode(ad.additionalClass.getEnumConstants(), " | ")
                             : ad.type.toString();
-                    System.out.print(" <" + ad.name + ": " + desc + ">");
+                    System.out.println("\t\t" + ad.name + ": " + desc);
                 }
-                System.out.println();
-                System.out.println("\t\t" + opt.description());
                 System.out.println();
             }
         }
