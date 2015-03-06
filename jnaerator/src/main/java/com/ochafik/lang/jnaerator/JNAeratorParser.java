@@ -161,8 +161,6 @@ public class JNAeratorParser {
                 String errorOut = new String(bout.toByteArray()).trim();
                 if (errorOut.length() > 0 && config.verbose) {
                     WriteText.writeText(errorOut, new File("fullParsing.errors.txt"));
-                } else {
-                    System.err.println(errorOut);
                 }
 
                 throw new ParseError(source, errorOut, error);
@@ -239,12 +237,13 @@ public class JNAeratorParser {
     public SourceFiles parse(final JNAeratorConfig config, TypeConversion typeConverter, MacroUseCallback macrosDependenciesOut) throws IOException, LexerException {
         SourceFiles sourceFiles = new SourceFiles();
 
-        StringBuilder syntheticTypeDefsBuilder = new StringBuilder("// Synthetic typedefs from -Tfoo=bar arguments.\n\n");
-        for (Map.Entry<String, String> e : config.preprocessorConfig.forcedTypeDefs.entrySet()) {
-            syntheticTypeDefsBuilder.append("typedef ").append(e.getValue()).append(" ").append(e.getKey()).append(";\n");
+        if (!config.preprocessorConfig.forcedTypeDefs.isEmpty()) {
+            StringBuilder syntheticTypeDefsBuilder = new StringBuilder("// Synthetic typedefs from -Tfoo=bar arguments.\n\n");
+            for (Map.Entry<String, String> e : config.preprocessorConfig.forcedTypeDefs.entrySet()) {
+                syntheticTypeDefsBuilder.append("typedef ").append(e.getValue()).append(" ").append(e.getKey()).append(";\n");
+            }
+            config.preprocessorConfig.includeStrings.add(0, syntheticTypeDefsBuilder.toString());
         }
-        System.out.println("syntheticTypeDefsBuilder = " + syntheticTypeDefsBuilder);
-        config.preprocessorConfig.includeStrings.add(0, syntheticTypeDefsBuilder.toString());
 
         String sourceContent = PreprocessorUtils.preprocessSources(config, sourceFiles.defines, config.verbose, typeConverter, macrosDependenciesOut);
 
