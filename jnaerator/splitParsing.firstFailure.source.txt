@@ -1,3 +1,5 @@
+// Synthetic typedefs from -Tfoo=bar arguments.
 
-//void f(const char**, size_t);
-void f();
+typedef short __be16;
+
+
