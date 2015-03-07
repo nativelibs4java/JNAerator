@@ -30,7 +30,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -197,6 +197,9 @@ public class JNAerator {
     public static void main(String[] argsArray) {
 //        argsArray = "-library foo -dependencies bar,baz /Users/ochafik/test.h -mode Directory -o /Users/ochafik/tmp".split(" ");
 //        argsArray = new String[] { "/Users/ochafik/github/nativelibs4java/libraries/tmp/glib/config.jnaerator", "-mode", "Directory", "-f", "-o", "/Users/ochafik/github/nativelibs4java/libraries/tmp/glib" };
+//        argsArray = new String[] { "/Users/ochafik/tmp/test.h", "-T__be16=short", "-mode", "Directory", "-f", "-o", "/Users/ochafik/github/nativelibs4java/libraries/jnaerator/test", "-v" };
+//        argsArray = new String[] { "/Users/ochafik/tmp/test.h", "-T__be16=short", "-mode", "Directory", "-f", "-o", "/Users/ochafik/github/nativelibs4java/libraries/jnaerator/test", "-v", "-Dfoo" };
+//        argsArray = new String[] { "-mode", "Jar", "-f", "-o", "/Users/ochafik/github/nativelibs4java/libraries/tmp", "/Users/ochafik/github/nativelibs4java/libraries/OpenCL/OpenCL4Java/src/main/jnaerator/config.jnaerator" };
         main(new JNAerator(new JNAeratorConfig()), argsArray);
     }
 
@@ -1092,7 +1095,7 @@ public class JNAerator {
 
     private Map<String, File> getResourceFiles() {
 
-        Map<String, File> additionalFiles = new HashMap<String, File>();
+        Map<String, File> additionalFiles = new LinkedHashMap<String, File>();
 
         if (config.bundleLibraries) {
             for (Map.Entry<NativePlatform, List<File>> e : config.libraryFilesByArch.entrySet()) {
@@ -1127,7 +1130,7 @@ public class JNAerator {
 
     protected static Map<String, URL> getRuntimeFiles(JNAeratorConfig.Runtime runtime, boolean needsObjCRuntime) throws IOException {
         ClassLoader classLoader = JNAerator.class.getClassLoader();
-        Map<String, URL> ret = new HashMap<String, URL>();
+        Map<String, URL> ret = new LinkedHashMap<String, URL>();
 
         String listingFile = runtime.runtimeFilesListFileName;
         if (listingFile == null) {
@@ -1491,7 +1494,7 @@ public class JNAerator {
     }
 
     private boolean checkNoCycles(SourceFiles sourceFiles) {
-        final HashMap<Integer, Throwable> ids = new HashMap<Integer, Throwable>(new Arg().getId());
+        final LinkedHashMap<Integer, Throwable> ids = new LinkedHashMap<Integer, Throwable>(new Arg().getId());
         sourceFiles.accept(new Scanner() {
             @Override
             protected void visitElement(Element d) {
