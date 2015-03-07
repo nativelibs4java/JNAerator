@@ -7,7 +7,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Stack;
@@ -37,7 +37,7 @@ public class ScalaGenerator implements ClassWritingNotifiable {
         public String path, name;
         public StringWriter content = new StringWriter();
     }
-    Map<String, ScalaClassFile> outByLib = new HashMap<String, ScalaClassFile>();
+    Map<String, ScalaClassFile> outByLib = new LinkedHashMap<String, ScalaClassFile>();
     Result result;
 
     public ScalaGenerator(Result result) throws FileNotFoundException {

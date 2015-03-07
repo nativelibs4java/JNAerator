@@ -20,7 +20,7 @@ package com.ochafik.lang.jnaerator.parser;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -697,12 +697,12 @@ public abstract class Expression extends Element {
 		}
 	};
 	
-	static final Map<String, AssignmentOperator> assignOps = new HashMap<String, AssignmentOperator>();
-	static final Map<String, BinaryOperator> binOps = new HashMap<String, BinaryOperator>();
-	static final Map<String, UnaryOperator> unOps = new HashMap<String, UnaryOperator>();
-	static final Map<AssignmentOperator, String> assignOpsRev = new HashMap<AssignmentOperator, String>();
-	static final Map<BinaryOperator, String> binOpsRev = new HashMap<BinaryOperator, String>();
-	static final Map<UnaryOperator, String> unOpsRev = new HashMap<UnaryOperator, String>();
+	static final Map<String, AssignmentOperator> assignOps = new LinkedHashMap<String, AssignmentOperator>();
+	static final Map<String, BinaryOperator> binOps = new LinkedHashMap<String, BinaryOperator>();
+	static final Map<String, UnaryOperator> unOps = new LinkedHashMap<String, UnaryOperator>();
+	static final Map<AssignmentOperator, String> assignOpsRev = new LinkedHashMap<AssignmentOperator, String>();
+	static final Map<BinaryOperator, String> binOpsRev = new LinkedHashMap<BinaryOperator, String>();
+	static final Map<UnaryOperator, String> unOpsRev = new LinkedHashMap<UnaryOperator, String>();
 	//public static final Expression EMPTY_EXPRESSION = new Constant(null, null, "");
 	static {
 		for (AssignmentOperator op : AssignmentOperator.values())

@@ -22,7 +22,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.EnumSet;
 import static java.util.EnumSet.of;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import static com.ochafik.lang.jnaerator.parser.ModifierKind.*;
@@ -324,7 +324,7 @@ public enum ModifierType implements Modifier {
 	}
 
 	static Map<String, Modifier> mods = new 
-	HashMap<String, Modifier>();
+	LinkedHashMap<String, Modifier>();
 	static {
 		for (ModifierType m : values()) {
 			String n = m == _Complex ? m.name() : m.name().toLowerCase();

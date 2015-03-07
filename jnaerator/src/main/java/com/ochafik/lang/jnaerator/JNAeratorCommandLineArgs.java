@@ -22,7 +22,7 @@ public class JNAeratorCommandLineArgs {
 
     public static abstract class ArgsParser {
 
-        Map<PathType, List<File>> paths = new HashMap<PathType, List<File>>();
+        Map<PathType, List<File>> paths = new LinkedHashMap<PathType, List<File>>();
 
         public List<File> getPath(PathType type) {
             if (type == null) {

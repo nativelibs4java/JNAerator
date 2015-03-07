@@ -26,7 +26,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Set;
 import com.ochafik.util.string.StringUtils;
 
@@ -85,7 +85,7 @@ public class ObjectiveCGenerator {
 
     public static Set<String> getForcedProtocolParents(String protocolName) {
         if (protocolsForcedInheritance == null) {
-            protocolsForcedInheritance = new HashMap<String, Set<String>>();
+            protocolsForcedInheritance = new LinkedHashMap<String, Set<String>>();
             try {
                 InputStream in = ObjectiveCGenerator.class.getClassLoader().getResourceAsStream("com/ochafik/lang/jnaerator/ObjectiveCProtocolsForcedInheritanceList.data");
                 List<String> lines = ReadText.readLines(in);
@@ -109,7 +109,7 @@ public class ObjectiveCGenerator {
 
     public static boolean isMethodExcludedFromStaticForwarding(Function m) {
         if (methodsExcludedFromStaticForwarding == null) {
-            methodsExcludedFromStaticForwarding = new HashMap<String, Set<String>>();
+            methodsExcludedFromStaticForwarding = new LinkedHashMap<String, Set<String>>();
             try {
                 InputStream in = ObjectiveCGenerator.class.getClassLoader().getResourceAsStream("com/ochafik/lang/jnaerator/ObjectiveCStaticForwardsExcludeList.data");
 //				InputStream in = new FileInputStream("/Users/ochafik/Prog/Java/sources/com/ochafik/lang/jnaerator/ObjectiveCStaticForwardsExcludeList.data");

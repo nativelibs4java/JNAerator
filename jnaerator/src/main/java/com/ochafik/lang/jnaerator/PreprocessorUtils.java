@@ -46,7 +46,7 @@ import com.ochafik.io.WriteText;
 import com.ochafik.lang.jnaerator.parser.Define;
 import com.ochafik.lang.jnaerator.parser.Expression;
 import com.ochafik.util.string.StringUtils;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashMap;
 import java.util.regex.Pattern;
 import org.anarres.cpp.VirtualFile;
@@ -147,7 +147,7 @@ public class PreprocessorUtils {
 
             @Override
             protected Map<String, Macro> createMacro() {
-                return new HashMap<String, Macro>() {
+                return new LinkedHashMap<String, Macro>() {
                     @Override
                     public boolean containsKey(Object key) {
                         if (key instanceof String) {

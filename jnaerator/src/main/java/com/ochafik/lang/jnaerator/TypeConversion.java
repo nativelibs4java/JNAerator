@@ -81,7 +81,7 @@ import java.nio.LongBuffer;
 import java.nio.ShortBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -118,9 +118,9 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
         PrimitiveReturnType,
         PointedValue
     }
-    public Map<JavaPrim, Class<? extends ByReference>> primToByReference = new HashMap<JavaPrim, Class<? extends ByReference>>();
-    public Map<JavaPrim, Class<? extends Global>> primToGlobal = new HashMap<JavaPrim, Class<? extends Global>>();
-    public Map<JavaPrim, Class<? extends Buffer>> primToBuffer = new HashMap<JavaPrim, Class<? extends Buffer>>();
+    public Map<JavaPrim, Class<? extends ByReference>> primToByReference = new LinkedHashMap<JavaPrim, Class<? extends ByReference>>();
+    public Map<JavaPrim, Class<? extends Global>> primToGlobal = new LinkedHashMap<JavaPrim, Class<? extends Global>>();
+    public Map<JavaPrim, Class<? extends Buffer>> primToBuffer = new LinkedHashMap<JavaPrim, Class<? extends Buffer>>();
     public final Set<String> byReferenceClassesNames = new HashSet<String>();
 
     public boolean isObjCppPrimitive(String s) {
@@ -184,7 +184,7 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
 
         public static JavaPrim getJavaPrim(String name) {
             if (nameToPrim == null) {
-                nameToPrim = new HashMap<String, JavaPrim>();
+                nameToPrim = new LinkedHashMap<String, JavaPrim>();
                 for (JavaPrim p : values()) {
                     nameToPrim.put(p.simpleName, p);
                 }
@@ -854,8 +854,8 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
         Callback,
         Default
     }
-    static Map<String, Pair<Integer, Class<?>>> buffersAndArityByType = new HashMap<String, Pair<Integer, Class<?>>>();
-    static Map<String, Pair<Integer, Class<?>>> arraysAndArityByType = new HashMap<String, Pair<Integer, Class<?>>>();
+    static Map<String, Pair<Integer, Class<?>>> buffersAndArityByType = new LinkedHashMap<String, Pair<Integer, Class<?>>>();
+    static Map<String, Pair<Integer, Class<?>>> arraysAndArityByType = new LinkedHashMap<String, Pair<Integer, Class<?>>>();
     static Set<String> objectMethodNames = new HashSet<String>();
 
     static {
@@ -916,7 +916,7 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
                     || result.config.charPtrAsString && typeRefAsString.equals("char**");
         }
     }
-    static Map<String, Class<?>> predefObjCClasses = new HashMap<String, Class<?>>();
+    static Map<String, Class<?>> predefObjCClasses = new LinkedHashMap<String, Class<?>>();
 
     static {
         predefObjCClasses.put("id", ObjCObject.class);//org.rococoa.ID.class);
@@ -1352,7 +1352,7 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
         Integer lastAdditiveValue = null;
         Expression lastRefValue = null;
         boolean failedOnceForThisEnum = false;
-        Map<String, Pair<Expression, TypeRef>> mappings = new HashMap<String, Pair<Expression, TypeRef>>();
+        Map<String, Pair<Expression, TypeRef>> mappings = new LinkedHashMap<String, Pair<Expression, TypeRef>>();
         for (com.ochafik.lang.jnaerator.parser.Enum.EnumItem item : e.getItems()) {
             EnumItemResult res = new EnumItemResult();
             res.originalItem = item;

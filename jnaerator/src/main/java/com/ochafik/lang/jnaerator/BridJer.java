@@ -25,7 +25,7 @@ import java.io.PrintStream;
 import com.ochafik.lang.jnaerator.parser.Identifier.SimpleIdentifier;
 import org.bridj.BridJ;
 import java.util.Map;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.List;
@@ -121,7 +121,7 @@ public class BridJer {
                 super.visitConstant(c);
             }
 //            
-//            static Map<String, String> primToCapNames = new HashMap<String, String>();
+//            static Map<String, String> primToCapNames = new LinkedHashMap<String, String>();
 //            static {
 //                primToCapNames.put("int", "Int");
 //                primToCapNames.put("long", "Long");
@@ -563,7 +563,7 @@ public class BridJer {
 
 
 
-        final Map<Integer, String> referencedElementsChangedNames = new HashMap<Integer, String>();
+        final Map<Integer, String> referencedElementsChangedNames = new LinkedHashMap<Integer, String>();
         for (Pair<Element, Integer> kv : ret.referencedElements) {
             Element e = kv.getKey();
             //int id = kv

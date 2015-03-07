@@ -49,7 +49,7 @@ import com.ochafik.util.listenable.Pair;
 import java.lang.annotation.Annotation;
 import java.text.MessageFormat;
 import java.util.Arrays;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.HashSet;
 
 import java.util.logging.Level;
@@ -409,16 +409,16 @@ public class JNAeratorConfig {
     public boolean reification;
     public boolean convertBodies;
     public boolean removeInlineAsm;
-    public Map<String, List<String>> dependencies = new HashMap<String, List<String>>();
-    public Map<String, String> libraryOverrides = new HashMap<String, String>();
+    public Map<String, List<String>> dependencies = new LinkedHashMap<String, List<String>>();
+    public Map<String, String> libraryOverrides = new LinkedHashMap<String, String>();
     public Map<String, String> extraJavaSourceFilesContents = new LinkedHashMap<String, String>();
     public Set<String> frameworks = new LinkedHashSet<String>();
     boolean skipIncludedFrameworks;
     public FileFilter fileFilter = new FileExtensionFilter(DEFAULT_HEADER_EXTENSIONS.split("[:;]"));
     public Map<NativePlatform, List<File>> libraryFilesByArch = new LinkedHashMap<NativePlatform, List<File>>();
     public List<File> libraryFiles = new ArrayList<File>();
-    public Map<String, List<File>> sourceFilesByLibrary = new HashMap<String, List<File>>();
-    public final Map<File, String> libraryByDirectory = new HashMap<File, String>();
+    public Map<String, List<File>> sourceFilesByLibrary = new LinkedHashMap<String, List<File>>();
+    public final Map<File, String> libraryByDirectory = new LinkedHashMap<File, String>();
     public Map<File, String> libraryByFile = new LinkedHashMap<File, String>();
 
     public void addFramework(String framework) throws IOException {
@@ -516,7 +516,7 @@ public class JNAeratorConfig {
     public String packageName = null, rootPackageName = null;
     public String defaultLibrary;
     public Map<String, File> libraryProjectSources = new LinkedHashMap<String, File>();
-    public Map<String, String> extractedLibraries = new HashMap<String, String>();
+    public Map<String, String> extractedLibraries = new LinkedHashMap<String, String>();
     public Adapter<File, String> fileToLibrary = new Adapter<File, String>() {
         public String adapt(File file) {
             String libraryName = null;

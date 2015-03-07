@@ -419,8 +419,8 @@ public class JNAeratorConfigUtils {
             Solution solution = new Solution(projectFile);
             solution.parseProjects(config.fileFilter);
 
-            //final Map<String, FileConfiguration> configsByFile = new HashMap<String, FileConfiguration>();
-            //final Map<File, String> libraryDLLByFile = new HashMap<File, String>();
+            //final Map<String, FileConfiguration> configsByFile = new LinkedHashMap<String, FileConfiguration>();
+            //final Map<File, String> libraryDLLByFile = new LinkedHashMap<File, String>();
 
             for (Project project : solution.getProjects()) {
                 String projectConfigName = project.activeConfigurationNameBySolutionConfigurationName.get(configName);

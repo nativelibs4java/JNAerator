@@ -4,7 +4,7 @@
  */
 package com.ochafik.lang.jnaerator;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -16,7 +16,7 @@ import java.util.Map;
 public class GYPUtils {
 
     public static Map<String, Object> map() {
-        return new HashMap<String, Object>();
+        return new LinkedHashMap<String, Object>();
     }
 
     public static String toGYP(Object o) {

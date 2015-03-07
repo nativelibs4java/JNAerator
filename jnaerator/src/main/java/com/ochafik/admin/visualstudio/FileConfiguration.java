@@ -19,11 +19,11 @@
 package com.ochafik.admin.visualstudio;
 
 import java.io.File;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class FileConfiguration {
 
-    public Map<String, Configuration> configurations = new HashMap<String, Configuration>();
+    public Map<String, Configuration> configurations = new LinkedHashMap<String, Configuration>();
     public File file;
 }

@@ -3,7 +3,7 @@ package com.ochafik.lang.jnaerator;
 import static com.ochafik.lang.jnaerator.parser.ElementsHelper.typeRef;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -114,7 +114,7 @@ public class UniversalReconciliator {
         // TODO Auto-generated method stub
         return tr32;
     }
-    static Map<Pair<String, String>, TypeRef> predefined32_64Reconciliations = new HashMap<Pair<String, String>, TypeRef>();
+    static Map<Pair<String, String>, TypeRef> predefined32_64Reconciliations = new LinkedHashMap<Pair<String, String>, TypeRef>();
 
     static {
         defRecon("float", "double", typeRef("CGFloat"));

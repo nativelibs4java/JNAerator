@@ -19,7 +19,7 @@
 package com.ochafik.xml;
 
 import java.lang.ref.SoftReference;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -35,7 +35,7 @@ import org.w3c.dom.NodeList;
 import com.ochafik.lang.SyntaxUtils;
 
 public class XPathUtils {
-	public static Map<String, SoftReference<XPathExpression>> xPathExpressionsCache = new HashMap<String, SoftReference<XPathExpression>>();
+	public static Map<String, SoftReference<XPathExpression>> xPathExpressionsCache = new LinkedHashMap<String, SoftReference<XPathExpression>>();
 	private static SoftReference<XPath> sharedXPath; 
 	public static XPath getSharedXPath() {
 		XPath xPath = null;

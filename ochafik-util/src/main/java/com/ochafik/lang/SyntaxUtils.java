@@ -29,7 +29,7 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -68,7 +68,7 @@ public class SyntaxUtils {
 		converters.put(c, converter);
 	}
 	
-	static Map<Class<?>, Converter<?>> converters = new HashMap<Class<?>, Converter<?>>();
+	static Map<Class<?>, Converter<?>> converters = new LinkedHashMap<Class<?>, Converter<?>>();
 	static {
 		registerConverter(Date.class, new Converter<Date>() {
 			public Date convert(Object value) throws ParseException {

@@ -26,7 +26,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.jar.JarEntry;
 import java.util.jar.JarOutputStream;
@@ -40,8 +40,8 @@ import com.ochafik.io.IOUtils;
 
 public class MemoryFileManager extends ForwardingJavaFileManager<JavaFileManager> {
 
-    public final Map<String, MemoryJavaFile> inputs = new HashMap<String, MemoryJavaFile>();
-    public final Map<String, FileObject> outputs = new HashMap<String, FileObject>();
+    public final Map<String, MemoryJavaFile> inputs = new LinkedHashMap<String, MemoryJavaFile>();
+    public final Map<String, FileObject> outputs = new LinkedHashMap<String, FileObject>();
 
     public void writeJar(File outputJar, boolean outputSources, Map<String, File> additionalFiles) throws IOException {
 

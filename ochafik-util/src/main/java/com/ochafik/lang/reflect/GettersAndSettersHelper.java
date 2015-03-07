@@ -24,7 +24,7 @@ package com.ochafik.lang.reflect;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -66,7 +66,7 @@ public class GettersAndSettersHelper {
 		}
 	}
 	
-	public final Map<String, GetterAndSetterInfo> gettersAndSetters = new HashMap<String, GetterAndSetterInfo>();
+	public final Map<String, GetterAndSetterInfo> gettersAndSetters = new LinkedHashMap<String, GetterAndSetterInfo>();
 	
 	static Pattern getterSetterPattern = Pattern.compile("(is|get|set)([A-Z]\\w+)");
 	

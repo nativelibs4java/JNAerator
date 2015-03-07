@@ -57,7 +57,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -97,7 +97,7 @@ public class JNADeclarationsConverter extends DeclarationsConverter {
 
     public static synchronized Pair<List<Pair<Function, String>>, Set<String>> getMethodsAndTheirSignatures(Class<?> originalLib) {
         if (cachedForcedMethodsAndTheirSignatures == null) {
-            cachedForcedMethodsAndTheirSignatures = new HashMap<Class<?>, Pair<List<Pair<Function, String>>, Set<String>>>();
+            cachedForcedMethodsAndTheirSignatures = new LinkedHashMap<Class<?>, Pair<List<Pair<Function, String>>, Set<String>>>();
         }
 
         Pair<List<Pair<Function, String>>, Set<String>> pair = cachedForcedMethodsAndTheirSignatures.get(originalLib);
@@ -813,7 +813,7 @@ public class JNADeclarationsConverter extends DeclarationsConverter {
         boolean isUnion = nativeStruct.getType() == Struct.Type.CUnion;
         boolean addPointerConstructor = true;
         if (isUnion) {
-            Map<String, Pair<TypeRef, List<Pair<String, String>>>> fieldsAndCommentsByTypeStr = new HashMap<String, Pair<TypeRef, List<Pair<String, String>>>>();
+            Map<String, Pair<TypeRef, List<Pair<String, String>>>> fieldsAndCommentsByTypeStr = new LinkedHashMap<String, Pair<TypeRef, List<Pair<String, String>>>>();
             for (Declaration d : initialMembers) {
                 if (!(d instanceof VariablesDeclaration)) {
                     continue;

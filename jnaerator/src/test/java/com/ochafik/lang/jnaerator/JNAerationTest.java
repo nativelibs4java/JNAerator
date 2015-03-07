@@ -25,7 +25,7 @@ import java.net.URL;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -71,7 +71,7 @@ public class JNAerationTest {
 		String cSource;
 		String libraryName = "test";
 		JNAeratorConfig.Runtime runtime;
-		Map<String, String> extraJavaSourceFilesContents = new HashMap<String, String>();
+		Map<String, String> extraJavaSourceFilesContents = new LinkedHashMap<String, String>();
 		public TestDesc(String cSource, JNAeratorConfig.Runtime runtime) {
 			this.cSource = cSource;
 			this.runtime = runtime;
@@ -221,7 +221,7 @@ public class JNAerationTest {
 			String cSource = tt[0];
 			String n = new File(URLDecoder.decode(testURL.toString(), "utf-8")).getName();
             
-            Map<JNAeratorConfig.Runtime, String> sourceByRuntime = new HashMap<JNAeratorConfig.Runtime, String>();
+            Map<JNAeratorConfig.Runtime, String> sourceByRuntime = new LinkedHashMap<JNAeratorConfig.Runtime, String>();
             sourceByRuntime.put(JNAeratorConfig.Runtime.BridJ, "");
             sourceByRuntime.put(JNAeratorConfig.Runtime.JNA, "");
             sourceByRuntime.put(JNAeratorConfig.Runtime.JNAerator, "");

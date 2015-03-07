@@ -24,7 +24,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeSet;
@@ -44,9 +44,9 @@ public class Project implements Comparable<Project> {
     public File projectFile;
     public String name, id;
     public List<String> depsIds = new ArrayList<String>();
-    public Map<String, String> activeConfigurationNameBySolutionConfigurationName = new HashMap<String, String>();
-    public Map<String, Configuration> configurations = new HashMap<String, Configuration>();
-    public Map<File, FileConfiguration> fileConfigurations = new HashMap<File, FileConfiguration>();
+    public Map<String, String> activeConfigurationNameBySolutionConfigurationName = new LinkedHashMap<String, String>();
+    public Map<String, Configuration> configurations = new LinkedHashMap<String, Configuration>();
+    public Map<File, FileConfiguration> fileConfigurations = new LinkedHashMap<File, FileConfiguration>();
     public List<File> files = new ArrayList<File>();
 
     public Project(Solution solution, File projectFile, String name, String id) {

@@ -25,7 +25,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.EnumSet;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -89,12 +88,12 @@ public abstract class Element {
     }
     public void setAttribute(Object key, Object value) {
         if (attributes == null)
-            attributes = new HashMap<Object, Object>();
+            attributes = new LinkedHashMap<Object, Object>();
         
         attributes.put(key, value);
     }
     public void setAttributes(Map<Object, Object> attributes) {
-        this.attributes = attributes == null ? null : new HashMap<Object, Object>(attributes);
+        this.attributes = attributes == null ? null : new LinkedHashMap<Object, Object>(attributes);
     }
     
 	
@@ -357,11 +356,7 @@ public abstract class Element {
 	
 	public static Map<?, ?> cloneElements(Map<?, ?> col) throws CloneNotSupportedException {
 		Map<Object, Object> colClone;
-		if (col instanceof LinkedHashMap<?,?>)
-			colClone = new LinkedHashMap<Object, Object>(col.size());
-		else if (col instanceof HashMap<?,?>)
-			colClone = new HashMap<Object, Object>(col.size());
-		else if (col instanceof TreeMap<?,?>)
+		if (col instanceof TreeMap<?,?>)
 			colClone = new TreeMap<Object, Object>();
 		else if (col instanceof Map<?,?>)
 			colClone = new LinkedHashMap<Object, Object>();

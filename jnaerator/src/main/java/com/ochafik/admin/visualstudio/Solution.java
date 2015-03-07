@@ -21,7 +21,7 @@ package com.ochafik.admin.visualstudio;
 import java.io.File;
 import java.io.FileFilter;
 import java.util.Collection;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Map;
@@ -49,7 +49,7 @@ public class Solution {
 
     public void parse() throws Exception {
         if (idToProject == null) {
-            idToProject = new HashMap<String, Project>();
+            idToProject = new LinkedHashMap<String, Project>();
 
             String solutionContent = ReadText.readText(solutionFile);
             File solutionPath = solutionFile.getParentFile();

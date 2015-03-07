@@ -19,7 +19,7 @@
 package com.ochafik.lang.jnaerator;
 
 import java.util.Map;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import com.ochafik.lang.jnaerator.parser.*;
 import static com.ochafik.lang.jnaerator.parser.Statement.*;
 import com.ochafik.lang.jnaerator.parser.StoredDeclarations.*;
@@ -30,9 +30,9 @@ import static com.ochafik.lang.jnaerator.parser.ElementsHelper.*;
 
 public class Symbols {
 
-    public final Map<Integer, Element> resolvedVariables = new HashMap<Integer, Element>();
-    public final Map<Integer, Element> resolvedTypes = new HashMap<Integer, Element>();
-    public final Map<Element, SymbolTable> elementTables = new HashMap<Element, SymbolTable>();
+    public final Map<Integer, Element> resolvedVariables = new LinkedHashMap<Integer, Element>();
+    public final Map<Integer, Element> resolvedTypes = new LinkedHashMap<Integer, Element>();
+    public final Map<Element, SymbolTable> elementTables = new LinkedHashMap<Element, SymbolTable>();
 
     public Element getType(Identifier ident) {
         return resolvedTypes.get(ident.getId());
@@ -88,8 +88,8 @@ public class Symbols {
 
         public final SymbolTable parent;
         public final Symbols symbols;
-        public final Map<Identifier, Element> variableDefinitions = new HashMap<Identifier, Element>();
-        public final Map<Identifier, Element> typeDefinitions = new HashMap<Identifier, Element>();
+        public final Map<Identifier, Element> variableDefinitions = new LinkedHashMap<Identifier, Element>();
+        public final Map<Identifier, Element> typeDefinitions = new LinkedHashMap<Identifier, Element>();
         public final Identifier subNamespace;
         public final Element owner;
 

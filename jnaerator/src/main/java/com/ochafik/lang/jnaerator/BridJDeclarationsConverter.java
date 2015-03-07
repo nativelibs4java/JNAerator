@@ -690,7 +690,7 @@ public class BridJDeclarationsConverter extends DeclarationsConverter {
 
         return structJavaClass;
     }
-    Map<Identifier, Boolean> structsVirtuality = new HashMap<Identifier, Boolean>();
+    Map<Identifier, Boolean> structsVirtuality = new LinkedHashMap<Identifier, Boolean>();
 
     public boolean isVirtual(Struct struct) {
         Identifier name = getActualTaggedTypeName(struct);

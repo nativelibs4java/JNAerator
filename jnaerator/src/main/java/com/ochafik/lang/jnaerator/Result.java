@@ -23,7 +23,7 @@ import java.util.regex.Pattern;
 import com.ochafik.lang.jnaerator.parser.TypeRef.SimpleTypeRef;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -115,33 +115,33 @@ public class Result extends Scanner {
         bridjer = new BridJer(this);
     }
     Set<Identifier> javaPackages = new TreeSet<Identifier>();
-    //Map<Identifier, ObjCClass> objCClasses = new HashMap<Identifier, ObjCClass>();
+    //Map<Identifier, ObjCClass> objCClasses = new LinkedHashMap<Identifier, ObjCClass>();
     Map<Struct.Type, Map<Identifier, Struct>> classes = new TreeMap<Struct.Type, Map<Identifier, Struct>>();
-    Map<Identifier, Map<String, Struct>> objCCategoriesByTargetType = new HashMap<Identifier, Map<String, Struct>>();
-    Map<String, Struct> objCCategoriesByName = new HashMap<String, Struct>();
-    Map<String, Map<String, String>> stringConstants = new HashMap<String, Map<String, String>>();
-    Map<String, Map<String, Boolean>> retainedRetValFunctions = new HashMap<String, Map<String, Boolean>>();
+    Map<Identifier, Map<String, Struct>> objCCategoriesByTargetType = new LinkedHashMap<Identifier, Map<String, Struct>>();
+    Map<String, Struct> objCCategoriesByName = new LinkedHashMap<String, Struct>();
+    Map<String, Map<String, String>> stringConstants = new LinkedHashMap<String, Map<String, String>>();
+    Map<String, Map<String, Boolean>> retainedRetValFunctions = new LinkedHashMap<String, Map<String, Boolean>>();
     //Set<String> 
     //cStructNames = new HashSet<String>(), 
     //enumNames = new HashSet<String>();
-    public Map<String, List<String>> missingPointersByUsingLibrary = new HashMap<String, List<String>>();
-    public Map<String, List<Struct>> structsByLibrary = new HashMap<String, List<Struct>>();
-    public Map<String, List<FunctionSignature>> callbacksByLibrary = new HashMap<String, List<FunctionSignature>>();
-    public Map<String, List<VariablesDeclaration>> globalsByLibrary = new HashMap<String, List<VariablesDeclaration>>();
-    public Map<Identifier, VariablesDeclaration> globalVariablesByName = new HashMap<Identifier, VariablesDeclaration>();
-    public Map<Identifier, Struct> structsByName = new HashMap<Identifier, Struct>();
-    public Map<Identifier, FunctionSignature> callbacksByName = new HashMap<Identifier, FunctionSignature>();
-    public Map<String, List<Enum>> enumsByLibrary = new HashMap<String, List<Enum>>();
-    public Map<Identifier, Enum> enumsByName = new HashMap<Identifier, Enum>();
-    public Map<String, EnumItem> enumItems = new HashMap<String, EnumItem>();
+    public Map<String, List<String>> missingPointersByUsingLibrary = new LinkedHashMap<String, List<String>>();
+    public Map<String, List<Struct>> structsByLibrary = new LinkedHashMap<String, List<Struct>>();
+    public Map<String, List<FunctionSignature>> callbacksByLibrary = new LinkedHashMap<String, List<FunctionSignature>>();
+    public Map<String, List<VariablesDeclaration>> globalsByLibrary = new LinkedHashMap<String, List<VariablesDeclaration>>();
+    public Map<Identifier, VariablesDeclaration> globalVariablesByName = new LinkedHashMap<Identifier, VariablesDeclaration>();
+    public Map<Identifier, Struct> structsByName = new LinkedHashMap<Identifier, Struct>();
+    public Map<Identifier, FunctionSignature> callbacksByName = new LinkedHashMap<Identifier, FunctionSignature>();
+    public Map<String, List<Enum>> enumsByLibrary = new LinkedHashMap<String, List<Enum>>();
+    public Map<Identifier, Enum> enumsByName = new LinkedHashMap<Identifier, Enum>();
+    public Map<String, EnumItem> enumItems = new LinkedHashMap<String, EnumItem>();
     public Map<String, Define> defines = new LinkedHashMap<String, Define>();
-    public Map<String, List<Define>> definesByLibrary = new HashMap<String, List<Define>>();
-    public Map<String, Set<String>> fakePointersByLibrary = new HashMap<String, Set<String>>();
-    public Map<String, Set<String>> undefinedTypesByLibrary = new HashMap<String, Set<String>>();
-    public Map<String, List<Function>> functionsByLibrary = new HashMap<String, List<Function>>();
+    public Map<String, List<Define>> definesByLibrary = new LinkedHashMap<String, List<Define>>();
+    public Map<String, Set<String>> fakePointersByLibrary = new LinkedHashMap<String, Set<String>>();
+    public Map<String, Set<String>> undefinedTypesByLibrary = new LinkedHashMap<String, Set<String>>();
+    public Map<String, List<Function>> functionsByLibrary = new LinkedHashMap<String, List<Function>>();
     //Map<String, Expression> defines = new LinkedHashMap<String, Expression>();
-    public Map<Identifier, Signatures> signaturesByOutputClass = new HashMap<Identifier, Signatures>();
-    public Map<String, Pair<TypeDef, Declarator>> typeDefs = new HashMap<String, Pair<TypeDef, Declarator>>();
+    public Map<Identifier, Signatures> signaturesByOutputClass = new LinkedHashMap<Identifier, Signatures>();
+    public Map<String, Pair<TypeDef, Declarator>> typeDefs = new LinkedHashMap<String, Pair<TypeDef, Declarator>>();
 
     static <T> List<T> getList(Map<String, List<T>> m, String key) {
         List<T> list = m.get(key);
@@ -198,7 +198,7 @@ public class Result extends Scanner {
     public boolean isUndefinedType(TypeRef tpe) {
         return tpe instanceof SimpleTypeRef && isUndefinedType(((SimpleTypeRef) tpe).getName());
     }
-    Map<Identifier, List<Pair<Identifier, Function>>> functionsReifiableInFakePointers = new HashMap<Identifier, List<Pair<Identifier, Function>>>();
+    Map<Identifier, List<Pair<Identifier, Function>>> functionsReifiableInFakePointers = new LinkedHashMap<Identifier, List<Pair<Identifier, Function>>>();
     Set<Identifier> resolvedFakePointers = new HashSet<Identifier>();
     Set<Identifier> resolvedUndefinedTypes = new HashSet<Identifier>();
 
@@ -666,7 +666,7 @@ public class Result extends Scanner {
         return "\"" + library + "\"";
     }
     Set<String> libraries = new HashSet<String>();
-    Map<String, Identifier> javaPackageByLibrary = new HashMap<String, Identifier>();
+    Map<String, Identifier> javaPackageByLibrary = new LinkedHashMap<String, Identifier>();
     public Set<Identifier> enumItemsFullName = new HashSet<Identifier>();
 
     public Identifier getLibraryPackage(String library) {
@@ -825,7 +825,7 @@ public class Result extends Scanner {
         }
         return false;
     }
-    public final Map<String, TypeRef> weakTypeDefs = new HashMap<String, TypeRef>();
+    public final Map<String, TypeRef> weakTypeDefs = new LinkedHashMap<String, TypeRef>();
 
     public void addWeakTypeDef(TypeRef clone, String sn) {
         weakTypeDefs.put(sn, clone);
@@ -840,7 +840,7 @@ public class Result extends Scanner {
             }
         }
     }
-    Map<String, TypeRef> manualTypeDefs = new HashMap<String, TypeRef>();
+    Map<String, TypeRef> manualTypeDefs = new LinkedHashMap<String, TypeRef>();
 
     public TypeRef getTypeDef(Identifier nameId) {
         if (nameId == null) {

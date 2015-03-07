@@ -12,7 +12,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -1083,7 +1083,7 @@ public class Printer implements Visitor {
     }
 
     public static void printJava(Identifier packageName, Identifier className, Element rootElement, PrintWriter out) {
-        final Map<String, Set<Identifier>> identifiersBySimpleName = new HashMap<String, Set<Identifier>>();
+        final Map<String, Set<Identifier>> identifiersBySimpleName = new LinkedHashMap<String, Set<Identifier>>();
         final String outputPackage = packageName.toString();
         final String outputClassPrefix = className + ".";
 
@@ -1116,7 +1116,7 @@ public class Printer implements Visitor {
             }
         });
 
-        final Map<Identifier, String> resolvedIds = new HashMap<Identifier, String>();
+        final Map<Identifier, String> resolvedIds = new LinkedHashMap<Identifier, String>();
         final Set<String> importedClassesStrings = new HashSet<String>(50);
         importedClassesStrings.add(className.toString());
 

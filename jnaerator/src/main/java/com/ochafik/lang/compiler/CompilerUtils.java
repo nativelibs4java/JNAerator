@@ -131,7 +131,7 @@ public class CompilerUtils {
         }
         return ret;
     }
-    static Map<String, File> localURLCaches = new HashMap<String, File>();
+    static Map<String, File> localURLCaches = new LinkedHashMap<String, File>();
 
     static File getLocalFile(URL remoteFile, File cacheDirectory) throws IOException {
         if ("file".equals(remoteFile.getProtocol())) {

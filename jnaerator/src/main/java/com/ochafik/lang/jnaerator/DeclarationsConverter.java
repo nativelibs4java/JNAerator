@@ -257,7 +257,7 @@ public abstract class DeclarationsConverter {
 
     public static synchronized Pair<List<Pair<Function, String>>, Set<String>> getMethodsAndTheirSignatures(Class<?> originalLib) {
         if (cachedForcedMethodsAndTheirSignatures == null) {
-            cachedForcedMethodsAndTheirSignatures = new HashMap<Class<?>, Pair<List<Pair<Function, String>>, Set<String>>>();
+            cachedForcedMethodsAndTheirSignatures = new LinkedHashMap<Class<?>, Pair<List<Pair<Function, String>>, Set<String>>>();
         }
 
         Pair<List<Pair<Function, String>>, Set<String>> pair = cachedForcedMethodsAndTheirSignatures.get(originalLib);
@@ -821,7 +821,7 @@ public abstract class DeclarationsConverter {
         HashSet<Identifier> added = new HashSet<Identifier>(), all = new HashSet<Identifier>();
 
 
-        Map<String, Pair<Define, Set<Identifier>>> pending = new HashMap<String, Pair<Define, Set<Identifier>>>();
+        Map<String, Pair<Define, Set<Identifier>>> pending = new LinkedHashMap<String, Pair<Define, Set<Identifier>>>();
         for (Define define : defines) {
             Set<Identifier> dependencies = new TreeSet<Identifier>();
             computeVariablesDependencies(define.getValue(), dependencies);
