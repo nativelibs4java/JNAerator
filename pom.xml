@@ -114,7 +114,7 @@
 			<dependency>
 				<groupId>com.nativelibs4java</groupId>
 				<artifactId>anarres-jnaerator</artifactId>
-				<version>1.2.8</version>
+				<version>1.2.9</version>
 			</dependency>
 			<!-- <dependency>
 				<groupId>org.anarres</groupId>
