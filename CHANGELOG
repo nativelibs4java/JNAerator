@@ -1,4 +1,8 @@
-Current development version (0.12-SNAPSHOT)
+Current development version (0.13-SNAPSHOT)
+
+...
+
+Version 0.12 (20150308)
 
 - Added `-library foo -dependencies bar,baz` to generate `@Library("foo", dependencies = {"bar", "baz"})` (issue #535)
 - Added JNA-only -forceStringSignatures option to force String and String[] params even with char* and char** (as opposed to const char* and const char**) (issue #476)

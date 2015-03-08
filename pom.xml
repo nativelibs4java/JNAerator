@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.nativelibs4java</groupId>
     <artifactId>jnaerator-parent</artifactId>
-	<version>0.12-SNAPSHOT</version>
+	<version>0.12</version>
     <packaging>pom</packaging>
     <inceptionYear>2009</inceptionYear>
     <name>JNAerator Parent Project</name>
@@ -11,12 +11,12 @@
 	<parent>
 		<groupId>com.nativelibs4java</groupId>
 		<artifactId>nativelibs4java-parent</artifactId>
-		<version>1.9-SNAPSHOT</version>
+		<version>1.9</version>
 		<relativePath>..</relativePath>
 	</parent>
 	
 	<properties>
-		<jna.version>4.0.0</jna.version>
+		<jna.version>4.1.0</jna.version>
 		<rococoa.version>0.5</rococoa.version>
 	</properties>
 	
