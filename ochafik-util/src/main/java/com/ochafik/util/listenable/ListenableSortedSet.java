@@ -22,7 +22,7 @@ package com.ochafik.util.listenable;
 import java.util.SortedSet;
 
 /**
- * Interface for sorted sets that support modification listeners.<br/>
+ * Interface for sorted sets that support modification listeners.<br>
  * Listenable sorted sets are required to trigger UPDATED events whenever one attempts to add an element that is already present in the set. 
  * @author Olivier Chafik
  * @param <T> Type of the elements of the set

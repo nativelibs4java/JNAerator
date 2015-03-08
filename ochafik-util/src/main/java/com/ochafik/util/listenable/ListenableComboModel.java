@@ -22,7 +22,7 @@ package com.ochafik.util.listenable;
 import javax.swing.ComboBoxModel;
 
 /**
- * Swing combo box model (for use by JList) that dynamically reflects the contents of a listenable list.<br/>
+ * Swing combo box model (for use by JList) that dynamically reflects the contents of a listenable list.<br>
  * This model safely propagates events from the listenable list to any registered ListDataListener within the event dispatch thread, even if the events were received from an other thread.
  * @see javax.swing.event.ListDataListener
  * @see javax.swing.JList

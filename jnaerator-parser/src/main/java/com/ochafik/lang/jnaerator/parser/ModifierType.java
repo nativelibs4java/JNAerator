@@ -352,7 +352,7 @@ public enum ModifierType implements Modifier {
 	}
 	
 	/**
-	 * Try to be smart about Kind inheritance (C => C++ or Objective-C)
+	 * Try to be smart about Kind inheritance (C =&gt; C++ or Objective-C)
 	 */
 	public boolean isA(ModifierKind k) {
 		if (k == Plain && !(kinds.contains(Attribute) || kinds.contains(Declspec)))

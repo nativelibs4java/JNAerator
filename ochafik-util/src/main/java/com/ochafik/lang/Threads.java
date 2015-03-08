@@ -38,6 +38,7 @@ import java.util.concurrent.Semaphore;
  * <li>call join() in some thread. This will implicitely start the threads if start() was not called yet, and the join() method will not return until all the thread finished their execution
  * </li><li>call start() and register some ActionListener instances. Whenever all threads finished their execution, the actionPerformed method of all the listeners will be called.
  * </li>
+ * </ul>
  * @author Olivier Chafik
  */
 public final class Threads {

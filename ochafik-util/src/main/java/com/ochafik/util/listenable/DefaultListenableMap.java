@@ -8,8 +8,8 @@ import java.util.Map;
 
 
 /**
- * Default implementation of the ListenableMao interface.<br/>
- * This class follows both the decorator and proxy patterns : it wraps an existing java.util.Map and adds the listenable feature to it.<br/>
+ * Default implementation of the ListenableMao interface.<br>
+ * This class follows both the decorator and proxy patterns : it wraps an existing java.util.Map and adds the listenable feature to it.<br>
  * @author Olivier Chafik
  * @param <K> Type of the keys of the map
  * @param <V> Type of the values of the map

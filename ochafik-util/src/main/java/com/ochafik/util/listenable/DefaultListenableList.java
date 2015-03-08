@@ -26,8 +26,8 @@ import java.util.List;
 import java.util.ListIterator;
 
 /**
- * Default implementation of the ListenableList interface.<br/>
- * This class follows both the decorator and proxy patterns : it wraps an existing java.util.Collection and adds the listenable feature to it.<br/>
+ * Default implementation of the ListenableList interface.<br>
+ * This class follows both the decorator and proxy patterns : it wraps an existing java.util.Collection and adds the listenable feature to it.<br>
  * @author Olivier Chafik
  * @param <T> Type of the elements of the list
  */

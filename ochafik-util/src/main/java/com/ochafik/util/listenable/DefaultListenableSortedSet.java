@@ -23,8 +23,8 @@ import java.util.Comparator;
 import java.util.SortedSet;
 
 /**
- * Default implementation of the ListenableSet and SortedSet interface.<br/>
- * This class follows both the decorator and proxy patterns : it wraps an existing java.util.Set and adds the listenable feature to it.<br/>
+ * Default implementation of the ListenableSet and SortedSet interface.<br>
+ * This class follows both the decorator and proxy patterns : it wraps an existing java.util.Set and adds the listenable feature to it.<br>
  * @author Olivier Chafik
  * @param <T> Type of the elements of the set
  */

@@ -20,7 +20,7 @@
 
 /**
 	This grammar is by no mean complete.
-	It is able to parse preprocessed C & Objective-C files and can tolerate some amount of C++. 
+	It is able to parse preprocessed C &amp; Objective-C files and can tolerate some amount of C++. 
 	It lacks serious expression support, which is being worked on.
 	Complex variable declarations may not be supported, such as complex signatures of functions that return function pointers...
 */

@@ -22,7 +22,7 @@ package com.ochafik.util.listenable;
 import java.util.Map;
 
 /**
- * Interface for maps which key set, entry set and values collection support modification listeners.<br/>
+ * Interface for maps which key set, entry set and values collection support modification listeners.<br>
  * @author Olivier Chafik
  * @param <K> Type of the keys of the map
  * @param <V> Type of the values of the map

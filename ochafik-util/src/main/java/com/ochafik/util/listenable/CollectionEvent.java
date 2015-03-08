@@ -24,14 +24,14 @@ import java.util.EventObject;
 
 /**
  * <p>
- * Event that represents a modification of a listenable collection.<br/>
- * An event can be of three types : addition, removal and update.<br/>
- * Multiple elements can be packed in the same event instance.<br/>
+ * Event that represents a modification of a listenable collection.<br>
+ * An event can be of three types : addition, removal and update.<br>
+ * Multiple elements can be packed in the same event instance.<br>
  * For instance, if a listenable collection is cleared then it may issue no more than a single REMOVED event with all of its elements as argument.
  * </p>
- * <br/>
+ * <br>
  * <p>
- * The UPDATED event type is here to notify the listeners that something changed about the elements referred to by the event.<br/>
+ * The UPDATED event type is here to notify the listeners that something changed about the elements referred to by the event.<br>
  * It is typically triggered when one adds an existing element to a ListenableSet.
  * </p>  
  * @author Olivier Chafik
