@@ -40,6 +40,23 @@
 			<configuration>
 	          <tags>
 		            <tag>
+                  <name>description</name>
+                  <placement>a</placement>
+                  <head>Description :</head>
+                </tag>
+                <tag>
+                  <name>goal</name>
+                  <placement>Xt</placement>
+                </tag>
+                <tag>
+                  <name>phase</name>
+                  <placement>Xt</placement>
+                </tag>
+                <tag>
+                  <name>execute</name>
+                  <placement>Xt</placement>
+                </tag>
+                <tag>
 		              <name>aggregator</name>
 		              <placement>t</placement>
 		            </tag>
