@@ -6,13 +6,17 @@ It was previously hosted on [ochafik/nativelibs4java](http://github.com/ochafik/
 
 # Quick links
 
-* [CHANGELOG](https://github.com/ochafik/JNAerator/blob/master/CHANGELOG)
+[![Join the chat at https://gitter.im/nativelibs4java/JNAerator](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/nativelibs4java/JNAerator?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
+[![Join the chat at https://gitter.im/nativelibs4java/JNAerator](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/nativelibs4java/JNAerator?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
+* [CHANGELOG](./CHANGELOG.md)
 * [FAQ](http://code.google.com/p/jnaerator/wiki/JNAeratorFAQ)
 * [Credits and License](http://code.google.com/p/jnaerator/wiki/CreditsAndLicense)
 
 # Building
   ```
-  git clone http://github.com/ochafik/JNAerator.git
+  git clone http://github.com/nativelibs4java/JNAerator.git
   mvn clean install
   ```
 
