@@ -1,4 +1,4 @@
-[![Join the chat at https://gitter.im/nativelibs4java/JNAerator](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/nativelibs4java/JNAerator?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) [![Build Status](https://travis-ci.org/nativelibs4java/JNAerator.svg?branch=master)](https://travis-ci.org/nativelibs4java/JNAerator)
+[![Maven Central](https://img.shields.io/maven-central/v/com.nativelibs4java/jnaerator.svg)]() [![Build Status](https://travis-ci.org/nativelibs4java/JNAerator.svg)](https://travis-ci.org/nativelibs4java/JNAerator) [![Join the chat at https://gitter.im/nativelibs4java/JNAerator](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/nativelibs4java/JNAerator?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 [JNAerator](http://jnaerator.googlecode.com) generates complete native bindings for C, C++ and Objective-C libraries, targetting [BridJ](http://github.com/ochafik/BridJ), [JNA](https://github.com/twall/jna) or [node.js](http://nodejs.org) runtimes.
 
