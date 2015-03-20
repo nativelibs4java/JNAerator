@@ -11,8 +11,7 @@
 	<parent>
 		<groupId>com.nativelibs4java</groupId>
 		<artifactId>nativelibs4java-parent</artifactId>
-    <version>1.9-SNAPSHOT</version>
-    <relativePath>../nativelibs4java/libraries</relativePath>
+    <version>1.10-SNAPSHOT</version>
 	</parent>
 
   <properties>
