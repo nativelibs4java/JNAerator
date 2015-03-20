@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.nativelibs4java</groupId>
     <artifactId>jnaerator-parent</artifactId>
-	<version>0.13-SNAPSHOT</version>
+	  <version>0.13-SNAPSHOT</version>
     <packaging>pom</packaging>
     <inceptionYear>2009</inceptionYear>
     <name>JNAerator Parent Project</name>
@@ -11,15 +11,31 @@
 	<parent>
 		<groupId>com.nativelibs4java</groupId>
 		<artifactId>nativelibs4java-parent</artifactId>
-		<version>1.9</version>
-		<relativePath>..</relativePath>
+    <version>1.9-SNAPSHOT</version>
+    <relativePath>../nativelibs4java/libraries</relativePath>
 	</parent>
-	
-	<properties>
-		<jna.version>4.1.0</jna.version>
-		<rococoa.version>0.5</rococoa.version>
-	</properties>
-	
+
+  <properties>
+    <bridj.version>0.7.1-SNAPSHOT</bridj.version>
+    <jna.version>4.1.0</jna.version>
+    <rococoa.version>0.5</rococoa.version>
+  </properties>
+  
+  <scm>
+    <connection>scm:git:git@github.com:nativelibs4java/JNAerator.git</connection>
+    <developerConnection>scm:git:git@github.com:nativelibs4java/JNAerator.git</developerConnection>
+    <url>http://github.com/nativelibs4java/JNAerator</url>
+  </scm>
+
+  <dependencies>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.12</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+  
 	<modules>
 		<module>anarres</module>
 		<!--module>jcpp</module-->
@@ -94,22 +110,22 @@
 			<dependency>
 				<groupId>com.nativelibs4java</groupId>
 				<artifactId>bridj</artifactId>
-				<version>${bridj.version}</version>
+        <version>${bridj.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.java.dev.jna</groupId>
 				<artifactId>jna</artifactId>
-				<version>${jna.version}</version>
+        <version>${jna.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.rococoa</groupId>
 				<artifactId>rococoa-core</artifactId>
-				<version>${rococoa.version}</version>
+        <version>${rococoa.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.antlr</groupId>
 				<artifactId>antlr-runtime</artifactId>
-				<version>3.4</version>
+				<version>3.5.2</version>
 			</dependency>
 			<dependency>
 				<groupId>com.nativelibs4java</groupId>
@@ -124,7 +140,7 @@
 			<dependency>
 				<groupId>org.eclipse.jdt.core.compiler</groupId>
 				<artifactId>ecj</artifactId>
-				<version>4.2.2</version>
+				<version>4.4.2</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
