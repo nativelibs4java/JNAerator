@@ -26,6 +26,22 @@
     <url>http://github.com/nativelibs4java/JNAerator</url>
   </scm>
 
+  <repositories>
+    <repository>
+      <id>sonatype</id>
+      <name>Sonatype OSS Snapshots Repository</name>
+      <url>http://oss.sonatype.org/content/groups/public</url>
+    </repository>
+  </repositories>
+
+  <pluginRepositories>
+    <pluginRepository>
+      <id>sonatype</id>
+      <name>Sonatype OSS Snapshots Repository</name>
+      <url>http://oss.sonatype.org/content/groups/public</url>
+    </pluginRepository>
+  </pluginRepositories>
+  
   <dependencies>
     <dependency>
       <groupId>junit</groupId>
