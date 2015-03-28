@@ -42,7 +42,7 @@ import com.ochafik.lang.jnaerator.parser.Function;
 import com.ochafik.lang.jnaerator.parser.Identifier;
 import com.ochafik.lang.jnaerator.parser.TypeRef;
 import com.ochafik.lang.jnaerator.parser.TypeRef.SimpleTypeRef;
-import com.ochafik.util.CompoundCollection;
+import com.nativelibs4java.jalico.CompoundCollection;
 import com.nativelibs4java.jalico.Adapter;
 import com.nativelibs4java.jalico.Filter;
 import com.nativelibs4java.jalico.Pair;

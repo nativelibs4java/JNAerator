@@ -23,7 +23,7 @@ import java.util.List;
 
 import javax.swing.tree.TreeNode;
 
-import com.ochafik.util.IteratorEnumeration;
+import com.nativelibs4java.jalico.IteratorEnumeration;
 
 abstract class AbstractNode implements TreeNode {
 

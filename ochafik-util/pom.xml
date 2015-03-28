@@ -15,6 +15,12 @@
 	  <relativePath>..</relativePath>
   </parent>
   	
+  <dependencies>
+    <dependency>
+      <groupId>com.nativelibs4java</groupId>
+      <artifactId>jalico</artifactId>
+    </dependency>
+  </dependencies>
 </project>
 
 
