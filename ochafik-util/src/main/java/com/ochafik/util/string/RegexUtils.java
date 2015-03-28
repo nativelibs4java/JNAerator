@@ -27,8 +27,8 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.ochafik.util.listenable.Adapter;
-import com.ochafik.util.listenable.Pair;
+import com.nativelibs4java.jalico.Adapter;
+import com.nativelibs4java.jalico.Pair;
 
 public class RegexUtils {
 	static final String[][] simplePatternReplacements=new String[][] {

@@ -14,7 +14,7 @@ import com.ochafik.lang.jnaerator.parser.ModifierType;
 import com.ochafik.lang.jnaerator.parser.Scanner;
 import com.ochafik.lang.jnaerator.parser.TypeRef;
 import com.ochafik.lang.jnaerator.parser.TypeRef.SimpleTypeRef;
-import com.ochafik.util.listenable.Pair;
+import com.nativelibs4java.jalico.Pair;
 
 public class UniversalReconciliator {
 

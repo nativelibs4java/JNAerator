@@ -68,7 +68,7 @@ import com.ochafik.lang.jnaerator.parser.TypeRef.Primitive;
 import com.ochafik.lang.jnaerator.parser.TypeRef.SimpleTypeRef;
 import com.ochafik.lang.jnaerator.parser.TypeRef.TaggedTypeRef;
 import com.ochafik.lang.jnaerator.parser.TypeRef.TargettedTypeRef;
-import com.ochafik.util.listenable.Pair;
+import com.nativelibs4java.jalico.Pair;
 import java.util.List;
 import java.util.Map;
 

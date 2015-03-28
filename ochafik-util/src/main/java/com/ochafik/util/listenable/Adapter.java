@@ -17,7 +17,7 @@
 
        http://jalico.googlecode.com/.
 */
-package com.ochafik.util.listenable;
+package com.nativelibs4java.jalico;
 
 public interface Adapter<U,V> {
 	public V adapt(U value);

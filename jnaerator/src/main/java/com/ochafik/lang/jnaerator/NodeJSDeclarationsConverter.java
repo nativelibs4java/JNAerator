@@ -38,7 +38,7 @@ import com.ochafik.lang.jnaerator.parser.Statement;
 import com.ochafik.lang.jnaerator.parser.Statement.Block;
 import com.ochafik.lang.jnaerator.parser.Statement.If;
 import com.ochafik.lang.jnaerator.parser.Statement.Return;
-import com.ochafik.util.listenable.Pair;
+import com.nativelibs4java.jalico.Pair;
 import java.io.File;
 import org.bridj.demangling.Demangler;
 

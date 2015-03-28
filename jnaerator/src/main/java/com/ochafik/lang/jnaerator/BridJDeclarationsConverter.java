@@ -45,7 +45,7 @@ import com.ochafik.lang.jnaerator.parser.Expression.*;
 import com.ochafik.lang.jnaerator.parser.Function.Type;
 import com.ochafik.lang.jnaerator.parser.DeclarationsHolder.ListWrapper;
 import com.ochafik.lang.jnaerator.parser.Declarator.*;
-import com.ochafik.util.listenable.Pair;
+import com.nativelibs4java.jalico.Pair;
 import com.ochafik.util.string.StringUtils;
 
 import static com.ochafik.lang.jnaerator.parser.ElementsHelper.*;

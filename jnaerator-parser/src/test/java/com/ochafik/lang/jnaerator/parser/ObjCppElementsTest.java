@@ -49,7 +49,7 @@ import com.ochafik.junit.ParameterizedWithDescription;
 //import com.ochafik.lang.jnaerator.parser.Expression.FunctionCall;
 import com.ochafik.lang.reflect.GettersAndSettersHelper;
 import com.ochafik.lang.reflect.GettersAndSettersHelper.GetterAndSetterInfo;
-import com.ochafik.util.listenable.Pair;
+import com.nativelibs4java.jalico.Pair;
 
 @SuppressWarnings("unused")
 //@RunWith(Parameterized.class)

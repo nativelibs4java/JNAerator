@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.ochafik.lang.jnaerator.parser.Identifier.SimpleIdentifier;
-import com.ochafik.util.listenable.Pair;
+import com.nativelibs4java.jalico.Pair;
 import java.math.BigInteger;
 import java.util.Collections;
 

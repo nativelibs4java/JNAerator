@@ -12,7 +12,7 @@ import com.ochafik.lang.jnaerator.parser.Enum;
 
 import static com.ochafik.lang.jnaerator.parser.ElementsHelper.*;
 import com.ochafik.lang.jnaerator.runtime.NativeSize;
-import com.ochafik.util.listenable.Pair;
+import com.nativelibs4java.jalico.Pair;
 import com.sun.jna.WString;
 import com.sun.jna.ptr.ByReference;
 import com.sun.jna.ptr.PointerByReference;

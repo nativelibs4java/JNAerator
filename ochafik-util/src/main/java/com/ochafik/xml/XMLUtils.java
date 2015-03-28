@@ -38,7 +38,7 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import com.ochafik.util.listenable.Adapter;
+import com.nativelibs4java.jalico.Adapter;
 import com.ochafik.util.string.RegexUtils;
 //import ochafik.babel.*;
 public class XMLUtils  { 

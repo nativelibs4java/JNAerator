@@ -8,7 +8,7 @@ import com.ochafik.lang.jnaerator.parser.*;
 import static com.ochafik.lang.jnaerator.parser.ElementsHelper.*;
 import static com.ochafik.lang.jnaerator.TypeConversion.*;
 import com.ochafik.lang.jnaerator.parser.Function.SignatureType;
-import com.ochafik.util.listenable.Pair;
+import com.nativelibs4java.jalico.Pair;
 import com.ochafik.util.string.StringUtils;
 import java.util.ArrayList;
 import java.util.Arrays;

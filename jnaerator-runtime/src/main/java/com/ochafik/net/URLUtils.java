@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
 
-import com.ochafik.util.listenable.Filter;
+import com.nativelibs4java.jalico.Filter;
 
 public class URLUtils {
 

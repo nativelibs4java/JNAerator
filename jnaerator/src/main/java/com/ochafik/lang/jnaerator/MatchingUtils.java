@@ -9,7 +9,7 @@ import com.ochafik.lang.jnaerator.parser.StoredDeclarations.*;
 import com.ochafik.lang.jnaerator.parser.TypeRef.*;
 import com.ochafik.lang.jnaerator.parser.Expression.*;
 import com.ochafik.lang.jnaerator.parser.Declarator.*;
-import com.ochafik.util.listenable.Pair;
+import com.nativelibs4java.jalico.Pair;
 import static com.ochafik.lang.jnaerator.parser.ElementsHelper.*;
 
 public class MatchingUtils {

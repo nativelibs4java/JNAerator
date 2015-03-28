@@ -30,7 +30,7 @@ import javax.tools.*;
 import javax.tools.Diagnostic.Kind;
 
 import com.ochafik.io.IOUtils;
-import com.ochafik.util.listenable.Adapter;
+import com.nativelibs4java.jalico.Adapter;
 import com.ochafik.util.string.RegexUtils;
 import com.ochafik.util.string.StringUtils;
 

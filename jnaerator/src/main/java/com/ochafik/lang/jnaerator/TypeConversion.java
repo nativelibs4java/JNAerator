@@ -56,7 +56,7 @@ import com.ochafik.lang.jnaerator.runtime.globals.GlobalLong;
 import com.ochafik.lang.jnaerator.runtime.globals.GlobalNativeLong;
 import com.ochafik.lang.jnaerator.runtime.globals.GlobalNativeSize;
 import com.ochafik.lang.jnaerator.runtime.globals.GlobalShort;
-import com.ochafik.util.listenable.Pair;
+import com.nativelibs4java.jalico.Pair;
 import com.ochafik.util.string.StringUtils;
 import com.sun.jna.Native;
 import com.sun.jna.WString;

@@ -17,7 +17,7 @@
 
        http://jalico.googlecode.com/.
 */
-package com.ochafik.util.listenable;
+package com.nativelibs4java.jalico;
 
 
 class UnmodifiableListenableSet<T> extends UnmodifiableListenableCollection<T> implements ListenableSet<T> {

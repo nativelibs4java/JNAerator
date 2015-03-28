@@ -13,7 +13,7 @@ import com.ochafik.lang.jnaerator.parser.Enum;
 import com.ochafik.lang.jnaerator.parser.TypeRef.SimpleTypeRef;
 import com.ochafik.lang.jnaerator.parser.TypeRef.TaggedTypeRef;
 import com.ochafik.lang.jnaerator.runtime.NativeSize;
-import com.ochafik.util.listenable.Pair;
+import com.nativelibs4java.jalico.Pair;
 import com.ochafik.util.string.StringUtils;
 import java.nio.charset.Charset;
 import java.util.ArrayList;

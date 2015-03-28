@@ -18,7 +18,7 @@
 */
 package com.ochafik.util;
 
-public class DefaultAdapter<U,V> implements Adapter<U, V>, com.ochafik.util.listenable.Adapter<U, V> {
+public class DefaultAdapter<U,V> implements Adapter<U, V>, com.nativelibs4java.jalico.Adapter<U, V> {
 	public V adapt(U value) {
 		throw new UnsupportedOperationException();
 	}

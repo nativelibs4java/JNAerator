@@ -91,9 +91,9 @@ import com.ochafik.swing.syntaxcoloring.JEditTextArea;
 import com.ochafik.swing.syntaxcoloring.JavaTokenMarker;
 import com.ochafik.swing.syntaxcoloring.TokenMarker;
 import com.ochafik.util.SystemUtils;
-import com.ochafik.util.listenable.ListenableCollections;
-import com.ochafik.util.listenable.ListenableComboModel;
-import com.ochafik.util.listenable.ListenableList;
+import com.nativelibs4java.jalico.ListenableCollections;
+import com.nativelibs4java.jalico.ListenableComboModel;
+import com.nativelibs4java.jalico.ListenableList;
 import com.ochafik.util.string.StringUtils;
 import java.util.List;
 

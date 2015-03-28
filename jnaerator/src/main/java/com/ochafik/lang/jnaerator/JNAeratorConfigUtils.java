@@ -40,7 +40,7 @@ import com.ochafik.lang.jnaerator.parser.Function;
 import com.ochafik.lang.jnaerator.parser.Modifier;
 import com.ochafik.lang.jnaerator.parser.ModifierType;
 import com.ochafik.util.SystemUtils;
-import com.ochafik.util.listenable.Adapter;
+import com.nativelibs4java.jalico.Adapter;
 import com.ochafik.util.string.RegexUtils;
 import com.ochafik.util.string.StringUtils;
 

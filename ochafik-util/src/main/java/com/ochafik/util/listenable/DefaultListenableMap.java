@@ -1,4 +1,4 @@
-package com.ochafik.util.listenable;
+package com.nativelibs4java.jalico;
 
 import java.util.ArrayList;
 import java.util.Collection;

@@ -51,7 +51,7 @@ import com.ochafik.lang.jnaerator.parser.Scanner;
 import com.ochafik.lang.jnaerator.parser.SourceFile;
 import com.ochafik.lang.jnaerator.parser.StoredDeclarations.TypeDef;
 import com.ochafik.lang.reflect.DebugUtils;
-import com.ochafik.util.listenable.Pair;
+import com.nativelibs4java.jalico.Pair;
 import com.ochafik.util.string.RegexUtils;
 import java.util.Collection;
 import java.util.Map;

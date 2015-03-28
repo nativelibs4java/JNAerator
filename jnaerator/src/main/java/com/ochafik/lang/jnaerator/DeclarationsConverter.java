@@ -34,7 +34,7 @@ import com.ochafik.lang.jnaerator.parser.Expression.*;
 import com.ochafik.lang.jnaerator.parser.Function.Type;
 import com.ochafik.lang.jnaerator.parser.Declarator.*;
 import com.ochafik.lang.jnaerator.runtime.VirtualTablePointer;
-import com.ochafik.util.listenable.Pair;
+import com.nativelibs4java.jalico.Pair;
 import static com.ochafik.lang.jnaerator.parser.ElementsHelper.*;
 import static com.ochafik.lang.jnaerator.TypeConversion.*;
 import com.ochafik.lang.jnaerator.parser.Function.SignatureType;

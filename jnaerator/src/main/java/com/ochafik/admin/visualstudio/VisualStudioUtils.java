@@ -25,7 +25,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
-import com.ochafik.util.listenable.Adapter;
+import com.nativelibs4java.jalico.Adapter;
 import com.ochafik.util.string.RegexUtils;
 
 public class VisualStudioUtils {

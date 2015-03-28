@@ -31,7 +31,7 @@ import com.ochafik.lang.jnaerator.parser.Declarator.DirectDeclarator;
 import com.ochafik.lang.jnaerator.parser.StoredDeclarations.TypeDef;
 import com.ochafik.lang.jnaerator.parser.TypeRef.FunctionSignature;
 import com.ochafik.lang.jnaerator.parser.TypeRef.TaggedTypeRef;
-import com.ochafik.util.listenable.Pair;
+import com.nativelibs4java.jalico.Pair;
 import com.ochafik.util.string.StringUtils;
 
 import static com.ochafik.lang.jnaerator.parser.ElementsHelper.*;

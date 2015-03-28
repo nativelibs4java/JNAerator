@@ -2,7 +2,7 @@ package com.ochafik.lang.jnaerator;
 
 import com.ochafik.lang.jnaerator.JNAeratorConfig.OutputMode;
 import com.ochafik.lang.jnaerator.JNAeratorConfig.Runtime;
-import com.ochafik.util.listenable.Pair;
+import com.nativelibs4java.jalico.Pair;
 import com.ochafik.util.string.StringUtils;
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
