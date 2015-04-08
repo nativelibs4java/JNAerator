@@ -15,6 +15,7 @@ It was previously hosted on [ochafik/nativelibs4java](http://github.com/ochafik/
 # Building
   ```
   git clone http://github.com/nativelibs4java/JNAerator.git
+  cd JNAerator
   mvn clean install
   ```
 
