@@ -19,6 +19,7 @@ package com.jnaerator;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.project.MavenProject;
+import org.sonatype.plexus.build.incremental.BuildContext;
 
 import com.ochafik.lang.jnaerator.*;
 
@@ -73,6 +74,16 @@ public class JNAeratorMojo
      */
     private MavenProject project;
 
+
+    /**
+     * @component
+     * @required
+     * @readonly
+     *
+     */
+    private BuildContext buildContext;
+
+
 	static File canonizeDir(File f) throws IOException {
         if (!f.exists())
             f.mkdirs();
@@ -90,16 +101,16 @@ public class JNAeratorMojo
             List<String> args = new ArrayList<String>();
 
             args.add(config.getAbsolutePath());
-            
+
             // Override settings from config file :
             args.add("-mode");
             args.add(JNAeratorConfig.OutputMode.Directory.name());
             args.add("-f");
             args.add("-o");
-            
+
             File javaDir = canonizeDir(javaOutputDirectory);
             args.add(javaDir.toString());
-            
+
             project.addCompileSourceRoot(javaDir.toString());
 
             if (generateScala) {
@@ -108,6 +119,13 @@ public class JNAeratorMojo
             }
 
             com.ochafik.lang.jnaerator.JNAerator.main(args.toArray(new String[0]));
+
+            //attempt to have eclipse adding the generated directory to it the source path
+            if (this.buildContext != null) {
+                this.buildContext.refresh(javaDir);
+                getLog().info( "Refreshing " + javaDir );
+            }
+
         }
         catch (Exception e )
         {
