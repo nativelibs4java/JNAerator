@@ -946,7 +946,7 @@ public class JNADeclarationsConverter extends DeclarationsConverter {
                         stat(methodCall(varRef(fieldOrderName), "addAll", selfList)),
                         new Statement.Return(varRef(fieldOrderName)));
             }
-            TypeRef listRef = typeRef(ident(List.class, expr(typeRef("?"))));
+            TypeRef listRef = typeRef(ident(List.class, expr(typeRef("java.lang.String"))));
             Function getFieldOrder = new Function(
                     Type.JavaMethod, ident(getFieldOrderName), listRef)
                     .setBody(getFieldOrderImpl).addModifiers(ModifierType.Protected);
