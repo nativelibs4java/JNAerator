@@ -31,6 +31,7 @@ public abstract class TokenMarker
 	 * that is called to split a line up into tokens.
 	 * @param line The line
 	 * @param lineIndex The line number
+	 * @return the token at the indicated position
 	 */
 	public Token markTokens(Segment line, int lineIndex)
 	{
@@ -124,7 +125,7 @@ public abstract class TokenMarker
 		int lineIndex);
 
 	/**
-	 * Returns if the token marker supports tokens that span multiple
+	 * @return if the token marker supports tokens that span multiple
 	 * lines. If this is true, the object using this token marker is
 	 * required to pass all lines in the document to the
 	 * <code>markTokens()</code> method (in turn).<p>
@@ -178,7 +179,7 @@ public abstract class TokenMarker
 	}
 
 	/**
-	 * Returns the number of lines in this token marker.
+	 * @return the number of lines in this token marker.
 	 */
 	public int getLineCount()
 	{
@@ -186,7 +187,7 @@ public abstract class TokenMarker
 	}
 
 	/**
-	 * Returns true if the next line should be repainted. This
+	 * @return true if the next line should be repainted. This
 	 * will return true after a line has been tokenized that starts
 	 * a multiline token that continues onto the next line.
 	 */
@@ -319,6 +320,8 @@ public abstract class TokenMarker
 		/**
 		 * Creates a new LineInfo object with the specified
 		 * parameters.
+         * @param token TODO
+         * @param obj TODO
 		 */
 		public LineInfo(byte token, Object obj)
 		{

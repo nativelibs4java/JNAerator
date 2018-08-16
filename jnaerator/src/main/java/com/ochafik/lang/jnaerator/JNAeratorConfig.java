@@ -482,7 +482,7 @@ public class JNAeratorConfig {
                     File directory = file.getParentFile().getAbsoluteFile();
                     String oldLib = libraryByDirectory.put(directory, library);
                     if (oldLib != null && !oldLib.equals(library)) {
-                        JNAerator.logger.log(Level.WARNING, "Directory " + directory + " contains files from different libraries, so there won't be any default library for its files (symbols defined in files from that library that were included but not explicitly listed will not be JNAerated).");
+                        JNAerator.log.info("Directory " + directory + " contains files from different libraries, so there won't be any default library for its files (symbols defined in files from that library that were included but not explicitly listed will not be JNAerated).");
                         libraryByDirectory.put(directory, "");
                     }
                 }

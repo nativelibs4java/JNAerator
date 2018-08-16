@@ -58,6 +58,11 @@ public class PreprocessorListener {
 	 * The behaviour of this method is defined by the
 	 * implementation. It may simply record the error message, or
 	 * it may throw an exception.
+	 * @param source The source code.
+	 * @param line The line offset in the source code.
+	 * @param column The column offset in line.
+	 * @param msg The warning message.
+	 * @throws LexerException TODO
 	 */
 	public void handleWarning(Source source, int line, int column,
 					String msg)
@@ -73,6 +78,11 @@ public class PreprocessorListener {
 	 * The behaviour of this method is defined by the
 	 * implementation. It may simply record the error message, or
 	 * it may throw an exception.
+	 * @param source The source code.
+	 * @param line The line offset in the source code.
+	 * @param column The column offset in line.
+	 * @param msg The error message.
+	 * @throws LexerException TODO
 	 */
 	public void handleError(Source source, int line, int column,
 					String msg)

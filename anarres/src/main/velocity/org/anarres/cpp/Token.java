@@ -58,7 +58,7 @@ public final class Token {
 	}
 
 	/**
-	 * Returns the semantic type of this token.
+	 * @return the semantic type of this token.
 	 */
 	public int getType() {
 		return type;
@@ -70,7 +70,7 @@ public final class Token {
 	}
 
 	/**
-	 * Returns the line at which this token started.
+	 * @return the line at which this token started.
 	 *
 	 * Lines are numbered from zero.
 	 */
@@ -79,7 +79,7 @@ public final class Token {
 	}
 
 	/**
-	 * Returns the column at which this token started.
+	 * @return the column at which this token started.
 	 *
 	 * Columns are numbered from zero.
 	 */
@@ -88,7 +88,7 @@ public final class Token {
 	}
 
 	/**
-	 * Returns the original or generated text of this token.
+	 * @return the original or generated text of this token.
 	 *
 	 * This is distinct from the semantic value of the token.
 	 *
@@ -99,7 +99,7 @@ public final class Token {
 	}
 
 	/**
-	 * Returns the semantic value of this token.
+	 * @return the semantic value of this token.
 	 *
 	 * For strings, this is the parsed String.
 	 * For integers, this is an Integer object.
@@ -112,7 +112,7 @@ public final class Token {
 	}
 
 	/**
-	 * Returns a description of this token, for debugging purposes.
+	 * @return a description of this token, for debugging purposes.
 	 */
 	public String toString() {
 		StringBuilder	buf = new StringBuilder();
@@ -136,9 +136,10 @@ public final class Token {
 	}
 
 	/**
-	 * Returns the descriptive name of the given token type.
+	 * @return the descriptive name of the given token type.
 	 *
 	 * This is mostly used for stringification and debugging.
+	 * @param type The type of the token.
 	 */
 	public static final String getTokenName(int type) {
 		if (type < 0)

@@ -72,6 +72,7 @@ public abstract class Union<S extends Union<S, V, R>, V extends S, R extends S>
 	}
 	/**
 	 * @deprecated use castToArray instead
+	 * @return the array for this union
 	 */
 	@Deprecated
 	public S[] toArray() {

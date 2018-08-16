@@ -51,6 +51,9 @@ public class Signatures {
     /**
      * TODO: CLEAN THIS UGLY HACK Rewrites function name until its signature
      * doesn't collide anymore with existing signatures
+     * @param originalSignature TODO
+     * @param originalName TODO
+     * @return TODO
      */
     public Identifier findNextMethodName(String originalSignature, Identifier originalName) {
         String signature = originalSignature;

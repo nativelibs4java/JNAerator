@@ -90,9 +90,9 @@ public class Result extends Scanner {
             objectiveCClassesFullNames = new HashSet<Identifier>();
 
     /**
-     * @param config
-     * @param classOutputter
-     * @param feedback
+     * @param config TODO
+     * @param classOutputter TODO
+     * @param feedback TODO
      */
     public Result(JNAeratorConfig config, ClassOutputter classOutputter, Feedback feedback) {
         if (config == null) {

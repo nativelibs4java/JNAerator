@@ -124,17 +124,19 @@ public abstract class Source implements Iterable<Token>, Closeable {
 	 * Normally this is set by the Preprocessor when a Source is
 	 * used, but if you are using a Source as a standalone object,
 	 * you may wish to call this.
+	 *
+	 * @param pl the listener for this Source
 	 */
 	public void setListener(PreprocessorListener pl) {
 		this.listener = pl;
 	}
 
 	/**
-	 * Returns the File currently being lexed.
-	 *
 	 * If this Source is not a {@link FileLexerSource}, then
 	 * it will ask the parent Source, and so forth recursively.
 	 * If no Source on the stack is a FileLexerSource, returns null.
+	 *
+	 * @return the File currently being lexed.
 	 */
 	public String getPath() {
 		Source	parent = getParent();
@@ -144,7 +146,7 @@ public abstract class Source implements Iterable<Token>, Closeable {
 	}
 
 	/**
-	 * Returns the human-readable name of the current Source.
+	 * @return the human-readable name of the current Source.
 	 */
 	/* pp */ String getName() {
 		Source	parent = getParent();
@@ -154,7 +156,7 @@ public abstract class Source implements Iterable<Token>, Closeable {
 	}
 
 	/**
-	 * Returns the current line number within this Source.
+	 * @return the current line number within this Source.
 	 */
 	public int getLine() {
 		Source	parent = getParent();
@@ -164,7 +166,7 @@ public abstract class Source implements Iterable<Token>, Closeable {
 	}
 
 	/**
-	 * Returns the current column number within this Source.
+	 * @return the current column number within this Source.
 	 */
 	public int getColumn() {
 		Source	parent = getParent();
@@ -174,8 +176,8 @@ public abstract class Source implements Iterable<Token>, Closeable {
 	}
 
 	/**
-	 * Returns true if this Source is expanding the given macro.
-	 *
+	 * @return true if this Source is expanding the given macro.
+	 * @param m the given macro.
 	 * This is used to prevent macro recursion.
 	 */
 	/* pp */ boolean isExpanding(Macro m) {
@@ -186,7 +188,7 @@ public abstract class Source implements Iterable<Token>, Closeable {
 	}
 
 	/**
-	 * Returns true if this Source should be transparently popped
+	 * @return true if this Source should be transparently popped
 	 * from the input stack.
 	 *
 	 * Examples of such sources are macro expansions.
@@ -196,7 +198,7 @@ public abstract class Source implements Iterable<Token>, Closeable {
 	}
 
 	/**
-	 * Returns true if this source has line numbers.
+	 * @return true if this source has line numbers.
 	 */
 	/* pp */ boolean isNumbered() {
 		return false;
@@ -213,16 +215,18 @@ public abstract class Source implements Iterable<Token>, Closeable {
 	}
 
 	/**
-	 * Returns the next Token parsed from this input stream.
+	 * @return the next Token parsed from this input stream.
 	 *
 	 * @see Token
+     * @throws IOException TODO
+     * @throws LexerException TODO
 	 */
 	public abstract Token token()
 						throws IOException,
 								LexerException;
 
 	/**
-	 * Returns a token iterator for this Source.
+	 * @return a token iterator for this Source.
 	 */
 	public Iterator<Token> iterator() {
 		return new SourceIterator(this);
@@ -234,6 +238,8 @@ public abstract class Source implements Iterable<Token>, Closeable {
 	 * @param white true if only whitespace is permitted on the
 	 *	remainder of the line.
 	 * @return the NL token.
+     * @throws IOException TODO
+     * @throws LexerException TODO
 	 */
 	public Token skipline(boolean white)
 						throws IOException,

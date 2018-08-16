@@ -60,7 +60,7 @@
 		<module>jnaerator-rococoa-runtime</module>
 		<module>jnaerator-parser</module>
 		
-		<module>maven-jnaerator-plugin</module>
+		<module>jnaerator-maven-plugin</module>
 		<module>jnaerator</module>
 	</modules>
 	
@@ -107,7 +107,7 @@
 			</dependency>
 			<dependency>
 				<groupId>com.nativelibs4java</groupId>
-				<artifactId>maven-jnaerator-plugin</artifactId>
+				<artifactId>jnaerator-maven-plugin</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>

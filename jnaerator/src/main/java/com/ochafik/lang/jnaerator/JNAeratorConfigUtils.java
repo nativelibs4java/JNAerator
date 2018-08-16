@@ -253,6 +253,7 @@ public class JNAeratorConfigUtils {
 
     /**
      * TODO move this to a .h resource file
+     * @param config the configuration to populate
      */
     public static void autoConfigure(final JNAeratorConfig config) {
         if (config.runtime == JNAeratorConfig.Runtime.BridJ) {

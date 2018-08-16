@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>com.nativelibs4java</groupId>
-	<artifactId>maven-jnaerator-plugin</artifactId>
+	<artifactId>jnearator-maven-plugin</artifactId>
 	<packaging>maven-plugin</packaging>
 	<name>JNAerator Maven Plugin</name>
 	<url>http://jnaerator.googlecode.com</url>
