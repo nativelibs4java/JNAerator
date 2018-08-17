@@ -2,3 +2,5 @@ target
 project/boot
 project/target
 *~
+.settings/
+.idea/
