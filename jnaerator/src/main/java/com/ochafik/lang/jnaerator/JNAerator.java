@@ -1018,7 +1018,8 @@ public class JNAerator {
                         javaCompilerMemoryFileManager.addSourceInput(cnAndSrc.getKey(), cnAndSrc.getValue());
                     }
                     feedback.setStatus("Compiling JNAerated files...");
-                    CompilerUtils.compile(javaCompiler, javaCompilerMemoryFileManager, diagnostics, "1.5", config.cacheDir, config.runtime.libraryClass,
+                    CompilerUtils.compile(javaCompiler, javaCompilerMemoryFileManager, diagnostics,
+                            "1.6", config.cacheDir, config.runtime.libraryClass,
                             JNAerator.class, NSClass.class, Rococoa.class, Mangling.class,
                             BridJ.class);
                     CompilerUtils.CompilationError.throwErrors(diagnostics.getDiagnostics(), javaCompilerMemoryFileManager.inputs, javaCompiler.getClass().getName());
