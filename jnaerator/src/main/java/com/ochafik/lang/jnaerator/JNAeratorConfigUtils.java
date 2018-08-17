@@ -74,8 +74,125 @@ public class JNAeratorConfigUtils {
             "/Local/Library/Frameworks/",
             System.getProperty("user.home") + "/Library/Frameworks");
     static List<String> DEFAULT_INCLUDE_PATH;
+    
+	private static String findGCCMainLibInclude()
+	{
+		boolean is64bitOS  = System.getProperty("sun.arch.data.model").equals("64");
+		File gccDir = new File("/usr/lib/gcc");
+		for (File f : gccDir.listFiles()) {
+            if (!f.isDirectory()) {
+                continue;
+            }
+            String archName = f.getName();
+            boolean is64Name = archName.contains("_64-");
+            if (is64bitOS==is64Name)
+            	return f.getAbsolutePath();
+        }
+		return "";
+	}
+	
+	private static String findGCCLibInclude()	
+	{
+		String gccArch = findGCCMainLibInclude();
+		if (gccArch=="") return "";
+		File gccArchDir = new File(gccArch); 
+        TreeSet<String> versions = new TreeSet<String>();
+        if (gccArchDir.isDirectory()) {
+            for (File f : gccArchDir.listFiles()) {
+                if (!f.isDirectory()) {
+                    continue;
+                }
+                String n = f.getName();
+                if (!n.matches("[\\d+](\\.[\\d+])*")) {
+                    continue;
+                }
+                if (!(new File(f, "include").exists() )) {
+                    continue;
+                }             
+                versions.add(n);
+            }
+        }
+        if (!versions.isEmpty()) {
+            File d = new File(gccArchDir, versions.last());
+				return d.getAbsolutePath()+"/include";
+        } 
+		return "";
+	}
 
-    static {
+	private static String findArchInclude()
+	{
+		boolean is64bitOS  = System.getProperty("sun.arch.data.model").equals("64");
+		String arch;
+		if (is64bitOS)
+			arch = "x86_64-linux-gnu";
+		else 
+			arch = "i686-linux-gnu";
+		return "/usr/include/" + arch;
+	}
+	
+	private static String findArchCppInclude()	
+	{
+		boolean is64bitOS  = System.getProperty("sun.arch.data.model").equals("64");
+		String arch;
+		if (is64bitOS)
+			arch = "x86_64-linux-gnu";
+		else 
+			arch = "i686-linux-gnu";
+		File cppDir = new File("/usr/include/" + arch + "/c++");
+        TreeSet<String> versions = new TreeSet<String>();
+        if (cppDir.isDirectory()) {
+            for (File f : cppDir.listFiles()) {
+                if (!f.isDirectory()) {
+                    continue;
+                }
+                String n = f.getName();
+                if (!n.matches("[\\d+](\\.[\\d+])*")) {
+                    continue;
+                }
+                if (!(new File(f, "bits").exists())) {
+                    continue;
+                }              
+                versions.add(n);
+            }
+        }
+        if (!versions.isEmpty()) {
+            File d = new File(cppDir, versions.last());
+				return d.getAbsolutePath();
+        } 
+		return "";
+	}
+	
+	/*
+     * /usr/include/c++ is likely to contain directories with versions such as 4.0.0, 4.4.0...
+     * We try to take the greatest version (in lexicographic order of matching dir names) and check that it contains "new" and "map" files
+     */
+	private static String findCPPInclude()	
+	{		
+		File cppDir = new File("/usr/include/c++"); 
+        TreeSet<String> versions = new TreeSet<String>();
+        if (cppDir.isDirectory()) {
+            for (File f : cppDir.listFiles()) {
+                if (!f.isDirectory()) {
+                    continue;
+                }
+                String n = f.getName();
+                if (!n.matches("[\\d+](\\.[\\d+])*")) {
+                    continue;
+                }
+                if (!(new File(f, "new").exists() && new File(f, "map").exists())) {
+                    continue;
+                }              
+                versions.add(n);
+            }
+        }
+        if (!versions.isEmpty()) {
+            File d = new File(cppDir, versions.last());
+				return d.getAbsolutePath();
+        } 
+		return "";
+	}
+
+        static {
         if (SystemUtils.isMacOSX()) {
             DEFAULT_INCLUDE_PATH = new ArrayList<String>();
             for (String s : new String[]{
@@ -99,33 +216,14 @@ public class JNAeratorConfigUtils {
         if (SystemUtils.isUnix()) {
             DEFAULT_INCLUDE_PATH.add("/usr/include");
             DEFAULT_INCLUDE_PATH.add("/usr/local/include");
-
-            /*
-             * /usr/include/c++ is likely to contain directories with versions such as 4.0.0, 4.4.0...
-             * We try to take the greatest version (in lexicographic order of matching dir names) and check that it contains "new" and "map" files
-             */
-            File cppi = new File("/usr/include/c++");
-            TreeSet<String> versions = new TreeSet<String>();
-            if (cppi.isDirectory()) {
-                for (File f : cppi.listFiles()) {
-                    if (!f.isDirectory()) {
-                        continue;
-                    }
-                    String n = f.getName();
-                    if (!n.matches("[\\d+](\\.[\\d+])*")) {
-                        continue;
-                    }
-                    if (!(new File(f, "new").exists() && new File(f, "map").exists())) {
-                        continue;
-                    }
-                    versions.add(n);
-                }
-            }
-            if (!versions.isEmpty()) {
-                File d = new File(cppi, versions.last());
-                DEFAULT_INCLUDE_PATH.add(d.toString());
-                DEFAULT_INCLUDE_PATH.add(new File(d, "tr1").toString());
-            }
+            DEFAULT_INCLUDE_PATH.add(findArchInclude());
+            String cppDir = findCPPInclude();
+            DEFAULT_INCLUDE_PATH.add(cppDir);
+            DEFAULT_INCLUDE_PATH.add(cppDir+"/tr1");
+            String gccLibDir = findGCCLibInclude();
+            DEFAULT_INCLUDE_PATH.add(gccLibDir);
+            String cppArchDir = findArchCppInclude();
+            DEFAULT_INCLUDE_PATH.add(cppArchDir);
         }
         DEFAULT_INCLUDE_PATH = Collections.unmodifiableList(DEFAULT_INCLUDE_PATH);
     }
