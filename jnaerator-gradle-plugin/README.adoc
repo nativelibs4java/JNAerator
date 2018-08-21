@@ -1,0 +1,74 @@
+= JNAerate Gradle Plugin
+:jnaerator-url: https://github.com/babeloff/JNAerator
+:issues: https://github.com/babeloff/JNAerator/issues
+:gradle-url: http://gradle.org/
+
+image:https://travis-ci.org/babeloff/jnaerator-gradle-plugin.png?branch=master["Build Status", link="https://travis-ci.org/melix/jnaerator-gradle-plugin"]
+
+The jnaerator-gradle-plugin provides an easy way to generate grammars with {jnaerator-url}[Antlr4] using {gradle-url}[Gradle].
+
+== Installation
+
+Use the following snippet inside a Gradle build file:
+
+[source,groovy]
+.build.gradle
+----
+buildscript {
+    repositories {
+        maven {
+            name 'JFrog OSS snapshot repo'
+            url  'https://oss.jfrog.org/oss-snapshot-local/'
+        }
+        jcenter()
+    }
+
+    dependencies {
+        classpath 'babeloff:jnaerator-gradle-plugin:0.13-SNAPSHOT'
+    }
+}
+
+repositories {
+   jcenter()
+}
+
+apply plugin: 'babeloff.jnaerator'
+----
+
+== Configuration
+
+The plugin adds a new task named `jnaerator`. This task exposes 5 properties as part of its configuration
+
+[horizontal]
+config:: where the source grammars are. Type: File. Default: `src/main/jnaerator`.
+output:: where generated sources go. Type: File. Default: `$buildDir/generated-src`.
+
+== Usage
+=== Basic generation
+
+Generating grammars can be done by calling the `jnaerator` task:
+
+```
+gradle jnaerator
+```
+
+=== Dependency on generated sources
+
+In general, you will want your main project to depend on the generated sources for compilation. You can easily do
+this by adding this configuration into your `build.gradle`:
+
+
+[source,groovy]
+.build.gradle
+----
+// make the Java compile task depend on the jnaerator task
+compileJava.dependsOn jnaerator
+
+// add the generated source files to the list of java sources
+sourceSets.main.java.srcDirs += jnaerator.output
+
+// add jnaerator to classpath
+configurations {
+   compile.extendsFrom jnaerator
+}
+----

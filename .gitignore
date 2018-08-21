@@ -4,3 +4,8 @@ project/target
 *~
 .settings/
 .idea/
+**/*.iml
+**/.classpath
+**/.factorypath
+**/.gradle
+**/.project

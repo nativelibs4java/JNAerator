@@ -1,0 +1,50 @@
+// configuration of the Maven artifacts
+apply plugin: 'maven-publish'
+
+// add javadoc/source jar tasks as artifacts
+artifacts {
+    archives sourcesJar, javadocJar
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+
+            artifact sourcesJar {
+                classifier "sources"
+            }
+
+            artifact javadocJar {
+                classifier "javadoc"
+            }
+
+            pom.withXml {
+                def Node root = asNode()
+                root.appendNode('name', 'Gradle Plugin for JNAerate')
+                root.appendNode('description', 'Gradle plugin for generating grammars with JNAerate')
+                root.appendNode('url', 'https://github.com/babeloff/jnaerator-gradle-plugin')
+
+                def issues = root.appendNode( 'issueManagement' )
+                issues.appendNode( 'system', 'github' )
+                issues.appendNode( 'url', 'https://github.com/babeloff/jnaerator-gradle-plugin/issues' )
+
+                def scm = root.appendNode( 'scm' )
+                scm.appendNode( 'url', 'https://github.com/babeloff/jnaerator-gradle-plugin' )
+                scm.appendNode( 'connection', 'scm:git:https://github.com/babeloff/jnaerator-gradle-plugin.git' )
+                scm.appendNode( 'developerConnection', 'scm:git:git@github.com:babeloff/jnaerator-gradle-plugin.git' )
+
+                def license = root.appendNode( 'licenses' ).appendNode( 'license' );
+                license.appendNode( 'name', 'The MIT License' )
+                license.appendNode( 'url', 'http://www.apache.org/licenses/LICENSE-2.0.txt' )
+                license.appendNode( 'distribution', 'repo' )
+
+                def dev = root.appendNode( 'developers' ).appendNode( 'developer' );
+                dev.appendNode( 'id', 'babeloff' )
+                dev.appendNode( 'name', 'Fred Eisele')
+                dev.appendNode( 'organization', 'Groovy' )
+                dev.appendNode( 'organizationUrl', 'http://groovy.codehaus.org' )
+            }
+        }
+    }
+}

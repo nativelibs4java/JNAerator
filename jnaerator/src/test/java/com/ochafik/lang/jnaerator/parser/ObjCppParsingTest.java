@@ -141,12 +141,12 @@ public class ObjCppParsingTest {
 		}
 
 	}
-        static String lineAware(String s) {
-            return s.replaceAll("\n\r", "\n").replace("\r", "\n").replaceAll("\\s+", " ");
-        }
-        public static void assertEqualsNewLineAware(String message, String a, String b) {
-            assertEquals(message, lineAware(a), lineAware(b));
-        }
+	static String lineAware(String s) {
+		return s.replaceAll("\n\r", "\n").replace("\r", "\n").replaceAll("\\s+", " ");
+	}
+	public static void assertEqualsNewLineAware(String message, String a, String b) {
+		assertEquals(message, lineAware(a), lineAware(b));
+	}
 
 	@Parameters
 	public static List<Object[]> readDataFromFile() throws IOException {

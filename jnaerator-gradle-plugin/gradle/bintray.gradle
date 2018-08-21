@@ -1,0 +1,16 @@
+// Handles publication of distributions to Bintray
+
+apply plugin: 'bintray'
+
+bintray {
+    user = bintrayUsername
+    key = bintrayKey
+    publications = ['mavenJava']
+    pkg {
+        repo = 'gradle-plugins'
+        name = 'jnaerator-gradle-plugin'
+        desc = 'An JNAerator plugin for Gradle'
+        licenses = ['MIT']
+        labels = ['jnaerator', 'gradle']
+    }
+}

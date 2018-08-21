@@ -1,0 +1,2 @@
+MIT License
+Copyright Fred Eisele phreed@gmail.com
