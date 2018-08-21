@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.tasks.TaskAction;
 import org.gradle.api.tasks.InputFile;
-import org.gradle.api.tasks.InputDirectory;
+import org.gradle.api.tasks.OutputDirectory;
 
 import org.gradle.api.tasks.TaskExecutionException;
 import org.slf4j.Logger;
@@ -31,7 +31,7 @@ public class JNAeratorTask extends DefaultTask {
      * Output directory for JNAerated Java sources.
      */
     private File output;
-    @InputDirectory
+    @OutputDirectory
     public File getOutput() { return this.output; }
     public void setOutput(File dir) { this.output = dir; }
 

@@ -3,9 +3,9 @@
 :issues: https://github.com/babeloff/JNAerator/issues
 :gradle-url: http://gradle.org/
 
-image:https://travis-ci.org/babeloff/jnaerator-gradle-plugin.png?branch=master["Build Status", link="https://travis-ci.org/melix/jnaerator-gradle-plugin"]
+image:https://travis-ci.org/babeloff/jnaerator-gradle-plugin.png?branch=master["Build Status", link="https://travis-ci.org/babeloff/jnaerator-gradle-plugin"]
 
-The jnaerator-gradle-plugin provides an easy way to generate grammars with {jnaerator-url}[Antlr4] using {gradle-url}[Gradle].
+The jnaerator-gradle-plugin provides an easy way to generate JNA bindings {jnaerator-url}[JNAerator] using {gradle-url}[Gradle].
 
 == Installation
 
