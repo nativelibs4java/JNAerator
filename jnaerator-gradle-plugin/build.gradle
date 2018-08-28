@@ -11,7 +11,12 @@ buildscript {
 
 plugins {
     id 'java-gradle-plugin'
+    id 'maven-publish'
+    id 'ivy-publish'
 }
+
+group='babeloff'
+version='0.13-SNAPSHOT'
 
 apply plugin: 'idea'
 apply from: 'gradle/credentials.gradle'
@@ -20,20 +25,36 @@ apply from: 'gradle/publishing.gradle'
 apply from: 'gradle/bintray.gradle'
 apply from: 'gradle/artifactory.gradle'
 
-
-
 dependencies {
     compile localGroovy()
     compile gradleApi()
-    compile 'com.nativelibs4java:jnaerator:0.13-SNAPSHOT'
-    testCompile 'junit:junit:4.11'
+    compile group: 'com.nativelibs4java', name: 'jnaerator', version: '0.13-SNAPSHOT'
+    testCompile group: 'junit', name: 'junit', version: '4.11'
 }
-
-group='babeloff'
-version='0.13-SNAPSHOT'
 
 task release {
     description = "Releases a version of the plugin on Artifactory and Bintray"
     dependsOn artifactoryPublish, bintrayUpload
 }
+
+gradlePlugin {
+    plugins {
+        jnaerator {
+            id = "babeloff.jnaerator"
+            implementationClass = "babeloff.jnaerator.JNAeratorPlugin"
+        }
+    }
+}
+
+publishing {
+    repositories {
+        maven {
+            url "../consuming/maven-repo"
+        }
+        ivy {
+            url "../consuming/ivy-repo"
+        }
+    }
+}
+
 

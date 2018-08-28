@@ -1,3 +1,7 @@
+gradle/wrapper/
+gradlew
+gradlew.bat
+
 target
 project/boot
 project/target

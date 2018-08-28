@@ -1,4 +1,4 @@
-package babeloff;
+package babeloff.jnaerator;
 
 import java.io.File;
 import java.io.IOException;
