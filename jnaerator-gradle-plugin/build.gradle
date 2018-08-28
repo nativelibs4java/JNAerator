@@ -1,11 +1,4 @@
 
-apply plugin: 'idea'
-apply from: 'gradle/credentials.gradle'
-apply from: 'gradle/compile.gradle'
-apply from: 'gradle/publishing.gradle'
-apply from: 'gradle/bintray.gradle'
-apply from: 'gradle/artifactory.gradle'
-
 buildscript {
     repositories {
         jcenter()
@@ -15,6 +8,19 @@ buildscript {
         classpath 'org.jfrog.buildinfo:build-info-extractor-gradle:2.2.4'
     }
 }
+
+plugins {
+    id 'java-gradle-plugin'
+}
+
+apply plugin: 'idea'
+apply from: 'gradle/credentials.gradle'
+apply from: 'gradle/compile.gradle'
+apply from: 'gradle/publishing.gradle'
+apply from: 'gradle/bintray.gradle'
+apply from: 'gradle/artifactory.gradle'
+
+
 
 dependencies {
     compile localGroovy()
@@ -30,3 +36,4 @@ task release {
     description = "Releases a version of the plugin on Artifactory and Bintray"
     dependsOn artifactoryPublish, bintrayUpload
 }
+

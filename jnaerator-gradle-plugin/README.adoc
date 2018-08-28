@@ -37,7 +37,7 @@ apply plugin: 'babeloff.jnaerator'
 
 == Configuration
 
-The plugin adds a new task named `jnaerator`. This task exposes 5 properties as part of its configuration
+The plugin adds a new task named `generate`.
 
 [horizontal]
 config:: where the source grammars are. Type: File. Default: `src/main/jnaerator`.
