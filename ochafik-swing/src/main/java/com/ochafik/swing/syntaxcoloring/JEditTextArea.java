@@ -156,7 +156,7 @@ public class JEditTextArea extends JComponent
 	}
 
 	/**
-	 * Returns if this component can be traversed by pressing
+	 * @return if this component can be traversed by pressing
 	 * the Tab key. This returns false.
 	 */
 	public final boolean isFocusable()
@@ -165,7 +165,7 @@ public class JEditTextArea extends JComponent
 	}
 
 	/**
-	 * Returns the object responsible for painting this text area.
+	 * @return the object responsible for painting this text area.
 	 */
 	public final TextAreaPainter getPainter()
 	{
@@ -173,7 +173,7 @@ public class JEditTextArea extends JComponent
 	}
 
 	/**
-	 * Returns the input handler.
+	 * @return the input handler.
 	 */
 	public final InputHandler getInputHandler()
 	{
@@ -190,7 +190,7 @@ public class JEditTextArea extends JComponent
 	}
 
 	/**
-	 * Returns true if the caret is blinking, false otherwise.
+	 * @return true if the caret is blinking, false otherwise.
 	 */
 	public final boolean isCaretBlinkEnabled()
 	{
@@ -211,7 +211,7 @@ public class JEditTextArea extends JComponent
 	}
 
 	/**
-	 * Returns true if the caret is visible, false otherwise.
+	 * @return true if the caret is visible, false otherwise.
 	 */
 	public final boolean isCaretVisible()
 	{
@@ -246,7 +246,7 @@ public class JEditTextArea extends JComponent
 	}
 
 	/**
-	 * Returns the number of lines from the top and button of the
+	 * @return the number of lines from the top and button of the
 	 * text area that are always visible.
 	 */
 	public final int getElectricScroll()
@@ -290,7 +290,7 @@ public class JEditTextArea extends JComponent
 	}
 
 	/**
-	 * Returns the line displayed at the text area's origin.
+	 * @return the line displayed at the text area's origin.
 	 */
 	public final int getFirstLine()
 	{
@@ -300,6 +300,7 @@ public class JEditTextArea extends JComponent
 	/**
 	 * Sets the line displayed at the text area's origin without
 	 * updating the scroll bars.
+     * @param firstLine The position of the first line in lines
 	 */
 	public void setFirstLine(int firstLine)
 	{
@@ -312,7 +313,7 @@ public class JEditTextArea extends JComponent
 	}
 
 	/**
-	 * Returns the number of lines visible in this text area.
+	 * @return the number of lines visible in this text area.
 	 */
 	public final int getVisibleLines()
 	{
@@ -334,7 +335,7 @@ public class JEditTextArea extends JComponent
 	}
 
 	/**
-	 * Returns the horizontal offset of drawn lines.
+	 * @return the horizontal offset of drawn lines.
 	 */
 	public final int getHorizontalOffset()
 	{
@@ -456,8 +457,9 @@ public class JEditTextArea extends JComponent
 	}
 
 	/**
-	 * Converts a line index to a y co-ordinate.
+	 * Converts a line index to a y coordinate.
 	 * @param line The line
+     * @return The y coordinate
 	 */
 	public int lineToY(int line)
 	{
@@ -473,8 +475,9 @@ public class JEditTextArea extends JComponent
 	}
 
 	/**
-	 * Converts a y co-ordinate to a line index.
-	 * @param y The y co-ordinate
+	 * Converts a y coordinate to a line index.
+	 * @param y The y coordinate
+     * @return The line index
 	 */
 	public int yToLine(int y)
 	{
@@ -489,6 +492,7 @@ public class JEditTextArea extends JComponent
 	 * slow version that can be used any time.
 	 * @param line The line
 	 * @param offset The offset, from the start of the line
+     * @return The X coordinate
 	 */
 	public final int offsetToX(int line, int offset)
 	{
@@ -503,6 +507,7 @@ public class JEditTextArea extends JComponent
 	 * to the text since the last repaint.
 	 * @param line The line
 	 * @param offset The offset, from the start of the line
+     * @return The X coordinate
 	 */
 	public int _offsetToX(int line, int offset)
 	{
@@ -580,6 +585,7 @@ public class JEditTextArea extends JComponent
 	 * Converts an x co-ordinate to an offset within a line.
 	 * @param line The line
 	 * @param x The x co-ordinate
+     * @return the offset within the line
 	 */
 	public int xToOffset(int line, int x)
 	{
@@ -690,6 +696,7 @@ public class JEditTextArea extends JComponent
 	 * Converts a point to an offset, from the start of the text.
 	 * @param x The x co-ordinate of the point
 	 * @param y The y co-ordinate of the point
+     * @return The offset from the start of the text
 	 */
 	public int xyToOffset(int x, int y)
 	{
@@ -699,7 +706,7 @@ public class JEditTextArea extends JComponent
 	}
 
 	/**
-	 * Returns the document this text area is editing.
+	 * @return the document this text area is editing.
 	 */
 	public final SyntaxDocument getDocument()
 	{
@@ -726,7 +733,7 @@ public class JEditTextArea extends JComponent
 	}
 
 	/**
-	 * Returns the document's token marker. Equivalent to calling
+	 * @return the document's token marker. Equivalent to calling
 	 * <code>getDocument().getTokenMarker()</code>.
 	 */
 	public final TokenMarker getTokenMarker()
@@ -745,7 +752,7 @@ public class JEditTextArea extends JComponent
 	}
 
 	/**
-	 * Returns the length of the document. Equivalent to calling
+	 * @return the length of the document. Equivalent to calling
 	 * <code>getDocument().getLength()</code>.
 	 */
 	public final int getDocumentLength()
@@ -754,7 +761,7 @@ public class JEditTextArea extends JComponent
 	}
 
 	/**
-	 * Returns the number of lines in the document.
+	 * @return the number of lines in the document.
 	 */
 	public final int getLineCount()
 	{
@@ -762,7 +769,7 @@ public class JEditTextArea extends JComponent
 	}
 
 	/**
-	 * Returns the line containing the specified offset.
+	 * @return the line containing the specified offset.
 	 * @param offset The offset
 	 */
 	public final int getLineOfOffset(int offset)
@@ -771,7 +778,6 @@ public class JEditTextArea extends JComponent
 	}
 
 	/**
-	 * Returns the start offset of the specified line.
 	 * @param line The line
 	 * @return The start offset of the specified line, or -1 if the line is
 	 * invalid
@@ -787,7 +793,6 @@ public class JEditTextArea extends JComponent
 	}
 
 	/**
-	 * Returns the end offset of the specified line.
 	 * @param line The line
 	 * @return The end offset of the specified line, or -1 if the line is
 	 * invalid.
@@ -803,7 +808,7 @@ public class JEditTextArea extends JComponent
 	}
 
 	/**
-	 * Returns the length of the specified line.
+	 * @return the length of the specified line.
 	 * @param line The line
 	 */
 	public int getLineLength(int line)
@@ -818,7 +823,7 @@ public class JEditTextArea extends JComponent
 	}
 
 	/**
-	 * Returns the entire text of this text area.
+	 * @return the entire text of this text area.
 	 */
 	public String getText()
 	{
@@ -835,6 +840,7 @@ public class JEditTextArea extends JComponent
 
 	/**
 	 * Sets the entire text of this text area.
+     * @param text The entire text
 	 */
 	public void setText(String text)
 	{
@@ -908,6 +914,7 @@ public class JEditTextArea extends JComponent
 	 * Copies the text on the specified line into a segment. If the line
 	 * is invalid, the segment will contain a null string.
 	 * @param lineIndex The line
+     * @param segment into which the line is copied
 	 */
 	public final void getLineText(int lineIndex, Segment segment)
 	{
@@ -916,7 +923,7 @@ public class JEditTextArea extends JComponent
 	}
 
 	/**
-	 * Returns the selection start offset.
+	 * @return the selection start offset.
 	 */
 	public final int getSelectionStart()
 	{
@@ -924,8 +931,8 @@ public class JEditTextArea extends JComponent
 	}
 
 	/**
-	 * Returns the offset where the selection starts on the specified
-	 * line.
+	 * @return the offset where the selection starts on the specified line.
+     * @param line containing a selection
 	 */
 	public int getSelectionStart(int line)
 	{
@@ -947,7 +954,7 @@ public class JEditTextArea extends JComponent
 	}
 
 	/**
-	 * Returns the selection start line.
+	 * @return the selection start line.
 	 */
 	public final int getSelectionStartLine()
 	{
@@ -966,7 +973,7 @@ public class JEditTextArea extends JComponent
 	}
 
 	/**
-	 * Returns the selection end offset.
+	 * @return the selection end offset.
 	 */
 	public final int getSelectionEnd()
 	{
@@ -974,8 +981,8 @@ public class JEditTextArea extends JComponent
 	}
 
 	/**
-	 * Returns the offset where the selection ends on the specified
-	 * line.
+	 * @return the offset where the selection ends on the specified line.
+     * @param line into which the offset is measured
 	 */
 	public int getSelectionEnd(int line)
 	{
@@ -997,7 +1004,7 @@ public class JEditTextArea extends JComponent
 	}
 
 	/**
-	 * Returns the selection end line.
+	 * @return the selection end line.
 	 */
 	public final int getSelectionEndLine()
 	{
@@ -1016,7 +1023,7 @@ public class JEditTextArea extends JComponent
 	}
 
 	/**
-	 * Returns the caret position. This will either be the selection
+	 * @return the caret position. This will either be the selection
 	 * start or the selection end, depending on which direction the
 	 * selection was made in.
 	 */
@@ -1026,7 +1033,7 @@ public class JEditTextArea extends JComponent
 	}
 
 	/**
-	 * Returns the caret line.
+	 * @return the caret line.
 	 */
 	public final int getCaretLine()
 	{
@@ -1034,7 +1041,7 @@ public class JEditTextArea extends JComponent
 	}
 
 	/**
-	 * Returns the mark position. This will be the opposite selection
+	 * @return the mark position. This will be the opposite selection
 	 * bound to the caret position.
 	 * @see #getCaretPosition()
 	 */
@@ -1044,7 +1051,7 @@ public class JEditTextArea extends JComponent
 	}
 
 	/**
-	 * Returns the mark line.
+	 * @return the mark line.
 	 */
 	public final int getMarkLine()
 	{
@@ -1159,7 +1166,7 @@ public class JEditTextArea extends JComponent
 	}
 
 	/**
-	 * Returns the selected text, or null if no selection is active.
+	 * @return the selected text, or null if no selection is active.
 	 */
 	public final String getSelectedText()
 	{
@@ -1312,7 +1319,7 @@ public class JEditTextArea extends JComponent
 	}
 
 	/**
-	 * Returns true if this text area is editable, false otherwise.
+	 * @return true if this text area is editable, false otherwise.
 	 */
 	public final boolean isEditable()
 	{
@@ -1330,7 +1337,7 @@ public class JEditTextArea extends JComponent
 	}
 
 	/**
-	 * Returns the right click popup menu.
+	 * @return the right click popup menu.
 	 */
 	public final JPopupMenu getRightClickPopup()
 	{
@@ -1347,7 +1354,7 @@ public class JEditTextArea extends JComponent
 	}
 
 	/**
-	 * Returns the `magic' caret position. This can be used to preserve
+	 * @return the `magic' caret position. This can be used to preserve
 	 * the column position when moving up and down lines.
 	 */
 	public final int getMagicCaretPosition()
@@ -1409,7 +1416,7 @@ public class JEditTextArea extends JComponent
 	}
 
 	/**
-	 * Returns true if overwrite mode is enabled, false otherwise.
+	 * @return true if overwrite mode is enabled, false otherwise.
 	 */
 	public final boolean isOverwriteEnabled()
 	{
@@ -1428,7 +1435,7 @@ public class JEditTextArea extends JComponent
 	}
 
 	/**
-	 * Returns true if the selection is rectangular, false otherwise.
+	 * @return true if the selection is rectangular, false otherwise.
 	 */
 	public final boolean isSelectionRectangular()
 	{
@@ -1447,7 +1454,7 @@ public class JEditTextArea extends JComponent
 	}
 
 	/**
-	 * Returns the position of the highlighted bracket (the bracket
+	 * @return the position of the highlighted bracket (the bracket
 	 * matching the one before the caret)
 	 */
 	public final int getBracketPosition()
@@ -1456,7 +1463,7 @@ public class JEditTextArea extends JComponent
 	}
 
 	/**
-	 * Returns the line of the highlighted bracket (the bracket
+	 * @return the line of the highlighted bracket (the bracket
 	 * matching the one before the caret)
 	 */
 	public final int getBracketLine()

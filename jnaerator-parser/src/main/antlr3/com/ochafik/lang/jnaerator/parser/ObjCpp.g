@@ -1,7 +1,7 @@
 /*
   Copyright (c) 2009 Olivier Chafik, All Rights Reserved
   
-  This file is part of JNAerator (http://jnaerator.googlecode.com/).
+  This file is part of JNAerator (https://github.com/nativelibs4java/JNAerator).
   
   JNAerator is free software: you can redistribute it and/or modify
   it under the terms of the GNU Lesser General Public License as published by
@@ -48,7 +48,7 @@ scope ModContext {
 /*
   Copyright (c) 2009 Olivier Chafik, All Rights Reserved
   
-  This file is part of JNAerator (http://jnaerator.googlecode.com/).
+  This file is part of JNAerator (https://github.com/nativelibs4java/JNAerator).
   
   JNAerator is free software: you can redistribute it and/or modify
   it under the terms of the GNU Lesser General Public License as published by
@@ -440,7 +440,7 @@ import static com.ochafik.lang.jnaerator.parser.StoredDeclarations.*;
 /*
   Copyright (c) 2009 Olivier Chafik, All Rights Reserved
   
-  This file is part of JNAerator (http://jnaerator.googlecode.com/).
+  This file is part of JNAerator (https://github.com/nativelibs4java/JNAerator).
   
   JNAerator is free software: you can redistribute it and/or modify
   it under the terms of the GNU Lesser General Public License as published by

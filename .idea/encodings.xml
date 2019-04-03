@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="Encoding">
+    <file url="file://$PROJECT_DIR$" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/anarres" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/jnaerator" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/jnaerator-maven-plugin" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/jnaerator-parser" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/jnaerator-rococoa-runtime" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/jnaerator-runtime" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/ochafik-swing" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/ochafik-util" charset="UTF-8" />
+  </component>
+</project>

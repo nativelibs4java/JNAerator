@@ -1,7 +1,7 @@
 /*
 	Copyright (c) 2009-2013 Olivier Chafik, All Rights Reserved
 	
-	This file is part of JNAerator (http://jnaerator.googlecode.com/).
+	This file is part of JNAerator (https://github.com/nativelibs4java/JNAerator).
 	
 	JNAerator is free software: you can redistribute it and/or modify
 	it under the terms of the GNU Lesser General Public License as published by
@@ -112,6 +112,7 @@ public abstract class Structure<S extends Structure<S, V, R>, V extends S, R ext
 	}
 	/**
 	 * @deprecated use castToArray instead
+	 * @return the structure as an array of S
 	 */
 	@Deprecated
 	public S[] toArray() {
@@ -119,6 +120,8 @@ public abstract class Structure<S extends Structure<S, V, R>, V extends S, R ext
 	}
 	/**
 	 * @deprecated use castToArray instead
+	 * @param size the size of the array
+	 * @return the structure as an array of R
 	 */
 	@Deprecated
 	@SuppressWarnings("unchecked")
@@ -127,6 +130,9 @@ public abstract class Structure<S extends Structure<S, V, R>, V extends S, R ext
 	}
 	/**
 	 * @deprecated use castToArray instead
+	 *
+	 * @param size the size of the array
+	 * @return the structure as an array of V
 	 */
 	@Deprecated
 	@SuppressWarnings("unchecked")
@@ -135,6 +141,7 @@ public abstract class Structure<S extends Structure<S, V, R>, V extends S, R ext
 	}
 	/**
 	 * @deprecated use castToArray instead
+	 * @return the structure as an array of R
 	 */
 	@Deprecated
 	public R[] toReferenceArray() {
@@ -142,6 +149,7 @@ public abstract class Structure<S extends Structure<S, V, R>, V extends S, R ext
 	}
 	/**
 	 * @deprecated use castToArray instead
+	 * @return the structure as an array of R
 	 */
 	@Deprecated
 	public V[] toValueArray() {
@@ -150,6 +158,8 @@ public abstract class Structure<S extends Structure<S, V, R>, V extends S, R ext
 
 	/**
 	 * @deprecated use castToArray instead
+	 * @param array the array to convert
+	 * @return the structure as an array of S
 	 */
 	@Deprecated
 	@SuppressWarnings("unchecked")
@@ -184,7 +194,8 @@ public abstract class Structure<S extends Structure<S, V, R>, V extends S, R ext
 		return (S[])super.toArray(array);
 	}
 
-	/** Simply does a memcmp between the two memory blocks of the two structures
+	/**
+	 * Simply does a memcmp between the two memory blocks of the two structures
      */
 	//@Override
 	public int compareTo(Structure<S, V, R> o) {

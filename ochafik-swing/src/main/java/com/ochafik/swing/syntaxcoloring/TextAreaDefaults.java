@@ -47,7 +47,7 @@ public class TextAreaDefaults
 	public JPopupMenu popup;
 
 	/**
-	 * Returns a new TextAreaDefaults object with the default values filled
+	 * @return a new TextAreaDefaults object with the default values filled
 	 * in.
 	 */
 	public static TextAreaDefaults getDefaults()

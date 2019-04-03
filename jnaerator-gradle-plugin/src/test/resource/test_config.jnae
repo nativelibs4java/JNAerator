@@ -1,0 +1,14 @@
+-f
+-beautifyNames
+-v
+-direct
+-skipDeprecated
+-o ./gen-src/main/java
+-mode Directory
+// -runtime JNA
+-runtime BridJ
+-arch linux_x64
+-rootPackage nng
+-library core
+./resource/Test.h
+-o ./src/test/resource/generated-src

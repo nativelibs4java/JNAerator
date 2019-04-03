@@ -32,6 +32,7 @@ public class SyntaxUtilities
 	 * @param text The segment
 	 * @param offset The offset into the segment
 	 * @param match The string to match
+	 * @return true if they match
 	 */
 	public static boolean regionMatches(boolean ignoreCase, Segment text,
 					    int offset, String match)
@@ -62,6 +63,7 @@ public class SyntaxUtilities
 	 * @param text The segment
 	 * @param offset The offset into the segment
 	 * @param match The character array to match
+	 * @return true if they match
 	 */
 	public static boolean regionMatches(boolean ignoreCase, Segment text,
 					    int offset, char[] match)
@@ -86,7 +88,7 @@ public class SyntaxUtilities
 	}
 
 	/**
-	 * Returns the default style table. This can be passed to the
+	 * @return the default style table. This can be passed to the
 	 * <code>setStyles()</code> method of <code>SyntaxDocument</code>
 	 * to use the default syntax styles.
 	 */

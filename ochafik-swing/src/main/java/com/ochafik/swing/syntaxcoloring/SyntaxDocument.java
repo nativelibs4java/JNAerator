@@ -26,7 +26,7 @@ import javax.swing.undo.UndoableEdit;
 public class SyntaxDocument extends PlainDocument
 {
 	/**
-	 * Returns the token marker that is to be used to split lines
+	 * @return the token marker that is to be used to split lines
 	 * of this document up into tokens. May return null if this
 	 * document is not to be colorized.
 	 */

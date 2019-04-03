@@ -38,6 +38,8 @@ public class TextAreaPainter extends JComponent implements TabExpander
 	/**
 	 * Creates a new repaint manager. This should be not be called
 	 * directly.
+     * @param textArea The area of interest
+     * @param defaults TODO
 	 */
 	/*static BufferedImage backgroundImage;
 	static {
@@ -82,7 +84,7 @@ public class TextAreaPainter extends JComponent implements TabExpander
 	}
 
 	/**
-	 * Returns if this component can be traversed by pressing the
+	 * @return if this component can be traversed by pressing the
 	 * Tab key. This returns false.
 	 */
 	public final boolean isManagingFocus()
@@ -91,7 +93,7 @@ public class TextAreaPainter extends JComponent implements TabExpander
 	}
 
 	/**
-	 * Returns the syntax styles used to paint colorized text. Entry <i>n</i>
+	 * @return the syntax styles used to paint colorized text. Entry <i>n</i>
 	 * will be used to paint tokens with id = <i>n</i>.
 	 * @see Token
 	 */
@@ -113,7 +115,7 @@ public class TextAreaPainter extends JComponent implements TabExpander
 	}
 
 	/**
-	 * Returns the caret color.
+	 * @return the caret color.
 	 */
 	public final Color getCaretColor()
 	{
@@ -131,7 +133,7 @@ public class TextAreaPainter extends JComponent implements TabExpander
 	}
 
 	/**
-	 * Returns the selection color.
+	 * @return the selection color.
 	 */
 	public final Color getSelectionColor()
 	{
@@ -149,7 +151,7 @@ public class TextAreaPainter extends JComponent implements TabExpander
 	}
 
 	/**
-	 * Returns the line highlight color.
+	 * @return the line highlight color.
 	 */
 	public final Color getLineHighlightColor()
 	{
@@ -167,7 +169,7 @@ public class TextAreaPainter extends JComponent implements TabExpander
 	}
 
 	/**
-	 * Returns true if line highlight is enabled, false otherwise.
+	 * @return true if line highlight is enabled, false otherwise.
 	 */
 	public final boolean isLineHighlightEnabled()
 	{
@@ -186,7 +188,7 @@ public class TextAreaPainter extends JComponent implements TabExpander
 	}
 
 	/**
-	 * Returns the bracket highlight color.
+	 * @return the bracket highlight color.
 	 */
 	public final Color getBracketHighlightColor()
 	{
@@ -204,7 +206,7 @@ public class TextAreaPainter extends JComponent implements TabExpander
 	}
 
 	/**
-	 * Returns true if bracket highlighting is enabled, false otherwise.
+	 * @return true if bracket highlighting is enabled, false otherwise.
 	 * When bracket highlighting is enabled, the bracket matching the
 	 * one before the caret (if any) is highlighted.
 	 */
@@ -227,7 +229,7 @@ public class TextAreaPainter extends JComponent implements TabExpander
 	}
 
 	/**
-	 * Returns true if the caret should be drawn as a block, false otherwise.
+	 * @return true if the caret should be drawn as a block, false otherwise.
 	 */
 	public final boolean isBlockCaretEnabled()
 	{
@@ -246,7 +248,7 @@ public class TextAreaPainter extends JComponent implements TabExpander
 	}
 
 	/**
-	 * Returns the EOL marker color.
+	 * @return the EOL marker color.
 	 */
 	public final Color getEOLMarkerColor()
 	{
@@ -264,7 +266,7 @@ public class TextAreaPainter extends JComponent implements TabExpander
 	}
 
 	/**
-	 * Returns true if EOL markers are drawn, false otherwise.
+	 * @return true if EOL markers are drawn, false otherwise.
 	 */
 	public final boolean getEOLMarkersPainted()
 	{
@@ -282,7 +284,7 @@ public class TextAreaPainter extends JComponent implements TabExpander
 	}
 
 	/**
-	 * Returns true if invalid lines are painted as red tildes (~),
+	 * @return true if invalid lines are painted as red tildes (~),
 	 * false otherwise.
 	 */
 	public boolean getInvalidLinesPainted()
@@ -331,7 +333,7 @@ public class TextAreaPainter extends JComponent implements TabExpander
 		void paintHighlight(Graphics gfx, int line, int y);
 
 		/**
-		 * Returns the tool tip to display at the specified
+		 * @return the tool tip to display at the specified
 		 * location. If this highlighter doesn't know what to
 		 * display, it should delegate to the next highlight
 		 * painter.
@@ -341,7 +343,7 @@ public class TextAreaPainter extends JComponent implements TabExpander
 	}
 
 	/**
-	 * Returns the tool tip to display at the specified location.
+	 * @return the tool tip to display at the specified location.
 	 * @param evt The mouse event
 	 */
 	public String getToolTipText(MouseEvent evt)
@@ -353,7 +355,7 @@ public class TextAreaPainter extends JComponent implements TabExpander
 	}
 
 	/**
-	 * Returns the font metrics used by this component.
+	 * @return the font metrics used by this component.
 	 */
 	public FontMetrics getFontMetrics()
 	{
@@ -470,7 +472,7 @@ public class TextAreaPainter extends JComponent implements TabExpander
 	}
 
 	/**
-	 * Returns the painter's preferred size.
+	 * @return the painter's preferred size.
 	 */
 	public Dimension getPreferredSize()
 	{
@@ -482,7 +484,7 @@ public class TextAreaPainter extends JComponent implements TabExpander
 
 
 	/**
-	 * Returns the painter's minimum size.
+	 * @return the painter's minimum size.
 	 */
 	public Dimension getMinimumSize()
 	{

@@ -1,7 +1,7 @@
 /*
  Copyright (c) 2009-2013 Olivier Chafik, All Rights Reserved
 	
- This file is part of JNAerator (http://jnaerator.googlecode.com/).
+ This file is part of JNAerator (https://github.com/nativelibs4java/JNAerator).
 	
  JNAerator is free software: you can redistribute it and/or modify
  it under the terms of the GNU Lesser General Public License as published by
@@ -45,6 +45,8 @@ import org.anarres.cpp.LexerException;
 import org.antlr.runtime.RecognitionException;
 //import org.junit.runner.JUnitCore;
 import org.rococoa.cocoa.foundation.NSClass;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
 import org.rococoa.Rococoa;
 
 import org.bridj.BridJ;
@@ -82,7 +84,6 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.StringReader;
 import java.text.MessageFormat;
-import java.util.logging.Logger;
 import org.antlr.runtime.ANTLRReaderStream;
 import org.antlr.runtime.CommonTokenStream;
 import com.ochafik.lang.jnaerator.parser.Function.SignatureType;
@@ -102,6 +103,7 @@ import org.bridj.ann.Library;
  * apple-frameworks.jar
  */
 public class JNAerator {
+    final static Logger log = LoggerFactory.getLogger(JNAerator.class.getName());
 
     public static final String JNAERATOR_URL = "http://code.google.com/p/jnaerator/";
     public static String DONATE_URL = "http://sourceforge.net/donate/index.php?group_id=266856";
@@ -192,7 +194,7 @@ public class JNAerator {
         }
         return argsPref.split(",");
     }
-    static Logger logger = Logger.getLogger(JNAerator.class.getName());
+    // static Logger logger = Logger.getLogger(JNAerator.class.getName());
 
     public static void main(String[] argsArray) {
 //        argsArray = "-library foo -dependencies bar,baz /Users/ochafik/test.h -mode Directory -o /Users/ochafik/tmp".split(" ");
@@ -470,9 +472,6 @@ public class JNAerator {
                         case ScalaOut:
                             config.scalaOut = a.getFileParam(0);
                             break;
-//					case NoRuntime:
-//						config.bundleRuntime = false;
-//						break;
                         case OutputDir:
                             config.outputDir = a.getFileParam(0);
                             break;
@@ -524,15 +523,6 @@ public class JNAerator {
                                 ex.printStackTrace();
                                 throw new ExitException(1);
                             }
-//					case Test:
-//						try {
-//							JUnitCore.main(JNAeratorTests.class.getName());
-//							System.exit(0);
-//						} catch (Exception ex) {
-//							ex.printStackTrace();
-//							System.exit(1);
-//						}
-//						break;
                         case Verbose:
                             config.verbose = true;
                             break;
@@ -784,6 +774,7 @@ public class JNAerator {
                     }
 
                     jnaerator.jnaerate(feedback[0]);
+                    log.info("jnaerator : " + jnaerator);
                     if (!simpleGUI) {
                         throw new ExitException(0);
                     }
@@ -1027,7 +1018,8 @@ public class JNAerator {
                         javaCompilerMemoryFileManager.addSourceInput(cnAndSrc.getKey(), cnAndSrc.getValue());
                     }
                     feedback.setStatus("Compiling JNAerated files...");
-                    CompilerUtils.compile(javaCompiler, javaCompilerMemoryFileManager, diagnostics, "1.5", config.cacheDir, config.runtime.libraryClass,
+                    CompilerUtils.compile(javaCompiler, javaCompilerMemoryFileManager, diagnostics,
+                            "1.6", config.cacheDir, config.runtime.libraryClass,
                             JNAerator.class, NSClass.class, Rococoa.class, Mangling.class,
                             BridJ.class);
                     CompilerUtils.CompilationError.throwErrors(diagnostics.getDiagnostics(), javaCompilerMemoryFileManager.inputs, javaCompiler.getClass().getName());

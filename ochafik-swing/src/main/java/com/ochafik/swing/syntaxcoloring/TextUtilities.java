@@ -19,7 +19,7 @@ import javax.swing.text.Document;
 public class TextUtilities
 {
 	/**
-	 * Returns the offset of the bracket matching the one at the
+	 * @return the offset of the bracket matching the one at the
 	 * specified offset of the document, or -1 if the bracket is
 	 * unmatched (or if the character is not a bracket).
 	 * @param doc The document
@@ -129,6 +129,8 @@ public class TextUtilities
 	 * Locates the start of the word at the specified position.
 	 * @param line The text
 	 * @param pos The position
+	 * @param noWordSep The word separator
+	 * @return the position of the start of the word
 	 */
 	public static int findWordStart(String line, int pos, String noWordSep)
 	{
@@ -158,6 +160,8 @@ public class TextUtilities
 	 * Locates the end of the word at the specified position.
 	 * @param line The text
 	 * @param pos The position
+	 * @param noWordSep The word separator
+	 * @return the position of the end of the word
 	 */
 	public static int findWordEnd(String line, int pos, String noWordSep)
 	{

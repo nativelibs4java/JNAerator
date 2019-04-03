@@ -37,8 +37,10 @@ public class StringLexerSource extends LexerSource {
 	/**
 	 * Creates a new Source for lexing the given String.
 	 *
+	 * @param string The string to be lexed.
 	 * @param ppvalid true if preprocessor directives are to be
 	 *	honoured within the string.
+	 * @throws IOException TODO
 	 */
 	public StringLexerSource(String string, boolean ppvalid)
 						throws IOException {
@@ -50,6 +52,8 @@ public class StringLexerSource extends LexerSource {
 	 *
 	 * By default, preprocessor directives are not honoured within
 	 * the string.
+	 * @param string The string to lex.
+	 * @throws IOException TODO
 	 */
 	public StringLexerSource(String string)
 						throws IOException {

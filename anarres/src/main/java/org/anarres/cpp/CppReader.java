@@ -57,7 +57,7 @@ public class CppReader extends Reader {
 	}
 
 	/**
-	 * Returns the Preprocessor used by this CppReader.
+	 * @return the Preprocessor used by this CppReader.
 	 */
 	public Preprocessor getPreprocessor() {
 		return cpp;
@@ -66,7 +66,9 @@ public class CppReader extends Reader {
 	/**
 	 * Defines the given name as a macro.
 	 *
-	 * This is a convnience method.
+	 * This is a convenience method.
+	 * @param name the macro name
+	 * @throws LexerException TODO
 	 */
 	public void addMacro(String name)
 						throws LexerException {
@@ -76,7 +78,11 @@ public class CppReader extends Reader {
 	/**
 	 * Defines the given name as a macro.
 	 *
-	 * This is a convnience method.
+	 * This is a convenience method.
+	 *
+	 * @param name the macro name
+	 * @param value TODO
+	 * @throws LexerException TODO
 	 */
 	public void addMacro(String name, String value)
 						throws LexerException {

@@ -53,13 +53,14 @@ public class Macro {
 
 	/**
 	 * Sets the Source from which this macro was parsed.
+	 * @param s the source
 	 */
 	public void setSource(Source s) {
 		this.source = s;
 	}
 
 	/**
-	 * Returns the Source from which this macro was parsed.
+	 * @return the Source from which this macro was parsed.
 	 *
 	 * This method may return null if the macro was not parsed
 	 * from a regular file.
@@ -69,7 +70,7 @@ public class Macro {
 	}
 
 	/**
-	 * Returns the name of this macro.
+	 * @return the name of this macro.
 	 */
 	public String getName() {
 		return name;
@@ -77,20 +78,21 @@ public class Macro {
 
 	/**
 	 * Sets the arguments to this macro.
+	 * @param args the arguments
 	 */
 	public void setArgs(List<String> args) {
 		this.args = args;
 	}
 
 	/**
-	 * Returns true if this is a function-like macro.
+	 * @return true if this is a function-like macro.
 	 */
 	public boolean isFunctionLike() {
 		return args != null;
 	}
 
 	/**
-	 * Returns the number of arguments to this macro.
+	 * @return the number of arguments to this macro.
 	 */
 	public int getArgs() {
 		return args.size();
@@ -98,13 +100,14 @@ public class Macro {
 
 	/**
 	 * Sets the variadic flag on this Macro.
+	 * @param b the variadic flag
 	 */
 	public void setVariadic(boolean b) {
 		this.variadic = b;
 	}
 
 	/**
-	 * Returns true if this is a variadic function-like macro.
+	 * @return true if this is a variadic function-like macro.
 	 */
 	public boolean isVariadic() {
 		return variadic;
@@ -112,6 +115,7 @@ public class Macro {
 
 	/**
 	 * Adds a token to the expansion of this macro.
+	 * @param tok the token to add
 	 */
 	public void addToken(Token tok) {
 		this.tokens.add(tok);
@@ -123,6 +127,7 @@ public class Macro {
 	 * A paste operator causes the next token added to be pasted
 	 * to the previous token when the macro is expanded.
 	 * It is an error for a macro to end with a paste token.
+	 * @param tok the token to paste
 	 */
 	public void addPaste(Token tok) {
 		/*
@@ -142,7 +147,10 @@ public class Macro {
 	/* Paste tokens are inserted before the first of the two pasted
 	 * tokens, so it's a kind of bytecode notation. This method
 	 * swaps them around again. We know that there will never be two
-	 * sequential paste tokens, so a boolean is sufficient. */
+	 * sequential paste tokens, so a boolean is sufficient.
+	 *
+	 * @return the pasted tokens
+	 */
 	public String getText() {
 		StringBuilder	buf = new StringBuilder();
 		boolean			paste = false;

@@ -146,7 +146,7 @@ public class DefaultInputHandler extends InputHandler
 	}
 
 	/**
-	 * Returns a copy of this input handler that shares the same
+	 * @return a copy of this input handler that shares the same
 	 * key bindings. Setting key bindings in the copy will also
 	 * set them in the original.
 	 */
@@ -287,6 +287,7 @@ public class DefaultInputHandler extends InputHandler
 	 * or a keycode name from the <code>KeyEvent</code> class, without
 	 * the <code>VK_</code> prefix.
 	 * @param keyStroke A string description of the key stroke
+	 * @return The KeyStroke object associated with the input string
 	 */
 	public static KeyStroke parseKeyStroke(String keyStroke)
 	{

@@ -15,7 +15,7 @@
 			-->
 			<plugin>
 				<groupId>com.nativelibs4java</groupId>
-				<artifactId>maven-jnaerator-plugin</artifactId>
+				<artifactId>jnaerator-maven-plugin</artifactId>
 				<version>${jnaerator_version}</version>
 				<executions>
 					<execution>
@@ -31,7 +31,7 @@
 			
 			<plugin>
 				<groupId>com.nativelibs4java</groupId>
-				<artifactId>maven-jnaerator-plugin</artifactId>
+				<artifactId>jnaerator-maven-plugin</artifactId>
 				<version>${jnaerator_version}</version>
 				<configuration>
 					<javaOutputDirectory>src/main/java</javaOutputDirectory>

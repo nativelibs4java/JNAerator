@@ -39,6 +39,8 @@ public class InputLexerSource extends LexerSource {
 	 * Creates a new Source for lexing the given Reader.
 	 *
 	 * Preprocessor directives are honoured within the file.
+	 * @param input the input stream to lex
+	 * @throws IOException TODO
 	 */
 	public InputLexerSource(InputStream input)
 						throws IOException {
@@ -52,14 +54,18 @@ public class InputLexerSource extends LexerSource {
 		);
 	}
 
+	/**
+	 * @return the standard input path
+	 */
 	@Override
-	/* pp */ 
 	public String getPath() {
 		return "<standard-input>";
 	}
-
+	/**
+	 * @return the standard input name
+	 */
 	@Override
-	/* pp */ String getName() {
+	String getName() {
 		return "standard input";
 	}
 

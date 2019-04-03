@@ -38,7 +38,7 @@ public class JNAeratorMojo
 {
     /**
      * Path to JNAerator configuration file.
-     * @parameter expression="${project.basedir}/src/main/jnaerator/config.jnaerator"
+     * @parameter property=${project.basedir}/src/main/jnaerator/config.jnaerator
      * @required
      */
     private File config;
@@ -46,27 +46,27 @@ public class JNAeratorMojo
 
     /**
      * Whether JNAerator should output helper Scala classes (experimental)
-     * @parameter expression="false"
+     * @parameter property=false
      * @optional
      */
     private boolean generateScala;
 
     /**
      * Output directory for JNAerated Java sources.
-     * @parameter expression="${project.build.directory}/generated-sources/java"
+     * @parameter property=${project.build.directory}/generated-sources/java
      * @optional
      */
     private File javaOutputDirectory;
 
     /**
      * Output directory for JNAerated Scala sources.
-     * @parameter expression="${project.build.directory}/generated-sources/scala"
+     * @parameter property=${project.build.directory}/generated-sources/scala
      * @optional
      */
     private File scalaOutputDirectory;
 
     /**
-     * @parameter expression="${project}"
+     * @parameter property=${project}
      * @required
      * @readonly
      * @since 1.0

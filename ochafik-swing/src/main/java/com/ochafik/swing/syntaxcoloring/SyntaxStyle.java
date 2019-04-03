@@ -36,7 +36,7 @@ public class SyntaxStyle
 	}
 
 	/**
-	 * Returns the color specified in this style.
+	 * @return the color specified in this style.
 	 */
 	public Color getColor()
 	{
@@ -44,7 +44,7 @@ public class SyntaxStyle
 	}
 
 	/**
-	 * Returns true if no font styles are enabled.
+	 * @return true if no font styles are enabled.
 	 */
 	public boolean isPlain()
 	{
@@ -52,7 +52,7 @@ public class SyntaxStyle
 	}
 
 	/**
-	 * Returns true if italics is enabled for this style.
+	 * @return true if italics is enabled for this style.
 	 */
 	public boolean isItalic()
 	{
@@ -60,7 +60,7 @@ public class SyntaxStyle
 	}
 
 	/**
-	 * Returns true if boldface is enabled for this style.
+	 * @return true if boldface is enabled for this style.
 	 */
 	public boolean isBold()
 	{
@@ -68,8 +68,9 @@ public class SyntaxStyle
 	}
 
 	/**
-	 * Returns the specified font, but with the style's bold and
+	 * @return the specified font, but with the style's bold and
 	 * italic flags applied.
+     * @param font The unperturbed font
 	 */
 	public Font getStyledFont(Font font)
 	{
@@ -87,7 +88,8 @@ public class SyntaxStyle
 	}
 
 	/**
-	 * Returns the font metrics for the styled font.
+	 * @return the font metrics for the styled font.
+     * @param font The font for which the metrics are obtained.
 	 */
 	@SuppressWarnings("deprecation")
 	public FontMetrics getFontMetrics(Font font)
@@ -121,7 +123,7 @@ public class SyntaxStyle
 	}
 
 	/**
-	 * Returns a string representation of this object.
+	 * @return a string representation of this object.
 	 */
 	public String toString()
 	{

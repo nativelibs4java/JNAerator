@@ -151,8 +151,11 @@ public class Preprocessor implements Closeable {
 		addInput(initial);
 	}
 
-	/** Equivalent to
+	/**
+	 * Equivalent to
 	 * 'new Preprocessor(new {@link FileLexerSource}(file))'
+	 * @param file the file to process
+	 * @throws IOException TODO
 	 */
 	public Preprocessor(File file)
 						throws IOException {
@@ -161,6 +164,7 @@ public class Preprocessor implements Closeable {
 
 	/**
 	 * Sets the VirtualFileSystem used by this Preprocessor.
+	 * @param filesystem the VirtualFileSystem
 	 */
 	public void setFileSystem(VirtualFileSystem filesystem) {
 		this.filesystem = filesystem;
@@ -171,7 +175,7 @@ public class Preprocessor implements Closeable {
 	}
 
 	/**
-	 * Returns the VirtualFileSystem used by this Preprocessor.
+	 * @return the VirtualFileSystem used by this Preprocessor.
 	 */
 	public VirtualFileSystem getFileSystem() {
 		return filesystem;
@@ -181,7 +185,7 @@ public class Preprocessor implements Closeable {
 	 * Sets the PreprocessorListener which handles events for
 	 * this Preprocessor.
 	 *
-	 * The listener is notified of warnings, errors and source
+	 * @param listener The listener notified of warnings, errors and source
 	 * changes, amongst other things.
 	 */
 	public void setListener(PreprocessorListener listener) {
@@ -195,7 +199,7 @@ public class Preprocessor implements Closeable {
 	}
 
 	/**
-	 * Returns the PreprocessorListener which handles events for
+	 * @return the PreprocessorListener which handles events for
 	 * this Preprocessor.
 	 */
 	public PreprocessorListener getListener() {
@@ -203,7 +207,7 @@ public class Preprocessor implements Closeable {
 	}
 
 	/**
-	 * Returns the feature-set for this Preprocessor.
+	 * @return the feature-set for this Preprocessor.
 	 *
 	 * This set may be freely modified by user code.
 	 */
@@ -213,6 +217,7 @@ public class Preprocessor implements Closeable {
 
 	/**
 	 * Adds a feature to the feature-set of this Preprocessor.
+	 * @param f the feature to add
 	 */
 	public void addFeature(Feature f) {
 		features.add(f);
@@ -220,21 +225,23 @@ public class Preprocessor implements Closeable {
 
 	/**
 	 * Adds features to the feature-set of this Preprocessor.
+	 * @param fs the features to add
 	 */
-	public void addFeatures(Collection<Feature> f) {
-		features.addAll(f);
+	public void addFeatures(Collection<Feature> fs) {
+		features.addAll(fs);
 	}
 
 	/**
-	 * Returns true if the given feature is in
+	 * @return true if the given feature is in
 	 * the feature-set of this Preprocessor.
+	 * @param f the features to get
 	 */
 	public boolean getFeature(Feature f) {
 		return features.contains(f);
 	}
 
 	/**
-	 * Returns the warning-set for this Preprocessor.
+	 * @return the warning-set for this Preprocessor.
 	 *
 	 * This set may be freely modified by user code.
 	 */
@@ -244,6 +251,7 @@ public class Preprocessor implements Closeable {
 
 	/**
 	 * Adds a warning to the warning-set of this Preprocessor.
+	 * @param w The warning added.
 	 */
 	public void addWarning(Warning w) {
 		warnings.add(w);
@@ -251,14 +259,16 @@ public class Preprocessor implements Closeable {
 
 	/**
 	 * Adds warnings to the warning-set of this Preprocessor.
+	 * @param ws The collection of warnings added.
 	 */
-	public void addWarnings(Collection<Warning> w) {
-		warnings.addAll(w);
+	public void addWarnings(Collection<Warning> ws) {
+		warnings.addAll(ws);
 	}
 
 	/**
-	 * Returns true if the given warning is in
+	 * @return true if the given warning is in
 	 * the warning-set of this Preprocessor.
+	 * @param w The warning to check.
 	 */
 	public boolean getWarning(Warning w) {
 		return warnings.contains(w);
@@ -268,6 +278,7 @@ public class Preprocessor implements Closeable {
 	 * Adds input for the Preprocessor.
 	 *
 	 * Inputs are processed in the order in which they are added.
+	 * @param source The new input source.
 	 */
 	public void addInput(Source source) {
 		source.init(this);
@@ -277,6 +288,8 @@ public class Preprocessor implements Closeable {
 	/**
 	 * Adds input for the Preprocessor.
 	 *
+	 * @param file The files from which to get input.
+     * @throws IOException TODO
 	 * @see #addInput(Source)
 	 */
 	public void addInput(File file)
@@ -346,6 +359,8 @@ public class Preprocessor implements Closeable {
 	 *
 	 * The given {@link Macro} object encapsulates both the name
 	 * and the expansion.
+	 * @param m The macro to add.
+     * @throws LexerException TODO
 	 */
 	public void addMacro(Macro m) throws LexerException {
 		// System.out.println("Macro " + m);
@@ -361,6 +376,9 @@ public class Preprocessor implements Closeable {
 	 *
 	 * The String value is lexed into a token stream, which is
 	 * used as the macro expansion.
+	 * @param name The name of the macro to add.
+	 * @param value The value of the macro to add.
+	 * @throws LexerException TODO
 	 */
 	public void addMacro(String name, String value)
 						throws LexerException {
@@ -385,6 +403,8 @@ public class Preprocessor implements Closeable {
 	 *
 	 * This is a convnience method, and is equivalent to
 	 * <code>addMacro(name, "1")</code>.
+	 * @param name The name of the macro.
+	 * @throws LexerException TODO
 	 */
 	public void addMacro(String name)
 						throws LexerException {
@@ -393,6 +413,7 @@ public class Preprocessor implements Closeable {
 
 	/**
 	 * Sets the user include path used by this Preprocessor.
+	 * @param path The user include path.
 	 */
 	/* Note for future: Create an IncludeHandler? */
 	public void setQuoteIncludePath(List<String> path) {
@@ -400,7 +421,7 @@ public class Preprocessor implements Closeable {
 	}
 
 	/**
-	 * Returns the user include-path of this Preprocessor.
+	 * @return the user include-path of this Preprocessor.
 	 *
 	 * This list may be freely modified by user code.
 	 */
@@ -410,14 +431,15 @@ public class Preprocessor implements Closeable {
 
 	/**
 	 * Sets the system include path used by this Preprocessor.
+     * @param paths The user include paths.
 	 */
 	/* Note for future: Create an IncludeHandler? */
-	public void setSystemIncludePath(List<String> path) {
-		this.sysincludepath = path;
+	public void setSystemIncludePath(List<String> paths) {
+		this.sysincludepath = paths;
 	}
 
 	/**
-	 * Returns the system include-path of this Preprocessor.
+	 * @return the system include-path of this Preprocessor.
 	 *
 	 * This list may be freely modified by user code.
 	 */
@@ -427,14 +449,15 @@ public class Preprocessor implements Closeable {
 
 	/**
 	 * Sets the Objective-C frameworks path used by this Preprocessor.
+     * @param paths The user include paths.
 	 */
 	/* Note for future: Create an IncludeHandler? */
-	public void setFrameworksPath(List<String> path) {
-		this.frameworkspath = path;
+	public void setFrameworksPath(List<String> paths) {
+		this.frameworkspath = paths;
 	}
 
 	/**
-	 * Returns the Objective-C frameworks path used by this
+	 * @return the Objective-C frameworks path used by this
 	 * Preprocessor.
 	 *
 	 * This list may be freely modified by user code.
@@ -444,7 +467,7 @@ public class Preprocessor implements Closeable {
 	}
 
 	/**
-	 * Returns the Map of Macros parsed during the run of this
+	 * @return the Map of Macros parsed during the run of this
 	 * Preprocessor.
 	 */
 	public Map<String,Macro> getMacros() {
@@ -452,10 +475,11 @@ public class Preprocessor implements Closeable {
 	}
 
 	/**
-	 * Returns the named macro.
+	 * @return the named macro.
 	 *
 	 * While you can modify the returned object, unexpected things
 	 * might happen if you do.
+     * @param name The macro name.
 	 */
 	public Macro getMacro(String name) {
 		return macros.get(name);
@@ -486,7 +510,7 @@ public class Preprocessor implements Closeable {
 /* Sources */
 
 	/**
-	 * Returns the top Source on the input stack.
+	 * @return the top Source on the input stack.
 	 *
 	 * @see Source
 	 * @see #push_source(Source,boolean)
@@ -624,7 +648,7 @@ public class Preprocessor implements Closeable {
 	}
 
 	/**
-	 * Returns an NL or an EOF token.
+	 * @return an NL or an EOF token.
 	 *
 	 * The metadata on the token will be correct, which is better
 	 * than generating a new one.
@@ -1978,11 +2002,11 @@ public class Preprocessor implements Closeable {
 	}
 
 	/**
-	 * Returns the next preprocessor token.
+	 * @return the next preprocessor token.
 	 *
 	 * @see Token
 	 * @throws LexerException if a preprocessing error occurs.
-	 * @throws InternalException if an unexpected error condition arises.
+	 * @throws IOException if an unexpected error condition arises.
 	 */
 	public Token token()
 						throws IOException,

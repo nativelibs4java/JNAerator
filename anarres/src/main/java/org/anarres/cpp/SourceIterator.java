@@ -83,7 +83,7 @@ public class SourceIterator implements Iterator<Token> {
 	/**
 	 * Not supported.
 	 *
-	 * @throws UnsupportedOperationException
+	 * @throws UnsupportedOperationException TODO
 	 */
 	public void remove() {
 		throw new UnsupportedOperationException();

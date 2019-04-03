@@ -175,7 +175,7 @@ public abstract class InputHandler extends KeyAdapter
 	}
 
 	/**
-	 * Returns a named text area action.
+	 * @return a named text area action.
 	 * @param name The action name
 	 */
 	public static ActionListener getAction(String name)
@@ -184,7 +184,7 @@ public abstract class InputHandler extends KeyAdapter
 	}
 
 	/**
-	 * Returns the name of the specified text area action.
+	 * @return the name of the specified text area action.
 	 * @param listener The action listener
 	 */
 	public static String getActionName(ActionListener listener)
@@ -201,7 +201,7 @@ public abstract class InputHandler extends KeyAdapter
 	}
 
 	/**
-	 * Returns an enumeration of all available actions.
+	 * @return an enumeration of all available actions.
 	 */
 	public static Enumeration getActions()
 	{
@@ -246,7 +246,7 @@ public abstract class InputHandler extends KeyAdapter
 	}
 
 	/**
-	 * Returns if repeating is enabled. When repeating is enabled,
+	 * @return if repeating is enabled. When repeating is enabled,
 	 * actions will be executed multiple times. This is usually
 	 * invoked with a special key stroke in the input handler.
 	 */
@@ -259,6 +259,7 @@ public abstract class InputHandler extends KeyAdapter
 	 * Enables repeating. When repeating is enabled, actions will be
 	 * executed multiple times. Once repeating is enabled, the input
 	 * handler should read a number from the keyboard.
+	 * @param repeat true enables repeating
 	 */
 	public void setRepeatEnabled(boolean repeat)
 	{
@@ -266,7 +267,7 @@ public abstract class InputHandler extends KeyAdapter
 	}
 
 	/**
-	 * Returns the number of times the next action will be repeated.
+	 * @return the number of times the next action will be repeated.
 	 */
 	public int getRepeatCount()
 	{
@@ -283,7 +284,7 @@ public abstract class InputHandler extends KeyAdapter
 	}
 
 	/**
-	 * Returns the macro recorder. If this is non-null, all executed
+	 * @return the macro recorder. If this is non-null, all executed
 	 * actions should be forwarded to the recorder.
 	 */
 	public InputHandler.MacroRecorder getMacroRecorder()
@@ -302,7 +303,7 @@ public abstract class InputHandler extends KeyAdapter
 	}
 
 	/**
-	 * Returns a copy of this input handler that shares the same
+	 * @return a copy of this input handler that shares the same
 	 * key bindings. Setting key bindings in the copy will also
 	 * set them in the original.
 	 */
@@ -370,7 +371,7 @@ public abstract class InputHandler extends KeyAdapter
 	}
 
 	/**
-	 * Returns the text area that fired the specified event.
+	 * @return the text area that fired the specified event.
 	 * @param evt The event
 	 */
 	public static JEditTextArea getTextArea(EventObject evt)

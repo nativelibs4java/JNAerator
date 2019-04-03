@@ -42,6 +42,10 @@ public class FileLexerSource extends LexerSource {
 	 * Creates a new Source for lexing the given File.
 	 *
 	 * Preprocessor directives are honoured within the file.
+	 *
+	 * @param file the file to lex
+	 * @param path TODO
+	 * @throws IOException TODO
 	 */
 	public FileLexerSource(File file, String path)
 						throws IOException {
