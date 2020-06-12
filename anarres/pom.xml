@@ -17,6 +17,8 @@
 	
 	<properties>
 		<mainClass>org.anarres.cpp.Main</mainClass>
+	    <maven.compiler.source>1.6</maven.compiler.source>
+	    <maven.compiler.target>1.6</maven.compiler.target>
 	</properties>
 	
 	<developers>
@@ -73,6 +75,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jar-plugin</artifactId>
+
 			</plugin>
 
 			<plugin>
@@ -81,6 +84,24 @@
 				<configuration>
 					<redirectTestOutputToFile>true</redirectTestOutputToFile>
 				</configuration>
+			</plugin>
+
+			<plugin>
+			    <groupId>org.apache.maven.plugins</groupId>
+			    <artifactId>maven-compiler-plugin</artifactId>
+			    <configuration>
+			        <source>1.6</source>
+			        <target>1.6</target>
+			    </configuration>
+			</plugin>
+
+			<plugin>
+			    <groupId>org.apache.maven.plugins</groupId>
+			    <artifactId>maven-javadoc-plugin</artifactId>
+			    <configuration>
+			        <source>1.6</source>
+			        <target>1.6</target>
+			    </configuration>
 			</plugin>
 		</plugins>
 	</build>
