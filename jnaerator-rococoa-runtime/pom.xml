@@ -25,6 +25,27 @@
 	  <version>0.13-SNAPSHOT</version>
 	  <relativePath>..</relativePath>
   </parent>
+
+  <build>
+  	<plugins>
+  		<plugin>
+		    <groupId>org.apache.maven.plugins</groupId>
+		    <artifactId>maven-compiler-plugin</artifactId>
+		    <configuration>
+		        <source>1.6</source>
+		        <target>1.6</target>
+		    </configuration>
+		</plugin>
+  		<plugin>
+		    <groupId>org.apache.maven.plugins</groupId>
+		    <artifactId>maven-javadoc-plugin</artifactId>
+		    <configuration>
+		        <source>1.6</source>
+		        <target>1.6</target>
+		    </configuration>
+		</plugin>
+  	</plugins>
+  </build>
   
 </project>
 
