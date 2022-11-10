@@ -15,8 +15,8 @@
 	</parent>
 
   <properties>
-    <bridj.version>0.7.1-SNAPSHOT</bridj.version>
-    <jna.version>4.1.0</jna.version>
+    <bridj.version>0.8.0-SNAPSHOT</bridj.version>
+    <jna.version>5.12.1</jna.version>
     <rococoa.version>0.5</rococoa.version>
   </properties>
   
@@ -46,7 +46,7 @@
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>4.12</version>
+      <version>4.13.2</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
@@ -60,7 +60,7 @@
 		<module>jnaerator-rococoa-runtime</module>
 		<module>jnaerator-parser</module>
 		
-		<module>maven-jnaerator-plugin</module>
+		<module>jnaerator-maven-plugin</module>
 		<module>jnaerator</module>
 	</modules>
 	
@@ -107,7 +107,7 @@
 			</dependency>
 			<dependency>
 				<groupId>com.nativelibs4java</groupId>
-				<artifactId>maven-jnaerator-plugin</artifactId>
+				<artifactId>jnaerator-maven-plugin</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>

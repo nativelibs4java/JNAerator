@@ -33,9 +33,9 @@ import com.sun.jna.NativeLibrary;
 import com.sun.jna.win32.StdCallFunctionMapper;
 
 public class MangledFunctionMapper implements FunctionMapper {
-	public static final Map<Object, Object> DEFAULT_OPTIONS;
+	public static final Map<String, Object> DEFAULT_OPTIONS;
 	static {
-		Map<Object, Object> m = new HashMap<Object, Object>();
+		Map<String, Object> m = new HashMap<String, Object>();
 		FunctionMapper[] mappers = 
 			Platform.isWindows() ?
 				new FunctionMapper[] { new StdCallFunctionMapper() } :
