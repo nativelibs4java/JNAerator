@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
-<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0" >
+<xsl:stylesheet xmlns:xsl="https://www.w3.org/1999/XSL/Transform" version="1.0" >
 
 <xsl:output
          method="xml" indent="yes"
-         doctype-system="http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"
+         doctype-system="https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"
          doctype-public="-//W3C//DTD XHTML 1.0 Transitional//EN"
  		encoding="UTF-8"/>
 
@@ -44,7 +44,7 @@
 	 -->
    <head><title><xsl:value-of select="$PAGE.TITLE" /></title></head>
   <body>
-    <h1 align="center"><a href="http://findbugs.sourceforge.net"><xsl:value-of select="$SUMMARY.HEADER" /></a></h1>
+    <h1 align="center"><a href="https://findbugs.sourceforge.net"><xsl:value-of select="$SUMMARY.HEADER" /></a></h1>
     <h2 align="center"> Analysis for 
     <xsl:choose>
       <xsl:when test='string-length(/BugCollection/Project/@projectName)>0'>

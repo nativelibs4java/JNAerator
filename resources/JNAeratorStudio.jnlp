@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jnlp spec="1.0+"
-  codebase="http://jnaerator.sourceforge.net/"
+  codebase="https://jnaerator.sourceforge.net/"
   href="webstart/JNAeratorStudio.jnlp"
 >
 <information>
   <title>JNAerator Studio</title>
   <vendor>Olivier Chafik</vendor>
-  <homepage href="http://jnaerator.googlecode.com/" />
+  <homepage href="https://jnaerator.googlecode.com/" />
   <description>JNAerator : Java gets to love native libraries !</description>
   <description kind='tooltip'>JNAerator Studio : wrap C and Objective-C libraries in Java.</description>
   <icon href="webstart/appIcon128.gif"/>

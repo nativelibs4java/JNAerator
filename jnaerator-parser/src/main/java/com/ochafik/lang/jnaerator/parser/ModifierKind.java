@@ -28,7 +28,7 @@ public enum ModifierKind {
 	ReferenceQualifier,
   ObjCPropertyModifier,
 	SizeModifier,
-	SignModifier, ///http://msdn.microsoft.com/en-us/library/cc264105.aspx
+	SignModifier, ///https://msdn.microsoft.com/en-us/library/cc264105.aspx
 	StringAnnotation,
 	VCAnnotationNoArg,
 	VCAnnotation2Args,

@@ -1,7 +1,7 @@
 /*
  Copyright (c) 2009-2013 Olivier Chafik, All Rights Reserved
 	
- This file is part of JNAerator (http://jnaerator.googlecode.com/).
+ This file is part of JNAerator (https://jnaerator.googlecode.com/).
 	
  JNAerator is free software: you can redistribute it and/or modify
  it under the terms of the GNU Lesser General Public License as published by
@@ -14,7 +14,7 @@
  GNU Lesser General Public License for more details.
 	
  You should have received a copy of the GNU Lesser General Public License
- along with JNAerator.  If not, see <http://www.gnu.org/licenses/>.
+ along with JNAerator.  If not, see <https://www.gnu.org/licenses/>.
  */
 package com.ochafik.lang.jnaerator;
 
@@ -103,11 +103,11 @@ import org.bridj.ann.Library;
  */
 public class JNAerator {
 
-    public static final String JNAERATOR_URL = "http://code.google.com/p/jnaerator/";
-    public static String DONATE_URL = "http://sourceforge.net/donate/index.php?group_id=266856";
-    public static String ABOUT_JNAERATOR_URL = "http://code.google.com/p/jnaerator/wiki/AboutJNAerator";
-    public static String ABOUT_ROCOCOA_URL = "http://code.google.com/p/rococoa";
-    public static String ABOUT_BRIDJ_URL = "http://code.google.com/p/bridj/wiki";
+    public static final String JNAERATOR_URL = "https://code.google.com/p/jnaerator/";
+    public static String DONATE_URL = "https://sourceforge.net/donate/index.php?group_id=266856";
+    public static String ABOUT_JNAERATOR_URL = "https://code.google.com/p/jnaerator/wiki/AboutJNAerator";
+    public static String ABOUT_ROCOCOA_URL = "https://code.google.com/p/rococoa";
+    public static String ABOUT_BRIDJ_URL = "https://code.google.com/p/bridj/wiki";
     public static String ABOUT_JNA_URL = "https://github.com/twall/jna";
 
     public static interface Feedback {
@@ -646,9 +646,9 @@ public class JNAerator {
                     };
 
                     // Strip comments out
-                    argsFileContent = argsFileContent.replaceAll("http://", "http:\\\\");
+                    argsFileContent = argsFileContent.replaceAll("https://", "http:\\\\");
                     argsFileContent = argsFileContent.replaceAll("(?m)//[^\n]*(\n|$)", "\n");
-                    argsFileContent = argsFileContent.replaceAll("http:\\\\", "http://");
+                    argsFileContent = argsFileContent.replaceAll("http:\\\\", "https://");
                     argsFileContent = argsFileContent.replaceAll("(?m)/\\*([^*]|\\*[^/])*\\*/", "");
 
                     // Replace variables

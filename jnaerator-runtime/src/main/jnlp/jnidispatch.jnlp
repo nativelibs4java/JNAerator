@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jnlp spec="1.0+"
-  codebase="http://jnaerator.sourceforge.net/webstart/jna/3.2.7"
+  codebase="https://jnaerator.sourceforge.net/webstart/jna/3.2.7"
   href="jnidispatch.jnlp"
 >
 	<information>
 	  <title>JNA's jnidispatch library</title>
 	  <vendor>JNA</vendor>
-	  <homepage href="http://jna.dev.java.net/" />
+	  <homepage href="https://jna.dev.java.net/" />
 	  <description>JNA's jnidispatch library</description>
 	</information>
 	<security>

@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jnlp spec="1.5+"
-  codebase="http://nativelibs4java.sourceforge.net/webstart/jnaerator"
+  codebase="https://nativelibs4java.sourceforge.net/webstart/jnaerator"
   href="JNAeratorStudio.jnlp"
 >
 <information>
   <title>JNAerator Studio</title>
   <vendor>Olivier Chafik</vendor>
-  <homepage href="http://jnaerator.googlecode.com/" />
+  <homepage href="https://jnaerator.googlecode.com/" />
   <description>JNAerator : Java gets to love native libraries !</description>
   <description kind='tooltip'>JNAerator Studio : wrap C and Objective-C libraries in Java.</description>
   <icon href="appIcon128.gif"/>
@@ -23,7 +23,7 @@
 </security>
 <resources>
   <j2se version="1.6+" />
-  		<jar href="http://nativelibs4java.sourceforge.net/webstart/jnaerator/jnaerator-0.12-SNAPSHOT-shaded.jar"/>
+  		<jar href="https://nativelibs4java.sourceforge.net/webstart/jnaerator/jnaerator-0.12-SNAPSHOT-shaded.jar"/>
 </resources>
 <application-desc main-class="com.ochafik.lang.jnaerator.studio.JNAeratorStudio"/>
 </jnlp>

@@ -1,7 +1,7 @@
 /*
  Copyright (c) 2009-2013 Olivier Chafik, All Rights Reserved
 
- This file is part of JNAerator (http://jnaerator.googlecode.com/).
+ This file is part of JNAerator (https://jnaerator.googlecode.com/).
 
  JNAerator is free software: you can redistribute it and/or modify
  it under the terms of the GNU Lesser General Public License as published by
@@ -14,7 +14,7 @@
  GNU Lesser General Public License for more details.
 
  You should have received a copy of the GNU Lesser General Public License
- along with JNAerator.  If not, see <http://www.gnu.org/licenses/>.
+ along with JNAerator.  If not, see <https://www.gnu.org/licenses/>.
  */
 package com.ochafik.lang.jnaerator;
 
@@ -388,7 +388,7 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
         result.addManualTypeDef("uintptr_t", pInt);
 
         // TODO: Add a windows failsafe mode that defines all the typedefs needed:
-        // http://msdn.microsoft.com/en-us/library/windows/desktop/aa383751(v=vs.85).aspx
+        // https://msdn.microsoft.com/en-us/library/windows/desktop/aa383751(v=vs.85).aspx
 //        TypeRef pVoid = new TypeRef.Pointer(new Primitive("void"), Declarator.PointerStyle.Pointer);
 //        result.addManualTypeDef("PVOID", pVoid);
 //        result.addManualTypeDef("LPVOID", pVoid);
@@ -1042,7 +1042,7 @@ public abstract class TypeConversion implements ObjCppParser.ObjCParserHelper {
         Identifier ident = ident(result.getLibraryClassFullName(library), result.declarationsConverter.getActualTaggedTypeName(e), enumItemName);
         return expr(typeRef(ident).setMarkedAsResolved(true));
     }
-    /// @see http://java.sun.com/docs/books/tutorial/java/nutsandbolts/_keywords.html
+    /// @see https://java.sun.com/docs/books/tutorial/java/nutsandbolts/_keywords.html
     public static Set<String> JAVA_OBJECT_METHODS = new HashSet<String>(Arrays.asList(
             "notify", "notifyAll", "equals", "finalize", "getClass", "hashCode", "clone", "toString", "wait" // not allowed for function names
             ));

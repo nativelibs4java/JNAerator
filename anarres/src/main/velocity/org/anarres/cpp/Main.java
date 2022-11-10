@@ -6,7 +6,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *     https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -208,7 +208,7 @@ public class Main {
 
 	private void version(PrintStream out) {
 		out.println("Anarres Java C Preprocessor version " + Version.getVersion());
-		out.println("Copyright (C) 2008 Shevek (http://www.anarres.org/).");
+		out.println("Copyright (C) 2008 Shevek (https://www.anarres.org/).");
 		out.println("This is free software; see the source for copying conditions.  There is NO");
 		out.println("warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.");
 	}

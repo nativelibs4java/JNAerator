@@ -1,6 +1,6 @@
 /*	
  Copyright (c) 2009-2013 Olivier Chafik, All Rights Reserved
- This file is part of JNAerator (http://jnaerator.googlecode.com/).
+ This file is part of JNAerator (https://jnaerator.googlecode.com/).
 	
  JNAerator is free software: you can redistribute it and/or modify
  it under the terms of the GNU Lesser General Public License as published by
@@ -13,7 +13,7 @@
  GNU Lesser General Public License for more details.
 	
  You should have received a copy of the GNU Lesser General Public License
- along with JNAerator.  If not, see <http://www.gnu.org/licenses/>.
+ along with JNAerator.  If not, see <https://www.gnu.org/licenses/>.
  */
 package com.ochafik.lang.jnaerator;
 
@@ -255,7 +255,7 @@ public class MissingNamesChooser extends Scanner {
         super.visitStruct(struct);
     }
 
-    //http://stackoverflow.com/questions/2503183/jnaerator-unnamed-union-missing-in-structure
+    //https://stackoverflow.com/questions/2503183/jnaerator-unnamed-union-missing-in-structure
     private void fixUnNamedChildren(Struct struct) {
         List<TaggedTypeRefDeclaration> trs = getUnnamedTaggedTypeRefs(struct.getDeclarations());
         if (trs.isEmpty()) {
@@ -332,7 +332,7 @@ public class MissingNamesChooser extends Scanner {
 //			) && 
 //			parent.getParentElement() instanceof Struct
 //		;
-//		// Support (non-standard) unnamed structs and unions : http://www.redhat.com/docs/manuals/enterprise/RHEL-4-Manual/gcc/unnamed-fields.html
+//		// Support (non-standard) unnamed structs and unions : https://www.redhat.com/docs/manuals/enterprise/RHEL-4-Manual/gcc/unnamed-fields.html
 //		if (unnamed) {
 //			String type = null;
 //			if (taggedTypeRef instanceof Struct) {

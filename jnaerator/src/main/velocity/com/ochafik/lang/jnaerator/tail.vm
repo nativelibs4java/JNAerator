@@ -71,13 +71,13 @@
 		<repository>
 			<id>sonatype</id>
 			<name>Sonatype OSS Snapshots Repository</name>
-			<url>http://oss.sonatype.org/content/groups/public</url>
+			<url>https://oss.sonatype.org/content/groups/public</url>
 		</repository>
 		<!-- Uncomment to use Rococoa:
         <repository>
             <id>nativelibs4java-legacy</id>
             <name>NativeLibs4Java Legacy Repository</name>
-            <url>http://nativelibs4java.sourceforge.net/maven/</url>
+            <url>https://nativelibs4java.sourceforge.net/maven/</url>
         </repository>
         -->
 	</repositories>
@@ -85,7 +85,7 @@
 		<pluginRepository>
 			<id>sonatype</id>
 			<name>Sonatype OSS Snapshots Repository</name>
-			<url>http://oss.sonatype.org/content/groups/public</url>
+			<url>https://oss.sonatype.org/content/groups/public</url>
 		</pluginRepository>
 	</pluginRepositories>
 </project>

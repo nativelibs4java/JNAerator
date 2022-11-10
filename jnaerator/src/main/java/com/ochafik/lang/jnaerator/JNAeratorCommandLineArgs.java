@@ -582,7 +582,7 @@ public class JNAeratorCommandLineArgs {
             System.out.println("           Includes Java Native Access (JNA) (LGPL license), Copyright (c) 2006-2009 Todd Fast, Timothy Wall, Wayne Meissner and others");
             System.out.println("           Includes Rococoa (LGPL license), Copyright (c) Copyright Duncan McGregor and others");
             System.out.println("           Includes ANTLR's runtime (BSD license), Copyright (c) 2003-2008, Terence Parr");
-            System.out.println("           Licensing & Copyright details : http://code.google.com/p/jnaerator/wiki/CreditsAndLicense");
+            System.out.println("           Licensing & Copyright details : https://code.google.com/p/jnaerator/wiki/CreditsAndLicense");
 
             for (OptionDef opt : opts) {
                 if (opt.examples.length > 0) {

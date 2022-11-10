@@ -1,7 +1,7 @@
 #	
 #	Copyright (c) 2009 Olivier Chafik, All Rights Reserved
 #	
-#	This file is part of JNAerator (http://jnaerator.googlecode.com/).
+#	This file is part of JNAerator (https://jnaerator.googlecode.com/).
 #	
 #	JNAerator is free software: you can redistribute it and/or modify
 #	it under the terms of the GNU Lesser General Public License as published by
@@ -14,7 +14,7 @@
 #	GNU Lesser General Public License for more details.
 #	
 #	You should have received a copy of the GNU Lesser General Public License
-#	along with JNAerator.s  If not, see <http://www.gnu.org/licenses/>.
+#	along with JNAerator.s  If not, see <https://www.gnu.org/licenses/>.
 #	
 #pragma reversible
 --
@@ -286,7 +286,7 @@ int i = 10;
 --
 int i = [NSObject createWithTest:"ok" encoding:[NSEncoding ascii] length:10];
 --
-# see http://tigcc.ticalc.org/doc/keywords.html
+# see https://tigcc.ticalc.org/doc/keywords.html
 typedef unsigned char byte;
 --
 typedef char str40[41];

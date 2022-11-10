@@ -1,10 +1,10 @@
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="https://maven.apache.org/POM/4.0.0" xmlns:xsi="https://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="https://maven.apache.org/POM/4.0.0 https://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.nativelibs4java</groupId>
 	<artifactId>anarres-jnaerator</artifactId>
 	<name>Anarres JCPP (with JNAerator modifications)</name>
-	<url>http://www.anarres.org/projects/jcpp/</url>
+	<url>https://www.anarres.org/projects/jcpp/</url>
 	<version>1.2.10-SNAPSHOT</version>
 	<packaging>jar</packaging>
 	<description></description>
@@ -30,7 +30,7 @@
 	<licenses>
 		<license>
 			<name>Apache 2.0</name>
-			<url>http://www.apache.org/licenses/LICENSE-2.0.html</url>
+			<url>https://www.apache.org/licenses/LICENSE-2.0.html</url>
 			<distribution>repo</distribution>
 			<comments>Anarres JCPP was patched with some modifications for use in JNAerator.. 
 	  Diffs are trivial to make with Original Anarres SVN repository : https://svn.anarres.org/svn/repos/code/java/cpp/trunk/</comments>

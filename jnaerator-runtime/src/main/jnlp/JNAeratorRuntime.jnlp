@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jnlp spec="1.5+"
-  codebase="http://nativelibs4java.sourceforge.net/webstart/jnaerator"
+  codebase="https://nativelibs4java.sourceforge.net/webstart/jnaerator"
   href="JNAeratorRuntime.jnlp"
 >
 	<information>
 	  <title>JNAerator Runtime</title>
 	  <vendor>Olivier Chafik</vendor>
-	  <homepage href="http://code.google.com/p/jnaerator/" />
+	  <homepage href="https://code.google.com/p/jnaerator/" />
 	  <description>JNAerated libraries runtime support classes</description>
 	  <description kind='tooltip'>JNAerated libraries runtime support classes</description>
 	</information>
@@ -15,8 +15,8 @@
 	</security>
 	<resources>
 		<j2se version="1.5+"/>
-		<extension name="jna-nativelibs" href="http://nativelibs4java.sourceforge.net/webstart/thirdparty/jna/3.3.0/jna-nativelibs.jnlp"/>
-		<jar href="http://nativelibs4java.sourceforge.net/maven/com/jnaerator/jnaerator-runtime/0.9.10-SNAPSHOT/jnaerator-runtime-0.9.10-SNAPSHOT-webstart.jar"/>
+		<extension name="jna-nativelibs" href="https://nativelibs4java.sourceforge.net/webstart/thirdparty/jna/3.3.0/jna-nativelibs.jnlp"/>
+		<jar href="https://nativelibs4java.sourceforge.net/maven/com/jnaerator/jnaerator-runtime/0.9.10-SNAPSHOT/jnaerator-runtime-0.9.10-SNAPSHOT-webstart.jar"/>
 	</resources>
 	
 	<component-desc/>

@@ -1,6 +1,6 @@
-<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0"
-    xmlns:lxslt="http://xml.apache.org/xslt"
-    xmlns:redirect="http://xml.apache.org/xalan/redirect"
+<xsl:stylesheet xmlns:xsl="https://www.w3.org/1999/XSL/Transform" version="1.0"
+    xmlns:lxslt="https://xml.apache.org/xslt"
+    xmlns:redirect="https://xml.apache.org/xalan/redirect"
     xmlns:stringutils="xalan://org.apache.tools.ant.util.StringUtils"
     extension-element-prefixes="redirect">
 <xsl:output method="html" indent="yes" encoding="US-ASCII"/>
@@ -12,7 +12,7 @@
    you may not use this file except in compliance with the License.
    You may obtain a copy of the License at
 
-       http://www.apache.org/licenses/LICENSE-2.0
+       https://www.apache.org/licenses/LICENSE-2.0
 
    Unless required by applicable law or agreed to in writing, software
    distributed under the License is distributed on an "AS IS" BASIS,
@@ -574,7 +574,7 @@ h6 {
     <table width="100%">
     <tr>
         <td align="left"></td>
-        <td align="right">Designed for use with <a href="http://www.junit.org/">JUnit</a> and <a href="http://jakarta.apache.org/">Ant</a>.</td>
+        <td align="right">Designed for use with <a href="https://www.junit.org/">JUnit</a> and <a href="https://jakarta.apache.org/">Ant</a>.</td>
     </tr>
     </table>
     <hr size="1"/>

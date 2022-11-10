@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jnlp spec="1.0+"
-  codebase="http://jnaerator.sourceforge.net/webstart/JNAerator"
+  codebase="https://jnaerator.sourceforge.net/webstart/JNAerator"
   href="JNA.jnlp"
 >
 	<information>
 	  <title>JNA</title>
 	  <vendor>JNA</vendor>
-	  <homepage href="http://jna.dev.java.net/" />
+	  <homepage href="https://jna.dev.java.net/" />
 	  <description>Java Native Access Library</description>
 	</information>
 	<security>
@@ -14,8 +14,8 @@
 	</security>
 	<resources>
 		<j2se version="1.5+"/>
-		<extension name="jnidispatch" href="http://jnaerator.sourceforge.net/webstart/jna/3.2.7/jnidispatch.jnlp"/>
-		<jar href="http://jnaerator.sourceforge.net/webstart/jna/3.2.7/jna-webstart.jar"/>
+		<extension name="jnidispatch" href="https://jnaerator.sourceforge.net/webstart/jna/3.2.7/jnidispatch.jnlp"/>
+		<jar href="https://jnaerator.sourceforge.net/webstart/jna/3.2.7/jna-webstart.jar"/>
 	</resources>
 	
 	<component-desc/>

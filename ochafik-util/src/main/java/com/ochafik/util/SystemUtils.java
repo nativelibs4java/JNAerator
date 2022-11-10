@@ -1,7 +1,7 @@
 /*
 	Copyright (c) 2009-2011 Olivier Chafik, All Rights Reserved
 	
-	This file is part of JNAerator (http://jnaerator.googlecode.com/).
+	This file is part of JNAerator (https://jnaerator.googlecode.com/).
 	
 	JNAerator is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -14,7 +14,7 @@
 	GNU General Public License for more details.
 	
 	You should have received a copy of the GNU General Public License
-	along with JNAerator.  If not, see <http://www.gnu.org/licenses/>.
+	along with JNAerator.  If not, see <https://www.gnu.org/licenses/>.
 */
 package com.ochafik.util;
 import java.awt.event.ActionEvent;
@@ -52,7 +52,7 @@ public class SystemUtils {
 	}
 	static String osName;
 	static {
-		// For possible values, see http://lopica.sourceforge.net/os.html
+		// For possible values, see https://lopica.sourceforge.net/os.html
 		osName = System.getProperty("os.name");
 	}
 	

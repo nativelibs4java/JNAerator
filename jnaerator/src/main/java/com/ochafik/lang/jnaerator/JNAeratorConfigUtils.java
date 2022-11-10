@@ -1,7 +1,7 @@
 /*
  Copyright (c) 2009-2013 Olivier Chafik, All Rights Reserved
 	
- This file is part of JNAerator (http://jnaerator.googlecode.com/).
+ This file is part of JNAerator (https://jnaerator.googlecode.com/).
 	
  JNAerator is free software: you can redistribute it and/or modify
  it under the terms of the GNU Lesser General Public License as published by
@@ -14,7 +14,7 @@
  GNU Lesser General Public License for more details.
 	
  You should have received a copy of the GNU Lesser General Public License
- along with JNAerator.  If not, see <http://www.gnu.org/licenses/>.
+ along with JNAerator.  If not, see <https://www.gnu.org/licenses/>.
  */
 package com.ochafik.lang.jnaerator;
 
@@ -280,16 +280,16 @@ public class JNAeratorConfigUtils {
         config.preprocessorConfig.implicitIncludes.addAll(getDefaultIncludePath(config.verbose));//JNAeratorConfigUtils.DEFAULT_INCLUDE_PATH);
         config.preprocessorConfig.frameworksPath.addAll(getDefaultFrameworkPath(config.verbose));//JNAeratorConfigUtils.DEFAULT_FRAMEWORKS_PATH);
         if (SystemUtils.isWindows()) {
-            //http://msdn.microsoft.com/en-us/library/b0084kay(VS.80).aspx
+            //https://msdn.microsoft.com/en-us/library/b0084kay(VS.80).aspx
 
             //config.preprocessorConfig.includeStrings.add("#define __declspec(x)\n");
 
-            //http://support.microsoft.com/kb/65472
+            //https://support.microsoft.com/kb/65472
             config.preprocessorConfig.implicitMacros.put("_CHAR_UNSIGNED", null);
 
             config.preprocessorConfig.implicitMacros.put("WIN32_LEAN_AND_MEAN", null);
 
-            // http://msdn.microsoft.com/en-us/library/dh8che7s(VS.80).aspx
+            // https://msdn.microsoft.com/en-us/library/dh8che7s(VS.80).aspx
             config.preprocessorConfig.implicitMacros.put("_WCHAR_T_DEFINED", null);
             config.preprocessorConfig.implicitMacros.put("_NATIVE_WCHAR_T_DEFINED", null);
 

@@ -19,14 +19,14 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 -->
 <xsl:stylesheet version="1.0"
-	xmlns="http://www.w3.org/1999/xhtml"
-	xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+	xmlns="https://www.w3.org/1999/xhtml"
+	xmlns:xsl="https://www.w3.org/1999/XSL/Transform">
 
 <xsl:output
 	method="xml"
 	omit-xml-declaration="yes"
 	standalone="yes"
-         doctype-system="http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"
+         doctype-system="https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"
          doctype-public="-//W3C//DTD XHTML 1.0 Transitional//EN"
 	indent="yes"
 	encoding="UTF-8"/>
@@ -72,7 +72,7 @@
 	<body>
 
 	<h1>FindBugs Report</h1>
-		<p>Produced using <a href="http://findbugs.sourceforge.net">FindBugs</a> <xsl:value-of select="/BugCollection/@version"/>.</p>
+		<p>Produced using <a href="https://findbugs.sourceforge.net">FindBugs</a> <xsl:value-of select="/BugCollection/@version"/>.</p>
 		<p>Project: 
 			<xsl:choose>
 				<xsl:when test='string-length(/BugCollection/Project/@projectName)>0'><xsl:value-of select="/BugCollection/Project/@projectName" /></xsl:when>

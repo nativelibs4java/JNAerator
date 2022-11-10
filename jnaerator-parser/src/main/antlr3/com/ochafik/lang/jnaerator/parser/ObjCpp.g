@@ -1,7 +1,7 @@
 /*
   Copyright (c) 2009 Olivier Chafik, All Rights Reserved
   
-  This file is part of JNAerator (http://jnaerator.googlecode.com/).
+  This file is part of JNAerator (https://jnaerator.googlecode.com/).
   
   JNAerator is free software: you can redistribute it and/or modify
   it under the terms of the GNU Lesser General Public License as published by
@@ -14,7 +14,7 @@
   GNU Lesser General Public Lticense for more details.
   
   You should have received a copy of the GNU Lesser General Public License
-  along with JNAerator.  If not, see <http://www.gnu.org/licenses/>.
+  along with JNAerator.  If not, see <https://www.gnu.org/licenses/>.
 */
 /**
   This grammar is by no mean complete.
@@ -48,7 +48,7 @@ scope ModContext {
 /*
   Copyright (c) 2009 Olivier Chafik, All Rights Reserved
   
-  This file is part of JNAerator (http://jnaerator.googlecode.com/).
+  This file is part of JNAerator (https://jnaerator.googlecode.com/).
   
   JNAerator is free software: you can redistribute it and/or modify
   it under the terms of the GNU Lesser General Public License as published by
@@ -61,7 +61,7 @@ scope ModContext {
   GNU Lesser General Public License for more details.
   
   You should have received a copy of the GNU Lesser General Public License
-  along with JNAerator.  If not, see <http://www.gnu.org/licenses/>.
+  along with JNAerator.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 package com.ochafik.lang.jnaerator.parser;
@@ -440,7 +440,7 @@ import static com.ochafik.lang.jnaerator.parser.StoredDeclarations.*;
 /*
   Copyright (c) 2009 Olivier Chafik, All Rights Reserved
   
-  This file is part of JNAerator (http://jnaerator.googlecode.com/).
+  This file is part of JNAerator (https://jnaerator.googlecode.com/).
   
   JNAerator is free software: you can redistribute it and/or modify
   it under the terms of the GNU Lesser General Public License as published by
@@ -453,7 +453,7 @@ import static com.ochafik.lang.jnaerator.parser.StoredDeclarations.*;
   GNU Lesser General Public License for more details.
   
   You should have received a copy of the GNU Lesser General Public License
-  along with JNAerator.  If not, see <http://www.gnu.org/licenses/>.
+  along with JNAerator.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 package com.ochafik.lang.jnaerator.parser;
@@ -1181,14 +1181,14 @@ modifier returns [List<Modifier> modifiers, String asmName]
     { next("__success") }?=>
     IDENTIFIER LPAREN 'return' binaryOp expression  RPAREN |
     
-    // TODO handle it properly @see http://blogs.msdn.com/staticdrivertools/archive/2008/11/06/annotating-for-success.aspx
+    // TODO handle it properly @see https://blogs.msdn.com/staticdrivertools/archive/2008/11/06/annotating-for-success.aspx
     { next(ModifierKind.VCAnnotation1Arg, ModifierKind.VCAnnotation2Args) }?=>
     m=IDENTIFIER LPAREN x=constant RPAREN {
       $modifiers.add(new ValuedModifier(ModifierType.parseModifier($m.text), $x.constant));
     }
   ;
 
-//http://msdn.microsoft.com/en-us/library/dabb5z75.aspx
+//https://msdn.microsoft.com/en-us/library/dabb5z75.aspx
 extendedModifiers returns [List<Modifier> modifiers]
 scope ModContext;
 @init {
@@ -2085,7 +2085,7 @@ statement returns [Statement stat]
     b=statementsBlock { 
       $stat = $b.statement; 
     } |
-    // GCC inline asm (see http://ibiblio.org/gferg/ldp/GCC-Inline-Assembly-HOWTO.html)
+    // GCC inline asm (see https://ibiblio.org/gferg/ldp/GCC-Inline-Assembly-HOWTO.html)
      
     { next("__asm__", "asm") }?=> IDENTIFIER
     ( { next("__volatile__", "volatile") }?=> IDENTIFIER )? LPAREN

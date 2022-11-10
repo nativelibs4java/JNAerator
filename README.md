@@ -1,20 +1,20 @@
-[![Maven Central](http://maven-badges.herokuapp.com/maven-central/com.nativelibs4java/jnaerator/badge.svg)](http://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22com.nativelibs4java%22%20AND%20a%3A%22jnaerator%22) [![Build Status](https://travis-ci.org/nativelibs4java/JNAerator.svg)](https://travis-ci.org/nativelibs4java/JNAerator) [![Join the chat at https://gitter.im/nativelibs4java/JNAerator](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/nativelibs4java/JNAerator?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.nativelibs4java/jnaerator/badge.svg)](https://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22com.nativelibs4java%22%20AND%20a%3A%22jnaerator%22) [![Build Status](https://travis-ci.org/nativelibs4java/JNAerator.svg)](https://travis-ci.org/nativelibs4java/JNAerator) [![Join the chat at https://gitter.im/nativelibs4java/JNAerator](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/nativelibs4java/JNAerator?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-[JNAerator](http://jnaerator.googlecode.com) generates complete native bindings for C, C++ and Objective-C libraries, targetting [BridJ](http://github.com/ochafik/BridJ), [JNA](https://github.com/twall/jna) or [node.js](http://nodejs.org) runtimes.
+[JNAerator](https://jnaerator.googlecode.com) generates complete native bindings for C, C++ and Objective-C libraries, targetting [BridJ](https://github.com/ochafik/BridJ), [JNA](https://github.com/twall/jna) or [node.js](https://nodejs.org) runtimes.
 
 A comprehensive documentation is available on its [Wiki](https://code.google.com/p/jnaerator/wiki/Documentation?tm=6).
 
-It was previously hosted on [ochafik/nativelibs4java](http://github.com/ochafik/nativelibs4java).
+It was previously hosted on [ochafik/nativelibs4java](https://github.com/ochafik/nativelibs4java).
 
 # Quick links
 
 * [CHANGELOG](./CHANGELOG.md)
-* [FAQ](http://code.google.com/p/jnaerator/wiki/JNAeratorFAQ)
-* [Credits and License](http://code.google.com/p/jnaerator/wiki/CreditsAndLicense)
+* [FAQ](https://code.google.com/p/jnaerator/wiki/JNAeratorFAQ)
+* [Credits and License](https://code.google.com/p/jnaerator/wiki/CreditsAndLicense)
 
 # Building
   ```
-  git clone http://github.com/nativelibs4java/JNAerator.git
+  git clone https://github.com/nativelibs4java/JNAerator.git
   cd JNAerator
   mvn clean install
   ```

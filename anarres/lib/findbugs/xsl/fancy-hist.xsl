@@ -18,10 +18,10 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 -->
 
-<xsl:transform xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0" >
+<xsl:transform xmlns:xsl="https://www.w3.org/1999/XSL/Transform" version="1.0" >
    <xsl:output
          method="xml" indent="yes"
-         doctype-system="http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"
+         doctype-system="https://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"
          doctype-public="-//W3C//DTD XHTML 1.0 Strict//EN"
          encoding="UTF-8"/>
 
@@ -968,7 +968,7 @@
    </head>
    <body>
       <h3>
-         <a href="http://findbugs.sourceforge.net">FindBugs</a> (<xsl:value-of select="/BugCollection/@version" />) 
+         <a href="https://findbugs.sourceforge.net">FindBugs</a> (<xsl:value-of select="/BugCollection/@version" />) 
          Analysis for 
          <xsl:choose>
             <xsl:when test='string-length(/BugCollection/Project/@projectName)>0'><xsl:value-of select="/BugCollection/Project/@projectName" /></xsl:when>

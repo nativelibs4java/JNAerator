@@ -1,26 +1,26 @@
 <?xml version="1.0"?>
 <!DOCTYPE module PUBLIC
     "-//Puppy Crawl//DTD Check Configuration 1.2//EN"
-    "http://www.puppycrawl.com/dtds/configuration_1_2.dtd">
+    "https://www.puppycrawl.com/dtds/configuration_1_2.dtd">
 
 <!--
 
   Checkstyle configuration that checks the sun coding conventions from:
 
     - the Java Language Specification at
-      http://java.sun.com/docs/books/jls/second_edition/html/index.html
+      https://java.sun.com/docs/books/jls/second_edition/html/index.html
 
-    - the Sun Code Conventions at http://java.sun.com/docs/codeconv/
+    - the Sun Code Conventions at https://java.sun.com/docs/codeconv/
 
     - the Javadoc guidelines at
-      http://java.sun.com/j2se/javadoc/writingdoccomments/index.html
+      https://java.sun.com/j2se/javadoc/writingdoccomments/index.html
 
-    - the JDK Api documentation http://java.sun.com/j2se/docs/api/index.html
+    - the JDK Api documentation https://java.sun.com/j2se/docs/api/index.html
 
     - some best practices
 
   Checkstyle is very configurable. Be sure to read the documentation at
-  http://checkstyle.sf.net (or in your downloaded distribution).
+  https://checkstyle.sf.net (or in your downloaded distribution).
 
   Most Checks are configurable, be sure to consult the documentation.
 
@@ -36,23 +36,23 @@
 <module name="Checker">
 
     <!-- Checks that a package.html file exists for each package.     -->
-    <!-- See http://checkstyle.sf.net/config_javadoc.html#PackageHtml -->
+    <!-- See https://checkstyle.sf.net/config_javadoc.html#PackageHtml -->
 	<!-- Currently too numerous, disabled -->
     <!--module name="PackageHtml"/-->
 
     <!-- Checks whether files end with a new line.                        -->
-    <!-- See http://checkstyle.sf.net/config_misc.html#NewlineAtEndOfFile -->
+    <!-- See https://checkstyle.sf.net/config_misc.html#NewlineAtEndOfFile -->
     <module name="NewlineAtEndOfFile"/>
 
     <!-- Checks that property files contain the same keys.         -->
-    <!-- See http://checkstyle.sf.net/config_misc.html#Translation -->
+    <!-- See https://checkstyle.sf.net/config_misc.html#Translation -->
     <module name="Translation"/>
 
 
     <module name="TreeWalker">
 
         <!-- Checks for Javadoc comments.                     -->
-        <!-- See http://checkstyle.sf.net/config_javadoc.html -->
+        <!-- See https://checkstyle.sf.net/config_javadoc.html -->
 		<!-- Currently too numerous -->
         <!--module name="JavadocMethod"/-->
         <!--module name="JavadocType"/-->
@@ -61,7 +61,7 @@
 
 
         <!-- Checks for Naming Conventions.                  -->
-        <!-- See http://checkstyle.sf.net/config_naming.html -->
+        <!-- See https://checkstyle.sf.net/config_naming.html -->
         <module name="ConstantName"/>
         <module name="LocalFinalVariableName"/>
         <module name="LocalVariableName"/>
@@ -74,14 +74,14 @@
 
 
         <!-- Checks for Headers                                -->
-        <!-- See http://checkstyle.sf.net/config_header.html   -->
+        <!-- See https://checkstyle.sf.net/config_header.html   -->
         <!-- <module name="Header">                            -->
             <!-- The follow property value demonstrates the ability     -->
             <!-- to have access to ANT properties. In this case it uses -->
             <!-- the ${basedir} property to allow Checkstyle to be run  -->
             <!-- from any directory within a project. See property      -->
             <!-- expansion,                                             -->
-            <!-- http://checkstyle.sf.net/config.html#properties        -->
+            <!-- https://checkstyle.sf.net/config.html#properties        -->
             <!-- <property                                              -->
             <!--     name="headerFile"                                  -->
             <!--     value="${basedir}/java.header"/>                   -->
@@ -92,7 +92,7 @@
 
 
         <!-- Checks for imports                              -->
-        <!-- See http://checkstyle.sf.net/config_import.html -->
+        <!-- See https://checkstyle.sf.net/config_import.html -->
         <module name="AvoidStarImport"/>
         <module name="IllegalImport"/> <!-- defaults to sun.* packages -->
         <module name="RedundantImport"/>
@@ -100,7 +100,7 @@
 
 
         <!-- Checks for Size Violations.                    -->
-        <!-- See http://checkstyle.sf.net/config_sizes.html -->
+        <!-- See https://checkstyle.sf.net/config_sizes.html -->
         <module name="FileLength"/>
         <module name="LineLength"/>
         <module name="MethodLength"/>
@@ -108,7 +108,7 @@
 
 
         <!-- Checks for whitespace                               -->
-        <!-- See http://checkstyle.sf.net/config_whitespace.html -->
+        <!-- See https://checkstyle.sf.net/config_whitespace.html -->
         <module name="EmptyForIteratorPad"/>
         <module name="MethodParamPad"/>
         <module name="NoWhitespaceAfter"/>
@@ -124,13 +124,13 @@
 
 
         <!-- Modifier Checks                                    -->
-        <!-- See http://checkstyle.sf.net/config_modifiers.html -->
+        <!-- See https://checkstyle.sf.net/config_modifiers.html -->
         <module name="ModifierOrder"/>
         <module name="RedundantModifier"/>
 
 
         <!-- Checks for blocks. You know, those {}'s         -->
-        <!-- See http://checkstyle.sf.net/config_blocks.html -->
+        <!-- See https://checkstyle.sf.net/config_blocks.html -->
         <module name="AvoidNestedBlocks"/>
         <module name="EmptyBlock"/>
         <module name="LeftCurly"/>
@@ -139,7 +139,7 @@
 
 
         <!-- Checks for common coding problems               -->
-        <!-- See http://checkstyle.sf.net/config_coding.html -->
+        <!-- See https://checkstyle.sf.net/config_coding.html -->
         <module name="AvoidInlineConditionals"/>
         <module name="DoubleCheckedLocking"/>    <!-- MY FAVOURITE -->
         <module name="EmptyStatement"/>
@@ -154,7 +154,7 @@
         <module name="SimplifyBooleanReturn"/>
 
         <!-- Checks for class design                         -->
-        <!-- See http://checkstyle.sf.net/config_design.html -->
+        <!-- See https://checkstyle.sf.net/config_design.html -->
         <module name="DesignForExtension"/>
         <module name="FinalClass"/>
         <module name="HideUtilityClassConstructor"/>
@@ -163,7 +163,7 @@
 
 
         <!-- Miscellaneous other checks.                   -->
-        <!-- See http://checkstyle.sf.net/config_misc.html -->
+        <!-- See https://checkstyle.sf.net/config_misc.html -->
         <module name="ArrayTypeStyle"/>
         <module name="FinalParameters"/>
         <module name="GenericIllegalRegexp">

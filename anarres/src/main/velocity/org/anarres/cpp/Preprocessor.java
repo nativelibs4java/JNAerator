@@ -6,7 +6,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *     https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -110,7 +110,7 @@ public class Preprocessor implements Closeable {
 	private List<String>			sysincludepath;		/* -I */
 	
 	//ochafik
-	/* -F @see http://developer.apple.com/DOCUMENTATION/DeveloperTools/gcc-3.3/gcc/Directory-Options.html */
+	/* -F @see https://developer.apple.com/DOCUMENTATION/DeveloperTools/gcc-3.3/gcc/Directory-Options.html */
 	private List<String>			frameworkspath;
 	private Set<Feature>			features;
 	private Set<Warning>			warnings;
