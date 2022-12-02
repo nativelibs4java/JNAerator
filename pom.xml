@@ -23,14 +23,14 @@
   <scm>
     <connection>scm:git:git@github.com:nativelibs4java/JNAerator.git</connection>
     <developerConnection>scm:git:git@github.com:nativelibs4java/JNAerator.git</developerConnection>
-    <url>http://github.com/nativelibs4java/JNAerator</url>
+    <url>https://github.com/nativelibs4java/JNAerator</url>
   </scm>
 
   <repositories>
     <repository>
       <id>sonatype</id>
       <name>Sonatype OSS Snapshots Repository</name>
-      <url>http://oss.sonatype.org/content/groups/public</url>
+      <url>https://oss.sonatype.org/content/groups/public</url>
     </repository>
   </repositories>
 
@@ -38,7 +38,7 @@
     <pluginRepository>
       <id>sonatype</id>
       <name>Sonatype OSS Snapshots Repository</name>
-      <url>http://oss.sonatype.org/content/groups/public</url>
+      <url>https://oss.sonatype.org/content/groups/public</url>
     </pluginRepository>
   </pluginRepositories>
   
