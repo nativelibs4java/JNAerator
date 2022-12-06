@@ -1,7 +1,7 @@
 /*
 	Copyright (c) 2009-2013 Olivier Chafik, All Rights Reserved
 	
-	This file is part of JNAerator (http://jnaerator.googlecode.com/).
+	This file is part of JNAerator (https://github.com/nativelibs4java/JNAerator).
 	
 	JNAerator is free software: you can redistribute it and/or modify
 	it under the terms of the GNU Lesser General Public License as published by
@@ -141,12 +141,12 @@ public class ObjCppParsingTest {
 		}
 
 	}
-        static String lineAware(String s) {
-            return s.replaceAll("\n\r", "\n").replace("\r", "\n").replaceAll("\\s+", " ");
-        }
-        public static void assertEqualsNewLineAware(String message, String a, String b) {
-            assertEquals(message, lineAware(a), lineAware(b));
-        }
+	static String lineAware(String s) {
+		return s.replaceAll("\n\r", "\n").replace("\r", "\n").replaceAll("\\s+", " ");
+	}
+	public static void assertEqualsNewLineAware(String message, String a, String b) {
+		assertEquals(message, lineAware(a), lineAware(b));
+	}
 
 	@Parameters
 	public static List<Object[]> readDataFromFile() throws IOException {

@@ -1,7 +1,7 @@
 /*
 	Copyright (c) 2009-2013 Olivier Chafik, All Rights Reserved
 	
-	This file is part of JNAerator (http://jnaerator.googlecode.com/).
+	This file is part of JNAerator (https://github.com/nativelibs4java/JNAerator).
 	
 	JNAerator is free software: you can redistribute it and/or modify
 	it under the terms of the GNU Lesser General Public License as published by
@@ -72,6 +72,7 @@ public abstract class Union<S extends Union<S, V, R>, V extends S, R extends S>
 	}
 	/**
 	 * @deprecated use castToArray instead
+	 * @return the array for this union
 	 */
 	@Deprecated
 	public S[] toArray() {

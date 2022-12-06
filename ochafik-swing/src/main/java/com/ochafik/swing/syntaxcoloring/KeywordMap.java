@@ -50,6 +50,7 @@ public class KeywordMap
 	 * @param text The text segment
 	 * @param offset The offset of the substring within the text segment
 	 * @param length The length of the substring
+	 * @return the key
 	 */
 	public byte lookup(Segment text, int offset, int length)
 	{
@@ -83,7 +84,7 @@ public class KeywordMap
 	}
 
 	/**
-	 * Returns true if the keyword map is set to be case insensitive,
+	 * @return true if the keyword map is set to be case insensitive,
 	 * false otherwise.
 	 */
 	public boolean getIgnoreCase()

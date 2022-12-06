@@ -44,9 +44,15 @@
   
   <dependencies>
     <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>4.12</version>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-engine</artifactId>
+      <version>5.2.0</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.vintage</groupId>
+      <artifactId>junit-vintage-engine</artifactId>
+      <version>5.2.0</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
@@ -60,7 +66,7 @@
 		<module>jnaerator-rococoa-runtime</module>
 		<module>jnaerator-parser</module>
 		
-		<module>maven-jnaerator-plugin</module>
+		<module>jnaerator-maven-plugin</module>
 		<module>jnaerator</module>
 	</modules>
 	
@@ -107,7 +113,7 @@
 			</dependency>
 			<dependency>
 				<groupId>com.nativelibs4java</groupId>
-				<artifactId>maven-jnaerator-plugin</artifactId>
+				<artifactId>jnaerator-maven-plugin</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>

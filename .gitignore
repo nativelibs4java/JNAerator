@@ -1,4 +1,15 @@
+gradle/wrapper/
+gradlew
+gradlew.bat
+
 target
 project/boot
 project/target
 *~
+.settings/
+.idea/
+**/*.iml
+**/.classpath
+**/.factorypath
+**/.gradle
+**/.project

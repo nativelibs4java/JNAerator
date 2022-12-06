@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <annotationProcessing>
+      <profile name="Maven default annotation processors profile" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <module name="anarres-jnaerator" />
+        <module name="jnaerator" />
+        <module name="jnaerator-parser" />
+        <module name="jnaerator-rococoa-runtime" />
+        <module name="jnaerator-runtime" />
+        <module name="jnearator-maven-plugin" />
+        <module name="ochafik-swing" />
+        <module name="ochafik-util" />
+      </profile>
+    </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="anarres-jnaerator" target="1.6" />
+      <module name="jnaerator" target="1.6" />
+      <module name="jnaerator-parent" target="1.6" />
+      <module name="jnaerator-parser" target="1.6" />
+      <module name="jnaerator-rococoa-runtime" target="1.6" />
+      <module name="jnaerator-runtime" target="1.6" />
+      <module name="jnearator-maven-plugin" target="1.6" />
+      <module name="ochafik-swing" target="1.6" />
+      <module name="ochafik-util" target="1.6" />
+    </bytecodeTargetLevel>
+  </component>
+</project>

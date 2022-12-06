@@ -1,7 +1,7 @@
 /*
 	Copyright (c) 2009-2011 Olivier Chafik, All Rights Reserved
 	
-	This file is part of JNAerator (http://jnaerator.googlecode.com/).
+	This file is part of JNAerator (https://github.com/nativelibs4java/JNAerator).
 	
 	JNAerator is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -76,6 +76,7 @@ public final class Threads {
 	/**
 	 * Add a task that is to be executed in its own thread.
 	 * @param runnable task to be executed in its own thread
+	 * @param <T> the specialization for Runnable
 	 * @return the runnable argument unchanged
 	 */
 	public synchronized <T extends Runnable> T add(T runnable) {
@@ -162,7 +163,7 @@ public final class Threads {
 	/**
 	 * Adds a listener that will be notified upon completion of all of the running threads.
 	 * Its actionPerformed method will be called immediately if the threads already finished.
-	 * @param actionListener
+	 * @param actionListener the listener that will be notified
 	 */
 	public synchronized void addActionListener(ActionListener actionListener) {
 		if (actionListeners == null)

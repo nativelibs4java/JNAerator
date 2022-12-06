@@ -6,7 +6,7 @@
 <information>
   <title>JNAerator Studio</title>
   <vendor>Olivier Chafik</vendor>
-  <homepage href="http://jnaerator.googlecode.com/" />
+  <homepage href="https://github.com/nativelibs4java/JNAerator" />
   <description>JNAerator : Java gets to love native libraries !</description>
   <description kind='tooltip'>JNAerator Studio : wrap C and Objective-C libraries in Java.</description>
   <icon href="webstart/appIcon128.gif"/>

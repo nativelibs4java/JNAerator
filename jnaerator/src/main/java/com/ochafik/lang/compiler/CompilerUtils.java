@@ -1,7 +1,7 @@
 /*
  Copyright (c) 2009-2013 Olivier Chafik, All Rights Reserved
 	
- This file is part of JNAerator (http://jnaerator.googlecode.com/).
+ This file is part of JNAerator (https://github.com/nativelibs4java/JNAerator).
 	
  JNAerator is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@
 package com.ochafik.lang.compiler;
 
 import java.util.*;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.io.*;
 import java.net.MalformedURLException;
@@ -88,35 +89,26 @@ public class CompilerUtils {
 
     public static String getClassPath(Class<?> c, File cacheDirectory) throws MalformedURLException, IOException {
 
-        URL resource = c.getResource(c.getSimpleName() + ".class");
+        final URL resource = c.getResource(c.getSimpleName() + ".class");
         if (resource != null) {
-            String resstr = resource.toString();
-//			if (resstr.contains("Prog/"))
-//				resstr = "jar:http://ochafik.com/Java/jnaerator.jar!/...";
-
+            final String resstr = resource.toString();
+            String newstr = resstr;
             if (resstr.matches("jar:.*!.*")) {
-                resstr = resstr.substring("jar:".length(), resstr.indexOf("!"));
+                newstr = resstr.substring("jar:".length(), resstr.indexOf("!"));
+            } else if (resstr.matches( "jrt:/[^/]*.*")) {
+                // final Pattern pattern = Pattern.compile("jrt:/(?<module>[^/]*)(?<path>.*)");
+                // final Matcher matcher = pattern.matcher(resstr);
+                // matcher.find();
+                // newstr = matcher.group("path");
             } else {
                 String p = '/' + c.getName().replace('.', '/') + ".class";
                 if (resstr.endsWith(p)) {
-                    resstr = resstr.substring(0, resstr.length() - p.length());
+                    newstr = resstr.substring(0, resstr.length() - p.length());
                 }
             }
-            return getLocalFile(new URL(resstr), cacheDirectory).toString();
+            // System.out.println("class path : " + resstr + ", new : " + newstr);
+            return getLocalFile(new URL(newstr), cacheDirectory).toString();
         }
-        /*
-         if (resource != null) {
-         String resstr = resource.toString();
-         if (resstr.matches("jar:file:.*!.*"))
-         return resstr.substring("jar:file:".length(), resstr.indexOf("!"));
-         else if (resstr.matches("jar:http:.*!.*"))
-         return resstr.substring("jar:".length(), resstr.indexOf("!"));
-         else {
-         String p = '/' + c.getName().replace('.', '/') + ".class";
-         if (resstr.endsWith(p))
-         return resstr.substring(0, resstr.length() - p.length());
-         }
-         }*/
         return null;
     }
 
@@ -133,7 +125,7 @@ public class CompilerUtils {
     }
     static Map<String, File> localURLCaches = new LinkedHashMap<String, File>();
 
-    static File getLocalFile(URL remoteFile, File cacheDirectory) throws IOException {
+    static File getLocalFile(final URL remoteFile, final File cacheDirectory) throws IOException {
         if ("file".equals(remoteFile.getProtocol())) {
             return new File(URLDecoder.decode(remoteFile.getFile(), "utf-8"));
         }
@@ -181,7 +173,11 @@ public class CompilerUtils {
         return f;
     }
 
-    public static void compile(JavaCompiler compiler, MemoryFileManager fileManager, DiagnosticCollector<JavaFileObject> diagnostics, String sourceCompatibility, File cacheDirectory, Class<?>... classpathHints) throws MalformedURLException, IOException {
+    public static void compile(JavaCompiler compiler, MemoryFileManager fileManager,
+                               DiagnosticCollector<JavaFileObject> diagnostics,
+                               String sourceCompatibility, File cacheDirectory,
+                               Class<?>... classpathHints)
+            throws MalformedURLException, IOException {
         //JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
         //System.out.println("compiler = " + (compiler == null ? "<none found>" : compiler.getClass().getName()));
         String bootclasspath = StringUtils.implode(getClassPaths(cacheDirectory, String.class), File.pathSeparator);
