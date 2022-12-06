@@ -21,6 +21,8 @@ It was previously hosted on [ochafik/nativelibs4java](http://github.com/ochafik/
   mvn clean install
   ```
 
+  Use `mvn clean install -DskipTests` if the build fails during the test phase.
+
 # Support
 
 Please use the [mailing-list](https://groups.google.com/forum/#!forum/nativelibs4java) and [file bugs](https://github.com/ochafik/nativelibs4java/issues/new).
